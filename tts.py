@@ -1,4 +1,4 @@
-__version__ = (0, 1, 57)
+__version__ = (0, 1, 59)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -170,7 +170,7 @@ class TTSMod(loader.Module):
         ext = replymsg.file.ext
         voice = BytesIO()
         voice.name = replymsg.file.name
-        message = await replymsg.client.download_file(replymsg, voice)
+        await replymsg.client.download_file(replymsg, voice)
         voice.name = f"voice{ext}"
         fn, fe = os.path.splitext(voice.name)
         voice.seek(0)
@@ -184,6 +184,8 @@ class TTSMod(loader.Module):
         voice.seek(0)
         voice.name = fn + fe
         filemsg = await utils.answer(message, voice, voice_note=True)
+        if message.out:
+            await message.delete()
 
 
     async def ttsspeedcmd(self, message: Message):
