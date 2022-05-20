@@ -43,7 +43,7 @@ async def audionormalizer(bytes_io_file, fn, fe):
     normalizedsound = effects.normalize(rawsound)
     bytes_io_file.seek(0)
     normalizedsound.export(bytes_io_file, format="wav")
-    bytes_io_file.name = fn + ".wav"
+    bytes_io_file.name = f"{fn}.wav"
     fn, fe = os.path.splitext(bytes_io_file.name)
     return bytes_io_file, fn, fe
 
@@ -57,7 +57,7 @@ async def audiohandler(bytes_io_file, fn, fe):
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, bufsize=-1)
     out, _ = p.communicate(input=content)
     p.stdin.close()
-    bytes_io_file.name =  fn + ".wav"
+    bytes_io_file.name = f"{fn}.wav"
     fn, fe = os.path.splitext(bytes_io_file.name)
     return BytesIO(out), fn, fe if out.startswith(b'RIFF\xff\xff\xff') else None
 
@@ -71,7 +71,7 @@ async def makewaves(bytes_io_file, fn, fe):
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, bufsize=-1)
     out, _ = p.communicate(input=content)
     p.stdin.close()
-    bytes_io_file.name =  fn + ".ogg"
+    bytes_io_file.name = f"{fn}.ogg"
     fn, fe = os.path.splitext(bytes_io_file.name)
     return BytesIO(out), fn, fe
 
@@ -79,10 +79,7 @@ async def makewaves(bytes_io_file, fn, fe):
 def represents_speed(s):
     try:
         float(s)
-        if 0.25 <= float(s) <= 3:
-            return True
-        else:
-            return False
+        return 0.25 <= float(s) <= 3
     except ValueError:
         return False
 
@@ -96,7 +93,7 @@ async def speedup(bytes_io_file, fn, fe, speed):
     bytes_io_file.seek(0)
     soundfile.write(bytes_io_file, y_stretch, sr, format='wav')
     bytes_io_file.seek(0)
-    bytes_io_file.name = fn + ".wav"
+    bytes_io_file.name = f"{fn}.wav"
     return bytes_io_file, fn, fe
 
 
@@ -159,13 +156,12 @@ class TTSMod(loader.Module):
     async def speedvccmd(self, message: Message):
         """Speed up voice by x"""
         speed = utils.get_args_raw(message)
-        if message.is_reply:
-            replymsg = await message.get_reply_message()
-            if not replymsg.voice:
-                message = await utils.answer(message, self.strings("needvoice"))
-                return
-        else:
+        if not message.is_reply:
             return await utils.answer(message, self.strings("no_reply"))
+        replymsg = await message.get_reply_message()
+        if not replymsg.voice:
+            message = await utils.answer(message, self.strings("needvoice"))
+            return
         if len(speed) == 0:
             return await utils.answer(message, self.strings("needspeed"))
         if not represents_speed(speed):
@@ -175,7 +171,7 @@ class TTSMod(loader.Module):
         voice = BytesIO()
         voice.name = replymsg.file.name
         message = await replymsg.client.download_file(replymsg, voice)
-        voice.name = "voice" + ext
+        voice.name = f"voice{ext}"
         fn, fe = os.path.splitext(voice.name)
         voice.seek(0)
         voice, fn, fe = await audiohandler(voice, fn, fe)
