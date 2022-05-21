@@ -21,7 +21,7 @@ import googletrans
 
 from .. import loader, utils
 
-if not googletrans.__version__ == "4.0.0-rc.1":
+if googletrans.__version__ != "4.0.0-rc.1":
     raise KeyError(f"The googletrans version is {googletrans.__version__}, not \"4.0.0-rc.1\"."
                    "It means the module cannot run properly. To fix this, reinstall googletrans==4.0.0-rc1.")
 
@@ -61,7 +61,7 @@ class GTranslateMod(loader.Module):
             text = " ".join(args[1:])
             args = args[0].split("->")
 
-        if len(text) == 0 and message.is_reply:
+        if not text and message.is_reply:
             text = (await message.get_reply_message()).message
         if len(text) == 0:
             await message.edit(self.strings["invalid_text"])
