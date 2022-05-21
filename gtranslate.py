@@ -1,19 +1,18 @@
-#    Friendly Telegram (telegram userbot)
-#    Copyright (C) 2018-2019 The Authors
+__version__ = (0, 0, 41)
 
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
 
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
+# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
+#
+#              © Copyright 2022
+#
+#          https://t.me/apodiktum_modules
+#
+# 🔒 Licensed under the GNU GPLv3
+# 🌐 https://www.gnu.org/licenses/agpl-3.0.html
+ 
+# meta developer: @anon97945
+# scope: hikka_only 
 # requires: googletrans==4.0.0-rc1
 
 import logging
