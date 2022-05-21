@@ -201,14 +201,3 @@ class TTSMod(loader.Module):
         filemsg = await utils.answer(message, voice, voice_note=True)
         if message.out:
             await message.delete()
-
-
-    async def ttsspeedcmd(self, message: Message):
-        """Set the desired speech speed
-          - Example: .ttsspeed 1.5 (Would be 1.5x speed)
-            Possible values between 0.25 and 3"""
-        speed = utils.get_args_raw(message)
-        if not represents_speed(speed):
-            return await utils.answer(message, self.strings("no_speed"))
-        self._db.set(__name__, "speech_speed", speed)
-        message = await utils.answer(message, self.strings("speech_speed").format(str(speed)))
