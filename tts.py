@@ -1,4 +1,4 @@
-__version__ = (0, 1, 59)
+__version__ = (0, 1, 60)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -12,6 +12,7 @@ __version__ = (0, 1, 59)
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
  
 # meta developer: @anon97945
+# changelog: .ttsspeed is now a config var
 # scope: libsndfile1 gcc ffmpeg rubberband-cli
 # scope: hikka_only 
 # requires: gtts pydub soundfile pyrubberband numpy AudioSegment wave
@@ -108,9 +109,27 @@ class TTSMod(loader.Module):
                "processing": "<b>[TTS]</b> Message is being processed ...",
                "needvoice": "<b>[TTS]</b> This command needs a voicemessage",
                "speech_speed": ("<b>[TTS]</b> Speech speed set to {}x.")}
+    strings = {
+        "name": "Text To Speech",
+        "_cfg_tts_lang": "Set your language code for the TTS here.",
+        "_cfg_tts_speed": "Set the desired speech speed. /nPossible values between 0.25 and 3",
+    }
 
     def __init__(self):
-        self.config = loader.ModuleConfig("TTS_LANG", "en", lambda m: self.strings("tts_lang_cfg", m))        
+        self.config = loader.ModuleConfig(
+            loader.ConfigValue(
+                "tts_lang",
+                "en",
+                doc=lambda: self.strings("_cfg_tts_lang"),
+            ),
+            loader.ConfigValue(
+                "tts_speed",
+                "1",
+                doc=lambda: self.strings("_cfg_tts_speed"),
+                validator=loader.validators.Float(minimum=0.25 maximum=3),
+            ),
+        )
+
 
     async def client_ready(self, client, db):
         self._db = db
@@ -118,14 +137,10 @@ class TTSMod(loader.Module):
         self._me = await client.get_me(True)
         self.id = (await client.get_me(True)).user_id
 
-    @loader.unrestricted
-    @loader.ratelimit
+
     async def ttscmd(self, message: Message):
         """Convert text to speech with Google APIs"""
-        if self._db.get(__name__, "speech_speed") is None:
-            speed = 1
-        else:
-            speed = float(self._db.get(__name__, "speech_speed"))
+        speed = self.config["tts_speed"]
         text = utils.get_args_raw(message.message)
         if len(text) == 0:
             if message.is_reply:
