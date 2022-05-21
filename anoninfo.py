@@ -138,30 +138,32 @@ class anoninfoMod(loader.Module):
     def _get_mark(self, int):
         if int == 1:
             return (
-                None
-                if not self.config["custom_button1"]
-                else {
+                {
                     "text": self.config["custom_button1"][0],
                     "url": self.config["custom_button1"][1],
                 }
+                if self.config["custom_button1"]
+                else None
             )
+
         elif int == 2:
             return (
-                None
-                if not self.config["custom_button2"]
-                else {
+                {
                     "text": self.config["custom_button2"][0],
                     "url": self.config["custom_button2"][1],
                 }
+                if self.config["custom_button2"]
+                else None
             )
+
         elif int == 3:
             return (
-                None
-                if not self.config["custom_button3"]
-                else {
+                {
                     "text": self.config["custom_button3"][0],
                     "url": self.config["custom_button3"][1],
                 }
+                if self.config["custom_button3"]
+                else None
             )
 
     @loader.unrestricted
@@ -182,9 +184,7 @@ class anoninfoMod(loader.Module):
                     *([m3] if m3 else []),
                 ],
             ],
-            **(
-                {self.config["custom_format"]: self.config["custom_banner"]}
-                if not self.config["disable_banner"]
-                else {}
-            ),
+            **{}
+            if self.config["disable_banner"]
+            else {self.config["custom_format"]: self.config["custom_banner"]}
         )
