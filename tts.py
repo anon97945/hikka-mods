@@ -126,7 +126,7 @@ class TTSMod(loader.Module):
                 "tts_speed",
                 "1",
                 doc=lambda: self.strings("_cfg_tts_speed"),
-                validator=loader.validators.Float(minimum=0.25 maximum=3),
+                validator=loader.validators.Float(minimum=0.25, maximum=3),
             ),
         )
 
