@@ -1,4 +1,4 @@
-__version__ = (0, 0, 45)
+__version__ = (0, 0, 48)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -59,23 +59,23 @@ class anoninfoMod(loader.Module):
                 "custom_button1",
                 ["🔥 Apodiktum Hikka Modules 🔥", "https://t.me/apodiktum_modules"],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(),
+                validator=loader.validators.Series(min_len=0, max_len=2),
             ),
             loader.ConfigValue(
                 "custom_button2",
                 ["🌘 Hikka RU Support chat", "https://t.me/hikka_talks"],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(),
+                validator=loader.validators.Series(min_len=0, max_len=2),
             ),
             loader.ConfigValue(
                 "custom_button3",
                 ["🌘 Hikka EN Support chat", "https://t.me/hikka_en"],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(),
+                validator=loader.validators.Series(min_len=0, max_len=2),
             ),
             loader.ConfigValue(
                 "custom_banner",
-                "https://i.ibb.co/z85VhZn/banner.png",
+                "https://i.ibb.co/BZ9Kg2N/Banner.png",
                 lambda: self.strings("_cfg_cst_bnr"),
             ),
             loader.ConfigValue(
@@ -88,7 +88,7 @@ class anoninfoMod(loader.Module):
                 "custom_format",
                 "photo",
                 lambda: self.strings("_cfg_cst_frmt"),
-                validator=loader.validators.Choice(["photo", "video", "file", "gif"]),
+                validator=loader.validators.Choice(["photo", "video", "audio", "gif"]),
             ),
         )
 
