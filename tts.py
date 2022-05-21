@@ -1,4 +1,4 @@
-__version__ = (0, 1, 60)
+__version__ = (0, 1, 602)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -148,7 +148,7 @@ class TTSMod(loader.Module):
             else:
                 return await utils.answer(message, self.strings("tts_needs_text"))
         message = await utils.answer(message, self.strings("processing"))
-        tts = await utils.run_sync(gTTS, text, lang=self.config["TTS_LANG"])
+        tts = await utils.run_sync(gTTS, text, lang=self.config["tts_lang"])
         voice = BytesIO()
         await utils.run_sync(tts.write_to_fp, voice)
         voice.seek(0)
