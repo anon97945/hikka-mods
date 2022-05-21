@@ -1,4 +1,4 @@
-__version__ = (0, 0, 48)
+__version__ = (0, 0, 49)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -10,11 +10,11 @@ __version__ = (0, 0, 48)
 #
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
- 
+
 # meta developer: @anon97945 | @hikariatama
 
 # scope: inline
-# scope: hikka_only 
+# scope: hikka_only
 # scope: hikka_min 1.1.27
 
 import logging
@@ -163,7 +163,6 @@ class anoninfoMod(loader.Module):
                     "url": self.config["custom_button3"][1],
                 }
             )
-
 
     @loader.unrestricted
     async def anoninfocmd(self, message: Message):
