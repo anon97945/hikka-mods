@@ -1,4 +1,4 @@
-__version__ = (0, 1, 602)
+__version__ = (0, 1, 60)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -100,17 +100,14 @@ async def speedup(bytes_io_file, fn, fe, speed):
 
 @loader.tds
 class TTSMod(loader.Module):
-    strings = {"name": "Text to speech",
-               "tts_lang_cfg": "Set your language code for the TTS here.",
-               "no_speed": "<b>[TTS]</b> Your input was an unsupported speed value.",
-               "needspeed": "You need to provide a speed value between 0.25 and 3.0.",
-               "no_reply": "<b>[TTS]</b> You need to reply to a voicemessage.",
-               "tts_needs_text": "<b>[TTS]</b> I need some text to convert to speech!",
-               "processing": "<b>[TTS]</b> Message is being processed ...",
-               "needvoice": "<b>[TTS]</b> This command needs a voicemessage",
-               "speech_speed": ("<b>[TTS]</b> Speech speed set to {}x.")}
     strings = {
         "name": "Text To Speech",
+        "no_speed": "<b>[TTS]</b> Your input was an unsupported speed value.",
+        "needspeed": "You need to provide a speed value between 0.25 and 3.0.",
+        "no_reply": "<b>[TTS]</b> You need to reply to a voicemessage.",
+        "tts_needs_text": "<b>[TTS]</b> I need some text to convert to speech!",
+        "processing": "<b>[TTS]</b> Message is being processed ...",
+        "needvoice": "<b>[TTS]</b> This command needs a voicemessage",
         "_cfg_tts_lang": "Set your language code for the TTS here.",
         "_cfg_tts_speed": "Set the desired speech speed. /nPossible values between 0.25 and 3",
     }
