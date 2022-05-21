@@ -1,4 +1,4 @@
-__version__ = (0, 1, 604)
+__version__ = (0, 1, 605)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -109,7 +109,7 @@ class TTSMod(loader.Module):
         "processing": "<b>[TTS]</b> Message is being processed ...",
         "needvoice": "<b>[TTS]</b> This command needs a voicemessage",
         "_cfg_tts_lang": "Set your language code for the TTS here.",
-        "_cfg_tts_speed": "Set the desired speech speed. /nPossible values between 0.25 and 3",
+        "_cfg_tts_speed": "Set the desired speech speed.",
     }
 
     def __init__(self):
