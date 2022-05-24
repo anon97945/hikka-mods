@@ -1,4 +1,4 @@
-__version__ = (0, 0, 41)
+__version__ = (0, 0, 42)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -10,9 +10,9 @@ __version__ = (0, 0, 41)
 #
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
- 
+
 # meta developer: @anon97945
-# scope: hikka_only 
+# scope: hikka_only
 # requires: numpy scipy noisereduce soundfile pyrubberband
 
 import logging
@@ -23,14 +23,12 @@ import subprocess
 import noisereduce as nr
 import soundfile
 import pyrubberband
-import random
 import io
 
 from telethon.tl.types import Message
 from io import BytesIO
 from pydub import AudioSegment, effects
 from .. import loader, utils
-from ..inline.types import InlineCall
 
 logger = logging.getLogger(__name__)
 
@@ -263,7 +261,7 @@ class voicetoolsMod(loader.Module):
         "_cfg_pitch_lvl": "Set the desired pitch level for auto pitch.",
         "_cfg_nr_lvl": "Set the desired noisereduction level.",
         "_cfg_vg_lvl": "Set the desired volume gain level for auto pitch.",
-        "_cfg_vg_lvl": "Set the desired speed level for auto speed.",
+        "_cfg_speed_lvl": "Set the desired speed level for auto speed.",
     }
 
     def __init__(self):
