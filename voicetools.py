@@ -1,4 +1,4 @@
-__version__ = (0, 0, 45)
+__version__ = (0, 0, 46)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -79,9 +79,6 @@ async def audiohandler(bytes_io_file, fn, fe, new_fe, ac, codec):
             f.write(bytes_io_file.getbuffer())
         bytes_io_file.seek(0)
         subprocess.call([
-                        "/usr/bin/env",
-                        "-P",
-                        "/tmp/",
                         "ffmpeg",
                         "-y",
                         "-i", fn + fe,
