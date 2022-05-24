@@ -131,8 +131,6 @@ class TTSMod(loader.Module):
     async def client_ready(self, client, db):
         self._db = db
         self._client = client
-        self._me = await client.get_me(True)
-        self.id = (await client.get_me(True)).user_id
 
 
     async def ttscmd(self, message: Message):
