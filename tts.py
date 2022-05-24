@@ -1,4 +1,4 @@
-__version__ = (0, 1, 605)
+__version__ = (0, 1, 61)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -113,6 +113,7 @@ class TTSMod(loader.Module):
     }
 
     def __init__(self):
+        self._ratelimit = []
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "tts_lang",
@@ -131,8 +132,6 @@ class TTSMod(loader.Module):
     async def client_ready(self, client, db):
         self._db = db
         self._client = client
-        self._me = await client.get_me(True)
-        self.id = (await client.get_me(True)).user_id
 
 
     async def ttscmd(self, message: Message):
