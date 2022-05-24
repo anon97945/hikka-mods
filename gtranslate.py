@@ -42,6 +42,7 @@ class gtranslateMod(loader.Module):
     }
 
     def __init__(self):
+        self._ratelimit = []
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "DEFAULT_LANG",

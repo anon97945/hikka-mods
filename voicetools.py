@@ -79,6 +79,9 @@ async def audiohandler(bytes_io_file, fn, fe, new_fe, ac, codec):
             f.write(bytes_io_file.getbuffer())
         bytes_io_file.seek(0)
         subprocess.call([
+                        "/usr/bin/env",
+                        "-P",
+                        "/tmp/",
                         "ffmpeg",
                         "-y",
                         "-i", fn + fe,
@@ -265,6 +268,7 @@ class voicetoolsMod(loader.Module):
     }
 
     def __init__(self):
+        self._ratelimit = []
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "pitch_lvl",
@@ -291,7 +295,6 @@ class voicetoolsMod(loader.Module):
                 validator=loader.validators.Float(minimum=0.25, maximum=3),
             ),
         )
-        self._ratelimit = []
 
     async def client_ready(self, client, db):
         self._db = db

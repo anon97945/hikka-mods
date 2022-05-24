@@ -66,20 +66,21 @@ async def is_member(c, u, message):
 @loader.tds
 class BlockNonDiscussionMod(loader.Module):
     """Block Comments For Non Discussion Members"""
-    strings = {"name": "BlockNonDiscussion",
-               "not_dc": "<b>This is no Groupchat.</b>",
-               "start": "<b>[BlockNonDiscussion]</b> Activated in this chat.</b>",
-               "stopped": "<b>[BlockNonDiscussion]</b> Deactivated in this chat.</b>",
-               "turned_off": "<b>[BlockNonDiscussion]</b> The mode is turned off in all chats.</b>",
-               "no_int": "<b>Your input was no int.</b>",
-               "error": "<b>Your command was wrong.</b>",
-               "permerror": "<b>You have no delete permissions in this chat.</b>",
-               "settings": ("<b>[BlockNonDiscussion - Settings]</b> Current settings in this"
-                             " chat are:\n{}."),
-               "triggered": ("{}, the comments are limited to discussiongroup members,"
-                             "please join our discussiongroup first."
-                             "\n\n👉🏻 {}"
-                             "\n\nRespectfully, the admins.")}
+    strings = {
+        "name": "BlockNonDiscussion",
+        "not_dc": "<b>This is no Groupchat.</b>",
+        "start": "<b>[BlockNonDiscussion]</b> Activated in this chat.</b>",
+        "stopped": "<b>[BlockNonDiscussion]</b> Deactivated in this chat.</b>",
+        "turned_off": "<b>[BlockNonDiscussion]</b> The mode is turned off in all chats.</b>",
+        "no_int": "<b>Your input was no int.</b>",
+        "error": "<b>Your command was wrong.</b>",
+        "permerror": "<b>You have no delete permissions in this chat.</b>",
+        "settings": ("<b>[BlockNonDiscussion - Settings]</b> Current settings in this"
+                     " chat are:\n{}."),
+        "triggered": ("{}, the comments are limited to discussiongroup members,"
+                      "please join our discussiongroup first."
+                      "\n\n👉🏻 {}\n\nRespectfully, the admins.")
+    }
 
     def __init__(self):
         self._ratelimit = []

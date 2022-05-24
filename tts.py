@@ -113,6 +113,7 @@ class TTSMod(loader.Module):
     }
 
     def __init__(self):
+        self._ratelimit = []
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "tts_lang",
