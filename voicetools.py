@@ -1,4 +1,4 @@
-__version__ = (0, 0, 48)
+__version__ = (0, 0, 49)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -229,7 +229,6 @@ class voicetoolsMod(loader.Module):
     """Change, pitch, enhance your Voice. Also includes optional automatic mode."""
     strings = {
         "name": "VoiceTools",
-        "downloading": "<b>[VoiceTools]</b> Message is being downloaded...",
         "vc_start": "<b>[VoiceTools]</b> Auto VoiceChanger activated.",
         "vc_stopped": "<b>[VoiceTools]</b> Auto VoiceChanger deactivated.",
         "vcanon_start": "<b>[VoiceTools]</b> Auto AnonVoice activated.",
@@ -250,14 +249,15 @@ class voicetoolsMod(loader.Module):
         "no_pitch": "<b>[VoiceTools]</b> Your input was an unsupported pitch level.",
         "no_speed": "<b>[VoiceTools]</b> Your input was an unsupported speed level.",
         "noargs": "🚫 <b>No file specified</b>",
-        "audiohandler_txt": "<b>[VoiceTools]</b> Audio is being transcoded.",
-        "audiodenoiser_txt": "<b>[VoiceTools]</b> Background noise is being removed.",
-        "audionormalizer_txt": "<b>[VoiceTools]</b> Audiovolume is being normalized.",
-        "dalekvoice_txt": "<b>[VoiceTools]</b> Dalek Voice is being applied.",
-        "pitch_txt": "<b>[VoiceTools]</b> Pitch is being applied.",
-        "speed_txt": "<b>[VoiceTools]</b> Speed is being applied.",
-        "uploading": "<b>[VoiceTools]</b> File is uploading.",
-        "makewaves_txt": "<b>[VoiceTools]</b> Speech waves are being applied.",
+        "downloading": "<b>[VoiceTools] Message is being downloaded...</b>",
+        "audiohandler_txt": "<b>[VoiceTools] Audio is being transcoded.</b>",
+        "audiodenoiser_txt": "<b>[VoiceTools] Background noise is being removed.</b>",
+        "audionormalizer_txt": "<b>[VoiceTools] Audiovolume is being normalized.</b>",
+        "dalekvoice_txt": "<b>[VoiceTools] Dalek Voice is being applied.</b>",
+        "pitch_txt": "<b>[VoiceTools] Pitch is being applied.</b>",
+        "speed_txt": "<b>[VoiceTools] Speed is being applied.</b>",
+        "uploading": "<b>[VoiceTools] File is uploading.</b>",
+        "makewaves_txt": "<b>[VoiceTools] Speech waves are being applied.</b>",
         "_cfg_pitch_lvl": "Set the desired pitch level for auto pitch.",
         "_cfg_nr_lvl": "Set the desired noisereduction level.",
         "_cfg_vg_lvl": "Set the desired volume gain level for auto pitch.",
@@ -367,7 +367,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        msg = await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtanoncmd(self, message):
@@ -417,7 +417,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        msg = await message.client.send_file(chatid, file, voice_note=True)
+        await message.client.send_file(chatid, file, voice_note=True)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtpitchcmd(self, message):
@@ -467,7 +467,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        msg = await message.client.send_file(chatid, file, voice_note=True)
+        await message.client.send_file(chatid, file, voice_note=True)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtspeedcmd(self, message):
@@ -517,7 +517,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        msg = await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtenhcmd(self, message):
@@ -565,7 +565,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        msg = await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtnormcmd(self, message):
@@ -608,7 +608,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        msg = await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtmp3cmd(self, message: Message):
@@ -639,7 +639,7 @@ class voicetoolsMod(loader.Module):
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
         # await message.client.send_file(message.chat_id, await self.fast_upload(file), voice_note=False)
-        msg = await message.client.send_file(chatid, file, voice_note=False)
+        await message.client.send_file(chatid, file, voice_note=False)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtspeechcmd(self, message):
@@ -669,7 +669,7 @@ class voicetoolsMod(loader.Module):
         file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        msg = await message.client.send_file(chatid, file, voice_note=True)
+        await message.client.send_file(chatid, file, voice_note=True)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtautovccmd(self, message):
