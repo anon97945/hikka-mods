@@ -1,4 +1,4 @@
-__version__ = (0, 0, 46)
+__version__ = (0, 0, 47)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -320,7 +320,6 @@ class voicetoolsMod(loader.Module):
                     ).getvalue()
                 )
             )
-
         file.seek(0)
         return file
 
@@ -368,7 +367,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        await message.client.send_file(message.chat_id, file, voice_note=SendAsVoice)
+        msg = await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtanoncmd(self, message):
@@ -418,7 +417,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        await message.client.send_file(message.chat_id, file, voice_note=True)
+        msg = await message.client.send_file(chatid, file, voice_note=True)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtpitchcmd(self, message):
@@ -468,7 +467,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        await message.client.send_file(message.chat_id, file, voice_note=True)
+        msg = await message.client.send_file(chatid, file, voice_note=True)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtspeedcmd(self, message):
@@ -518,7 +517,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        await message.client.send_file(message.chat_id, file, voice_note=SendAsVoice)
+        msg = await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtenhcmd(self, message):
@@ -566,7 +565,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        await message.client.send_file(message.chat_id, file, voice_note=SendAsVoice)
+        msg = await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtnormcmd(self, message):
@@ -609,7 +608,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        await message.client.send_file(message.chat_id, file, voice_note=SendAsVoice)
+        msg = await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtmp3cmd(self, message: Message):
@@ -640,7 +639,7 @@ class voicetoolsMod(loader.Module):
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
         # await message.client.send_file(message.chat_id, await self.fast_upload(file), voice_note=False)
-        await message.client.send_file(message.chat_id, file, voice_note=False)
+        msg = await message.client.send_file(chatid, file, voice_note=False)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtspeechcmd(self, message):
@@ -670,7 +669,7 @@ class voicetoolsMod(loader.Module):
         file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        await message.client.send_file(message.chat_id, file, voice_note=True)
+        msg = await message.client.send_file(chatid, file, voice_note=True)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtautovccmd(self, message):
@@ -865,6 +864,6 @@ class voicetoolsMod(loader.Module):
         file.seek(0)
         file.name = fn + fe
         if reply:
-            await message.client.send_file(message.chat_id, file, voice_note=True, reply_to=reply)
+            await message.client.send_file(chatid, file, voice_note=True, reply_to=reply)
         else:
-            await message.client.send_file(message.chat_id, file, voice_note=True)
+            await message.client.send_file(chatid, file, voice_note=True)
