@@ -66,7 +66,7 @@ async def is_member(c, u, message):
 @loader.tds
 class BlockNonDiscussionMod(loader.Module):
     """Block Comments For Non Discussion Members"""
-    strings = {"name": "Block Non Discussion",
+    strings = {"name": "BlockNonDiscussion",
                "not_dc": "<b>This is no Groupchat.</b>",
                "start": "<b>[BlockNonDiscussion]</b> Activated in this chat.</b>",
                "stopped": "<b>[BlockNonDiscussion]</b> Deactivated in this chat.</b>",
