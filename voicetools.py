@@ -386,6 +386,7 @@ class voicetoolsMod(loader.Module):
 
     async def vtanoncmd(self, message):
         """reply to a file to change the voice into anonymous"""
+        chatid = message.chat_id
         SendAsVoice = False
         if not message.is_reply:
             return
@@ -774,6 +775,7 @@ class voicetoolsMod(loader.Module):
         vc_chats = self._db.get(__name__, "vc_watcher", [])
         pitch_chats = self._db.get(__name__, "pitch_watcher", [])
         vcanon_chats = self._db.get(__name__, "vcanon_watcher", [])
+        speed_chats = self._db.get(__name__, "speed_watcher", [])
         chatid = message.chat_id
         chatid_str = str(chatid)
         if chatid_str in norm_chats:
