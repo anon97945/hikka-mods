@@ -47,6 +47,7 @@ def to_bool(value):
         return True
     if str(value).lower() in ("false"):
         return False
+    return None
 
 
 def replaced(sequence, old, new):
