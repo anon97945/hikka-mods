@@ -38,10 +38,7 @@ logger = logging.getLogger(__name__)
 async def getchattype(message):
     chattype = ""
     if message.is_group:
-        if message.is_channel:
-            chattype = "supergroup"
-        else:
-            chattype = "smallgroup"
+        chattype = "supergroup" if message.is_channel else "smallgroup"
     elif message.is_channel:
         chattype = "channel"
     elif message.is_private:
@@ -52,10 +49,7 @@ async def getchattype(message):
 def represents_nr(nr_lvl):
     try:
         float(nr_lvl)
-        if 0.01 <= float(nr_lvl) <= 1:
-            return True
-        else:
-            return False
+        return 0.01 <= float(nr_lvl) <= 1
     except ValueError:
         return False
 
@@ -63,10 +57,7 @@ def represents_nr(nr_lvl):
 def represents_pitch(pitch_lvl):
     try:
         float(pitch_lvl)
-        if -18 <= float(pitch_lvl) <= 18:
-            return True
-        else:
-            return False
+        return -18 <= float(pitch_lvl) <= 18
     except ValueError:
         return False
 
@@ -74,10 +65,7 @@ def represents_pitch(pitch_lvl):
 def represents_speed(s):
     try:
         float(s)
-        if 0.25 <= float(s) <= 3:
-            return True
-        else:
-            return False
+        return 0.25 <= float(s) <= 3
     except ValueError:
         return False
 
@@ -87,7 +75,7 @@ async def audiohandler(bytes_io_file, fn, fe, new_fe, ac, codec):
     bytes_io_file.seek(0)
     bytes_io_file.name = fn + fe
     out = fn + new_fe
-    if not fe == new_fe:
+    if fe != new_fe:
         new_fe_nodot = new_fe[1:]
         with open(fn + fe, "wb") as f:
             f.write(bytes_io_file.getbuffer())
@@ -161,7 +149,6 @@ async def audiospeedup(bytes_io_file, fn, fe, speed):
     format_ext = fe[1:]
     y, sr = soundfile.read(bytes_io_file)
     y_stretch = pyrubberband.time_stretch(y, sr, speed)
-    y_shift = pyrubberband.pitch_shift(y, sr, speed)
     bytes_io_file.seek(0)
     soundfile.write(bytes_io_file, y_stretch, sr, format=format_ext)
     bytes_io_file.seek(0)
@@ -187,7 +174,7 @@ async def dalekvoice(bytes_io_file, fn, fe):
 
     def diode_lookup(n_samples):
         result = np.zeros((n_samples,))
-        for i in range(0, n_samples):
+        for i in range(n_samples):
             v = float(i - float(n_samples) / 2) / (n_samples / 2)
             v = abs(v)
             if v < VB:
@@ -198,17 +185,6 @@ async def dalekvoice(bytes_io_file, fn, fe):
                 result[i] = H * v - H * VL + (H * (VL - VB)**2) / (2 * VL - 2 * VB)
         return result
 
-    def raw_diode(signal):
-        result = np.zeros(signal.shape)
-        for i in range(0, signal.shape[0]):
-            v = signal[i]
-            if v < VB:
-                result[i] = 0
-            elif VB < v <= VL:
-                result[i] = H * ((v - VB)**2) / (2 * VL - 2 * VB)
-        else:
-            result[i] = H * v - H * VL + (H * (VL - VB)**2) / (2 * VL - 2 * VB)
-        return result
     rate, data = wavfile.read(bytes_io_file)
     data = data[:, 1]
     scaler = np.max(np.abs(data))
@@ -335,18 +311,18 @@ class voicetoolsMod(loader.Module):
         if not m:
             file = io.BytesIO(bytes(reply.raw_text, "utf-8"))
         else:
-            if not silent:
-                file = io.BytesIO(
+            file = (
+                io.BytesIO((await self.fast_download(m.document)).getvalue())
+                if silent
+                else io.BytesIO(
                     (
-                        await self.fast_download(m.document, message_object=inline_msg)
+                        await self.fast_download(
+                            m.document, message_object=inline_msg
+                        )
                     ).getvalue()
                 )
-            else:
-                file = io.BytesIO(
-                    (
-                        await self.fast_download(m.document)
-                    ).getvalue()
-                )
+            )
+
         file.seek(0)
         return file
 
@@ -354,20 +330,13 @@ class voicetoolsMod(loader.Module):
         """reply to a file to change the voice"""
         chatid = message.chat_id
         SendAsVoice = False
-        if message.is_reply:
-            replymsg = await message.get_reply_message()
-            if replymsg.voice:
-                SendAsVoice = True
-            else:
-                SendAsVoice = False
-            if not replymsg.media:
-                return await utils.answer(message, self.strings("error_file", message))
-        else:
+        if not message.is_reply:
             return
-        if not replymsg.file.name:
-            filename = "voice"
-        else:
-            filename = replymsg.file.name
+        replymsg = await message.get_reply_message()
+        SendAsVoice = bool(replymsg.voice)
+        if not replymsg.media:
+            return await utils.answer(message, self.strings("error_file", message))
+        filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
             filename_new = filename.replace(ext, "")
@@ -406,21 +375,15 @@ class voicetoolsMod(loader.Module):
 
     async def vtanoncmd(self, message):
         """reply to a file to change the voice into anonymous"""
+        chatid = message.chat_id
         SendAsVoice = False
-        if message.is_reply:
-            replymsg = await message.get_reply_message()
-            if replymsg.voice:
-                SendAsVoice = True
-            else:
-                SendAsVoice = False
-            if not replymsg.media:
-                return await utils.answer(message, self.strings("error_file", message))
-        else:
+        if not message.is_reply:
             return
-        if not replymsg.file.name:
-            filename = "voice"
-        else:
-            filename = replymsg.file.name
+        replymsg = await message.get_reply_message()
+        SendAsVoice = bool(replymsg.voice)
+        if not replymsg.media:
+            return await utils.answer(message, self.strings("error_file", message))
+        filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
             filename_new = filename.replace(ext, "")
@@ -449,7 +412,7 @@ class voicetoolsMod(loader.Module):
         inline_msg = await utils.answer(inline_msg, self.strings("dalekvoice_txt", inline_msg))
         file, fn, fe = await dalekvoice(file, fn, fe)
         file.seek(0)
-        file, fn, fe = await audiopitcher(file, fn, fe, float(pitch_lvl))
+        file, fn, fe = await audiopitcher(file, fn, fe, pitch_lvl)
         file.seek(0)
         if SendAsVoice:
             inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
@@ -466,23 +429,16 @@ class voicetoolsMod(loader.Module):
             Possible values between -18 and 18"""
         chatid = message.chat_id
         SendAsVoice = False
-        if message.is_reply:
-            replymsg = await message.get_reply_message()
-            if replymsg.voice:
-                SendAsVoice = True
-            else:
-                SendAsVoice = False
-            if not replymsg.media:
-                return await utils.answer(message, self.strings("error_file", message))
-        else:
+        if not message.is_reply:
             return
+        replymsg = await message.get_reply_message()
+        SendAsVoice = bool(replymsg.voice)
+        if not replymsg.media:
+            return await utils.answer(message, self.strings("error_file", message))
         pitch_lvl = utils.get_args_raw(message)
         if not represents_pitch(pitch_lvl):
             return await utils.answer(message, self.strings("no_pitch", message))
-        if not replymsg.file.name:
-            filename = "voice"
-        else:
-            filename = replymsg.file.name
+        filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
             filename_new = filename.replace(ext, "")
@@ -523,23 +479,16 @@ class voicetoolsMod(loader.Module):
             Possible values between 0.25 - 3"""
         chatid = message.chat_id
         SendAsVoice = False
-        if message.is_reply:
-            replymsg = await message.get_reply_message()
-            if replymsg.voice:
-                SendAsVoice = True
-            else:
-                SendAsVoice = False
-            if not replymsg.media:
-                return await utils.answer(message, self.strings("error_file", message))
-        else:
+        if not message.is_reply:
             return
+        replymsg = await message.get_reply_message()
+        SendAsVoice = bool(replymsg.voice)
+        if not replymsg.media:
+            return await utils.answer(message, self.strings("error_file", message))
         speed_lvl = utils.get_args_raw(message)
         if not represents_speed(speed_lvl):
             return await utils.answer(message, self.strings("no_speed", message))
-        if not replymsg.file.name:
-            filename = "voice"
-        else:
-            filename = replymsg.file.name
+        filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
             filename_new = filename.replace(ext, "")
@@ -550,7 +499,7 @@ class voicetoolsMod(loader.Module):
         file = BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(message=message, text=self.strings("downloading", message), reply_markup={"text": "\u0020\u2800", "data": "empty"})
-        file = await self.get_media(repymsg)
+        file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
@@ -580,22 +529,15 @@ class voicetoolsMod(loader.Module):
          - Background NoiseReduce (set your noisereduce level before)"""
         chatid = message.chat_id
         SendAsVoice = False
-        if message.is_reply:
-            replymsg = await message.get_reply_message()
-            if replymsg.voice:
-                SendAsVoice = True
-            else:
-                SendAsVoice = False
-            if not replymsg.media:
-                return await utils.answer(message, self.strings("error_file", message))
-        else:
+        if not message.is_reply:
             return
+        replymsg = await message.get_reply_message()
+        SendAsVoice = bool(replymsg.voice)
+        if not replymsg.media:
+            return await utils.answer(message, self.strings("error_file", message))
         nr_lvl = self.config["nr_lvl"]
         vg_lvl = self.config["vg_lvl"]
-        if not replymsg.file.name:
-            filename = "voice"
-        else:
-            filename = replymsg.file.name
+        filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
             filename_new = filename.replace(ext, "")
@@ -620,32 +562,26 @@ class voicetoolsMod(loader.Module):
         inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt", inline_msg))
         file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
-        file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
-        file.seek(0)
+        if SendAsVoice:
+            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
+            file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
+            file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        await message.client.send_file(message.chat_id, file, voice_note=True)
+        await message.client.send_file(message.chat_id, file, voice_note=SendAsVoice)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtnormcmd(self, message):
         """reply to a file to normalize volume"""
         chatid = message.chat_id
         SendAsVoice = False
-        if message.is_reply:
-            replymsg = await message.get_reply_message()
-            if replymsg.voice:
-                SendAsVoice = True
-            else:
-                SendAsVoice = False
-            if not replymsg.media:
-                return await utils.answer(message, self.strings("error_file", message))
-        else:
+        if not message.is_reply:
             return
-        if not replymsg.file.name:
-            filename = "voice"
-        else:
-            filename = replymsg.file.name
+        replymsg = await message.get_reply_message()
+        SendAsVoice = bool(replymsg.voice)
+        if not replymsg.media:
+            return await utils.answer(message, self.strings("error_file", message))
+        filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
             filename_new = filename.replace(ext, "")
@@ -669,27 +605,24 @@ class voicetoolsMod(loader.Module):
         inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt", inline_msg))
         file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
-        file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
-        file.seek(0)
+        if SendAsVoice:
+            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
+            file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
+            file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        await message.client.send_file(message.chat_id, file, voice_note=True)
+        await message.client.send_file(message.chat_id, file, voice_note=SendAsVoice)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtmp3cmd(self, message: Message):
         """reply to a file to convert it to mp3"""
         chatid = message.chat_id
-        if message.is_reply:
-            replymsg = await message.get_reply_message()
-            if not replymsg.media:
-                return await utils.answer(message, self.strings("error_file", message))
-        else:
+        if not message.is_reply:
             return
-        if not replymsg.file.name:
-            filename = "voice"
-        else:
-            filename = replymsg.file.name
+        replymsg = await message.get_reply_message()
+        if not replymsg.media:
+            return await utils.answer(message, self.strings("error_file", message))
+        filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
             filename_new = filename.replace(ext, "")
@@ -715,16 +648,12 @@ class voicetoolsMod(loader.Module):
     async def vtspeechcmd(self, message):
         """reply to a file to convert it to speech"""
         chatid = message.chat_id
-        if message.is_reply:
-            replymsg = await message.get_reply_message()
-            if not replymsg.media:
-                return await utils.answer(message, self.strings("error_file", message))
-        else:
+        if not message.is_reply:
             return
-        if not replymsg.file.name:
-            filename = "voice"
-        else:
-            filename = replymsg.file.name
+        replymsg = await message.get_reply_message()
+        if not replymsg.media:
+            return await utils.answer(message, self.strings("error_file", message))
+        filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
             filename_new = filename.replace(ext, "")
@@ -837,6 +766,7 @@ class voicetoolsMod(loader.Module):
         vc_chats = self._db.get(__name__, "vc_watcher", [])
         pitch_chats = self._db.get(__name__, "pitch_watcher", [])
         vcanon_chats = self._db.get(__name__, "vcanon_watcher", [])
+        speed_chats = self._db.get(__name__, "speed_watcher", [])
         chatid = message.chat_id
         chatid_str = str(chatid)
         if chatid_str in norm_chats:
@@ -877,12 +807,13 @@ class voicetoolsMod(loader.Module):
                 and chatid_str not in vcanon_chats
                 and chatid_str not in speed_chats):
             return
-        if chattype != "channel":
-            if message.sender_id != self._id:
-                return
-        else:
-            if not chat.admin_rights.delete_messages:
-                return
+        if (
+            chattype != "channel"
+            and message.sender_id != self._id
+            or chattype == "channel"
+            and not chat.admin_rights.delete_messages
+        ):
+            return
         if not message.voice or message.via_bot or message.forward:
             return
         if message.reply:
@@ -901,10 +832,7 @@ class voicetoolsMod(loader.Module):
         file = BytesIO()
         file.name = msgs.file.name
         file = await self.get_media(msgs, msgs, True)
-        if not msgs.file.name:
-            filename = "voice"
-        else:
-            filename = msgs.file.name
+        filename = msgs.file.name or "voice"
         ext = msgs.file.ext
         if ext == ".oga":
             filename_new = filename.replace(ext, "")

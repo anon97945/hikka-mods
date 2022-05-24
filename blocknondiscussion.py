@@ -1,4 +1,4 @@
-__version__ = (0, 0, 41)
+__version__ = (0, 0, 05)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -10,9 +10,9 @@ __version__ = (0, 0, 41)
 #
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
- 
+
 # meta developer: @anon97945
-# scope: hikka_only 
+# scope: hikka_only
 
 import asyncio
 import logging
@@ -88,7 +88,7 @@ class BlockNonDiscussionMod(loader.Module):
     def __init__(self):
         self._ratelimit = []
 
-    async def client_ready(self, client, db):
+    async def client_ready(self, db):
         self._db = db
 
     async def bndcmd(self, message):
@@ -194,7 +194,7 @@ class BlockNonDiscussionMod(loader.Module):
             link = link.full_chat.exported_invite.link
         else:
             link = ""
-        if not (await is_member(chatid, userid, message)):
+        if not await is_member(chatid, userid, message):
             await message.delete()
             if chat.admin_rights.ban_users and sets[chatid_str].get("mute") is not None:
                 if sets[chatid_str].get("mute") != "0":
