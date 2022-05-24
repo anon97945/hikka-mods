@@ -28,15 +28,10 @@ logger = logging.getLogger(__name__)
 
 
 async def is_linkedchannel(e, c, u, message):
-    if not isinstance(e, User):
-        full_chat = await message.client(functions.channels.GetFullChannelRequest(channel=u))
-        linked_channel_id = int(str(-100) + str(full_chat.full_chat.linked_chat_id))
-        if c == linked_channel_id:
-            return True
-        else:
-            return False
-    else:
+    if isinstance(e, User):
         return False
+    full_chat = await message.client(functions.channels.GetFullChannelRequest(channel=u))
+    return c == int(str(-100) + str(full_chat.full_chat.linked_chat_id))
 
 
 def represents_int(s):
@@ -113,21 +108,22 @@ class BlockNonDiscussionMod(loader.Module):
         chatid = message.chat_id
         chatid_str = str(chatid)
 
-        if args:
-            if args[0] == "clearall":
-                self._db.set(__name__, "bnd", [])
-                self._db.set(__name__, "sets", {})
-                return await utils.answer(message, self.strings("turned_off", message))
+        if args and args[0] == "clearall":
+            self._db.set(__name__, "bnd", [])
+            self._db.set(__name__, "sets", {})
+            return await utils.answer(message, self.strings("turned_off", message))
 
         if message.is_private:
             await utils.answer(message, self.strings("not_dc", message))
             return
 
-        if not chat.admin_rights and not chat.creator:
+        if (
+            (chat.admin_rights or chat.creator)
+            and not chat.admin_rights.delete_messages
+            or not chat.admin_rights
+            and not chat.creator
+        ):
             return await utils.answer(message, self.strings("permerror", message))
-        else:
-            if not chat.admin_rights.delete_messages:
-                return await utils.answer(message, self.strings("permerror", message))
 
         if not args:
             if chatid_str not in bnd:
@@ -147,7 +143,7 @@ class BlockNonDiscussionMod(loader.Module):
                 return await utils.answer(message, self.strings("stopped", message))
 
         if chatid_str in bnd:
-            if args[0] == "notify" and args[1] is not None and chatid_str in bnd:
+            if args[0] == "notify" and args[1] is not None:
                 if not isinstance(to_bool(args[1]), bool):
                     return await utils.answer(message, self.strings("error", message))
                 sets[chatid_str].update({"notify": to_bool(args[1])})
@@ -180,15 +176,25 @@ class BlockNonDiscussionMod(loader.Module):
 
         if (await is_linkedchannel(entity, chatid, userid, message)) or isinstance(entity, Channel):
             return
-        if not chat.admin_rights and not chat.creator:
+        if (
+            (chat.admin_rights or chat.creator)
+            and not chat.admin_rights.delete_messages
+            or not chat.admin_rights
+            and not chat.creator
+        ):
             return
-        else:
-            if not chat.admin_rights.delete_messages:
-                return
-        usertag = "<a href=tg://user?id=" + str(userid) + ">" + user.first_name + \
-                  "</a> (<code>" + str(userid) + "</code>)"
+        usertag = (
+            (
+                f"<a href=tg://user?id={str(userid)}>{user.first_name}"
+                + "</a> (<code>"
+            )
+            + str(userid)
+            + "</code>)"
+        )
+
         if (await message.client.get_entity(chatid)).username:
-            link = "https://t.me/" + str((await message.client.get_entity(chatid)).username)
+            link = f"https://t.me/{str((await message.client.get_entity(chatid)).username)}"
+
         elif chat.admin_rights.invite_users:
             link = await message.client(functions.channels.GetFullChannelRequest(channel=chatid))
             link = link.full_chat.exported_invite.link
@@ -196,11 +202,14 @@ class BlockNonDiscussionMod(loader.Module):
             link = ""
         if not (await is_member(chatid, userid, message)):
             await message.delete()
-            if chat.admin_rights.ban_users and sets[chatid_str].get("mute") is not None:
-                if sets[chatid_str].get("mute") != "0":
-                    MUTETIMER = sets[chatid_str].get("mute")
-                    await message.client.edit_permissions(chatid, userid,
-                                                          timedelta(minutes=MUTETIMER), send_messages=False)
+            if (
+                chat.admin_rights.ban_users
+                and sets[chatid_str].get("mute") is not None
+                and sets[chatid_str].get("mute") != "0"
+            ):
+                MUTETIMER = sets[chatid_str].get("mute")
+                await message.client.edit_permissions(chatid, userid,
+                                                      timedelta(minutes=MUTETIMER), send_messages=False)
             if sets[chatid_str].get("notify") is True:
                 msgs = await utils.answer(message, self.strings("triggered", message).format(usertag, link))
                 if sets[chatid_str].get("deltimer") != "0":
