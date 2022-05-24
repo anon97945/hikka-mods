@@ -344,7 +344,7 @@ class voicetoolsMod(loader.Module):
         nr_lvl = self.config["nr_lvl"]
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
@@ -392,7 +392,7 @@ class voicetoolsMod(loader.Module):
         file.name = replymsg.file.name
         nr_lvl = 0.8
         pitch_lvl = -4.5
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
@@ -418,7 +418,7 @@ class voicetoolsMod(loader.Module):
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, file, voice_note=True)
-        inline_msg.delete()
+        await inline_msg.delete()
 
     async def vtpitchcmd(self, message):
         """reply to a file to pitch voice
@@ -445,7 +445,7 @@ class voicetoolsMod(loader.Module):
         vg_lvl = self.config["vg_lvl"]
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
@@ -468,7 +468,7 @@ class voicetoolsMod(loader.Module):
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, file, voice_note=True)
-        inline_msg.delete()
+        await inline_msg.delete()
 
     async def vtspeedcmd(self, message):
         """reply to a file to increase speed and reduce length
@@ -495,7 +495,7 @@ class voicetoolsMod(loader.Module):
         vg_lvl = self.config["vg_lvl"]
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
@@ -518,7 +518,7 @@ class voicetoolsMod(loader.Module):
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, file, voice_note=SendAsVoice)
-        inline_msg.delete()
+        await inline_msg.delete()
 
     async def vtenhcmd(self, message):
         """reply to a file to enhance voice quality with
@@ -543,7 +543,7 @@ class voicetoolsMod(loader.Module):
             filename_new = filename.replace(ext, "")
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
@@ -566,7 +566,7 @@ class voicetoolsMod(loader.Module):
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, file, voice_note=SendAsVoice)
-        inline_msg.delete()
+        await inline_msg.delete()
 
     async def vtnormcmd(self, message):
         """reply to a file to normalize volume"""
@@ -588,7 +588,7 @@ class voicetoolsMod(loader.Module):
         vg_lvl = self.config["vg_lvl"]
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
@@ -608,7 +608,7 @@ class voicetoolsMod(loader.Module):
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, file, voice_note=SendAsVoice)
-        inline_msg.delete()
+        await inline_msg.delete()
 
     async def vtmp3cmd(self, message: Message):
         """reply to a file to convert it to mp3"""
@@ -627,7 +627,7 @@ class voicetoolsMod(loader.Module):
             filename_new = filename.replace(ext, "")
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
@@ -639,7 +639,7 @@ class voicetoolsMod(loader.Module):
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         # await message.client.send_file(message.chat_id, await self.fast_upload(file), voice_note=False)
         await message.client.send_file(chatid, file, voice_note=False)
-        inline_msg.delete()
+        await inline_msg.delete()
 
     async def vtspeechcmd(self, message):
         """reply to a file to convert it to speech"""
@@ -658,7 +658,7 @@ class voicetoolsMod(loader.Module):
             filename_new = filename.replace(ext, "")
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
@@ -669,7 +669,7 @@ class voicetoolsMod(loader.Module):
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, file, voice_note=True)
-        inline_msg.delete()
+        await inline_msg.delete()
 
     async def vtautovccmd(self, message):
         """Turns on AutoVoiceChanger for your own Voicemessages in the chat"""
