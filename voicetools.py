@@ -332,7 +332,7 @@ class voicetoolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file", message))
+            return await utils.answer(message, self.strings("error_file"))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -344,31 +344,31 @@ class voicetoolsMod(loader.Module):
         nr_lvl = self.config["nr_lvl"]
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading", message), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
         file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audiodenoiser_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audiodenoiser_txt"))
         file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt"))
         file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("dalekvoice_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("dalekvoice_txt"))
         file, fn, fe = await dalekvoice(file, fn, fe)
         file.seek(0)
         if SendAsVoice:
-            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
+            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
             file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, file, voice_note=SendAsVoice)
-        await message.client.delete_messages(chatid, inline_msg)
+        await inline_msg.delete()
 
     async def vtanoncmd(self, message):
         """reply to a file to change the voice into anonymous"""
@@ -379,7 +379,7 @@ class voicetoolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file", message))
+            return await utils.answer(message, self.strings("error_file"))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -392,33 +392,33 @@ class voicetoolsMod(loader.Module):
         file.name = replymsg.file.name
         nr_lvl = 0.8
         pitch_lvl = -4.5
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading", message), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
         file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audiodenoiser_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audiodenoiser_txt"))
         file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt"))
         file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("dalekvoice_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("dalekvoice_txt"))
         file, fn, fe = await dalekvoice(file, fn, fe)
         file.seek(0)
         file, fn, fe = await audiopitcher(file, fn, fe, pitch_lvl)
         file.seek(0)
         if SendAsVoice:
-            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
+            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
             file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, file, voice_note=True)
-        await message.client.delete_messages(chatid, inline_msg)
+        inline_msg.delete()
 
     async def vtpitchcmd(self, message):
         """reply to a file to pitch voice
@@ -431,10 +431,10 @@ class voicetoolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file", message))
+            return await utils.answer(message, self.strings("error_file"))
         pitch_lvl = utils.get_args_raw(message)
         if not represents_pitch(pitch_lvl):
-            return await utils.answer(message, self.strings("no_pitch", message))
+            return await utils.answer(message, self.strings("no_pitch"))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -445,30 +445,30 @@ class voicetoolsMod(loader.Module):
         vg_lvl = self.config["vg_lvl"]
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading", message), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
         file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
         file.seek(0)
         file, fn, fe = await audiohandler(file, fn, fe, ".flac", "1", "flac")
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("pitch_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("pitch_txt"))
         file, fn, fe = await audiopitcher(file, fn, fe, float(pitch_lvl))
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt"))
         file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
         file.seek(0)
         if SendAsVoice:
-            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
+            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
             file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, file, voice_note=True)
-        await message.client.delete_messages(chatid, inline_msg)
+        inline_msg.delete()
 
     async def vtspeedcmd(self, message):
         """reply to a file to increase speed and reduce length
@@ -481,10 +481,10 @@ class voicetoolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file", message))
+            return await utils.answer(message, self.strings("error_file"))
         speed_lvl = utils.get_args_raw(message)
         if not represents_speed(speed_lvl):
-            return await utils.answer(message, self.strings("no_speed", message))
+            return await utils.answer(message, self.strings("no_speed"))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -495,30 +495,30 @@ class voicetoolsMod(loader.Module):
         vg_lvl = self.config["vg_lvl"]
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading", message), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
         file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
         file.seek(0)
         file, fn, fe = await audiohandler(file, fn, fe, ".flac", "1", "flac")
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("speed_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("speed_txt"))
         file, fn, fe = await audiospeedup(file, fn, fe, float(speed_lvl))
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt"))
         file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
         file.seek(0)
         if SendAsVoice:
-            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
+            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
             file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, file, voice_note=SendAsVoice)
-        await message.client.delete_messages(chatid, inline_msg)
+        inline_msg.delete()
 
     async def vtenhcmd(self, message):
         """reply to a file to enhance voice quality with
@@ -531,7 +531,7 @@ class voicetoolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file", message))
+            return await utils.answer(message, self.strings("error_file"))
         nr_lvl = self.config["nr_lvl"]
         vg_lvl = self.config["vg_lvl"]
         filename = replymsg.file.name or "voice"
@@ -543,30 +543,30 @@ class voicetoolsMod(loader.Module):
             filename_new = filename.replace(ext, "")
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading", message), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
         file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
         file.seek(0)
         file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audiodenoiser_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audiodenoiser_txt"))
         file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt"))
         file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
         file.seek(0)
         if SendAsVoice:
-            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
+            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
             file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, file, voice_note=SendAsVoice)
-        await message.client.delete_messages(chatid, inline_msg)
+        inline_msg.delete()
 
     async def vtnormcmd(self, message):
         """reply to a file to normalize volume"""
@@ -577,7 +577,7 @@ class voicetoolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file", message))
+            return await utils.answer(message, self.strings("error_file"))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -588,28 +588,27 @@ class voicetoolsMod(loader.Module):
         vg_lvl = self.config["vg_lvl"]
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading", message), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt", inline_msg))
-        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
         file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
         file.seek(0)
         file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt"))
         file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
         file.seek(0)
         if SendAsVoice:
-            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
+            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
             file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, file, voice_note=SendAsVoice)
-        await message.client.delete_messages(chatid, inline_msg)
+        inline_msg.delete()
 
     async def vtmp3cmd(self, message: Message):
         """reply to a file to convert it to mp3"""
@@ -618,7 +617,7 @@ class voicetoolsMod(loader.Module):
             return
         replymsg = await message.get_reply_message()
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file", message))
+            return await utils.answer(message, self.strings("error_file"))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -628,19 +627,19 @@ class voicetoolsMod(loader.Module):
             filename_new = filename.replace(ext, "")
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading", message), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
         file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
         file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         # await message.client.send_file(message.chat_id, await self.fast_upload(file), voice_note=False)
         await message.client.send_file(chatid, file, voice_note=False)
-        await message.client.delete_messages(chatid, inline_msg)
+        inline_msg.delete()
 
     async def vtspeechcmd(self, message):
         """reply to a file to convert it to speech"""
@@ -649,7 +648,7 @@ class voicetoolsMod(loader.Module):
             return
         replymsg = await message.get_reply_message()
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file", message))
+            return await utils.answer(message, self.strings("error_file"))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -659,18 +658,18 @@ class voicetoolsMod(loader.Module):
             filename_new = filename.replace(ext, "")
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self.strings("downloading", message), reply_markup={"text": "\u0020\u2800", "data": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "data": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
         file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
         file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
+        inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, file, voice_note=True)
-        await message.client.delete_messages(chatid, inline_msg)
+        inline_msg.delete()
 
     async def vtautovccmd(self, message):
         """Turns on AutoVoiceChanger for your own Voicemessages in the chat"""
@@ -694,11 +693,11 @@ class voicetoolsMod(loader.Module):
         if chatid_str not in vcanon_chats:
             vcanon_chats.append(chatid_str)
             self._db.set(__name__, "vcanon_watcher", vcanon_chats)
-            await utils.answer(message, self.strings("vcanon_start", message))
+            await utils.answer(message, self.strings("vcanon_start"))
         else:
             vcanon_chats.remove(chatid_str)
             self._db.set(__name__, "vcanon_watcher", vcanon_chats)
-            await utils.answer(message, self.strings("vcanon_stopped", message))
+            await utils.answer(message, self.strings("vcanon_stopped"))
 
     async def vtautonrcmd(self, message):
         """Turns on AutoNoiseReduce for your own Voicemessages in the chat"""
@@ -708,11 +707,11 @@ class voicetoolsMod(loader.Module):
         if chatid_str not in nr_chats:
             nr_chats.append(chatid_str)
             self._db.set(__name__, "nr_watcher", nr_chats)
-            await utils.answer(message, self.strings("nr_start", message))
+            await utils.answer(message, self.strings("nr_start"))
         else:
             nr_chats.remove(chatid_str)
             self._db.set(__name__, "nr_watcher", nr_chats)
-            await utils.answer(message, self.strings("nr_stopped", message))
+            await utils.answer(message, self.strings("nr_stopped"))
 
     async def vtautonormcmd(self, message):
         """Turns on AutoVoiceNormalizer for your own Voicemessages in the chat"""
@@ -722,11 +721,11 @@ class voicetoolsMod(loader.Module):
         if chatid_str not in norm_chats:
             norm_chats.append(chatid_str)
             self._db.set(__name__, "norm_watcher", norm_chats)
-            await utils.answer(message, self.strings("norm_start", message))
+            await utils.answer(message, self.strings("norm_start"))
         else:
             norm_chats.remove(chatid_str)
             self._db.set(__name__, "norm_watcher", norm_chats)
-            await utils.answer(message, self.strings("norm_stopped", message))
+            await utils.answer(message, self.strings("norm_stopped"))
 
     async def vtautospeedcmd(self, message):
         """Turns on AutoSpeed for your own Voicemessages in the chat"""
@@ -736,11 +735,11 @@ class voicetoolsMod(loader.Module):
         if chatid_str not in speed_chats:
             speed_chats.append(chatid_str)
             self._db.set(__name__, "speed_watcher", speed_chats)
-            await utils.answer(message, self.strings("speed_start", message))
+            await utils.answer(message, self.strings("speed_start"))
         else:
             speed_chats.remove(chatid_str)
             self._db.set(__name__, "speed_watcher", speed_chats)
-            await utils.answer(message, self.strings("speed_stopped", message))
+            await utils.answer(message, self.strings("speed_stopped"))
 
     async def vtautopitchcmd(self, message):
         """Turns on AutoVoiceNormalizer for your own Voicemessages in the chat"""
@@ -750,11 +749,11 @@ class voicetoolsMod(loader.Module):
         if chatid_str not in pitch_chats:
             pitch_chats.append(chatid_str)
             self._db.set(__name__, "pitch_watcher", pitch_chats)
-            await utils.answer(message, self.strings("pitch_start", message))
+            await utils.answer(message, self.strings("pitch_start"))
         else:
             pitch_chats.remove(chatid_str)
             self._db.set(__name__, "pitch_watcher", pitch_chats)
-            await utils.answer(message, self.strings("pitch_stopped", message))
+            await utils.answer(message, self.strings("pitch_stopped"))
 
     async def vtautostopcmd(self, message):
         """Turns off AutoVoice for your own Voicemessages in the chat"""
@@ -784,7 +783,7 @@ class voicetoolsMod(loader.Module):
         if chatid_str in speed_chats:
             speed_chats.remove(chatid_str)
             self._db.set(__name__, "speed_watcher", speed_chats)
-        await utils.answer(message, self.strings("vtauto_stopped", message))
+        await utils.answer(message, self.strings("vtauto_stopped"))
 
     async def watcher(self, message: Message):
         chatid = message.chat_id

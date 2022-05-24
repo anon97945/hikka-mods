@@ -75,8 +75,8 @@ class BlockNonDiscussionMod(loader.Module):
         "no_int": "<b>Your input was no int.</b>",
         "error": "<b>Your command was wrong.</b>",
         "permerror": "<b>You have no delete permissions in this chat.</b>",
-        "settings": ("<b>[BlockNonDiscussion - Settings]</b> Current settings in this"
-                     " chat are:\n{}."),
+        "settings": ("<b>[BlockNonDiscussion - Settings]</b> Current settings in this "
+                     "chat are:\n{}."),
         "triggered": ("{}, the comments are limited to discussiongroup members, "
                       "please join our discussiongroup first."
                       "\n\n👉🏻 {}\n\nRespectfully, the admins.")
@@ -113,10 +113,10 @@ class BlockNonDiscussionMod(loader.Module):
         if args and args[0] == "clearall":
             self._db.set(__name__, "bnd", [])
             self._db.set(__name__, "sets", {})
-            return await utils.answer(message, self.strings("turned_off", message))
+            return await utils.answer(message, self.strings("turned_off"))
 
         if message.is_private:
-            await utils.answer(message, self.strings("not_dc", message))
+            await utils.answer(message, self.strings("not_dc"))
             return
 
         if (
@@ -125,7 +125,7 @@ class BlockNonDiscussionMod(loader.Module):
             or not chat.admin_rights
             and not chat.creator
         ):
-            return await utils.answer(message, self.strings("permerror", message))
+            return await utils.answer(message, self.strings("permerror"))
 
         if not args:
             if chatid_str not in bnd:
@@ -136,30 +136,30 @@ class BlockNonDiscussionMod(loader.Module):
                 sets[chatid_str].setdefault("deltimer", 60)
                 self._db.set(__name__, "bnd", bnd)
                 self._db.set(__name__, "sets", sets)
-                return await utils.answer(message, self.strings("start", message))
+                return await utils.answer(message, self.strings("start"))
             bnd.remove(chatid_str)
             sets.pop(chatid_str)
             self._db.set(__name__, "bnd", bnd)
             self._db.set(__name__, "sets", sets)
-            return await utils.answer(message, self.strings("stopped", message))
+            return await utils.answer(message, self.strings("stopped"))
 
         if chatid_str in bnd:
             if args[0] == "notify" and args[1] is not None:
                 if not isinstance(to_bool(args[1]), bool):
-                    return await utils.answer(message, self.strings("error", message))
+                    return await utils.answer(message, self.strings("error"))
                 sets[chatid_str].update({"notify": to_bool(args[1])})
             elif args[0] == "mute" and args[1] is not None and chatid_str in bnd:
                 if not represents_int(args[1]):
-                    return await utils.answer(message, self.strings("no_int", message))
+                    return await utils.answer(message, self.strings("no_int"))
                 sets[chatid_str].update({"mute": args[1].capitalize()})
             elif args[0] == "deltimer" and args[1] is not None and chatid_str in bnd:
                 if not represents_int(args[1]):
-                    return await utils.answer(message, self.strings("no_int", message))
+                    return await utils.answer(message, self.strings("no_int"))
                 sets[chatid_str].update({"deltimer": args[1]})
             elif args[0] != "settings" and chatid_str in bnd:
                 return
             self._db.set(__name__, "sets", sets)
-            return await utils.answer(message, self.strings("settings", message).format(str(sets[chatid_str])))
+            return await utils.answer(message, self.strings("settings").format(str(sets[chatid_str])))
 
     async def watcher(self, message: Message):
         bnd = self._db.get(__name__, "bnd", [])
@@ -210,7 +210,7 @@ class BlockNonDiscussionMod(loader.Module):
                 await message.client.edit_permissions(chatid, userid,
                                                       timedelta(minutes=MUTETIMER), send_messages=False)
             if sets[chatid_str].get("notify") is True:
-                msgs = await utils.answer(message, self.strings("triggered", message).format(usertag, link))
+                msgs = await utils.answer(message, self.strings("triggered").format(usertag, link))
                 if sets[chatid_str].get("deltimer") != "0":
                     DELTIMER = int(sets[chatid_str].get("deltimer"))
                     await asyncio.sleep(DELTIMER)
