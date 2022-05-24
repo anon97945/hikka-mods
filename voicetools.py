@@ -94,7 +94,7 @@ async def audiohandler(bytes_io_file, fn, fe, new_fe, ac, codec):
         with open(out, "rb") as f:
             bytes_io_file = BytesIO(f.read())
         bytes_io_file.seek(0)
-        new_fn, new_fe = os.path.splitext(out)
+        _, new_fe = os.path.splitext(out)
     if os.path.exists(out):
         os.remove(out)
     if os.path.exists(fn + fe):
@@ -149,7 +149,6 @@ async def audiospeedup(bytes_io_file, fn, fe, speed):
     format_ext = fe[1:]
     y, sr = soundfile.read(bytes_io_file)
     y_stretch = pyrubberband.time_stretch(y, sr, speed)
-    y_shift = pyrubberband.pitch_shift(y, sr, speed)
     bytes_io_file.seek(0)
     soundfile.write(bytes_io_file, y_stretch, sr, format=format_ext)
     bytes_io_file.seek(0)
@@ -186,16 +185,6 @@ async def dalekvoice(bytes_io_file, fn, fe):
                 result[i] = H * v - H * VL + (H * (VL - VB)**2) / (2 * VL - 2 * VB)
         return result
 
-    def raw_diode(signal):
-        result = np.zeros(signal.shape)
-        for i in range(signal.shape[0]):
-            v = signal[i]
-            if v < VB:
-                result[i] = 0
-            elif VB < v <= VL:
-                result[i] = H * ((v - VB)**2) / (2 * VL - 2 * VB)
-        result[i] = H * v - H * VL + (H * (VL - VB)**2) / (2 * VL - 2 * VB)
-        return result
     rate, data = wavfile.read(bytes_io_file)
     data = data[:, 1]
     scaler = np.max(np.abs(data))
@@ -573,12 +562,13 @@ class voicetoolsMod(loader.Module):
         inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt", inline_msg))
         file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
-        file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
-        file.seek(0)
+        if SendAsVoice:
+            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
+            file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
+            file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        await message.client.send_file(message.chat_id, file, voice_note=True)
+        await message.client.send_file(message.chat_id, file, voice_note=SendAsVoice)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtnormcmd(self, message):
@@ -615,12 +605,13 @@ class voicetoolsMod(loader.Module):
         inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt", inline_msg))
         file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
-        file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
-        file.seek(0)
+        if SendAsVoice:
+            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt", inline_msg))
+            file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
+            file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading", inline_msg))
-        await message.client.send_file(message.chat_id, file, voice_note=True)
+        await message.client.send_file(message.chat_id, file, voice_note=SendAsVoice)
         await message.client.delete_messages(chatid, inline_msg)
 
     async def vtmp3cmd(self, message: Message):
