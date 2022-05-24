@@ -84,7 +84,7 @@ class BlockNonDiscussionMod(loader.Module):
     def __init__(self):
         self._ratelimit = []
 
-    async def client_ready(self, db):
+    async def client_ready(self, client, db):
         self._db = db
 
     async def bndcmd(self, message):
