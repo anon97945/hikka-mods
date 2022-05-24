@@ -1,4 +1,4 @@
-__version__ = (0, 0, 44)
+__version__ = (0, 0, 45)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -25,7 +25,7 @@ import soundfile
 import pyrubberband
 import io
 
-from telethon.tl.types import Message, Voice
+from telethon.tl.types import Message
 from io import BytesIO
 from pydub import AudioSegment, effects
 from .. import loader, utils
@@ -790,7 +790,7 @@ class voicetoolsMod(loader.Module):
             self._db.set(__name__, "speed_watcher", speed_chats)
         await utils.answer(message, self.strings("vtauto_stopped", message))
 
-    async def watcher(self, message: Voice):
+    async def watcher(self, message: Message):
         chatid = message.chat_id
         chatid_str = str(chatid)
         norm_chats = self._db.get(__name__, "norm_watcher", [])

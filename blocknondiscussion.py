@@ -1,4 +1,4 @@
-__version__ = (0, 0, 7)
+__version__ = (0, 0, 8)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -77,7 +77,7 @@ class BlockNonDiscussionMod(loader.Module):
         "permerror": "<b>You have no delete permissions in this chat.</b>",
         "settings": ("<b>[BlockNonDiscussion - Settings]</b> Current settings in this"
                      " chat are:\n{}."),
-        "triggered": ("{}, the comments are limited to discussiongroup members,"
+        "triggered": ("{}, the comments are limited to discussiongroup members, "
                       "please join our discussiongroup first."
                       "\n\n👉🏻 {}\n\nRespectfully, the admins.")
     }
