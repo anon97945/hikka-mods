@@ -29,19 +29,16 @@ if googletrans.__version__ != "4.0.0-rc.1":
 logger = logging.getLogger(__name__)
 
 
-def register(cb):
-    cb(GTranslateMod())
-
-
 @loader.tds
 class gtranslateMod(loader.Module):
     """Google Translator"""
     strings = {
         "name": "Google Translator",
-           "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
-           "invalid_text": "Invalid text to translate",
-           "split_error": "Python split() error, if there is -> in the text, it must split!",
-           "_cfg_lang_msg": "Language to translate to by default.",
+        "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
+        "invalid_text": "Invalid text to translate",
+        "split_error": "Python split() error, if there is -> in the text, it must split!",
+        "_cfg_lang_msg": "Language to translate to by default.",
+        "_cfg_vodkatr_msg": "If `RU` should be displayed as `Vodka`.",
     }
 
     def __init__(self):
@@ -52,7 +49,18 @@ class gtranslateMod(loader.Module):
                 doc=lambda: self.strings("_cfg_lang_msg"),
                 validator=loader.validators.String(length=2),
             ),
+            loader.ConfigValue(
+                "vodka_easteregg",
+                "True",
+                doc=lambda: self.strings("_cfg_vodkatr_msg"),
+                validator=loader.validators.Boolean(),
+            ),
         )
+
+    async def client_ready(self, client, db):
+        self._db = db
+        self._client = client
+        self._me = await client.get_me()
 
     async def gtranslatecmd(self, message: Message):
         """.gtranslate [from_lang->][->to_lang] <text>"""
@@ -82,7 +90,8 @@ class gtranslateMod(loader.Module):
         args[0] = args[0].lower()
         translated = (await utils.run_sync(self.tr.translate, text, dest=args[1], src=args[0])).text
         ret = self.strings["translated"]
-        args = list(map(lambda x: x.replace("ru", "vodka"), args))
+        if self.config["vodka_easteregg"]:
+            args = list(map(lambda x: x.replace("ru", "vodka"), args))
         ret = ret.format(text=utils.escape_html(text), frlang=utils.escape_html(args[0]),
                          to=utils.escape_html(args[1]), output=utils.escape_html(translated))
         await utils.answer(message, ret)
