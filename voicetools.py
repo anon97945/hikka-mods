@@ -94,7 +94,7 @@ async def audiohandler(bytes_io_file, fn, fe, new_fe, ac, codec):
         with open(out, "rb") as f:
             bytes_io_file = BytesIO(f.read())
         bytes_io_file.seek(0)
-        new_fn, new_fe = os.path.splitext(out)
+        _, new_fe = os.path.splitext(out)
     if os.path.exists(out):
         os.remove(out)
     if os.path.exists(fn + fe):
