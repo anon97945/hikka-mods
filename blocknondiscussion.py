@@ -135,12 +135,11 @@ class BlockNonDiscussionMod(loader.Module):
                 self._db.set(__name__, "bnd", bnd)
                 self._db.set(__name__, "sets", sets)
                 return await utils.answer(message, self.strings("start", message))
-            else:
-                bnd.remove(chatid_str)
-                sets.pop(chatid_str)
-                self._db.set(__name__, "bnd", bnd)
-                self._db.set(__name__, "sets", sets)
-                return await utils.answer(message, self.strings("stopped", message))
+            bnd.remove(chatid_str)
+            sets.pop(chatid_str)
+            self._db.set(__name__, "bnd", bnd)
+            self._db.set(__name__, "sets", sets)
+            return await utils.answer(message, self.strings("stopped", message))
 
         if chatid_str in bnd:
             if args[0] == "notify" and args[1] is not None:
@@ -150,13 +149,11 @@ class BlockNonDiscussionMod(loader.Module):
             elif args[0] == "mute" and args[1] is not None and chatid_str in bnd:
                 if not represents_int(args[1]):
                     return await utils.answer(message, self.strings("no_int", message))
-                else:
-                    sets[chatid_str].update({"mute": args[1].capitalize()})
+                sets[chatid_str].update({"mute": args[1].capitalize()})
             elif args[0] == "deltimer" and args[1] is not None and chatid_str in bnd:
                 if not represents_int(args[1]):
                     return await utils.answer(message, self.strings("no_int", message))
-                else:
-                    sets[chatid_str].update({"deltimer": args[1]})
+                sets[chatid_str].update({"deltimer": args[1]})
             elif args[0] != "settings" and chatid_str in bnd:
                 return
             self._db.set(__name__, "sets", sets)
