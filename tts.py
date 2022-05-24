@@ -128,11 +128,9 @@ class TTSMod(loader.Module):
             ),
         )
 
-
     async def client_ready(self, client, db):
         self._db = db
         self._client = client
-
 
     async def ttscmd(self, message: Message):
         """Convert text to speech with Google APIs"""
@@ -159,10 +157,9 @@ class TTSMod(loader.Module):
         voice, fn, fe = await makewaves(voice, fn, fe)
         voice.seek(0)
         voice.name = fn + fe
-        filemsg = await utils.answer(message, voice, voice_note=True)
+        await utils.answer(message, voice, voice_note=True)
         if message.out:
             await message.delete()
-
 
     async def speedvccmd(self, message: Message):
         """Speed up voice by x"""
@@ -194,6 +191,6 @@ class TTSMod(loader.Module):
         voice, fn, fe = await makewaves(voice, fn, fe)
         voice.seek(0)
         voice.name = fn + fe
-        filemsg = await utils.answer(message, voice, voice_note=True)
+        await utils.answer(message, voice, voice_note=True)
         if message.out:
             await message.delete()
