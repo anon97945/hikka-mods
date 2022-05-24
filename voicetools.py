@@ -509,7 +509,7 @@ class voicetoolsMod(loader.Module):
         file = BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(message=message, text=self.strings("downloading", message), reply_markup={"text": "\u0020\u2800", "data": "empty"})
-        file = await self.get_media(repymsg)
+        file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
