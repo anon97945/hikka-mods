@@ -1,4 +1,4 @@
-__version__ = (0, 0, 41)
+__version__ = (0, 0, 42)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -10,14 +10,15 @@ __version__ = (0, 0, 41)
 #
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
- 
+
 # meta developer: @anon97945
-# scope: hikka_only 
+# scope: hikka_only
 # requires: googletrans==4.0.0-rc1
 
 import logging
 import googletrans
 
+from telethon.tl.types import Message
 from .. import loader, utils
 
 if googletrans.__version__ != "4.0.0-rc.1":
@@ -33,23 +34,27 @@ def register(cb):
 
 
 @loader.tds
-class GTranslateMod(loader.Module):
+class gtranslateMod(loader.Module):
     """Google Translator"""
-    strings = {"name": "Google Translator",
-               "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
-               "invalid_text": "Invalid text to translate",
-               "split_error": "Python split() error, if there is -> in the text, it must split!"
-               }
+    strings = {
+        "name": "Google Translator",
+           "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
+           "invalid_text": "Invalid text to translate",
+           "split_error": "Python split() error, if there is -> in the text, it must split!",
+           "_cfg_lang_msg": "Language to translate to by default.",
+    }
 
     def __init__(self):
-        self.commands = {"gtranslate": self.gtranslatecmd}
-        self.config = loader.ModuleConfig("DEFAULT_LANG", "en", "Language to translate to by default")
+        self.config = loader.ModuleConfig(
+            loader.ConfigValue(
+                "DEFAULT_LANG",
+                "en",
+                doc=lambda: self.strings("_cfg_lang_msg"),
+                validator=loader.validators.String(length=2),
+            ),
+        )
 
-    def config_complete(self):
-        self.name = self.strings["name"]
-        self.tr = googletrans.Translator()
-
-    async def gtranslatecmd(self, message):
+    async def gtranslatecmd(self, message: Message):
         """.gtranslate [from_lang->][->to_lang] <text>"""
         args = utils.get_args(message)
 

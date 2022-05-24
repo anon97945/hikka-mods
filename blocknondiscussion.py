@@ -19,7 +19,7 @@ import logging
 
 from telethon import functions
 from datetime import timedelta
-from telethon.tl.types import User, Channel
+from telethon.tl.types import User, Channel, Message
 from telethon.errors import UserNotParticipantError
 
 from .. import loader, utils
@@ -87,7 +87,7 @@ class BlockNonDiscussionMod(loader.Module):
     async def client_ready(self, client, db):
         self._db = db
 
-    async def bndcmd(self, message):
+    async def bndcmd(self, message: Message):
         """Available commands:
            .bnd
              - Toggles the module for the current chat.
@@ -160,7 +160,7 @@ class BlockNonDiscussionMod(loader.Module):
             self._db.set(__name__, "sets", sets)
             return await utils.answer(message, self.strings("settings", message).format(str(sets[chatid_str])))
 
-    async def watcher(self, message):
+    async def watcher(self, message: Message):
         bnd = self._db.get(__name__, "bnd", [])
         sets = self._db.get(__name__, "sets", {})
         chatid = message.chat_id
