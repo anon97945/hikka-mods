@@ -1,4 +1,4 @@
-__version__ = (0, 0, 42)
+__version__ = (0, 0, 43)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -41,7 +41,7 @@ async def getchattype(message):
         chattype = "channel"
     elif message.is_private:
         chattype = "private"
-    return(chattype)
+    return chattype
 
 
 def represents_nr(nr_lvl):
