@@ -1,4 +1,4 @@
-__version__ = (0, 0, 43)
+__version__ = (0, 0, 44)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -62,6 +62,7 @@ class gtranslateMod(loader.Module):
         self._db = db
         self._client = client
         self._me = await client.get_me()
+        self.tr = googletrans.Translator()
 
     async def gtranslatecmd(self, message: Message):
         """.gtranslate [from_lang->][->to_lang] <text>"""
