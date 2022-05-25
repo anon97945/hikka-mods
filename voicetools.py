@@ -1,4 +1,4 @@
-__version__ = (0, 0, 49)
+__version__ = (0, 0, 50)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -13,6 +13,7 @@ __version__ = (0, 0, 49)
 
 # meta developer: @anon97945
 # scope: hikka_only
+# scope: hikka_min 1.1.28
 # requires: numpy scipy noisereduce soundfile pyrubberband
 
 import logging
@@ -367,7 +368,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtanoncmd(self, message):
@@ -417,7 +418,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        await message.client.send_file(chatid, file, voice_note=True)
+        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtpitchcmd(self, message):
@@ -467,7 +468,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        await message.client.send_file(chatid, file, voice_note=True)
+        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtspeedcmd(self, message):
@@ -517,7 +518,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtenhcmd(self, message):
@@ -565,7 +566,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtnormcmd(self, message):
@@ -607,7 +608,7 @@ class voicetoolsMod(loader.Module):
             file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtmp3cmd(self, message: Message):
@@ -638,7 +639,7 @@ class voicetoolsMod(loader.Module):
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         # await message.client.send_file(message.chat_id, await self.fast_upload(file), voice_note=False)
-        await message.client.send_file(chatid, file, voice_note=False)
+        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=False)
         await inline_msg.delete()
 
     async def vtspeechcmd(self, message):
@@ -863,6 +864,6 @@ class voicetoolsMod(loader.Module):
         file.seek(0)
         file.name = fn + fe
         if reply:
-            await message.client.send_file(chatid, file, voice_note=True, reply_to=reply)
+            await message.client.send_file(chatid, await self.fast_upload(file), voice_note=True, reply_to=reply)
         else:
-            await message.client.send_file(chatid, file, voice_note=True)
+            await message.client.send_file(chatid, await self.fast_upload(file), voice_note=True)
