@@ -365,11 +365,10 @@ class voicetoolsMod(loader.Module):
         if SendAsVoice:
             inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
-            file.seek(0)
         else:
             inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
-            file.seek(0)
+        file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
@@ -419,11 +418,10 @@ class voicetoolsMod(loader.Module):
         if SendAsVoice:
             inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
-            file.seek(0)
         else:
             inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
-            file.seek(0)
+        file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
@@ -473,11 +471,10 @@ class voicetoolsMod(loader.Module):
         if SendAsVoice:
             inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
-            file.seek(0)
         else:
             inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
-            file.seek(0)
+        file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
@@ -527,11 +524,10 @@ class voicetoolsMod(loader.Module):
         if SendAsVoice:
             inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
-            file.seek(0)
         else:
             inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
-            file.seek(0)
+        file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
@@ -579,11 +575,10 @@ class voicetoolsMod(loader.Module):
         if SendAsVoice:
             inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
-            file.seek(0)
         else:
             inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
-            file.seek(0)
+        file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
@@ -625,11 +620,10 @@ class voicetoolsMod(loader.Module):
         if SendAsVoice:
             inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
-            file.seek(0)
         else:
             inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
             file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
-            file.seek(0)
+        file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
         await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
