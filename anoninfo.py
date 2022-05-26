@@ -1,4 +1,4 @@
-__version__ = (0, 0, 49)
+__version__ = (0, 0, 50)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -41,7 +41,7 @@ class anoninfoMod(loader.Module):
         "prefix": "Prefix",
         "up-to-date": "😌 Up-to-date",
         "update_required": "😕 Update required </b><code>.update</code><b>",
-        "_cfg_cst_msg": "Custom message for info. May contain {me}, {version}, {build}, {prefix}, {platform} keywords",
+        "_cfg_cst_msg": "Custom message for info. May contain {me}, {version}, {build}, {prefix}, {platform}, {upd} keywords",
         "_cfg_cst_btn": "Custom button for info. Leave empty to remove button",
         "_cfg_cst_bnr": "Custom Banner for info.",
         "_cfg_cst_frmt": "Custom fileformat for Banner info.",
@@ -116,17 +116,18 @@ class anoninfoMod(loader.Module):
         platform = utils.get_named_platform()
 
         return (
-            "<b>😈 Anondamus Hikka Info</b>\n"
+            "🌚"
             + self.config["custom_message"].format(
                 me=me,
                 version=version,
                 build=build,
                 prefix=prefix,
                 platform=platform,
+                upd=upd
             )
             if self.config["custom_message"] != "no"
             else (
-                "<b>😈 Anondamus Hikka Info</b>\n"
+                "<b>🌚 Anondamus Hikka Info</b>\n"
                 f'<b>🤴 {self.strings("owner")}: </b>{me}\n\n'
                 f"<b>🔮 {self.strings('version')}: </b>{version} {build}\n"
                 f"<b>{upd}</b>\n\n"
