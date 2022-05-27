@@ -1,4 +1,4 @@
-__version__ = (0, 0, 51)
+__version__ = (0, 0, 52)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -204,7 +204,7 @@ class anoninfoMod(loader.Module):
     @loader.unrestricted
     async def anoninfocmd(self, message: Message):
         """Send userbot info"""
-        m = {x: self._get_mark(x) for x in range(12)}
+        m = {x: self._get_mark(x) for x in range(13)}
         await self.inline.form(
             message=message,
             text=self._render_info(),
