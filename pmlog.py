@@ -113,7 +113,7 @@ class PMLogMod(loader.Module):
             return
         if pmlog_group:
             if chat.username:
-                name = "@" + chat.username
+                name = f"@{chat.username}"
             elif chat.last_name:
                 name = f"{chat.first_name} {chat.last_name}"
             else:
