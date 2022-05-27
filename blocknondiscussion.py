@@ -1,4 +1,4 @@
-__version__ = (0, 0, 8)
+__version__ = (0, 0, 9)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -12,6 +12,7 @@ __version__ = (0, 0, 8)
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
 # meta developer: @anon97945
+
 # scope: hikka_only
 
 import asyncio

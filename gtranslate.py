@@ -1,4 +1,4 @@
-__version__ = (0, 0, 44)
+__version__ = (0, 0, 45)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -12,6 +12,7 @@ __version__ = (0, 0, 44)
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
 # meta developer: @anon97945
+
 # scope: hikka_only
 # requires: googletrans==4.0.0-rc1
 

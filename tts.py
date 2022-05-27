@@ -1,4 +1,4 @@
-__version__ = (0, 1, 61)
+__version__ = (0, 1, 62)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -12,7 +12,7 @@ __version__ = (0, 1, 61)
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
 # meta developer: @anon97945
-# changelog: .ttsspeed is now a config var
+
 # scope: libsndfile1 gcc ffmpeg rubberband-cli
 # scope: hikka_only
 # requires: gtts pydub soundfile pyrubberband numpy AudioSegment wave

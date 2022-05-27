@@ -1,4 +1,4 @@
-__version__ = (0, 0, 51)
+__version__ = (0, 0, 52)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -12,6 +12,7 @@ __version__ = (0, 0, 51)
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
 # meta developer: @anon97945
+
 # scope: hikka_only
 # scope: hikka_min 1.1.28
 # requires: numpy scipy noisereduce soundfile pyrubberband

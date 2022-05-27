@@ -1,4 +1,4 @@
-__version__ = (0, 0, 7)
+__version__ = (0, 0, 8)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -12,6 +12,7 @@ __version__ = (0, 0, 7)
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
 # meta developer: @anon97945
+
 # scope: hikka_only
 
 import asyncio
@@ -26,14 +27,13 @@ logger = logging.getLogger(__name__)
 
 @loader.tds
 class lcrMod(loader.Module):
-    """Telegram OTP Remote Reciever"""
+    """Telegram Login Code Reciever"""
     strings = {
-        "name": "Logincode Reciever",
+        "name": "Login Code Reciever",
         "timeouterror": "<b>TimeoutError:</b>\nNo login code for {} seconds recieved.",
         "error": "<b>No Login code in the message found.</b>",
-        "otp_cfg_doc": "OTP Reciever config",
         "waiting": "<b>Waiting for the login code...</b>",
-        "not_pchat": "<b>This is no private chat. Use <code>.otp group --force</code></b>",
+        "not_pchat": "<b>This is no private chat. Use <code>.lcr group --force</code></b>",
         "not_group": "This command is for groups only.",
         "no_self": "<b>You can't use it on yourself.</b>",
         "_cfg_timeout": "<b>Define a time to wait for the Code.</b>",
@@ -50,18 +50,17 @@ class lcrMod(loader.Module):
             ),
         )
 
-
-    async def client_ready(self, client):
+    async def client_ready(self, client, db):
         self._client = client
         self._me = await client.get_me(True)
 
     @loader.owner
-    async def otpcmd(self, message: Message):
+    async def lcrcmd(self, message: Message):
         """Available commands:
-           .otp
-             - waiting for the OTP from TG service chat, use in private
-           .otp group --force
-             - waiting for the OTP from TG service chat, use in group"""
+           .lcr
+             - waiting for the login code from TG service chat, use in private.
+           .lcr group --force
+             - waiting for the login code from TG service chat, use in group."""
 
         user_msg = utils.get_args_raw(message)
         chatid = message.chat_id
@@ -82,11 +81,8 @@ class lcrMod(loader.Module):
                 logincode = conv.wait_event(events.NewMessage(incoming=True, from_users=tgacc), timeout=lc_timeout)
                 logincode = await logincode
                 logincodemsg = " ".join((await message.client.get_messages(tgacc, 1,
-                                                                         search="Login code:"))[0].message)
-                if (
-                    logincodemsg is not None
-                    and "Login code:" in logincodemsg.lower()
-                ):
+                                                                           search="Login code:"))[0].message)
+                if logincodemsg is not None and "Login code:" in logincodemsg.lower():
                     logincode = True
                 if logincode:
                     await message.client.send_read_acknowledge(tgacc, clear_mentions=True)
@@ -96,4 +92,4 @@ class lcrMod(loader.Module):
                 return await message.client.send_message(chatid, self.strings("error"))
             except asyncio.TimeoutError:
                 await message.client.delete_messages(chatid, msgs)
-                return await message.client.send_message(chatid, self.strings("timeouterror"))
+                return await message.client.send_message(chatid, self.strings("timeouterror").format(lc_timeout))
