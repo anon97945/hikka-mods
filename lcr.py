@@ -50,7 +50,6 @@ class lcrMod(loader.Module):
             ),
         )
 
-
     async def client_ready(self, client, db):
         self._client = client
         self._me = await client.get_me(True)
@@ -70,7 +69,7 @@ class lcrMod(loader.Module):
         lc_timeout = self.config["timeout"]
         if chatid == (await message.client.get_me(True)).user_id:
             return await utils.answer(message, self.strings("no_self"))
-        if user_msg != "" and user_msg != "group --force":
+        if user_msg not in ["", "group --force"]:
             return
         if not message.is_private and user_msg != "group --force":
             return await utils.answer(message, self.strings("not_pchat"))
@@ -82,10 +81,9 @@ class lcrMod(loader.Module):
                 logincode = conv.wait_event(events.NewMessage(incoming=True, from_users=tgacc), timeout=lc_timeout)
                 logincode = await logincode
                 logincodemsg = " ".join((await message.client.get_messages(tgacc, 1,
-                                                                         search="Login code:"))[0].message)
-                if logincodemsg is not None:
-                    if "Login code:" in logincodemsg.lower():
-                        logincode = True
+                                                                           search="Login code:"))[0].message)
+                if logincodemsg is not None and "Login code:" in logincodemsg.lower():
+                    logincode = True
                 if logincode:
                     await message.client.send_read_acknowledge(tgacc, clear_mentions=True)
                     await message.client.delete_messages(chatid, msgs)
