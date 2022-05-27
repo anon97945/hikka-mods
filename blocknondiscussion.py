@@ -72,7 +72,7 @@ class BlockNonDiscussionMod(loader.Module):
         "not_dc": "<b>This is no Groupchat.</b>",
         "start": "<b>[BlockNonDiscussion]</b> Activated in this chat.</b>",
         "stopped": "<b>[BlockNonDiscussion]</b> Deactivated in this chat.</b>",
-        "turned_off": "<b>[BlockNonDiscussion]</b> The mode is turned off in all chats.</b>",
+        "turned_off": "<b>[BlockNonDiscussion]</b> The module is now turned off in all chats.</b>",
         "no_int": "<b>Your input was no int.</b>",
         "error": "<b>Your command was wrong.</b>",
         "permerror": "<b>You have no delete permissions in this chat.</b>",
@@ -81,6 +81,22 @@ class BlockNonDiscussionMod(loader.Module):
         "triggered": ("{}, the comments are limited to discussiongroup members, "
                       "please join our discussiongroup first."
                       "\n\n👉🏻 {}\n\nRespectfully, the admins.")
+    }
+
+    strings_de = {
+        "name": "BlockNonDiscussion",
+        "not_dc": "<b>Dies ist kein Gruppenchat.</b>",
+        "start": "<b>[BlockNonDiscussion]</b> In diesem Chat aktiviert.</b>",
+        "stopped": "<b>[BlockNonDiscussion]</b> Der Chat wurde aus der Liste entfernt.</b>",
+        "turned_off": "<b>[BlockNonDiscussion]</b> In allen Chats ausgeschaltet.</b>",
+        "no_int": "<b>Ihre Eingabe war keine Zahl.</b>",
+        "error": "<b>Dein Befehl war falsch.</b>",
+        "permerror": "<b>Sie haben in diesem Chat keine Löschberechtigung.</b>",
+        "settings": ("<b>[BlockNonDiscussion - Settings]</b> Aktuelle Einstellungen in diesem "
+                     "Chat:\n{}."),
+        "triggered": ("{}, die Kommentarfunktion wurde auf die Chatmitglieder begrenzt, "
+                      "tritt bitte zuerst unserem Chat bei."
+                      "\n\n👉🏻 {}\n\nHochachtungsvoll, die Obrigkeit.")
     }
 
     def __init__(self):
