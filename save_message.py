@@ -1,4 +1,4 @@
-__version__ = (0, 0, 3)
+__version__ = (0, 0, 4)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -39,9 +39,9 @@ def get_ids(link):
 
 @loader.tds
 class SaveMessageMod(loader.Module):
-    """Saves Message from link to SavedMessages"""
+    """Get Message/Media from given link."""
     strings = {
-        "name": "Save Channel Message",
+        "name": "Save Message",
         "done": "<b>Forward to saved complete.</b>",
         "invalid_link": "<b>Invalid link.</b>",
     }
@@ -54,7 +54,7 @@ class SaveMessageMod(loader.Module):
         self._id = (await client.get_me(True)).user_id
 
     async def smcmd(self, message: Message):
-        """.sm <messagelink> to forward message to SavedMessages"""
+        """<messagelink> to forward message/media to SavedMessages."""
         args = utils.get_args_raw(message).lower()
         if not args:
             return
@@ -66,7 +66,7 @@ class SaveMessageMod(loader.Module):
         return await utils.answer(message, self.strings("done"))
 
     async def smhcmd(self, message: Message):
-        """.smh <messagelink> to forward message to current chat"""
+        """<messagelink> to forward message/media to current chat."""
         args = utils.get_args_raw(message).lower()
         if not args:
             return
