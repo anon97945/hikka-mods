@@ -1,4 +1,4 @@
-__version__ = (0, 0, 6)
+__version__ = (0, 0, 7)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -10,13 +10,14 @@ __version__ = (0, 0, 6)
 #
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
- 
+
 # meta developer: @anon97945
-# scope: hikka_only 
+# scope: hikka_only
 
 import asyncio
 import logging
 
+from telethon.tl.types import Message
 from telethon import events
 from .. import loader, utils
 
@@ -50,7 +51,7 @@ class lcrMod(loader.Module):
         )
 
 
-    async def client_ready(self, client, db):
+    async def client_ready(self, client):
         self._client = client
         self._me = await client.get_me(True)
 
@@ -68,16 +69,13 @@ class lcrMod(loader.Module):
         tgacc = 777000
         lc_timeout = self.config["timeout"]
         if chatid == (await message.client.get_me(True)).user_id:
-            msgs = await utils.answer(message, self.strings("no_self"))
-            return
+            return await utils.answer(message, self.strings("no_self"))
         if user_msg != "" and user_msg != "group --force":
             return
         if not message.is_private and user_msg != "group --force":
-            msgs = await utils.answer(message, self.strings("not_pchat"))
-            return
-        elif message.is_private and user_msg == "group --force":
-            msgs = await utils.answer(message, self.strings("not_group"))
-            return
+            return await utils.answer(message, self.strings("not_pchat"))
+        if message.is_private and user_msg == "group --force":
+            return await utils.answer(message, self.strings("not_group"))
         async with message.client.conversation(tgacc) as conv:
             try:
                 msgs = await utils.answer(message, self.strings("waiting"))
@@ -91,13 +89,9 @@ class lcrMod(loader.Module):
                 if logincode:
                     await message.client.send_read_acknowledge(tgacc, clear_mentions=True)
                     await message.client.delete_messages(chatid, msgs)
-                    msgs = await message.client.send_message(chatid, logincodemsg)
-                    return
-                else:
-                    await message.client.delete_messages(chatid, msgs)
-                    msgs = await message.client.send_message(chatid, self.strings("error"))
-                    return
+                    return await message.client.send_message(chatid, logincodemsg)
+                await message.client.delete_messages(chatid, msgs)
+                return await message.client.send_message(chatid, self.strings("error"))
             except asyncio.TimeoutError:
                 await message.client.delete_messages(chatid, msgs)
-                msgs = await message.client.send_message(chatid, self.strings("timeouterror"))
-                return
+                return await message.client.send_message(chatid, self.strings("timeouterror"))
