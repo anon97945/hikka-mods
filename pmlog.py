@@ -91,6 +91,13 @@ class PMLogMod(loader.Module):
         self._db = db
         self._id = (await client.get_me(True)).user_id
 
+    async def get_media(self, message: Message):
+        file = (
+            io.BytesIO((await self.fast_download(message.media)).getvalue())
+        )
+        file.seek(0)
+        return file
+
     async def watcher(self, message: Message):
         if not message.is_private or not isinstance(message, Message):
             return
@@ -122,8 +129,8 @@ class PMLogMod(loader.Module):
                 if not message.file or not pmlog_destr:
                     return
                 file = io.BytesIO()
-                file.name = message.file.name or f"{message.file.media.id}{message.file.ext}"
                 caption = message.text + "\n\n" + link
-                await message.client.download_file(message, file)
+                file = await self.get_media(message)
+                file.name = message.file.name or f"{message.file.media.id}{message.file.ext}"
                 file.seek(0)
-                await message.client.send_file(pmlog_group, file, force_document=True, caption=caption)
+                await message.client.send_file(pmlog_group, await self.fast_upload(file), force_document=True, caption=caption)
