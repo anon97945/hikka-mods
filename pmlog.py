@@ -1,4 +1,4 @@
-__version__ = (0, 0, 10)
+__version__ = (0, 0, 11)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -85,7 +85,7 @@ class PMLogMod(loader.Module):
         pmlog_bot = self.config["log_bots"]
         pmlog_group = self.config["log_group"]
         chat = await message.get_chat()
-        if chat.bot and not pmlog_bot or chat.id == self._id or pmlog_group == None:
+        if chat.bot and not pmlog_bot or chat.id == self._id or pmlog_group is not None:
             return
         chatidindb = utils.get_chat_id(message) in self.config["logs_list"]
         if pmlog_whitelist and chatidindb or not pmlog_whitelist and not chatidindb:
