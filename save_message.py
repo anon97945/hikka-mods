@@ -26,10 +26,10 @@ logger = logging.getLogger(__name__)
 regex = re.compile(r"(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")
 
 
-async def get_ids(link, message):
+def get_ids(link):
     match = regex.match(link)
     if not match:
-        return await utils.answer(message, self.strings("invalid_link"))
+        return False
     chat_id = match.group(4)
     msg_id = int(match.group(5))
     if chat_id.isnumeric():
@@ -58,7 +58,9 @@ class SaveMessageMod(loader.Module):
         args = utils.get_args_raw(message).lower()
         if not args:
             return
-        channel_id, msg_id = await get_ids(args, message)
+        if not get_ids(args):
+            return await utils.answer(message, self.strings("invalid_link"))
+        channel_id, msg_id = get_ids(args)
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
         msgs = await message.client.send_message(self._id, message=msgs)
         return await utils.answer(message, self.strings("done"))
@@ -68,7 +70,9 @@ class SaveMessageMod(loader.Module):
         args = utils.get_args_raw(message).lower()
         if not args:
             return
-        channel_id, msg_id = await get_ids(args, message)
+        if not get_ids(args):
+            return await utils.answer(message, self.strings("invalid_link"))
+        channel_id, msg_id = get_ids(args)
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
         msgs = await message.client.send_message(message.chat_id, message=msgs)
         return await message.delete()
