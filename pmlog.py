@@ -1,4 +1,4 @@
-__version__ = (0, 0, 11)
+__version__ = (0, 0, 12)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -60,7 +60,7 @@ class PMLogMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
-                "log_self_destr.",
+                "log_self_destr",
                 "False",
                 doc=lambda: self.strings("_cfg_selfdestructive"),
                 validator=loader.validators.Boolean(),
@@ -84,6 +84,7 @@ class PMLogMod(loader.Module):
         pmlog_whitelist = self.config["whitelist"]
         pmlog_bot = self.config["log_bots"]
         pmlog_group = self.config["log_group"]
+        pmlog_destr = self.config["log_self_destr"]
         chat = await message.get_chat()
         if chat.bot and not pmlog_bot or chat.id == self._id or pmlog_group is not None:
             return
@@ -104,7 +105,7 @@ class PMLogMod(loader.Module):
                 await message.client.send_message(self.config["LOG_GROUP"], link)
                 return
             except MessageIdInvalidError:
-                if not message.file:
+                if not message.file or not self.config["log_self_destr"]:
                     return
                 file = io.BytesIO()
                 file.name = message.file.name or f"{message.file.media.id}{message.file.ext}"
