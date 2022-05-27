@@ -1,4 +1,4 @@
-__version__ = (0, 0, 4)
+__version__ = (0, 0, 5)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -39,7 +39,7 @@ def get_ids(link):
 
 @loader.tds
 class SaveMessageMod(loader.Module):
-    """Get Message/Media from given link."""
+    """Get Message/Media from given link (also works for forward restricted content)."""
     strings = {
         "name": "Save Message",
         "done": "<b>Forward to saved complete.</b>",
