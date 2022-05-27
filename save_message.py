@@ -16,16 +16,14 @@ __version__ = (0, 0, 3)
 # scope: hikka_only
 # scope: hikka_min 1.1.28
 
-import asyncio
 import logging
-import io
 import re
 
 from .. import loader, utils
 from telethon.tl.types import Message
 
 logger = logging.getLogger(__name__)
-regex = re.compile("(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")
+regex = re.compile(r"(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")
 
 
 async def get_ids(link, message):
@@ -35,7 +33,7 @@ async def get_ids(link, message):
     chat_id = match.group(4)
     msg_id = int(match.group(5))
     if chat_id.isnumeric():
-        chat_id  = int(chat_id)
+        chat_id = int(chat_id)
     return chat_id, msg_id
 
 
@@ -50,6 +48,8 @@ class SaveMessageMod(loader.Module):
 
     def __init__(self):
         self._ratelimit = []
+
+    async def client_ready(self, client, db):
         self._db = db
         self._id = (await client.get_me(True)).user_id
 
