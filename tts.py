@@ -1,8 +1,8 @@
 __version__ = (0, 1, 61)
 
 
-# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
-# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
+# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
+# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
 #
 #              © Copyright 2022
 #
@@ -10,11 +10,11 @@ __version__ = (0, 1, 61)
 #
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
- 
+
 # meta developer: @anon97945
 # changelog: .ttsspeed is now a config var
 # scope: libsndfile1 gcc ffmpeg rubberband-cli
-# scope: hikka_only 
+# scope: hikka_only
 # requires: gtts pydub soundfile pyrubberband numpy AudioSegment wave
 
 import logging
