@@ -1,4 +1,4 @@
-__version__ = (0, 0, 50)
+__version__ = (0, 0, 51)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -63,13 +63,67 @@ class anoninfoMod(loader.Module):
             ),
             loader.ConfigValue(
                 "custom_button2",
-                ["🌘 Hikka RU Support chat", "https://t.me/hikka_talks"],
+                [],
                 lambda: self.strings("_cfg_cst_btn"),
                 validator=loader.validators.Series(min_len=0, max_len=2),
             ),
             loader.ConfigValue(
                 "custom_button3",
+                [],
+                lambda: self.strings("_cfg_cst_btn"),
+                validator=loader.validators.Series(min_len=0, max_len=2),
+            ),
+            loader.ConfigValue(
+                "custom_button4",
                 ["🌘 Hikka EN Support chat", "https://t.me/hikka_en"],
+                lambda: self.strings("_cfg_cst_btn"),
+                validator=loader.validators.Series(min_len=0, max_len=2),
+            ),
+            loader.ConfigValue(
+                "custom_button5",
+                ["🌘 Hikka. userbot", "https://t.me/hikka_ub"],
+                lambda: self.strings("_cfg_cst_btn"),
+                validator=loader.validators.Series(min_len=0, max_len=2),
+            ),
+            loader.ConfigValue(
+                "custom_button6",
+                ["🌘 Hikka RU Support chat", "https://t.me/hikka_talks"],
+                lambda: self.strings("_cfg_cst_btn"),
+                validator=loader.validators.Series(min_len=0, max_len=2),
+            ),
+            loader.ConfigValue(
+                "custom_button7",
+                [],
+                lambda: self.strings("_cfg_cst_btn"),
+                validator=loader.validators.Series(min_len=0, max_len=2),
+            ),
+            loader.ConfigValue(
+                "custom_button8",
+                [],
+                lambda: self.strings("_cfg_cst_btn"),
+                validator=loader.validators.Series(min_len=0, max_len=2),
+            ),
+            loader.ConfigValue(
+                "custom_button9",
+                [],
+                lambda: self.strings("_cfg_cst_btn"),
+                validator=loader.validators.Series(min_len=0, max_len=2),
+            ),
+            loader.ConfigValue(
+                "custom_button10",
+                [],
+                lambda: self.strings("_cfg_cst_btn"),
+                validator=loader.validators.Series(min_len=0, max_len=2),
+            ),
+            loader.ConfigValue(
+                "custom_button11",
+                [],
+                lambda: self.strings("_cfg_cst_btn"),
+                validator=loader.validators.Series(min_len=0, max_len=2),
+            ),
+            loader.ConfigValue(
+                "custom_button12",
+                [],
                 lambda: self.strings("_cfg_cst_btn"),
                 validator=loader.validators.Series(min_len=0, max_len=2),
             ),
@@ -137,52 +191,45 @@ class anoninfoMod(loader.Module):
         )
 
     def _get_mark(self, int):
-        if int == 1:
-            return (
-                {
-                    "text": self.config["custom_button1"][0],
-                    "url": self.config["custom_button1"][1],
-                }
-                if self.config["custom_button1"]
-                else None
-            )
-
-        elif int == 2:
-            return (
-                {
-                    "text": self.config["custom_button2"][0],
-                    "url": self.config["custom_button2"][1],
-                }
-                if self.config["custom_button2"]
-                else None
-            )
-
-        elif int == 3:
-            return (
-                {
-                    "text": self.config["custom_button3"][0],
-                    "url": self.config["custom_button3"][1],
-                }
-                if self.config["custom_button3"]
-                else None
-            )
+        int = str(int)
+        return (
+            {
+                "text": self.config["custom_button" + int][0],
+                "url": self.config["custom_button" + int][1],
+            }
+            if self.config["custom_button" + int]
+            else None
+        )
 
     @loader.unrestricted
     async def anoninfocmd(self, message: Message):
         """Send userbot info"""
-        m1 = self._get_mark(1)
-        m2 = self._get_mark(2)
-        m3 = self._get_mark(3)
+        m = {}
+        for x in range(0, 12):
+            m[x] = self._get_mark(x)
         await self.inline.form(
             message=message,
             text=self._render_info(),
             reply_markup=[
                 [
-                    *([m1] if m1 else []),
+                    *([m[1]] if m[1] else []),
+                    *([m[2]] if m[2] else []),
+                    *([m[3]] if m[3] else []),
                 ],
                 [
-                    *([m2] if m2 else []),
-                    *([m3] if m3 else []),
+                    *([m[4]] if m[4] else []),
+                    *([m[5]] if m[5] else []),
+                    *([m[6]] if m[6] else []),
+                ],
+                [
+                    *([m[7]] if m[7] else []),
+                    *([m[8]] if m[8] else []),
+                    *([m[9]] if m[9] else []),
+                ],
+                [
+                    *([m[10]] if m[10] else []),
+                    *([m[11]] if m[11] else []),
+                    *([m[12]] if m[12] else []),
                 ],
             ],
             **{}
