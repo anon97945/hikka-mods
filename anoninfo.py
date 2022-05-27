@@ -1,4 +1,4 @@
-__version__ = (0, 0, 52)
+__version__ = (0, 0, 53)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -54,6 +54,23 @@ class anoninfoMod(loader.Module):
                 "custom_message",
                 "no",
                 doc=lambda: self.strings("_cfg_cst_msg"),
+            ),
+            loader.ConfigValue(
+                "custom_banner",
+                "https://i.ibb.co/BZ9Kg2N/Banner.png",
+                lambda: self.strings("_cfg_cst_bnr"),
+            ),
+            loader.ConfigValue(
+                "disable_banner",
+                False,
+                lambda: self.strings("_cfg_banner"),
+                validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
+                "custom_format",
+                "photo",
+                lambda: self.strings("_cfg_cst_frmt"),
+                validator=loader.validators.Choice(["photo", "video", "audio", "gif"]),
             ),
             loader.ConfigValue(
                 "custom_button1",
@@ -126,23 +143,6 @@ class anoninfoMod(loader.Module):
                 [],
                 lambda: self.strings("_cfg_cst_btn"),
                 validator=loader.validators.Series(min_len=0, max_len=2),
-            ),
-            loader.ConfigValue(
-                "custom_banner",
-                "https://i.ibb.co/BZ9Kg2N/Banner.png",
-                lambda: self.strings("_cfg_cst_bnr"),
-            ),
-            loader.ConfigValue(
-                "disable_banner",
-                False,
-                lambda: self.strings("_cfg_banner"),
-                validator=loader.validators.Boolean(),
-            ),
-            loader.ConfigValue(
-                "custom_format",
-                "photo",
-                lambda: self.strings("_cfg_cst_frmt"),
-                validator=loader.validators.Choice(["photo", "video", "audio", "gif"]),
             ),
         )
 
