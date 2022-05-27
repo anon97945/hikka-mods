@@ -824,7 +824,8 @@ class voicetoolsMod(loader.Module):
                 and chatid_str not in speed_chats):
             return
         if (
-            chattype != "channel"
+            isinstance(message, Message)
+            and chattype != "channel"
             and message.sender_id != self._id
             or chattype == "channel"
             and not chat.admin_rights.delete_messages
