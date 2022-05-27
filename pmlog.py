@@ -80,7 +80,7 @@ class PMLogMod(loader.Module):
             ),
             loader.ConfigValue(
                 "log_list",
-                doc=lambda: self.strings("_cfg_selfdestructive"),
+                doc=lambda: self.strings("_cfg_loglist"),
                 validator=loader.validators.Series(
                     validator=loader.validators.TelegramID()
                 ),
