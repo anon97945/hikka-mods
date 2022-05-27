@@ -1,4 +1,4 @@
-__version__ = (0, 0, 9)
+__version__ = (0, 0, 10)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -29,16 +29,14 @@ logger = logging.getLogger(__name__)
 
 @loader.tds
 class PMLogMod(loader.Module):
-    """Logs unwanted PMs to a channel"""
+    """Logs PMs to a group/channel"""
     strings = {
         "name": "PM Logger",
-        "start": "<b>Conversation added to the List</b>",
-        "not_pm": "<b>You can't log a group</b>",
-        "stopped": "<b>Conversation removed from the List</b>",
         "_cfg_log_group": "Group or channel ID where to send the logged PMs.",
         "_cfg_whitelist": "Whether the list is a for excluded(True) or included chats(False).",
         "_cfg_bots": "Whether to log bots or not.",
         "_cfg_selfdestructive": "Whether selfdestructive media should be logged or not.",
+        "_cfg_loglist": "Add telegram id's to log them.",
     }
 
     def __init__(self):
@@ -46,7 +44,6 @@ class PMLogMod(loader.Module):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "log_group",
-                None,
                 doc=lambda: self.strings("_cfg_log_group"),
                 validator=loader.validators.TelegramID(),
             ),
@@ -70,7 +67,6 @@ class PMLogMod(loader.Module):
             ),
             loader.ConfigValue(
                 "log_list",
-                "",
                 doc=lambda: self.strings("_cfg_selfdestructive"),
                 validator=loader.validators.Series(
                     validator=loader.validators.TelegramID()
@@ -87,8 +83,9 @@ class PMLogMod(loader.Module):
             return
         pmlog_whitelist = self.config["whitelist"]
         pmlog_bot = self.config["log_bots"]
+        pmlog_group = self.config["log_group"]
         chat = await message.get_chat()
-        if chat.bot and not pmlog_bot or chat.id == self._id:
+        if chat.bot and not pmlog_bot or chat.id == self._id or pmlog_group == None:
             return
         chatidindb = utils.get_chat_id(message) in self.config["logs_list"]
         if pmlog_whitelist and chatidindb or not pmlog_whitelist and not chatidindb:
