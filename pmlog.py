@@ -90,17 +90,14 @@ class PMLogMod(loader.Module):
         chat = await message.get_chat()
         if chat.bot and not pmlog_bot or chat.id == (await message.client.get_me(True)).user_id:
             return
-        if utils.get_chat_id(message) in self.config["logs_list"]:
-            chatidindb = True
-        else:
-            chatidindb = False
+        chatidindb = utils.get_chat_id(message) in self.config["logs_list"]
         if pmlog_whitelist and chatidindb or not pmlog_whitelist and not chatidindb:
             return
         if self.config["LOG_GROUP"]:
             if chat.username:
                 name = chat.username
             elif chat.last_name:
-                name = chat.first_name + " " + chat.last_name
+                name = f"{chat.first_name} {chat.last_name}"
             else:
                 name = chat.first_name
             linkid = str(chat.id)
