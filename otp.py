@@ -1,8 +1,8 @@
 __version__ = (0, 0, 7)
 
 
-# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
-# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
+# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
+# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
 #
 #              © Copyright 2022
 #
@@ -70,7 +70,7 @@ class lcrMod(loader.Module):
         lc_timeout = self.config["timeout"]
         if chatid == (await message.client.get_me(True)).user_id:
             return await utils.answer(message, self.strings("no_self"))
-        if user_msg != "" and user_msg != "group --force":
+        if user_msg not in ["", "group --force"]:
             return
         if not message.is_private and user_msg != "group --force":
             return await utils.answer(message, self.strings("not_pchat"))
@@ -83,9 +83,11 @@ class lcrMod(loader.Module):
                 logincode = await logincode
                 logincodemsg = " ".join((await message.client.get_messages(tgacc, 1,
                                                                          search="Login code:"))[0].message)
-                if logincodemsg is not None:
-                    if "Login code:" in logincodemsg.lower():
-                        logincode = True
+                if (
+                    logincodemsg is not None
+                    and "Login code:" in logincodemsg.lower()
+                ):
+                    logincode = True
                 if logincode:
                     await message.client.send_read_acknowledge(tgacc, clear_mentions=True)
                     await message.client.delete_messages(chatid, msgs)
