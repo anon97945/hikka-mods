@@ -2,5 +2,7 @@ anoninfo
 blocknondiscussion
 gtranslate
 lcr
+pmlog
+save_message
 tts
 voicetools
