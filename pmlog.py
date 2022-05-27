@@ -80,6 +80,7 @@ class PMLogMod(loader.Module):
 
     async def client_ready(self, client, db):
         self._db = db
+        self._id = (await client.get_me(True)).user_id
 
     async def watcher(self, message: Message):
         if not message.is_private or not isinstance(message, Message):
@@ -87,7 +88,7 @@ class PMLogMod(loader.Module):
         pmlog_whitelist = self.config["whitelist"]
         pmlog_bot = self.config["log_bots"]
         chat = await message.get_chat()
-        if chat.bot and not pmlog_bot or chat.id == (await message.client.get_me(True)).user_id:
+        if chat.bot and not pmlog_bot or chat.id == self._id:
             return
         chatidindb = utils.get_chat_id(message) in self.config["logs_list"]
         if pmlog_whitelist and chatidindb or not pmlog_whitelist and not chatidindb:
