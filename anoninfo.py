@@ -194,19 +194,17 @@ class anoninfoMod(loader.Module):
         int = str(int)
         return (
             {
-                "text": self.config["custom_button" + int][0],
-                "url": self.config["custom_button" + int][1],
+                "text": self.config[f"custom_button{int}"][0],
+                "url": self.config[f"custom_button{int}"][1],
             }
-            if self.config["custom_button" + int]
+            if self.config[f"custom_button{int}"]
             else None
         )
 
     @loader.unrestricted
     async def anoninfocmd(self, message: Message):
         """Send userbot info"""
-        m = {}
-        for x in range(0, 12):
-            m[x] = self._get_mark(x)
+        m = {x: self._get_mark(x) for x in range(12)}
         await self.inline.form(
             message=message,
             text=self._render_info(),
