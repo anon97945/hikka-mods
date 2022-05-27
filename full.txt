@@ -1,5 +1,6 @@
 anoninfo
 blocknondiscussion
 gtranslate
+lcr
 tts
 voicetools
