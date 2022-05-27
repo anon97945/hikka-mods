@@ -1,4 +1,4 @@
-__version__ = (0, 0, 5)
+__version__ = (0, 0, 9)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -16,11 +16,10 @@ __version__ = (0, 0, 5)
 # scope: hikka_only
 # scope: hikka_min 1.1.28
 
-import asyncio
 import logging
 import io
 
-from telethon import types
+from telethon.tl.types import Message
 from telethon.errors import MessageIdInvalidError
 
 from .. import loader, utils
@@ -117,4 +116,3 @@ class PMLogMod(loader.Module):
                 await message.client.download_file(message, file)
                 file.seek(0)
                 await message.client.send_file(self.config["LOG_GROUP"], file, force_document=True, caption=link)
-
