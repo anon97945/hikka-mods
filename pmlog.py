@@ -19,12 +19,25 @@ __version__ = (0, 0, 12)
 import logging
 import io
 
-from telethon.tl.types import Message
+from telethon.tl.types import Message, User, Channel
 from telethon.errors import MessageIdInvalidError
 
 from .. import loader, utils
 
 logger = logging.getLogger(__name__)
+
+
+def get_link(user: User or Channel) -> str:
+    """Get link to object (User or Channel)"""
+    return (
+        f"tg://user?id={user.id}"
+        if isinstance(user, User)
+        else (
+            f"tg://resolve?domain={user.username}"
+            if getattr(user, "username", None)
+            else ""
+        )
+    )
 
 
 @loader.tds
@@ -35,7 +48,7 @@ class PMLogMod(loader.Module):
         "_cfg_log_group": "Group or channel ID where to send the logged PMs.",
         "_cfg_whitelist": "Whether the list is a for excluded(True) or included chats(False).",
         "_cfg_bots": "Whether to log bots or not.",
-        "_cfg_selfdestructive": "Whether selfdestructive media should be logged or not.",
+        "_cfg_selfdestructive": "Whether selfdestructive media should be logged or not. This violates TG TOS!",
         "_cfg_loglist": "Add telegram id's to log them.",
     }
 
@@ -86,29 +99,31 @@ class PMLogMod(loader.Module):
         pmlog_group = self.config["log_group"]
         pmlog_destr = self.config["log_self_destr"]
         chat = await message.get_chat()
-        if chat.bot and not pmlog_bot or chat.id == self._id or pmlog_group is not None:
+        if chat.bot and not pmlog_bot or chat.id == self._id or pmlog_group is None:
             return
-        chatidindb = utils.get_chat_id(message) in self.config["logs_list"]
+        chatidindb = utils.get_chat_id(message) in (self.config["logs_list"] or [])
         if pmlog_whitelist and chatidindb or not pmlog_whitelist and not chatidindb:
             return
-        if self.config["LOG_GROUP"]:
+        if pmlog_group:
             if chat.username:
-                name = chat.username
+                name = "@" + chat.username
             elif chat.last_name:
                 name = f"{chat.first_name} {chat.last_name}"
             else:
                 name = chat.first_name
-            linkid = str(chat.id)
-            link = "Chat: <a href='tg://user?id=" + linkid + "'>" + name + "</a>\nID: " + linkid
+            user_id = str(chat.id)
+            user_url = get_link(chat.id)
+            link = "Chat: <a href='" + user_url + "'>" + name + "</a>\nID: " + user_id
             try:
-                await message.forward_to(self.config["LOG_GROUP"])
-                await message.client.send_message(self.config["LOG_GROUP"], link)
+                await message.forward_to(pmlog_group)
+                await message.client.send_message(pmlog_group, link)
                 return
             except MessageIdInvalidError:
-                if not message.file or not self.config["log_self_destr"]:
+                if not message.file or not pmlog_destr:
                     return
                 file = io.BytesIO()
                 file.name = message.file.name or f"{message.file.media.id}{message.file.ext}"
+                caption = message.text + "\n\n" + link
                 await message.client.download_file(message, file)
                 file.seek(0)
-                await message.client.send_file(self.config["LOG_GROUP"], file, force_document=True, caption=link)
+                await message.client.send_file(pmlog_group, file, force_document=True, caption=caption)
