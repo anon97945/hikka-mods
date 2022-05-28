@@ -1,4 +1,4 @@
-__version__ = (0, 0, 11)
+__version__ = (0, 1, 0)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -78,9 +78,11 @@ class BlockNonDiscussionMod(loader.Module):
         "permerror": "<b>You have no delete permissions in this chat.</b>",
         "settings": ("<b>[BlockNonDiscussion - Settings]</b> Current settings in this "
                      "chat are:\n{}."),
+        "db_string": ("<b>[BlockNonDiscussion - Settings]</b> Current Database:\n\nWatcher:\n{}"
+                      "\n\nChatsettings:\n{}"),
         "triggered": ("{}, the comments are limited to discussiongroup members, "
                       "please join our discussiongroup first."
-                      "\n\n👉🏻 {}\n\nRespectfully, the admins.")
+                      "\n\n👉🏻 {}\n\nRespectfully, the admins."),
     }
 
     strings_de = {
@@ -94,9 +96,11 @@ class BlockNonDiscussionMod(loader.Module):
         "permerror": "<b>Sie haben in diesem Chat keine Löschberechtigung.</b>",
         "settings": ("<b>[BlockNonDiscussion - Settings]</b> Aktuelle Einstellungen in diesem "
                      "Chat:\n{}."),
+        "db_string": ("<b>[BlockNonDiscussion - Settings]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
+                      "\n\nChateinstellungen:\n{}"),
         "triggered": ("{}, die Kommentarfunktion wurde auf die Chatmitglieder begrenzt, "
                       "tritt bitte zuerst unserem Chat bei."
-                      "\n\n👉🏻 {}\n\nHochachtungsvoll, die Obrigkeit.")
+                      "\n\n👉🏻 {}\n\nHochachtungsvoll, die Obrigkeit."),
     }
 
     def __init__(self):
@@ -117,6 +121,8 @@ class BlockNonDiscussionMod(loader.Module):
             - Deletes the notification message in seconds. 0 to disable.
            .bnd settings
             - Shows the current configuration of the chat.
+           .bnd db
+            - Shows the current database.
            .bnd clearall
             - Clears the db of the module"""
         bnd = self._db.get(__name__, "bnd", [])
@@ -131,6 +137,9 @@ class BlockNonDiscussionMod(loader.Module):
             self._db.set(__name__, "bnd", [])
             self._db.set(__name__, "sets", {})
             return await utils.answer(message, self.strings("turned_off"))
+
+        if args[0] == "db":
+            return await utils.answer(message, self.strings("db_string").format(str(bnd), str(sets)))
 
         if message.is_private:
             await utils.answer(message, self.strings("not_dc"))
