@@ -1,4 +1,4 @@
-__version__ = (0, 0, 10)
+__version__ = (0, 0, 11)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -179,6 +179,8 @@ class BlockNonDiscussionMod(loader.Module):
             return await utils.answer(message, self.strings("settings").format(str(sets[chatid_str])))
 
     async def watcher(self, message: Message):
+        if not isinstance(message, Message):
+            return
         bnd = self._db.get(__name__, "bnd", [])
         sets = self._db.get(__name__, "sets", {})
         chatid = message.chat_id

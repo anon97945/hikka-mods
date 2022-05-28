@@ -1,4 +1,4 @@
-__version__ = (0, 1, 62)
+__version__ = (0, 1, 63)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -18,10 +18,7 @@ __version__ = (0, 1, 62)
 # requires: gtts pydub soundfile pyrubberband numpy AudioSegment wave
 
 import logging
-import wave
-import re
 import os
-import sys
 import soundfile
 import pyrubberband
 
@@ -37,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 async def audionormalizer(bytes_io_file, fn, fe):
-    #return bytes_io_file, fn, fe
+    # return bytes_io_file, fn, fe
     bytes_io_file.seek(0)
     bytes_io_file.name = fn + fe
     rawsound = AudioSegment.from_file(bytes_io_file, "wav")
@@ -50,7 +47,7 @@ async def audionormalizer(bytes_io_file, fn, fe):
 
 
 async def audiohandler(bytes_io_file, fn, fe):
-    #return bytes_io_file, fn, fe
+    # return bytes_io_file, fn, fe
     bytes_io_file.seek(0)
     bytes_io_file.name = fn + fe
     content = bytes_io_file.getvalue()
@@ -64,7 +61,7 @@ async def audiohandler(bytes_io_file, fn, fe):
 
 
 async def makewaves(bytes_io_file, fn, fe):
-    #return bytes_io_file, fn, fe
+    # return bytes_io_file, fn, fe
     bytes_io_file.seek(0)
     bytes_io_file.name = fn + fe
     content = bytes_io_file.getvalue()
@@ -90,7 +87,6 @@ async def speedup(bytes_io_file, fn, fe, speed):
     bytes_io_file.name = fn + fe
     y, sr = soundfile.read(bytes_io_file)
     y_stretch = pyrubberband.time_stretch(y, sr, speed)
-    y_shift = pyrubberband.pitch_shift(y, sr, speed)
     bytes_io_file.seek(0)
     soundfile.write(bytes_io_file, y_stretch, sr, format='wav')
     bytes_io_file.seek(0)

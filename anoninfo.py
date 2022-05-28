@@ -1,4 +1,4 @@
-__version__ = (0, 0, 53)
+__version__ = (0, 0, 54)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -24,7 +24,6 @@ from telethon.tl.types import Message
 from telethon.utils import get_display_name
 
 from .. import loader, main, utils
-from ..inline.types import InlineQuery
 
 logger = logging.getLogger(__name__)
 
@@ -190,14 +189,14 @@ class anoninfoMod(loader.Module):
             )
         )
 
-    def _get_mark(self, int):
-        int = str(int)
+    def _get_mark(self, btn_count):
+        btn_count = str(btn_count)
         return (
             {
-                "text": self.config[f"custom_button{int}"][0],
-                "url": self.config[f"custom_button{int}"][1],
+                "text": self.config[f"custom_button{btn_count}"][0],
+                "url": self.config[f"custom_button{btn_count}"][1],
             }
-            if self.config[f"custom_button{int}"]
+            if self.config[f"custom_button{btn_count}"]
             else None
         )
 
