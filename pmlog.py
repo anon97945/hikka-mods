@@ -62,13 +62,12 @@ class PMLogMod(loader.Module):
 
     strings_ru = {
         "_cfg_log_group": "Айди группы или канала для отправки личных сообщений.",
-        "_cfg_whitelist": "Является ли список для исключённых (True) или включённых чатов (False).", 
+        "_cfg_whitelist": "Является ли список для исключённых (True) или включённых чатов (False).",
         "_cfg_bots": "Регистрировать ботов или нет",
         "_cfg_selfdestructive": "Должны ли самоуничтожающиеся медиафайлы регистрироваться или нет. Это нарушает «Условия использования Telegram» (ToS)",
         "_cfg_loglist": "Добавьте айди Telegram, чтобы зарегистрировать их",
         "translated_by": "@MUTANTP7AY3R5",
     }
-
 
     def __init__(self):
         self._ratelimit = []

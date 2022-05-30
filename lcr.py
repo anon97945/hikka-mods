@@ -49,7 +49,7 @@ class lcrMod(loader.Module):
         "_cfg_timeout": "<b>Definieren Sie eine Wartezeit für den Code.</b>",
     }
 
-strings_ru = {
+    strings_ru = {
         "timeouterror": "<b>TimeoutError:</b>\nНе получен код за {} секунд.",
         "error": "<b>Код входа не найден в сообщении.</b>",
         "waiting": "<b>Ожидание кода для входа...</b>",

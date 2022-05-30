@@ -69,6 +69,7 @@ def represents_speed(s):
     except ValueError:
         return False
 
+
 def represents_gain(s):
     try:
         float(s)
@@ -470,7 +471,7 @@ class voicetoolsMod(loader.Module):
             filename_new = filename.replace(".ogg", "")
         else:
             filename_new = filename.replace(ext, "")
-        gain_lvl = self.config["gain_lvl"] if chatid_str in gain_chats else 0
+        gain_lvl = 0
         nr_lvl = self.config["nr_lvl"]
         file = BytesIO()
         file.name = replymsg.file.name
@@ -1008,7 +1009,6 @@ class voicetoolsMod(loader.Module):
             current = current + self.strings("auto_nr_off") + "\n"
         return await utils.answer(message, self.strings("current_auto").format(current))
 
-
     async def watcher(self, message: Message):
         chatid = message.chat_id
         chatid_str = str(chatid)
@@ -1026,7 +1026,8 @@ class voicetoolsMod(loader.Module):
                 and chatid_str not in norm_chats
                 and chatid_str not in pitch_chats
                 and chatid_str not in vcanon_chats
-                and chatid_str not in speed_chats):
+                and chatid_str not in speed_chats
+                and chatid_str not in gain_chats):
             return
         if (
             isinstance(message, Message)
@@ -1073,7 +1074,7 @@ class voicetoolsMod(loader.Module):
         if chatid_str in nr_chats or chatid_str in vcanon_chats or chatid_str in dalek_chats:
             file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
             file.seek(0)
-        if chatid_str in norm_chats or chatid_str in vcanon_chats or chatid_str in dalek_chats:
+        if chatid_str in norm_chats or chatid_str in vcanon_chats or chatid_str in dalek_chats or chatid_str in gain_chats:
             file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
             file.seek(0)
         if chatid_str in dalek_chats or chatid_str in vcanon_chats:
