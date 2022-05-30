@@ -470,10 +470,7 @@ class voicetoolsMod(loader.Module):
             filename_new = filename.replace(".ogg", "")
         else:
             filename_new = filename.replace(ext, "")
-        if chatid_str in gain_chats:
-            gain_lvl = self.config["gain_lvl"]
-        else:
-            gain_lvl = 0
+        gain_lvl = self.config["gain_lvl"] if chatid_str in gain_chats else 0
         nr_lvl = self.config["nr_lvl"]
         file = BytesIO()
         file.name = replymsg.file.name
