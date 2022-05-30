@@ -1,4 +1,4 @@
-__version__ = (0, 0, 52)
+__version__ = (1, 0, 0)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -70,6 +70,14 @@ def represents_speed(s):
         return False
 
 
+def represents_gain(s):
+    try:
+        float(s)
+        return -10 <= float(s) <= 10
+    except ValueError:
+        return False
+
+
 async def audiohandler(bytes_io_file, fn, fe, new_fe, ac, codec):
     # return bytes_io_file, fn, fe, new_fe
     bytes_io_file.seek(0)
@@ -128,14 +136,14 @@ async def audiodenoiser(bytes_io_file, fn, fe, nr_lvl):
     return bytes_io_file, fn, fe
 
 
-async def audionormalizer(bytes_io_file, fn, fe, db):
+async def audionormalizer(bytes_io_file, fn, fe, gain):
     # return bytes_io_file, fn, fe
     bytes_io_file.seek(0)
     bytes_io_file.name = fn + fe
     format_ext = fe[1:]
     rawsound = AudioSegment.from_file(bytes_io_file, format_ext)
     normalizedsound = effects.normalize(rawsound)
-    normalizedsound = normalizedsound + db
+    normalizedsound = normalizedsound + gain
     bytes_io_file.seek(0)
     normalizedsound.export(bytes_io_file, format=format_ext)
     bytes_io_file.name = fn + fe
@@ -228,11 +236,11 @@ class Waveshaper():
 
 @loader.tds
 class voicetoolsMod(loader.Module):
-    """Change, pitch, enhance your Voice. Also includes optional automatic mode."""
+    """Change, pitch, enhance your Voice. Also includes optional automatic modes."""
     strings = {
         "name": "VoiceTools",
-        "vc_start": "<b>[VoiceTools]</b> Auto VoiceChanger activated.",
-        "vc_stopped": "<b>[VoiceTools]</b> Auto VoiceChanger deactivated.",
+        "dalek_start": "<b>[VoiceTools]</b> Auto DalekVoice activated.",
+        "dalek_stopped": "<b>[VoiceTools]</b> Auto DalekVoice deactivated.",
         "vcanon_start": "<b>[VoiceTools]</b> Auto AnonVoice activated.",
         "vcanon_stopped": "<b>[VoiceTools]</b> Auto AnonVoice deactivated.",
         "nr_start": "<b>[VoiceTools]</b> Auto VoiceEnhancer activated.",
@@ -243,27 +251,148 @@ class voicetoolsMod(loader.Module):
         "pitch_stopped": "<b>[VoiceTools]</b> Auto VoicePitch deactivated.",
         "speed_start": "<b>[VoiceTools]</b> Auto VoiceSpeed activated.",
         "speed_stopped": "<b>[VoiceTools]</b> Auto VoiceSpeed deactivated.",
+        "gain_start": "<b>[VoiceTools]</b> Auto VolumeGain activated.",
+        "gain_stopped": "<b>[VoiceTools]</b> Auto VolumeGain deactivated.",
+        "auto_dalek_on": "<b>✅ Dalek Voice.</b>",
+        "auto_anon_on": "<b>✅ Anon Voice.</b>",
+        "auto_nr_on": "<b>✅ NoiseReduction.</b>",
+        "auto_norm_on": "<b>✅ Normalize.</b>",
+        "auto_pitch_on": "<b>✅ Pitching.</b>",
+        "auto_speed_on": "<b>✅ Speed.</b>",
+        "auto_gain_on": "<b>✅ Volumegain.</b>",
+        "auto_dalek_off": "<b>❌ Dalek Voice.</b>",
+        "auto_anon_off": "<b>❌ Anon Voice.</b>",
+        "auto_nr_off": "<b>❌ NoiseReduction.</b>",
+        "auto_norm_off": "<b>❌ Normalize.</b>",
+        "auto_pitch_off": "<b>❌ Pitching.</b>",
+        "auto_speed_off": "<b>❌ Speed.</b>",
+        "auto_gain_off": "<b>❌ Volumegain.</b>",
         "vtauto_stopped": "<b>[VoiceTools]</b> Auto Voice Tools deactivated.",
-        "error_file": "<b>[VoiceTools] No file in the reply detected.</b>",
+        "error_file": "<b>[VoiceTools]</b> No file in the reply detected.",
         "nr_level": ("<b>[VoiceTools]</b> Noise reduction level set to {}."),
         "pitch_level": ("<b>[VoiceTools]</b> Pitch level set to {}."),
         "no_nr": "<b>[VoiceTools]</b> Your input was an unsupported noise reduction level.",
         "no_pitch": "<b>[VoiceTools]</b> Your input was an unsupported pitch level.",
         "no_speed": "<b>[VoiceTools]</b> Your input was an unsupported speed level.",
-        "noargs": "🚫 <b>No file specified</b>",
         "downloading": "<b>[VoiceTools] Message is being downloaded...</b>",
         "audiohandler_txt": "<b>[VoiceTools] Audio is being transcoded.</b>",
         "audiodenoiser_txt": "<b>[VoiceTools] Background noise is being removed.</b>",
-        "audionormalizer_txt": "<b>[VoiceTools] Audiovolume is being normalized.</b>",
+        "audiovolume_txt": "<b>[VoiceTools] Audiovolume is being changed.</b>",
         "dalekvoice_txt": "<b>[VoiceTools] Dalek Voice is being applied.</b>",
         "pitch_txt": "<b>[VoiceTools] Pitch is being applied.</b>",
         "speed_txt": "<b>[VoiceTools] Speed is being applied.</b>",
         "uploading": "<b>[VoiceTools] File is uploading.</b>",
         "makewaves_txt": "<b>[VoiceTools] Speech waves are being applied.</b>",
+        "current_auto": "<b>[VoiceTools]</b> Current AutoVoiceTools in this Chat are:\n\n{}",
         "_cfg_pitch_lvl": "Set the desired pitch level for auto pitch.",
         "_cfg_nr_lvl": "Set the desired noisereduction level.",
-        "_cfg_vg_lvl": "Set the desired volume gain level for auto pitch.",
+        "_cfg_gain_lvl": "Set the desired volume gain level for auto normalize.",
         "_cfg_speed_lvl": "Set the desired speed level for auto speed.",
+    }
+
+    strings_de = {
+        "dalek_start": "<b>[VoiceTools]</b> Auto DalekVoice aktiviert.",
+        "dalek_stopped": "<b>[VoiceTools]</b> Auto DalekVoice ist deaktiviert.",
+        "vcanon_start": "<b>[VoiceTools]</b> Auto AnonVoice aktiviert.",
+        "vcanon_stopped": "<b>[VoiceTools]</b> Auto AnonVoice deaktiviert.",
+        "nr_start": "<b>[VoiceTools]</b> Auto VoiceEnhancer aktiviert.",
+        "nr_stopped": "<b>[VoiceTools]</b> Auto VoiceEnhancer deaktiviert.",
+        "norm_start": "<b>[VoiceTools]</b> Auto VoiceNormalizer aktiviert.",
+        "norm_stopped": "<b>[VoiceTools]</b> Auto VoiceNormalizer deaktiviert.",
+        "pitch_start": "<b>[VoiceTools]</b> Auto VoicePitch aktiviert.",
+        "pitch_stopped": "<b>[VoiceTools]</b> Auto VoicePitch deaktiviert.",
+        "speed_start": "<b>[VoiceTools]</b> Auto VoiceSpeed aktiviert.",
+        "speed_stopped": "<b>[VoiceTools]</b> Auto VoiceSpeed deaktiviert.",
+        "gain_start": "<b>[VoiceTools]</b> Auto VolumeGain aktiviert.",
+        "gain_stopped": "<b>[VoiceTools]</b> Auto VolumeGain deaktiviert.",
+        "auto_dalek_on": "<b>✅ Dalek Voice.</b>",
+        "auto_anon_on": "<b>✅ Anon Voice.</b>",
+        "auto_nr_on": "<b>✅ NoiseReduction.</b>",
+        "auto_norm_on": "<b>✅ Normalize.</b>",
+        "auto_pitch_on": "<b>✅ Pitching.</b>",
+        "auto_speed_on": "<b>✅ Speed.</b>",
+        "auto_gain_on": "<b>✅ Volumegain.</b>",
+        "auto_dalek_off": "<b>❌ Dalek Voice.</b>",
+        "auto_anon_off": "<b>❌ Anon Voice.</b>",
+        "auto_nr_off": "<b>❌ NoiseReduction.</b>",
+        "auto_norm_off": "<b>❌ Normalize.</b>",
+        "auto_pitch_off": "<b>❌ Pitching.</b>",
+        "auto_speed_off": "<b>❌ Speed.</b>",
+        "auto_gain_off": "<b>❌ Volumegain.</b>",
+        "vtauto_stopped": "<b>[VoiceTools]</b> Auto Voice Tools deaktiviert.",
+        "error_file": "<b>[VoiceTools]</b> Keine Datei in der Antwort gefunden.",
+        "nr_level": ("<b>[VoiceTools]</b> Rauschunterdrückungspegel auf {} eingestellt."),
+        "pitch_level": ("<b>[VoiceTools]</b> Die Tonhöhe ist auf {} eingestellt."),
+        "no_nr": "<b>[VoiceTools]</b> Ihre Eingabe war ein nicht unterstützter Rauschunterdrückungspegel.",
+        "no_pitch": "<b>[VoiceTools]</b> Ihre Eingabe war ein nicht unterstützter Tonhöhenpegel.",
+        "no_speed": "<b>[VoiceTools]</b> Ihre Eingabe war eine nicht unterstützte Geschwindigkeitswert.",
+        "downloading": "<b>[VoiceTools] Die Nachricht wird heruntergeladen...</b>",
+        "audiohandler_txt": "<b>[VoiceTools] Der Ton wird transkodiert.</b>",
+        "audiodenoiser_txt": "<b>[VoiceTools] Die Hintergrundgeräusche werden entfernt.</b>",
+        "audiovolume_txt": "<b>[VoiceTools] Das Audiovolumen wird angepasst.</b>",
+        "dalekvoice_txt": "<b>[VoiceTools] Die Dalek-Stimme wird angewendet.</b>",
+        "pitch_txt": "<b>[VoiceTools] Pitch wird angewandt.</b>",
+        "speed_txt": "<b>[VoiceTools] Geschwindigkeit wird angewendet.</b>",
+        "uploading": "<b>[VoiceTools] Datei wird hochgeladen.</b>",
+        "makewaves_txt": "<b>[VoiceTools] Es werden Sprachwellen erstellt.</b>",
+        "current_auto": "<b>[VoiceTools]</b> Aktuelle AutoVoiceTools in diesem Chat sind:\n\n{}",
+        "_cfg_pitch_lvl": "Stellen Sie den gewünschten Tonhöhenpegel für die automatische Tonhöheneinstellung ein.",
+        "_cfg_nr_lvl": "Stellen Sie den gewünschten Rauschunterdrückungspegel ein.",
+        "_cfg_gain_lvl": "Stellen Sie den gewünschten Lautstärkepegel für die automatische Normalisierung ein.",
+        "_cfg_speed_lvl": "Stellen Sie die gewünschte Geschwindigkeitsstufe für die automatische Geschwindigkeit ein.",
+    }
+
+    strings_ru = {
+        "dalek_start": "<b>[VoiceTools]</b> Активирован автоматический голос «Далека».",
+        "dalek_stopped": "<b>[VoiceTools]</b> Деактивирован автоматический голос «Далека».",
+        "vcanon_start": "<b>[VoiceTools]</b> Активирован автоматический «анонимный голос»",
+        "vcanon_stopped": "<b>[VoiceTools]</b> Деактивирован автоматический «анонимный голос»",
+        "nr_start": "<b>[VoiceTools]</b> Активировано автоматическое усиление голоса.",
+        "nr_stopped": "<b>[VoiceTools]</b> Деактивировано автоматическое усиление голоса.",
+        "norm_start": "<b>[VoiceTools]</b> Активирована автонормализация голоса.",
+        "norm_stopped": "<b>[VoiceTools]</b> Деактивирована автонормализация голоса.",
+        "pitch_start": "<b>[VoiceTools]</b> Активирован авто-питч. (Высота тона)",
+        "pitch_stopped": "<b>[VoiceTools]</b> Деактивирован авто-питч. (Высота тона)",
+        "speed_start": "<b>[VoiceTools]</b> Активировано автоускорение голоса.",
+        "speed_stopped": "<b>[VoiceTools]</b> Деактивировано автоускорение голоса.",
+        "gain_start": "<b>[VoiceTools]</b> Активировано автоматическое усиление громкости.",
+        "gain_stopped": "<b>[VoiceTools]</b> Деактивировано автоматическое усиление громкости.",
+        "auto_dalek_on": "<b>✅ Dalek Voice.</b>",
+        "auto_anon_on": "<b>✅ Anon Voice.</b>",
+        "auto_nr_on": "<b>✅ NoiseReduction.</b>",
+        "auto_norm_on": "<b>✅ Normalize.</b>",
+        "auto_pitch_on": "<b>✅ Pitching.</b>",
+        "auto_speed_on": "<b>✅ Speed.</b>",
+        "auto_gain_on": "<b>✅ Volumegain.</b>",
+        "auto_dalek_off": "<b>❌ Dalek Voice.</b>",
+        "auto_anon_off": "<b>❌ Anon Voice.</b>",
+        "auto_nr_off": "<b>❌ NoiseReduction.</b>",
+        "auto_norm_off": "<b>❌ Normalize.</b>",
+        "auto_pitch_off": "<b>❌ Pitching.</b>",
+        "auto_speed_off": "<b>❌ Speed.</b>",
+        "auto_gain_off": "<b>❌ Volumegain.</b>",
+        "vtauto_stopped": "<b>[VoiceTools]</b> Деактивированы все автоматические инструменты для работы с голосом.",
+        "error_file": "<b>[VoiceTools]</b> Не обнаружен файл в реплае.",
+        "nr_level": ("<b>[VoiceTools]</b> Уровень шумоподавления установлен на {}."),
+        "pitch_level": ("<b>[VoiceTools]</b> Уровень высоты тона установлен на {}."),
+        "no_nr": "<b>[VoiceTools]</b> Ваш ввод является неподдерживаемым уровнем шумоподавления.",
+        "no_pitch": "<b>[VoiceTools]</b> Ваш ввод является неподдерживаемым уровнем высоты тона.",
+        "no_speed": "<b>[VoiceTools]</b> Ваш ввод является неподдерживаемым уровнем скорости звука.",
+        "downloading": "<b>[VoiceTools] Сообщение загружается...</b>",
+        "audiohandler_txt": "<b>[VoiceTools] Аудио перекодируется.</b>",
+        "audiodenoiser_txt": "<b>[VoiceTools] Фоновый шум удаляется.</b>",
+        "audiovolume_txt": "<b>[VoiceTools] Аудиогромкость изменяется.</b>",
+        "dalekvoice_txt": "<b>[VoiceTools] Голос «Далека» применяется.</b>",
+        "pitch_txt": "<b>[VoiceTools] Высота тона применяется.</b>",
+        "speed_txt": "<b>[VoiceTools] Скорость применяется.</b>",
+        "uploading": "<b>[VoiceTools] Файл загружается.</b>",
+        "makewaves_txt": "<b>[VoiceTools] Речевые волны применяются.</b>",
+        "current_auto": "<b>[VoiceTools]</b> Текущие авто-инструменты для работы с голосом в этом чате:\n\n{}",
+        "_cfg_pitch_lvl": "Установите желаемый уровень высоты тона для автонастройки.",
+        "_cfg_nr_lvl": "Установите желаемый уровень шумоподавления.",
+        "_cfg_gain_lvl": "Установите желаемый уровень усиления громкости для автоматического питча. (Высоты тона)",
+        "_cfg_speed_lvl": "Установите желаемый уровень скорости для автоматической скорости.",
+        "translated_by": "@MUTANTP7AY3R5",
     }
 
     def __init__(self):
@@ -271,7 +400,7 @@ class voicetoolsMod(loader.Module):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "pitch_lvl",
-                "0",
+                "4",
                 doc=lambda: self.strings("_cfg_pitch_lvl"),
                 validator=loader.validators.Float(minimum=-18, maximum=18),
             ),
@@ -282,10 +411,10 @@ class voicetoolsMod(loader.Module):
                 validator=loader.validators.Float(minimum=0.01, maximum=1),
             ),
             loader.ConfigValue(
-                "vg_lvl",
-                "3",
-                doc=lambda: self.strings("_cfg_vg_lvl"),
-                validator=loader.validators.Integer(minimum=-10, maximum=10),
+                "gain_lvl",
+                "1.5",
+                doc=lambda: self.strings("_cfg_gain_lvl"),
+                validator=loader.validators.Float(minimum=-10, maximum=10),
             ),
             loader.ConfigValue(
                 "speed_lvl",
@@ -325,7 +454,7 @@ class voicetoolsMod(loader.Module):
         file.seek(0)
         return file
 
-    async def vtvccmd(self, message):
+    async def vtdalekcmd(self, message):
         """reply to a file to change the voice"""
         chatid = message.chat_id
         SendAsVoice = False
@@ -342,7 +471,7 @@ class voicetoolsMod(loader.Module):
             filename_new = filename.replace(".ogg", "")
         else:
             filename_new = filename.replace(ext, "")
-        vg_lvl = self.config["vg_lvl"]
+        gain_lvl = 0
         nr_lvl = self.config["nr_lvl"]
         file = BytesIO()
         file.name = replymsg.file.name
@@ -357,8 +486,8 @@ class voicetoolsMod(loader.Module):
         inline_msg = await utils.answer(inline_msg, self.strings("audiodenoiser_txt"))
         file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt"))
-        file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
+        inline_msg = await utils.answer(inline_msg, self.strings("audiovolume_txt"))
+        file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
         file.seek(0)
         inline_msg = await utils.answer(inline_msg, self.strings("dalekvoice_txt"))
         file, fn, fe = await dalekvoice(file, fn, fe)
@@ -392,7 +521,7 @@ class voicetoolsMod(loader.Module):
             filename_new = filename.replace(".ogg", "")
         else:
             filename_new = filename.replace(ext, "")
-        vg_lvl = self.config["vg_lvl"]
+        gain_lvl = 0
         file = BytesIO()
         file.name = replymsg.file.name
         nr_lvl = 0.8
@@ -408,8 +537,8 @@ class voicetoolsMod(loader.Module):
         inline_msg = await utils.answer(inline_msg, self.strings("audiodenoiser_txt"))
         file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt"))
-        file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
+        inline_msg = await utils.answer(inline_msg, self.strings("audiovolume_txt"))
+        file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
         file.seek(0)
         inline_msg = await utils.answer(inline_msg, self.strings("dalekvoice_txt"))
         file, fn, fe = await dalekvoice(file, fn, fe)
@@ -450,7 +579,7 @@ class voicetoolsMod(loader.Module):
             filename_new = filename.replace(".ogg", "")
         else:
             filename_new = filename.replace(ext, "")
-        vg_lvl = self.config["vg_lvl"]
+        gain_lvl = 0
         file = BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
@@ -466,8 +595,8 @@ class voicetoolsMod(loader.Module):
         inline_msg = await utils.answer(inline_msg, self.strings("pitch_txt"))
         file, fn, fe = await audiopitcher(file, fn, fe, float(pitch_lvl))
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt"))
-        file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
+        inline_msg = await utils.answer(inline_msg, self.strings("audiovolume_txt"))
+        file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
         file.seek(0)
         if SendAsVoice:
             inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
@@ -503,7 +632,7 @@ class voicetoolsMod(loader.Module):
             filename_new = filename.replace(".ogg", "")
         else:
             filename_new = filename.replace(ext, "")
-        vg_lvl = self.config["vg_lvl"]
+        gain_lvl = 0
         file = BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
@@ -519,8 +648,57 @@ class voicetoolsMod(loader.Module):
         inline_msg = await utils.answer(inline_msg, self.strings("speed_txt"))
         file, fn, fe = await audiospeedup(file, fn, fe, float(speed_lvl))
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt"))
-        file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
+        inline_msg = await utils.answer(inline_msg, self.strings("audiovolume_txt"))
+        file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
+        file.seek(0)
+        if SendAsVoice:
+            inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
+            file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
+        else:
+            inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
+            file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
+        file.seek(0)
+        file.name = fn + fe
+        inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
+        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
+        await inline_msg.delete()
+
+    async def vtgaincmd(self, message):
+        """reply to a file to increase volumegain
+          - Example: .vtgain 1
+            Possible values between -10 - 10"""
+        chatid = message.chat_id
+        SendAsVoice = False
+        if not message.is_reply:
+            return
+        replymsg = await message.get_reply_message()
+        SendAsVoice = bool(replymsg.voice)
+        if not replymsg.media:
+            return await utils.answer(message, self.strings("error_file"))
+        gain_lvl = utils.get_args_raw(message)
+        if not represents_gain(gain_lvl):
+            return await utils.answer(message, self.strings("no_speed"))
+        filename = replymsg.file.name or "voice"
+        ext = replymsg.file.ext
+        if ext == ".oga":
+            filename_new = filename.replace(ext, "")
+            filename_new = filename.replace(".ogg", "")
+        else:
+            filename_new = filename.replace(ext, "")
+        file = BytesIO()
+        file.name = replymsg.file.name
+        inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
+        file = await self.get_media(replymsg, inline_msg, False)
+        file.name = filename_new + ext
+        fn, fe = os.path.splitext(file.name)
+        file.seek(0)
+        inline_msg = await utils.answer(inline_msg, self.strings("audiohandler_txt"))
+        file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
+        file.seek(0)
+        file, fn, fe = await audiohandler(file, fn, fe, ".flac", "1", "flac")
+        file.seek(0)
+        inline_msg = await utils.answer(inline_msg, self.strings("audiovolume_txt"))
+        file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
         file.seek(0)
         if SendAsVoice:
             inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
@@ -547,7 +725,7 @@ class voicetoolsMod(loader.Module):
         if not replymsg.media:
             return await utils.answer(message, self.strings("error_file"))
         nr_lvl = self.config["nr_lvl"]
-        vg_lvl = self.config["vg_lvl"]
+        gain_lvl = 0
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -570,8 +748,8 @@ class voicetoolsMod(loader.Module):
         inline_msg = await utils.answer(inline_msg, self.strings("audiodenoiser_txt"))
         file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt"))
-        file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
+        inline_msg = await utils.answer(inline_msg, self.strings("audiovolume_txt"))
+        file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
         file.seek(0)
         if SendAsVoice:
             inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
@@ -602,7 +780,7 @@ class voicetoolsMod(loader.Module):
             filename_new = filename.replace(".ogg", "")
         else:
             filename_new = filename.replace(ext, "")
-        vg_lvl = self.config["vg_lvl"]
+        gain_lvl = 0
         file = BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(message=message, text=self.strings("downloading"), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
@@ -615,8 +793,8 @@ class voicetoolsMod(loader.Module):
         file.seek(0)
         file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self.strings("audionormalizer_txt"))
-        file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
+        inline_msg = await utils.answer(inline_msg, self.strings("audiovolume_txt"))
+        file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
         file.seek(0)
         if SendAsVoice:
             inline_msg = await utils.answer(inline_msg, self.strings("makewaves_txt"))
@@ -691,19 +869,19 @@ class voicetoolsMod(loader.Module):
         await message.client.send_file(chatid, file, voice_note=True)
         await inline_msg.delete()
 
-    async def vtautovccmd(self, message):
-        """Turns on AutoVoiceChanger for your own Voicemessages in the chat"""
-        vc_chats = self._db.get(__name__, "vc_watcher", [])
+    async def vtautodalekcmd(self, message):
+        """Turns on AutoDalekVoice for your own Voicemessages in the chat"""
+        dalek_chats = self._db.get(__name__, "dalek_watcher", [])
         chatid = message.chat_id
         chatid_str = str(chatid)
-        if chatid_str not in vc_chats:
-            vc_chats.append(chatid_str)
-            self._db.set(__name__, "vc_watcher", vc_chats)
-            await utils.answer(message, self.strings("vc_start", message))
+        if chatid_str not in dalek_chats:
+            dalek_chats.append(chatid_str)
+            self._db.set(__name__, "dalek_watcher", dalek_chats)
+            await utils.answer(message, self.strings("dalek_start", message))
         else:
-            vc_chats.remove(chatid_str)
-            self._db.set(__name__, "vc_watcher", vc_chats)
-            await utils.answer(message, self.strings("vc_stopped", message))
+            dalek_chats.remove(chatid_str)
+            self._db.set(__name__, "dalek_watcher", dalek_chats)
+            await utils.answer(message, self.strings("dalek_stopped", message))
 
     async def vtautoanoncmd(self, message):
         """Turns on AutoAnonVoice for your own Voicemessages in the chat"""
@@ -775,53 +953,81 @@ class voicetoolsMod(loader.Module):
             self._db.set(__name__, "pitch_watcher", pitch_chats)
             await utils.answer(message, self.strings("pitch_stopped"))
 
-    async def vtautostopcmd(self, message):
-        """Turns off AutoVoice for your own Voicemessages in the chat"""
+    async def vtautogaincmd(self, message):
+        """Turns on AutoVolumeGain for your own Voicemessages in the chat"""
+        gain_chats = self._db.get(__name__, "gain_watcher", [])
+        chatid = message.chat_id
+        chatid_str = str(chatid)
+        if chatid_str not in gain_chats:
+            gain_chats.append(chatid_str)
+            self._db.set(__name__, "gain_watcher", gain_chats)
+            await utils.answer(message, self.strings("gain_start"))
+        else:
+            gain_chats.remove(chatid_str)
+            self._db.set(__name__, "gain_watcher", gain_chats)
+            await utils.answer(message, self.strings("gain_stopped"))
+
+    async def vtautocmd(self, message):
+        """Displays all enabled AutoVoice settings in this Chat"""
+        current = ""
         norm_chats = self._db.get(__name__, "norm_watcher", [])
         nr_chats = self._db.get(__name__, "nr_watcher", [])
-        vc_chats = self._db.get(__name__, "vc_watcher", [])
+        dalek_chats = self._db.get(__name__, "dalek_watcher", [])
         pitch_chats = self._db.get(__name__, "pitch_watcher", [])
         vcanon_chats = self._db.get(__name__, "vcanon_watcher", [])
         speed_chats = self._db.get(__name__, "speed_watcher", [])
+        gain_chats = self._db.get(__name__, "gain_watcher", [])
         chatid = message.chat_id
         chatid_str = str(chatid)
-        if chatid_str in norm_chats:
-            norm_chats.remove(chatid_str)
-            self._db.set(__name__, "norm_watcher", norm_chats)
-        if chatid_str in nr_chats:
-            nr_chats.remove(chatid_str)
-            self._db.set(__name__, "nr_watcher", nr_chats)
-        if chatid_str in vc_chats:
-            vc_chats.remove(chatid_str)
-            self._db.set(__name__, "vc_watcher", vc_chats)
-        if chatid_str in pitch_chats:
-            pitch_chats.remove(chatid_str)
-            self._db.set(__name__, "pitch_watcher", pitch_chats)
         if chatid_str in vcanon_chats:
-            vcanon_chats.remove(chatid_str)
-            self._db.set(__name__, "vcanon_watcher", vcanon_chats)
+            current = current + self.strings("auto_anon_on") + "\n"
+        else:
+            current = current + self.strings("auto_anon_off") + "\n"
+        if chatid_str in dalek_chats:
+            current = current + self.strings("auto_dalek_on") + "\n"
+        else:
+            current = current + self.strings("auto_dalek_off") + "\n"
+        if chatid_str in pitch_chats:
+            current = current + self.strings("auto_pitch_on") + "\n"
+        else:
+            current = current + self.strings("auto_pitch_off") + "\n"
         if chatid_str in speed_chats:
-            speed_chats.remove(chatid_str)
-            self._db.set(__name__, "speed_watcher", speed_chats)
-        await utils.answer(message, self.strings("vtauto_stopped"))
+            current = current + self.strings("auto_speed_on") + "\n"
+        else:
+            current = current + self.strings("auto_speed_off") + "\n"
+        if chatid_str in norm_chats:
+            current = current + self.strings("auto_norm_on") + "\n"
+        else:
+            current = current + self.strings("auto_norm_off") + "\n"
+        if chatid_str in gain_chats:
+            current = current + self.strings("auto_gain_on") + "\n"
+        else:
+            current = current + self.strings("auto_gain_off") + "\n"
+        if chatid_str in nr_chats:
+            current = current + self.strings("auto_nr_on") + "\n"
+        else:
+            current = current + self.strings("auto_nr_off") + "\n"
+        return await utils.answer(message, self.strings("current_auto").format(current))
 
     async def watcher(self, message: Message):
         chatid = message.chat_id
         chatid_str = str(chatid)
         norm_chats = self._db.get(__name__, "norm_watcher", [])
         nr_chats = self._db.get(__name__, "nr_watcher", [])
-        vc_chats = self._db.get(__name__, "vc_watcher", [])
+        dalek_chats = self._db.get(__name__, "dalek_watcher", [])
         pitch_chats = self._db.get(__name__, "pitch_watcher", [])
         vcanon_chats = self._db.get(__name__, "vcanon_watcher", [])
         speed_chats = self._db.get(__name__, "speed_watcher", [])
+        gain_chats = self._db.get(__name__, "gain_watcher", [])
         chat = await message.get_chat()
         chattype = await getchattype(message)
         if (chatid_str not in nr_chats
-                and chatid_str not in vc_chats
+                and chatid_str not in dalek_chats
                 and chatid_str not in norm_chats
                 and chatid_str not in pitch_chats
                 and chatid_str not in vcanon_chats
-                and chatid_str not in speed_chats):
+                and chatid_str not in speed_chats
+                and chatid_str not in gain_chats):
             return
         if (
             isinstance(message, Message)
@@ -837,9 +1043,9 @@ class voicetoolsMod(loader.Module):
             reply = await message.get_reply_message()
         nr_lvl = self.config["nr_lvl"]
         pitch_lvl = self.config["pitch_lvl"]
-        vg_lvl = self.config["vg_lvl"]
         speed_lvl = self.config["speed_lvl"]
-        if chatid_str in vc_chats:
+        gain_lvl = self.config["gain_lvl"]
+        if chatid_str in dalek_chats:
             nr_lvl = 0.8
         if chatid_str in vcanon_chats:
             nr_lvl = 0.8
@@ -865,13 +1071,13 @@ class voicetoolsMod(loader.Module):
         file.seek(0)
         file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
         file.seek(0)
-        if chatid_str in nr_chats or chatid_str in vcanon_chats or chatid_str in vc_chats:
+        if chatid_str in nr_chats or chatid_str in vcanon_chats or chatid_str in dalek_chats:
             file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
             file.seek(0)
-        if chatid_str in norm_chats or chatid_str in vcanon_chats or chatid_str in vc_chats:
-            file, fn, fe = await audionormalizer(file, fn, fe, vg_lvl)
+        if chatid_str in norm_chats or chatid_str in vcanon_chats or chatid_str in dalek_chats or chatid_str in gain_chats:
+            file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
             file.seek(0)
-        if chatid_str in vc_chats or chatid_str in vcanon_chats:
+        if chatid_str in dalek_chats or chatid_str in vcanon_chats:
             file, fn, fe = await dalekvoice(file, fn, fe)
             file.seek(0)
         if chatid_str in pitch_chats or chatid_str in vcanon_chats:

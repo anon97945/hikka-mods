@@ -1,4 +1,4 @@
-__version__ = (0, 0, 8)
+__version__ = (0, 0, 9)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -37,6 +37,27 @@ class lcrMod(loader.Module):
         "not_group": "This command is for groups only.",
         "no_self": "<b>You can't use it on yourself.</b>",
         "_cfg_timeout": "<b>Define a time to wait for the Code.</b>",
+    }
+
+    strings_de = {
+        "timeouterror": "<b>TimeoutError:</b>\nKein Anmeldecode für {} Sekunden erhalten.",
+        "error": "<b>Kein Anmeldecode in der Nachricht gefunden.</b>",
+        "waiting": "<b>Warten auf den Anmeldecode...</b>",
+        "not_pchat": "<b>Dies ist kein privater Chat. Verwenden Sie <code>.lcr group --force</code></b>",
+        "not_group": "Dieser Befehl ist nur für Gruppen.",
+        "no_self": "<b>Sie können es nicht an sich selbst verwenden.</b>",
+        "_cfg_timeout": "<b>Definieren Sie eine Wartezeit für den Code.</b>",
+    }
+
+    strings_ru = {
+        "timeouterror": "<b>TimeoutError:</b>\nНе получен код за {} секунд.",
+        "error": "<b>Код входа не найден в сообщении.</b>",
+        "waiting": "<b>Ожидание кода для входа...</b>",
+        "not_pchat": "<b>Это не приватный чат. Используйте <code>.lcr группа --force</code></b>",
+        "not_group": "Эта команда только для групп.",
+        "no_self": "<b>Вы не можете использовать это на себе.</b>",
+        "_cfg_timeout": "<b>Определите время ожидания кода.</b>",
+        "translated_by": "@MUTANTP7AY3R5",
     }
 
     def __init__(self):
