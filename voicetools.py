@@ -664,7 +664,7 @@ class voicetoolsMod(loader.Module):
         await inline_msg.delete()
 
     async def vtgaincmd(self, message):
-        """reply to a file to increase volumegain
+        """reply to a file to change the volume
           - Example: .vtgain 1
             Possible values between -10 - 10"""
         chatid = message.chat_id
@@ -968,7 +968,7 @@ class voicetoolsMod(loader.Module):
             await utils.answer(message, self.strings("gain_stopped"))
 
     async def vtautocmd(self, message):
-        """Displays all enabled AutoVoice settings in this Chat"""
+        """Displays all enabled AutoVoice settings in the chat"""
         current = ""
         norm_chats = self._db.get(__name__, "norm_watcher", [])
         nr_chats = self._db.get(__name__, "nr_watcher", [])
