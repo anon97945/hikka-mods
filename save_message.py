@@ -1,4 +1,4 @@
-__version__ = (0, 0, 5)
+__version__ = (0, 0, 6)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -44,6 +44,17 @@ class SaveMessageMod(loader.Module):
         "name": "Save Message",
         "done": "<b>Forward to saved complete.</b>",
         "invalid_link": "<b>Invalid link.</b>",
+    }
+
+    strings_de = {
+        "done": "<b>Weiterleitung zu gespeicherten Daten abgeschlossen.</b>",
+        "invalid_link": "<b>Ungültiger Link.</b>",
+    }
+
+    strings_ru = {
+        "done": "<b>Перешлите для завершения сохранения.</b>",
+        "invalid_link": "<b>Неверная ссылка.</b>",
+        "translated_by": "@MUTANTP7AY3R5",
     }
 
     def __init__(self):

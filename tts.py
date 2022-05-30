@@ -1,4 +1,4 @@
-__version__ = (0, 1, 63)
+__version__ = (0, 1, 64)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -101,11 +101,34 @@ class TTSMod(loader.Module):
         "no_speed": "<b>[TTS]</b> Your input was an unsupported speed value.",
         "needspeed": "You need to provide a speed value between 0.25 and 3.0.",
         "no_reply": "<b>[TTS]</b> You need to reply to a voicemessage.",
-        "tts_needs_text": "<b>[TTS]</b> I need some text to convert to speech!",
+        "tts_needs_text": "<b>[TTS]</b> I need text to convert to speech!",
         "processing": "<b>[TTS]</b> Message is being processed ...",
-        "needvoice": "<b>[TTS]</b> This command needs a voicemessage",
+        "needvoice": "<b>[TTS]</b> This command needs a voicemessage.",
         "_cfg_tts_lang": "Set your language code for the TTS here.",
         "_cfg_tts_speed": "Set the desired speech speed.",
+    }
+
+    strings_de = {
+        "no_speed": "<b>[TTS]</b> Ihre Eingabe war ein nicht unterstützter Geschwindigkeitswert.",
+        "needspeed": "Sie müssen einen Geschwindigkeitswert zwischen 0.25 und 3.0 angeben.",
+        "no_reply": "<b>[TTS]</b> Sie müssen auf eine Sprachnachricht antworten.",
+        "tts_needs_text": "<b>[TTS]</b> Ich brauche Text, um ihn in Sprache umzuwandeln!",
+        "processing": "<b>[TTS]</b> Nachricht wird verarbeitet ...",
+        "needvoice": "<b>[TTS]</b> Dieser Befehl benötigt eine Sprachnachricht.",
+        "_cfg_tts_lang": "Stellen Sie hier Ihren Sprachcode für TTS ein.",
+        "_cfg_tts_speed": "Stellen Sie die gewünschte Sprechgeschwindigkeit ein.",
+    }
+
+    strings_ru = {
+        "no_speed": "<b>[TTS]</b> Ваш ввод является неподдерживаемым значением скорости.",
+        "needspeed": "Вам нужно предоставить значение скорости между 0.25 и 3.0",
+        "no_reply": "<b>[TTS]</b> Вам нужно сделать реплай на голосовое сообщение.",
+        "tts_needs_text": "<b>[TTS]</b> Мне нужен текст для преобразования в речь!",
+        "processing": "<b>[TTS]</b> Сообщение обрабатывается...",
+        "needvoice": "<b>[TTS]</b> Этой команде нужно голосовое сообщение.",
+        "_cfg_tts_lang": "Установите ваш код страны для TTS здесь.",
+        "_cfg_tts_speed": "Установите желаемую скорость речи.",
+        "translated_by": "@MUTANTP7AY3R5",
     }
 
     def __init__(self):

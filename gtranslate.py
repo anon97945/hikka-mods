@@ -1,4 +1,4 @@
-__version__ = (0, 0, 45)
+__version__ = (0, 0, 46)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -40,6 +40,24 @@ class gtranslateMod(loader.Module):
         "split_error": "Python split() error, if there is -> in the text, it must split!",
         "_cfg_lang_msg": "Language to translate to by default.",
         "_cfg_vodkatr_msg": "If `RU` should be displayed as `Vodka`.",
+    }
+
+    strings_de = {
+        "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
+        "invalid_text": "Ungültiger Text zum Übersetzen.",
+        "split_error": "Python split() error, wenn -> im Text steht, muss es gesplittet werden!",
+        "_cfg_lang_msg": "Sprache, in die standardmäßig übersetzt werden soll.",
+        "_cfg_vodkatr_msg": "Ob `RU` als `Vodka` angezeigt werden soll.",
+    }
+
+    strings_ru = {
+        "name": "Google Translator",
+        "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
+        "invalid_text": "Неправильный текст для перевода",
+        "split_error": "Ошибка в функции Python – split(). Если в тексте есть ->, то это должно быть разделено.",
+        "_cfg_lang_msg": "Язык на который переводится по умолчанию.",
+        "_cfg_vodkatr_msg": "Если `RU`, то должно отображаться как `Vodka`.",
+        "translated_by": "@MUTANTP7AY3R5",
     }
 
     def __init__(self):
