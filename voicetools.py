@@ -380,7 +380,7 @@ class voicetoolsMod(loader.Module):
         "downloading": "<b>[VoiceTools] Сообщение загружается...</b>",
         "audiohandler_txt": "<b>[VoiceTools] Аудио перекодируется.</b>",
         "audiodenoiser_txt": "<b>[VoiceTools] Фоновый шум удаляется.</b>",
-        "audiovolume_txt": "<b>[VoiceTools] Изменяется громкость звука.</b>",
+        "audiovolume_txt": "<b>[VoiceTools] Аудиогромкость изменяется.</b>",
         "dalekvoice_txt": "<b>[VoiceTools] Голос «Далека» применяется.</b>",
         "pitch_txt": "<b>[VoiceTools] Высота тона применяется.</b>",
         "speed_txt": "<b>[VoiceTools] Скорость применяется.</b>",
