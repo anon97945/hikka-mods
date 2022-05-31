@@ -1031,10 +1031,9 @@ class voicetoolsMod(loader.Module):
                 and chatid_str not in gain_chats):
             return
         if (chattype != "channel"
-            and message.sender_id != self._id
-            or chattype == "channel"
-            and not chat.admin_rights.delete_messages
-        ):
+                and message.sender_id != self._id
+                or chattype == "channel"
+                and not chat.admin_rights.delete_messages):
             return
         if not message.voice or message.via_bot or message.forward:
             return
