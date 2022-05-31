@@ -83,7 +83,7 @@ class AutoUpdateMod(loader.Module):
         if (not isinstance(message, Message)
                 or message.chat_id != self.inline.bot_id):
             return
-        if not (await buttonhandler(message, self.inline.bot_id, "🌘 Hikka Update available!", "hikka_update", "hikka_upd_ignore")):
+        if not await buttonhandler(message, self.inline.bot_id, "🌘 Hikka Update available!", "hikka_update", "hikka_upd_ignore"):
             return
         asyncio.sleep(self.config["update_delay"])
         await self.allmodules.commands["update"](
