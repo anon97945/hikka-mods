@@ -1,4 +1,4 @@
-__version__ = (1, 0, 0)
+__version__ = (1, 0, 1)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -1030,7 +1030,7 @@ class voicetoolsMod(loader.Module):
                 and chatid_str not in gain_chats):
             return
         if (
-            isinstance(message, Message)
+            not isinstance(message, Message)
             and chattype != "channel"
             and message.sender_id != self._id
             or chattype == "channel"
