@@ -1,4 +1,5 @@
 anoninfo
+auto_update
 blocknondiscussion
 gtranslate
 lcr
