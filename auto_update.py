@@ -19,7 +19,7 @@ __version__ = (0, 0, 5)
 import logging
 import asyncio
 
-from .. import loader, utils
+from .. import loader
 from telethon.tl.types import Message
 
 logger = logging.getLogger(__name__)
@@ -81,8 +81,8 @@ class AutoUpdateMod(loader.Module):
 
     async def watcher(self, message: Message):
         if (not isinstance(message, Message)
-            or message.chat_id != self.inline.bot_id):
-                return
+                or message.chat_id != self.inline.bot_id):
+            return
         if not (await buttonhandler(message, self.inline.bot_id, "🌘 Hikka Update available!", "hikka_update", "hikka_upd_ignore")):
             return
         asyncio.sleep(self.config["update_delay"])
