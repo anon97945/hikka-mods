@@ -1021,7 +1021,8 @@ class voicetoolsMod(loader.Module):
         gain_chats = self._db.get(__name__, "gain_watcher", [])
         chat = await message.get_chat()
         chattype = await getchattype(message)
-        if (chatid_str not in nr_chats
+        if (not isinstance(message, Message)
+                or chatid_str not in nr_chats
                 and chatid_str not in dalek_chats
                 and chatid_str not in norm_chats
                 and chatid_str not in pitch_chats
@@ -1029,9 +1030,7 @@ class voicetoolsMod(loader.Module):
                 and chatid_str not in speed_chats
                 and chatid_str not in gain_chats):
             return
-        if (
-            not isinstance(message, Message)
-            and chattype != "channel"
+        if (chattype != "channel"
             and message.sender_id != self._id
             or chattype == "channel"
             and not chat.admin_rights.delete_messages
