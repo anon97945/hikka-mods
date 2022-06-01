@@ -97,19 +97,28 @@ class AutoUpdateMod(loader.Module):
         self._db = db
         async for message in client.iter_messages(entity=self.inline.bot_id,
                                                         limit=20):
-            if isinstance(message, Message) and message.from_id == self.inline.bot_id:
-                if await buttonhandler(message, self.inline.bot_id, "🌘 Hikka Update available!", "hikka_update", "hikka_upd_ignore"):
-                    if self.config["mark_read"]:
-                        await self._client.send_read_acknowledge(
-                            message.chat_id,
-                            clear_mentions=True,
-                        )
-                    asyncio.sleep(self.config["update_delay"])
-                    await message.delete()
-                    logger.info(self.strings("updating"))
-                    await self.allmodules.commands["update"](
-                        await message.respond(f"{self.get_prefix()}update --force")
+            if (
+                isinstance(message, Message)
+                and message.from_id == self.inline.bot_id
+                and await buttonhandler(
+                    message,
+                    self.inline.bot_id,
+                    "🌘 Hikka Update available!",
+                    "hikka_update",
+                    "hikka_upd_ignore",
+                )
+            ):
+                if self.config["mark_read"]:
+                    await self._client.send_read_acknowledge(
+                        message.chat_id,
+                        clear_mentions=True,
                     )
+                asyncio.sleep(self.config["update_delay"])
+                await message.delete()
+                logger.info(self.strings("updating"))
+                await self.allmodules.commands["update"](
+                    await message.respond(f"{self.get_prefix()}update --force")
+                )
 
     async def watcher(self, message: Message):
         if (not isinstance(message, Message)
