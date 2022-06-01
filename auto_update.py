@@ -30,11 +30,12 @@ async def buttonhandler(bmsg, chatid, caption, data_btn1, data_btn2):
     fnd_btn2 = False
     bmsg = await bmsg.client.get_messages(chatid, ids=bmsg.id)
     buttons = bmsg.buttons
-    if caption in bmsg.message:
+    if caption in bmsg.message and bmsg.buttons is not None:
         for row in buttons:
             for button in row:
                 if data_btn1 in str(button.data):
                     fnd_btn1 = True
+                    upd_btn = button
                 if data_btn2 in str(button.data):
                     fnd_btn2 = True
                 if fnd_btn1 and fnd_btn2:
@@ -47,21 +48,21 @@ class AutoUpdateMod(loader.Module):
     """Automatically update your Hikka Userbot"""
     strings = {
         "name": "HikkaAutoUpdater",
-        "updating": "Hikka Userbot was automatically updated.",
+        "updating": "Hikka Userbot will be automatically updated in {} seconds.",
         "_cfg_auto_update": "Whether the Hikka Userbot should automatically update or not.",
         "_cfg_auto_update_delay": "Choose a delay to wait to start the automatic update.",
         "_cfg_update_msg_read": "Whether to mark the message as read or not.",
     }
 
     strings_de = {
-        "updating": "Hikka Userbot wurde automatisch geupdated.",
+        "updating": "Hikka Userbot wird in {} Sekunden automatisch aktualisiert.",
         "_cfg_auto_update": "Ob der Hikka Userbot automatisch aktualisieren soll oder nicht.",
         "_cfg_auto_update_delay": "Wählen Sie eine Wartezeit bis zum Start des automatischen Updates.",
         "_cfg_update_msg_read": "Ob die Nachricht als gelesen markiert werden soll oder nicht.",
     }
 
     strings_ru = {
-        "updating": "Hikka Юзербот был автоматически обновлен.",
+        "updating": "Хикка будет автоматически обновлена через {} секунд.",
         "_cfg_auto_update": "Должен ли Hikka UserBot обновляться автоматически или нет.",
         "_cfg_auto_update_delay": "Выберите задержку для автоматического обновления.",
         "_cfg_update_msg_read": "Будет ли отмечать сообщение обновления как прочтённое или нет.",
@@ -75,7 +76,7 @@ class AutoUpdateMod(loader.Module):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "auto_update",
-                "False",
+                "True",
                 doc=lambda: self.strings("_cfg_auto_update"),
                 validator=loader.validators.Boolean(),
             ),
@@ -93,10 +94,21 @@ class AutoUpdateMod(loader.Module):
             ),
         )
 
+    async def _autoupdate(self, msg):
+            if self.config["mark_read"]:
+                await self._client.send_read_acknowledge(
+                    msg.chat_id,
+                    clear_mentions=True,
+                )
+            logger.info(self.strings("updating").format(self.config["update_delay"]))
+            await asyncio.sleep(self.config["update_delay"])
+            await msg.click(0)
+
+
     async def client_ready(self, client, db):
         self._db = db
         async for message in client.iter_messages(entity=self.inline.bot_id,
-                                                        limit=20):
+                                                  limit=5):
             if (
                 isinstance(message, Message)
                 and message.from_id == self.inline.bot_id
@@ -108,35 +120,20 @@ class AutoUpdateMod(loader.Module):
                     "hikka_upd_ignore",
                 )
             ):
-                if self.config["mark_read"]:
-                    await self._client.send_read_acknowledge(
-                        message.chat_id,
-                        clear_mentions=True,
-                    )
-                asyncio.sleep(self.config["update_delay"])
-                await message.delete()
-                logger.info(self.strings("updating"))
-                await self.allmodules.commands["update"](
-                    await message.respond(f"{self.get_prefix()}update --force")
-                )
+                await self._autoupdate(message)
 
     async def watcher(self, message: Message):
-        if (not isinstance(message, Message)
-                or message.chat_id != self.inline.bot_id
-                or message.from_id != self.inline.bot_id
-                or not message.is_private):
-            return
-        if not await buttonhandler(message, self.inline.bot_id, "🌘 Hikka Update available!", "hikka_update", "hikka_upd_ignore"):
-            return
-
-        if self.config["mark_read"]:
-            await self._client.send_read_acknowledge(
-                message.chat_id,
-                clear_mentions=True,
+        if (
+            isinstance(message, Message)
+            and message.chat_id == self.inline.bot_id
+            and message.from_id == self.inline.bot_id
+            and message.is_private
+            and await buttonhandler(
+                message,
+                self.inline.bot_id,
+                "🌘 Hikka Update available!",
+                "hikka_update",
+                "hikka_upd_ignore",
             )
-        asyncio.sleep(self.config["update_delay"])
-        await message.delete()
-        logger.info(self.strings("updating"))
-        await self.allmodules.commands["update"](
-            await message.respond(f"{self.get_prefix()}update --force")
-        )
+        ):
+            await self._autoupdate(message)
