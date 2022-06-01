@@ -35,7 +35,6 @@ async def buttonhandler(bmsg, chatid, caption, data_btn1, data_btn2):
             for button in row:
                 if data_btn1 in str(button.data):
                     fnd_btn1 = True
-                    upd_btn = button
                 if data_btn2 in str(button.data):
                     fnd_btn2 = True
                 if fnd_btn1 and fnd_btn2:
@@ -95,15 +94,14 @@ class AutoUpdateMod(loader.Module):
         )
 
     async def _autoupdate(self, msg):
-            if self.config["mark_read"]:
-                await self._client.send_read_acknowledge(
-                    msg.chat_id,
-                    clear_mentions=True,
-                )
-            logger.info(self.strings("updating").format(self.config["update_delay"]))
-            await asyncio.sleep(self.config["update_delay"])
-            await msg.click(0)
-
+        if self.config["mark_read"]:
+            await self._client.send_read_acknowledge(
+                msg.chat_id,
+                clear_mentions=True,
+            )
+        logger.info(self.strings("updating").format(self.config["update_delay"]))
+        await asyncio.sleep(self.config["update_delay"])
+        await msg.click(0)
 
     async def client_ready(self, client, db):
         self._db = db
