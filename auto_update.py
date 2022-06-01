@@ -47,21 +47,21 @@ class AutoUpdateMod(loader.Module):
     """Automatically update your Hikka Userbot"""
     strings = {
         "name": "HikkaAutoUpdater",
-        "updating": "Hikka Userbot was automatically updated."
+        "updating": "Hikka Userbot was automatically updated.",
         "_cfg_auto_update": "Whether the Hikka Userbot should automatically update or not.",
         "_cfg_auto_update_delay": "Choose a delay to wait to start the automatic update.",
         "_cfg_update_msg_read": "Whether to mark the message as read or not.",
     }
 
     strings_de = {
-        "updating": "Hikka Userbot wurde automatisch geupdated."
+        "updating": "Hikka Userbot wurde automatisch geupdated.",
         "_cfg_auto_update": "Ob der Hikka Userbot automatisch aktualisieren soll oder nicht.",
         "_cfg_auto_update_delay": "Wählen Sie eine Wartezeit bis zum Start des automatischen Updates.",
         "_cfg_update_msg_read": "Ob die Nachricht als gelesen markiert werden soll oder nicht.",
     }
 
     strings_ru = {
-        "updating": "Hikka Юзербот был автоматически обновлен."
+        "updating": "Hikka Юзербот был автоматически обновлен.",
         "_cfg_auto_update": "Должен ли Hikka UserBot обновляться автоматически или нет.",
         "_cfg_auto_update_delay": "Выберите задержку для автоматического обновления.",
         "_cfg_update_msg_read": "Будет ли отмечать сообщение обновления как прочтённое или нет.",
