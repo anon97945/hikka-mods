@@ -85,7 +85,6 @@ class anoninfoMod(loader.Module):
         "_cfg_cst_frmt": "Кастомный формат файла для баннера.",
         "_cfg_banner": "Поставь `True`, чтобы отключить баннер-картинку.",
         "_cfg_inline_banner": "Установите `True`, чтобы отключить встроенный медиа-баннер",
-        
     }
 
     def __init__(self):
