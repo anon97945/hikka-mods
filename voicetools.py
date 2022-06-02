@@ -1,4 +1,4 @@
-__version__ = (1, 0, 1)
+__version__ = (1, 0, 2)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -456,7 +456,7 @@ class voicetoolsMod(loader.Module):
 
     async def vtdalekcmd(self, message):
         """reply to a file to change the voice"""
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         SendAsVoice = False
         if not message.is_reply:
             return
@@ -506,7 +506,7 @@ class voicetoolsMod(loader.Module):
 
     async def vtanoncmd(self, message):
         """reply to a file to change the voice into anonymous"""
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         SendAsVoice = False
         if not message.is_reply:
             return
@@ -561,7 +561,7 @@ class voicetoolsMod(loader.Module):
         """reply to a file to pitch voice
           - Example: .vtpitch 12
             Possible values between -18 and 18"""
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         SendAsVoice = False
         if not message.is_reply:
             return
@@ -614,7 +614,7 @@ class voicetoolsMod(loader.Module):
         """reply to a file to increase speed and reduce length
           - Example: .vtspeed 1.5
             Possible values between 0.25 - 3"""
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         SendAsVoice = False
         if not message.is_reply:
             return
@@ -667,7 +667,7 @@ class voicetoolsMod(loader.Module):
         """reply to a file to change the volume
           - Example: .vtgain 1
             Possible values between -10 - 10"""
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         SendAsVoice = False
         if not message.is_reply:
             return
@@ -716,7 +716,7 @@ class voicetoolsMod(loader.Module):
         """reply to a file to enhance voice quality with
          - Volume normalize
          - Background NoiseReduce (set your noisereduce level before)"""
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         SendAsVoice = False
         if not message.is_reply:
             return
@@ -765,7 +765,7 @@ class voicetoolsMod(loader.Module):
 
     async def vtnormcmd(self, message):
         """reply to a file to normalize volume"""
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         SendAsVoice = False
         if not message.is_reply:
             return
@@ -810,7 +810,7 @@ class voicetoolsMod(loader.Module):
 
     async def vtmp3cmd(self, message: Message):
         """reply to a file to convert it to mp3"""
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         if not message.is_reply:
             return
         replymsg = await message.get_reply_message()
@@ -835,13 +835,13 @@ class voicetoolsMod(loader.Module):
         file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        # await message.client.send_file(message.chat_id, await self.fast_upload(file), voice_note=False)
+        # await message.client.send_file(utils.get_chat_id(message), await self.fast_upload(file), voice_note=False)
         await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=False)
         await inline_msg.delete()
 
     async def vtspeechcmd(self, message):
         """reply to a file to convert it to speech"""
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         if not message.is_reply:
             return
         replymsg = await message.get_reply_message()
@@ -872,7 +872,7 @@ class voicetoolsMod(loader.Module):
     async def vtautodalekcmd(self, message):
         """Turns on AutoDalekVoice for your own Voicemessages in the chat"""
         dalek_chats = self._db.get(__name__, "dalek_watcher", [])
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str not in dalek_chats:
             dalek_chats.append(chatid_str)
@@ -886,7 +886,7 @@ class voicetoolsMod(loader.Module):
     async def vtautoanoncmd(self, message):
         """Turns on AutoAnonVoice for your own Voicemessages in the chat"""
         vcanon_chats = self._db.get(__name__, "vcanon_watcher", [])
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str not in vcanon_chats:
             vcanon_chats.append(chatid_str)
@@ -900,7 +900,7 @@ class voicetoolsMod(loader.Module):
     async def vtautonrcmd(self, message):
         """Turns on AutoNoiseReduce for your own Voicemessages in the chat"""
         nr_chats = self._db.get(__name__, "nr_watcher", [])
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str not in nr_chats:
             nr_chats.append(chatid_str)
@@ -914,7 +914,7 @@ class voicetoolsMod(loader.Module):
     async def vtautonormcmd(self, message):
         """Turns on AutoVoiceNormalizer for your own Voicemessages in the chat"""
         norm_chats = self._db.get(__name__, "norm_watcher", [])
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str not in norm_chats:
             norm_chats.append(chatid_str)
@@ -928,7 +928,7 @@ class voicetoolsMod(loader.Module):
     async def vtautospeedcmd(self, message):
         """Turns on AutoSpeed for your own Voicemessages in the chat"""
         speed_chats = self._db.get(__name__, "speed_watcher", [])
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str not in speed_chats:
             speed_chats.append(chatid_str)
@@ -942,7 +942,7 @@ class voicetoolsMod(loader.Module):
     async def vtautopitchcmd(self, message):
         """Turns on AutoVoiceNormalizer for your own Voicemessages in the chat"""
         pitch_chats = self._db.get(__name__, "pitch_watcher", [])
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str not in pitch_chats:
             pitch_chats.append(chatid_str)
@@ -956,7 +956,7 @@ class voicetoolsMod(loader.Module):
     async def vtautogaincmd(self, message):
         """Turns on AutoVolumeGain for your own Voicemessages in the chat"""
         gain_chats = self._db.get(__name__, "gain_watcher", [])
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str not in gain_chats:
             gain_chats.append(chatid_str)
@@ -977,7 +977,7 @@ class voicetoolsMod(loader.Module):
         vcanon_chats = self._db.get(__name__, "vcanon_watcher", [])
         speed_chats = self._db.get(__name__, "speed_watcher", [])
         gain_chats = self._db.get(__name__, "gain_watcher", [])
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str in vcanon_chats:
             current = current + self.strings("auto_anon_on") + "\n"
@@ -1009,8 +1009,42 @@ class voicetoolsMod(loader.Module):
             current = current + self.strings("auto_nr_off") + "\n"
         return await utils.answer(message, self.strings("current_auto").format(current))
 
+    async def vtautostopcmd(self, message):
+        """Turns off AutoVoice for your own Voicemessages in the chat"""
+        norm_chats = self._db.get(__name__, "norm_watcher", [])
+        nr_chats = self._db.get(__name__, "nr_watcher", [])
+        dalek_chats = self._db.get(__name__, "dalek_watcher", [])
+        pitch_chats = self._db.get(__name__, "pitch_watcher", [])
+        vcanon_chats = self._db.get(__name__, "vcanon_watcher", [])
+        speed_chats = self._db.get(__name__, "speed_watcher", [])
+        gain_chats = self._db.get(__name__, "gain_watcher", [])
+        chatid = utils.get_chat_id(message)
+        chatid_str = str(chatid)
+        if chatid_str in norm_chats:
+            norm_chats.remove(chatid_str)
+            self._db.set(__name__, "norm_watcher", norm_chats)
+        if chatid_str in nr_chats:
+            nr_chats.remove(chatid_str)
+            self._db.set(__name__, "nr_watcher", nr_chats)
+        if chatid_str in dalek_chats:
+            dalek_chats.remove(chatid_str)
+            self._db.set(__name__, "dalek_watcher", dalek_chats)
+        if chatid_str in pitch_chats:
+            pitch_chats.remove(chatid_str)
+            self._db.set(__name__, "pitch_watcher", pitch_chats)
+        if chatid_str in vcanon_chats:
+            vcanon_chats.remove(chatid_str)
+            self._db.set(__name__, "vcanon_watcher", vcanon_chats)
+        if chatid_str in speed_chats:
+            speed_chats.remove(chatid_str)
+            self._db.set(__name__, "speed_watcher", speed_chats)
+        if chatid_str in gain_chats:
+            gain_chats.remove(chatid_str)
+            self._db.set(__name__, "gain_watcher", gain_chats)
+        await utils.answer(message, self.strings("vtauto_stopped"))
+
     async def watcher(self, message: Message):
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         norm_chats = self._db.get(__name__, "norm_watcher", [])
         nr_chats = self._db.get(__name__, "nr_watcher", [])

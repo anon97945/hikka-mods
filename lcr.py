@@ -1,4 +1,4 @@
-__version__ = (0, 0, 9)
+__version__ = (0, 0, 10)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -84,7 +84,7 @@ class lcrMod(loader.Module):
              - waiting for the login code from TG service chat, use in group."""
 
         user_msg = utils.get_args_raw(message)
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         logincode = False
         tgacc = 777000
         lc_timeout = self.config["timeout"]

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 6)
+__version__ = (0, 0, 7)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -85,5 +85,5 @@ class SaveMessageMod(loader.Module):
             return await utils.answer(message, self.strings("invalid_link"))
         channel_id, msg_id = get_ids(args)
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
-        msgs = await message.client.send_message(message.chat_id, message=msgs)
+        msgs = await message.client.send_message(utils.get_chat_id(message), message=msgs)
         return await message.delete()
