@@ -1,4 +1,4 @@
-__version__ = (0, 0, 6)
+__version__ = (0, 1, 1)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -19,18 +19,20 @@ __version__ = (0, 0, 6)
 import logging
 import asyncio
 
-from .. import loader
+from .. import loader, utils
 from telethon.tl.types import Message
 
 logger = logging.getLogger(__name__)
 
 
-async def buttonhandler(bmsg, chatid, caption, data_btn1, data_btn2):
+async def buttonhandler(bmsg, chatid, caption1, caption2, data_btn1, data_btn2):
     fnd_btn1 = False
     fnd_btn2 = False
     bmsg = await bmsg.client.get_messages(chatid, ids=bmsg.id)
     buttons = bmsg.buttons
-    if caption in bmsg.message and bmsg.buttons is not None:
+    if (
+        caption1 in bmsg.message or caption2 in bmsg.message
+    ) and bmsg.buttons is not None:
         for row in buttons:
             for button in row:
                 if data_btn1 in str(button.data):
@@ -81,7 +83,7 @@ class AutoUpdateMod(loader.Module):
             ),
             loader.ConfigValue(
                 "update_delay",
-                "120",
+                "300",
                 doc=lambda: self.strings("_cfg_auto_update_delay"),
                 validator=loader.validators.Integer(minimum=60),
             ),
@@ -101,37 +103,44 @@ class AutoUpdateMod(loader.Module):
             )
         logger.info(self.strings("updating").format(self.config["update_delay"]))
         await asyncio.sleep(self.config["update_delay"])
-        await msg.click(0)
+        try:
+            return await msg.click(0)
+        except Exception:
+            return
 
     async def client_ready(self, client, db):
         self._db = db
-        async for message in client.iter_messages(entity=self.inline.bot_id,
-                                                  limit=5):
-            if (
-                isinstance(message, Message)
-                and message.from_id == self.inline.bot_id
-                and await buttonhandler(
-                    message,
-                    self.inline.bot_id,
-                    "🌘 Hikka Update available!",
-                    "hikka_update",
-                    "hikka_upd_ignore",
-                )
-            ):
-                await self._autoupdate(message)
+        if self.config["auto_update"]:
+            async for message in client.iter_messages(entity=self.inline.bot_id,
+                                                      limit=5):
+                if (
+                    isinstance(message, Message)
+                    and message.sender_id == self.inline.bot_id
+                    and await buttonhandler(
+                        message,
+                        self.inline.bot_id,
+                        "🌘 Hikka Update available!",
+                        "🌘 Доступно обновление Hikka!",
+                        "hikka_update",
+                        "hikka_upd_ignore",
+                    )
+                ):
+                    return await self._autoupdate(message)
 
     async def watcher(self, message: Message):
         if (
             isinstance(message, Message)
-            and message.chat_id == self.inline.bot_id
-            and message.from_id == self.inline.bot_id
+            and self.config["auto_update"]
+            and utils.get_chat_id(message) == self.inline.bot_id
+            and message.sender_id == self.inline.bot_id
             and message.is_private
             and await buttonhandler(
                 message,
                 self.inline.bot_id,
                 "🌘 Hikka Update available!",
+                "🌘 Доступно обновление Hikka!",
                 "hikka_update",
                 "hikka_upd_ignore",
             )
         ):
-            await self._autoupdate(message)
+            return await self._autoupdate(message)
