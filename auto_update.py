@@ -1,4 +1,4 @@
-__version__ = (0, 1, 1)
+__version__ = (0, 1, 2)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -95,37 +95,40 @@ class AutoUpdateMod(loader.Module):
             ),
         )
 
-    async def _autoupdate(self, msg):
+    async def _autoupdate(self, message):
         if self.config["mark_read"]:
             await self._client.send_read_acknowledge(
-                msg.chat_id,
+                message.chat_id,
                 clear_mentions=True,
             )
         logger.info(self.strings("updating").format(self.config["update_delay"]))
         await asyncio.sleep(self.config["update_delay"])
         try:
-            return await msg.click(0)
+            return await message.click(0)
         except Exception:
             return
+
+    async def _check_on_load(self, client):
+        async for message in client.iter_messages(entity=self.inline.bot_id,
+                                                  limit=5):
+            if (
+                isinstance(message, Message)
+                and message.sender_id == self.inline.bot_id
+                and await buttonhandler(
+                    message,
+                    self.inline.bot_id,
+                    "🌘 Hikka Update available!",
+                    "🌘 Доступно обновление Hikka!",
+                    "hikka_update",
+                    "hikka_upd_ignore",
+                )
+            ):
+                return await self._autoupdate(message)
 
     async def client_ready(self, client, db):
         self._db = db
         if self.config["auto_update"]:
-            async for message in client.iter_messages(entity=self.inline.bot_id,
-                                                      limit=5):
-                if (
-                    isinstance(message, Message)
-                    and message.sender_id == self.inline.bot_id
-                    and await buttonhandler(
-                        message,
-                        self.inline.bot_id,
-                        "🌘 Hikka Update available!",
-                        "🌘 Доступно обновление Hikka!",
-                        "hikka_update",
-                        "hikka_upd_ignore",
-                    )
-                ):
-                    return await self._autoupdate(message)
+            return asyncio.ensure_future(self._check_on_load(client))
 
     async def watcher(self, message: Message):
         if (
