@@ -1,4 +1,4 @@
-__version__ = (0, 1, 1)
+__version__ = (0, 1, 2)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -148,7 +148,7 @@ class BlockNonDiscussionMod(loader.Module):
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
         chat = await message.get_chat()
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
 
         if args and args[0] == "clearall":
@@ -210,7 +210,7 @@ class BlockNonDiscussionMod(loader.Module):
             return
         bnd = self._db.get(__name__, "bnd", [])
         sets = self._db.get(__name__, "sets", {})
-        chatid = message.chat_id
+        chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if message.is_private or chatid_str not in bnd:
             return
