@@ -1,4 +1,4 @@
-__version__ = (0, 0, 55)
+__version__ = (0, 1, 00)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -47,7 +47,8 @@ class anoninfoMod(loader.Module):
         "_cfg_cst_btn": "Custom button. Leave empty to remove button.",
         "_cfg_cst_bnr": "Custom Banner.",
         "_cfg_cst_frmt": "Custom fileformat for Banner.",
-        "_cfg_banner": "Set `True` in order to disable an image banner",
+        "_cfg_banner": "Set `True` in order to disable an media banner",
+        "_cfg_inline_banner": "Set `True` in order to disable an inline media banner",
     }
 
     strings_de = {
@@ -64,7 +65,8 @@ class anoninfoMod(loader.Module):
         "_cfg_cst_btn": "Benutzerdefinierte Schaltfläche für Informationen. Leer lassen, um die Schaltfläche zu entfernen.",
         "_cfg_cst_bnr": "Benutzerdefiniertes Banner.",
         "_cfg_cst_frmt": "Benutzerdefiniertes Dateiformat für das Banner.",
-        "_cfg_banner": "Setzen Sie `True`, um ein Bildbanner zu deaktivieren.",
+        "_cfg_banner": "Setzen Sie `True`, um das Media Banner zu deaktivieren.",
+        "_cfg_inline_banner": "Setzen Sie `True`, um das Inline Media Banner zu deaktivieren.",
     }
 
     strings_ru = {
@@ -82,6 +84,7 @@ class anoninfoMod(loader.Module):
         "_cfg_cst_bnr": "Кастомный баннер.",
         "_cfg_cst_frmt": "Кастомный формат файла для баннера.",
         "_cfg_banner": "Поставь `True`, чтобы отключить баннер-картинку.",
+        "_cfg_inline_banner": "Установите `True`, чтобы отключить встроенный медиа-баннер",
     }
 
     def __init__(self):
@@ -97,16 +100,22 @@ class anoninfoMod(loader.Module):
                 lambda: self.strings("_cfg_cst_bnr"),
             ),
             loader.ConfigValue(
+                "custom_format",
+                "photo",
+                lambda: self.strings("_cfg_cst_frmt"),
+                validator=loader.validators.Choice(["photo", "video", "audio", "gif"]),
+            ),
+            loader.ConfigValue(
                 "disable_banner",
                 False,
                 lambda: self.strings("_cfg_banner"),
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
-                "custom_format",
-                "photo",
-                lambda: self.strings("_cfg_cst_frmt"),
-                validator=loader.validators.Choice(["photo", "video", "audio", "gif"]),
+                "disable_inline_banner",
+                False,
+                lambda: self.strings("_cfg_inline_banner"),
+                validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
                 "custom_button1",
@@ -240,66 +249,69 @@ class anoninfoMod(loader.Module):
     @loader.inline_everyone
     async def anoninfo_inline_handler(self, query: InlineQuery) -> dict:
         """Send userbot info"""
-
         m = {x: self._get_mark(x) for x in range(13)}
+        btns = [
+            [
+                *([m[1]] if m[1] else []),
+                *([m[2]] if m[2] else []),
+                *([m[3]] if m[3] else []),
+            ],
+            [
+                *([m[4]] if m[4] else []),
+                *([m[5]] if m[5] else []),
+                *([m[6]] if m[6] else []),
+            ],
+            [
+                *([m[7]] if m[7] else []),
+                *([m[8]] if m[8] else []),
+                *([m[9]] if m[9] else []),
+            ],
+            [
+                *([m[10]] if m[10] else []),
+                *([m[11]] if m[11] else []),
+                *([m[12]] if m[12] else []),
+            ],
+        ]
+        msg_type = "message" if self.config["disable_inline_banner"] else "caption"
         return {
             "title": self.strings("send_info"),
             "description": self.strings("description"),
-            "message": self._render_info(),
+            msg_type: self._render_info(),
+            self.config["custom_format"]: self.config["custom_banner"],
             "thumb": "https://github.com/hikariatama/Hikka/raw/master/assets/hikka_pfp.png",
-            "reply_markup": [
-                [
-                    *([m[1]] if m[1] else []),
-                    *([m[2]] if m[2] else []),
-                    *([m[3]] if m[3] else []),
-                ],
-                [
-                    *([m[4]] if m[4] else []),
-                    *([m[5]] if m[5] else []),
-                    *([m[6]] if m[6] else []),
-                ],
-                [
-                    *([m[7]] if m[7] else []),
-                    *([m[8]] if m[8] else []),
-                    *([m[9]] if m[9] else []),
-                ],
-                [
-                    *([m[10]] if m[10] else []),
-                    *([m[11]] if m[11] else []),
-                    *([m[12]] if m[12] else []),
-                ],
-            ],
+            "reply_markup": btns,
         }
 
     @loader.unrestricted
     async def anoninfocmd(self, message: Message):
         """Send userbot info"""
         m = {x: self._get_mark(x) for x in range(13)}
+        btns = [
+            [
+                *([m[1]] if m[1] else []),
+                *([m[2]] if m[2] else []),
+                *([m[3]] if m[3] else []),
+            ],
+            [
+                *([m[4]] if m[4] else []),
+                *([m[5]] if m[5] else []),
+                *([m[6]] if m[6] else []),
+            ],
+            [
+                *([m[7]] if m[7] else []),
+                *([m[8]] if m[8] else []),
+                *([m[9]] if m[9] else []),
+            ],
+            [
+                *([m[10]] if m[10] else []),
+                *([m[11]] if m[11] else []),
+                *([m[12]] if m[12] else []),
+            ],
+        ]
         await self.inline.form(
             message=message,
             text=self._render_info(),
-            reply_markup=[
-                [
-                    *([m[1]] if m[1] else []),
-                    *([m[2]] if m[2] else []),
-                    *([m[3]] if m[3] else []),
-                ],
-                [
-                    *([m[4]] if m[4] else []),
-                    *([m[5]] if m[5] else []),
-                    *([m[6]] if m[6] else []),
-                ],
-                [
-                    *([m[7]] if m[7] else []),
-                    *([m[8]] if m[8] else []),
-                    *([m[9]] if m[9] else []),
-                ],
-                [
-                    *([m[10]] if m[10] else []),
-                    *([m[11]] if m[11] else []),
-                    *([m[12]] if m[12] else []),
-                ],
-            ],
+            reply_markup=btns,
             **{}
             if self.config["disable_banner"]
             else {self.config["custom_format"]: self.config["custom_banner"]}
