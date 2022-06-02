@@ -30,16 +30,17 @@ async def buttonhandler(bmsg, chatid, caption1, caption2, data_btn1, data_btn2):
     fnd_btn2 = False
     bmsg = await bmsg.client.get_messages(chatid, ids=bmsg.id)
     buttons = bmsg.buttons
-    if caption1 in bmsg.message or caption2 in bmsg.message:
-        if bmsg.buttons is not None:
-            for row in buttons:
-                for button in row:
-                    if data_btn1 in str(button.data):
-                        fnd_btn1 = True
-                    if data_btn2 in str(button.data):
-                        fnd_btn2 = True
-                    if fnd_btn1 and fnd_btn2:
-                        return True
+    if (
+        caption1 in bmsg.message or caption2 in bmsg.message
+    ) and bmsg.buttons is not None:
+        for row in buttons:
+            for button in row:
+                if data_btn1 in str(button.data):
+                    fnd_btn1 = True
+                if data_btn2 in str(button.data):
+                    fnd_btn2 = True
+                if fnd_btn1 and fnd_btn2:
+                    return True
     return False
 
 
