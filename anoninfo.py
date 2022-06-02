@@ -273,10 +273,7 @@ class anoninfoMod(loader.Module):
                 *([m[12]] if m[12] else []),
             ],
         ]
-        if self.config["disable_inline_banner"]:
-            msg_type = "message"
-        else:
-            msg_type = "caption"
+        msg_type = "message" if self.config["disable_inline_banner"] else "caption"
         return {
             "title": self.strings("send_info"),
             "description": self.strings("description"),
