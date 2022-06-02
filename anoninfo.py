@@ -47,8 +47,8 @@ class anoninfoMod(loader.Module):
         "_cfg_cst_btn": "Custom button. Leave empty to remove button.",
         "_cfg_cst_bnr": "Custom Banner.",
         "_cfg_cst_frmt": "Custom fileformat for Banner.",
-        "_cfg_banner": "Set `True` in order to disable an media banner",
-        "_cfg_inline_banner": "Set `True` in order to disable an inline media banner",
+        "_cfg_banner": "Set `True` in order to disable an media banner.",
+        "_cfg_inline_banner": "Set `True` in order to disable an inline media banner.",
     }
 
     strings_de = {
