@@ -76,7 +76,7 @@ class py2pngMod(loader.Module):
         byte_str = file.read()
         text = byte_str.decode("utf-8")
         pygments.highlight(text, Python3Lexer(), ImageFormatter(font_name="DejaVu Sans Mono", line_numbers=True), pngfile)
-        pngfile.name = os.path.splitext(file.name)[0] + ".png"
+        pngfile.name = f"{os.path.splitext(file.name)[0]}.png"
         pngfile.seek(0)
         await message.client.send_file(message.to_id, await self.fast_upload(pngfile), force_document=True, reply_to=reply)
         await message.delete()
