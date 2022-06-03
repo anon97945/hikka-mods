@@ -1,4 +1,4 @@
-__version__ = (0, 1, 2)
+__version__ = (0, 1, 3)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -156,7 +156,7 @@ class BlockNonDiscussionMod(loader.Module):
             self._db.set(__name__, "sets", {})
             return await utils.answer(message, self.strings("turned_off"))
 
-        if args[0] == "db":
+        if args and args[0] == "db":
             return await utils.answer(message, self.strings("db_string").format(str(bnd), str(sets)))
 
         if message.is_private:
