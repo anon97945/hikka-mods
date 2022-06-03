@@ -1,4 +1,4 @@
-__version__ = (0, 1, 2)
+__version__ = (0, 1, 3)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -109,26 +109,26 @@ class AutoUpdateMod(loader.Module):
             return
 
     async def _check_on_load(self, client):
-        async for message in client.iter_messages(entity=self.inline.bot_id,
-                                                  limit=5):
-            if (
-                isinstance(message, Message)
-                and message.sender_id == self.inline.bot_id
-                and await buttonhandler(
-                    message,
-                    self.inline.bot_id,
-                    "🌘 Hikka Update available!",
-                    "🌘 Доступно обновление Hikka!",
-                    "hikka_update",
-                    "hikka_upd_ignore",
-                )
-            ):
-                return await self._autoupdate(message)
+        if self.config["auto_update"]:
+            async for message in client.iter_messages(entity=self.inline.bot_id,
+                                                      limit=5):
+                if (
+                    isinstance(message, Message)
+                    and message.sender_id == self.inline.bot_id
+                    and await buttonhandler(
+                        message,
+                        self.inline.bot_id,
+                        "🌘 Hikka Update available!",
+                        "🌘 Доступно обновление Hikka!",
+                        "hikka_update",
+                        "hikka_upd_ignore",
+                    )
+                ):
+                    return await self._autoupdate(message)
 
     async def client_ready(self, client, db):
         self._db = db
-        if self.config["auto_update"]:
-            return asyncio.ensure_future(self._check_on_load(client))
+        asyncio.ensure_future(self._check_on_load(client))
 
     async def watcher(self, message: Message):
         if (

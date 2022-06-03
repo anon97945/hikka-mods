@@ -1,4 +1,4 @@
-__version__ = (0, 1, 0)
+__version__ = (0, 1, 1)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -96,12 +96,12 @@ class anoninfoMod(loader.Module):
             ),
             loader.ConfigValue(
                 "custom_banner",
-                "https://i.ibb.co/BZ9Kg2N/Banner.png",
+                "https://t.me/file_dumbster/6",
                 lambda: self.strings("_cfg_cst_bnr"),
             ),
             loader.ConfigValue(
                 "custom_format",
-                "photo",
+                "video",
                 lambda: self.strings("_cfg_cst_frmt"),
                 validator=loader.validators.Choice(["photo", "video", "audio", "gif"]),
             ),
