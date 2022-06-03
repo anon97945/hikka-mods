@@ -69,14 +69,13 @@ class py2pngMod(loader.Module):
         file = BytesIO()
         if not reply:
             return await utils.answer(message, self.strings("no_file"))
-        media = reply.media
-        if not media:
-            if not (res := await _filefromurl(reply)):
-                return await utils.answer(message, self.strings("no_url"))
-            file, file.name = res
-        else:
+        if media := reply.media:
             await message.client.download_file(media, file)
             file.name = reply.file.name
+        elif res := await _filefromurl(reply):
+            file, file.name = res
+        else:
+            return await utils.answer(message, self.strings("no_url"))
         file.seek(0)
         byte_str = file.read()
         text = byte_str.decode("utf-8")
