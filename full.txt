@@ -4,6 +4,7 @@ blocknondiscussion
 gtranslate
 lcr
 pmlog
+pypng
 save_message
 tts
 voicetools
