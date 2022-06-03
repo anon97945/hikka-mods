@@ -45,7 +45,6 @@ async def _filefromurl(message):
     text = get(url).text
     file = BytesIO(bytes(text, "utf-8"))
     file.name = url.split("/")[-1]
-    file.seek(0)
     return file, file.name
 
 
@@ -63,10 +62,11 @@ class py2pngMod(loader.Module):
         self.client = client
 
     async def pypngcmd(self, message: Message):
-        """reply to text code or py file"""
+        """reply to url or py file"""
         await utils.answer(message, self.strings("py2png"))
         reply = await message.get_reply_message()
         file = BytesIO()
+        pngfile = BytesIO()
         if not reply:
             return await utils.answer(message, self.strings("no_file"))
         if media := reply.media:
@@ -79,6 +79,8 @@ class py2pngMod(loader.Module):
         file.seek(0)
         byte_str = file.read()
         text = byte_str.decode("utf-8")
-        pygments.highlight(text, Python3Lexer(), ImageFormatter(font_name="DejaVu Sans Mono", line_numbers=True), file.name)
-        await message.client.send_file(message.to_id, file.name, force_document=True)
+        pygments.highlight(text, Python3Lexer(), ImageFormatter(font_name="DejaVu Sans Mono", line_numbers=True), pngfile)
+        pngfile.name = os.path.splitext(file.name)[0] + ".png"
+        pngfile.seek(0)
+        await message.client.send_file(message.to_id, await self.fast_upload(pngfile), force_document=True, reply_to=reply)
         await message.delete()

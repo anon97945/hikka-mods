@@ -1,4 +1,4 @@
-__version__ = (1, 0, 2)
+__version__ = (1, 0, 3)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -25,7 +25,6 @@ import subprocess
 import noisereduce as nr
 import soundfile
 import pyrubberband
-import io
 
 from telethon.tl.types import Message
 from io import BytesIO
@@ -438,12 +437,12 @@ class voicetoolsMod(loader.Module):
         else:
             return
         if not m:
-            file = io.BytesIO(bytes(reply.raw_text, "utf-8"))
+            file = BytesIO(bytes(reply.raw_text, "utf-8"))
         else:
             file = (
-                io.BytesIO((await self.fast_download(m.document)).getvalue())
+                BytesIO((await self.fast_download(m.document)).getvalue())
                 if silent
-                else io.BytesIO(
+                else BytesIO(
                     (
                         await self.fast_download(
                             m.document, message_object=inline_msg
