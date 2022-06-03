@@ -35,17 +35,13 @@ logger = logging.getLogger(__name__)
 
 async def _filefromurl(message):
     urll = message.raw_text.split()
-    url_found = False
     for url in urll:
         if "://" in url:
-            url_found = True
-            break
-    if not url_found:
-        return False
-    text = get(url).text
-    file = BytesIO(bytes(text, "utf-8"))
-    file.name = url.split("/")[-1]
-    return file, file.name
+            text = get(url).text
+            file = BytesIO(bytes(text, "utf-8"))
+            file.name = url.split("/")[-1]
+            return file, file.name
+    return False
 
 
 @loader.tds
