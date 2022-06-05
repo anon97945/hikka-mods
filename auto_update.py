@@ -1,4 +1,4 @@
-__version__ = (0, 1, 4)
+__version__ = (0, 1, 5)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -114,7 +114,7 @@ class AutoUpdateMod(loader.Module):
                                                       limit=5):
                 if (
                     isinstance(message, Message)
-                    and "[do not install]" not in message.lower()
+                    and "[do not install]" not in message.message.lower()
                     and message.text == self.inline.bot_id
                     and message.sender_id == self.inline.bot_id
                     and await buttonhandler(
@@ -135,7 +135,7 @@ class AutoUpdateMod(loader.Module):
     async def watcher(self, message: Message):
         if (
             isinstance(message, Message)
-            and "[do not install]" not in message.lower()
+            and "[do not install]" not in message.message.lower()
             and self.config["auto_update"]
             and utils.get_chat_id(message) == self.inline.bot_id
             and message.sender_id == self.inline.bot_id
