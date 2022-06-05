@@ -112,8 +112,11 @@ class AutoUpdateMod(loader.Module):
         if self.config["auto_update"]:
             async for message in client.iter_messages(entity=self.inline.bot_id,
                                                       limit=5):
+                if not "[DO NOT INSTALL]" in message.lower():
+                    return
                 if (
                     isinstance(message, Message)
+                    and message.text == self.inline.bot_id
                     and message.sender_id == self.inline.bot_id
                     and await buttonhandler(
                         message,
@@ -131,6 +134,8 @@ class AutoUpdateMod(loader.Module):
         asyncio.ensure_future(self._check_on_load(client))
 
     async def watcher(self, message: Message):
+        if not "[do not install]" in message.lower():
+            return
         if (
             isinstance(message, Message)
             and self.config["auto_update"]
