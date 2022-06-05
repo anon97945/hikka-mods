@@ -1,4 +1,4 @@
-__version__ = (0, 1, 5)
+__version__ = (1, 0, 0)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -23,6 +23,7 @@ from .. import loader, utils
 from telethon.tl.types import Message
 
 logger = logging.getLogger(__name__)
+skip_update = ["[do not install]", "[unstable]", "[test]"]
 
 
 async def buttonhandler(bmsg, chatid, caption1, caption2, data_btn1, data_btn2):
@@ -51,6 +52,7 @@ class AutoUpdateMod(loader.Module):
         "name": "HikkaAutoUpdater",
         "updating": "Hikka Userbot will be automatically updated in {} seconds.",
         "_cfg_auto_update": "Whether the Hikka Userbot should automatically update or not.",
+        "_cfg_update_skip": "The update was skipped due to {}.\n{}",
         "_cfg_auto_update_delay": "Choose a delay to wait to start the automatic update.",
         "_cfg_update_msg_read": "Whether to mark the message as read or not.",
     }
@@ -58,6 +60,7 @@ class AutoUpdateMod(loader.Module):
     strings_de = {
         "updating": "Hikka Userbot wird in {} Sekunden automatisch aktualisiert.",
         "_cfg_auto_update": "Ob der Hikka Userbot automatisch aktualisieren soll oder nicht.",
+        "_cfg_update_skip": "Das Update wurde wegen {} übersprungen.\n{}",
         "_cfg_auto_update_delay": "Wählen Sie eine Wartezeit bis zum Start des automatischen Updates.",
         "_cfg_update_msg_read": "Ob die Nachricht als gelesen markiert werden soll oder nicht.",
     }
@@ -65,11 +68,9 @@ class AutoUpdateMod(loader.Module):
     strings_ru = {
         "updating": "Хикка будет автоматически обновлена через {} секунд.",
         "_cfg_auto_update": "Должен ли Hikka UserBot обновляться автоматически или нет.",
+        "_cfg_update_skip": "Обновление было пропущено из-за {}.\n{}",
         "_cfg_auto_update_delay": "Выберите задержку для автоматического обновления.",
         "_cfg_update_msg_read": "Будет ли отмечать сообщение обновления как прочтённое или нет.",
-    }
-
-    strings_ru = {
     }
 
     def __init__(self):
@@ -108,14 +109,23 @@ class AutoUpdateMod(loader.Module):
         except Exception:
             return
 
+    async def _check_skip(self, message):
+        last_commit = message.raw_text.splitlines()[5].lower()
+        for x in range(len(skip_update)):
+            if (
+                skip_update[x].lower() in last_commit
+                and not "revert" in last_commit
+            ):
+                logger.info(self.strings("_cfg_update_skip").format(skip_update[x], last_commit))
+                return True
+        return False
+
     async def _check_on_load(self, client):
         if self.config["auto_update"]:
             async for message in client.iter_messages(entity=self.inline.bot_id,
                                                       limit=5):
                 if (
                     isinstance(message, Message)
-                    and "[do not install]" not in message.message.lower()
-                    and message.text == self.inline.bot_id
                     and message.sender_id == self.inline.bot_id
                     and await buttonhandler(
                         message,
@@ -126,6 +136,8 @@ class AutoUpdateMod(loader.Module):
                         "hikka_upd_ignore",
                     )
                 ):
+                    if await self._check_skip(message):
+                        return
                     return await self._autoupdate(message)
 
     async def client_ready(self, client, db):
@@ -135,7 +147,6 @@ class AutoUpdateMod(loader.Module):
     async def watcher(self, message: Message):
         if (
             isinstance(message, Message)
-            and "[do not install]" not in message.message.lower()
             and self.config["auto_update"]
             and utils.get_chat_id(message) == self.inline.bot_id
             and message.sender_id == self.inline.bot_id
@@ -149,4 +160,6 @@ class AutoUpdateMod(loader.Module):
                 "hikka_upd_ignore",
             )
         ):
+            if await self._check_skip(message):
+                return
             return await self._autoupdate(message)
