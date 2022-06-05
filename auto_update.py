@@ -111,12 +111,12 @@ class AutoUpdateMod(loader.Module):
 
     async def _check_skip(self, message):
         last_commit = message.raw_text.splitlines()[5].lower()
-        for x in range(len(skip_update)):
+        for x in skip_update:
             if (
-                skip_update[x].lower() in last_commit
+                x.lower() in last_commit
                 and "revert" not in last_commit
             ):
-                logger.info(self.strings("_cfg_update_skip").format(skip_update[x], last_commit))
+                logger.info(self.strings("_cfg_update_skip").format(x, last_commit))
                 return True
         return False
 
