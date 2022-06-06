@@ -37,14 +37,14 @@ def get_link(user: User or Channel) -> str:
 @loader.tds
 class GroupChannelLoggerMod(loader.Module):
     """Log given chats/channel to given group/channel"""
-    strings = {"name": "Log Groups/Channel",
-               "start": "<b>[Grouplogger]</b> Activated.</b>",
-               "stopped": "<b>[Grouplogger]</b> Deactivated.</b>",
-               "turned_off": "<b>[Grouplogger]</b> Is now turned off.</b>",
-               "no_int": "<b>Your input was no int.</b>",
-               "error": "<b>Your command was wrong.</b>",
-               "settings": ("<b>[Grouplogger - Settings]</b> Current settings are:"
-                            "\n{}."),
+    strings = {
+        "name": "Log Groups/Channel",
+        "start": "<b>[Grouplogger]</b> Activated.</b>",
+        "stopped": "<b>[Grouplogger]</b> Deactivated.</b>",
+        "turned_off": "<b>[Grouplogger]</b> Is now turned off.</b>",
+        "no_int": "<b>Your input was no int.</b>",
+        "error": "<b>Your command was wrong.</b>",
+        "settings": "<b>[Grouplogger - Settings]</b> Current settings are:\n{}.",
     }
 
     def __init__(self):
