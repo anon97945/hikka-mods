@@ -113,13 +113,13 @@ class GroupChannelLoggerMod(loader.Module):
                 self._db.set(__name__, "gl", [])
                 self._db.set(__name__, "sets", {})
                 return await utils.answer(message, self.strings("turned_off", message))
-            elif args[0] == "rem" and represents_tgid(args[1]) and chatid_str in gl:
+            if args[0] == "rem" and represents_tgid(args[1]) and chatid_str in gl:
                 gl.remove(chatid_str)
                 sets.pop(chatid_str)
                 self._db.set(__name__, "gl", gl)
                 self._db.set(__name__, "sets", sets)
                 return await utils.answer(message, self.strings("stopped", message))
-            elif args[0] == "rem" and (represents_tgid(args[1]) or chatid_str not in gl):
+            if args[0] == "rem" and (represents_tgid(args[1]) or chatid_str not in gl):
                 return await utils.answer(message, self.strings("error", message))
         if not represents_tgid(chatid_str):
             return await utils.answer(message, self.strings("error", message))
