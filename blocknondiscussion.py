@@ -1,4 +1,4 @@
-__version__ = (0, 1, 3)
+__version__ = (0, 1, 4)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -125,6 +125,7 @@ class BlockNonDiscussionMod(loader.Module):
         self._ratelimit = []
 
     async def client_ready(self, client, db):
+        self._client = client
         self._db = db
 
     async def bndcmd(self, message: Message):
@@ -134,15 +135,15 @@ class BlockNonDiscussionMod(loader.Module):
            .bnd notify <true/false>
              - Toggles the notification message.
            .bnd mute <minutes/or 0>
-            - Mutes the user for x minutes. 0 to disable.
+             - Mutes the user for x minutes. 0 to disable.
            .bnd deltimer <seconds/or 0>
-            - Deletes the notification message in seconds. 0 to disable.
+             - Deletes the notification message in seconds. 0 to disable.
            .bnd settings
-            - Shows the current configuration of the chat.
+             - Shows the current configuration of the chat.
            .bnd db
-            - Shows the current database.
+             - Shows the current database.
            .bnd clearall
-            - Clears the db of the module"""
+             - Clears the db of the module"""
         bnd = self._db.get(__name__, "bnd", [])
         sets = self._db.get(__name__, "sets", {})
         args = utils.get_args_raw(message).lower()
@@ -217,7 +218,7 @@ class BlockNonDiscussionMod(loader.Module):
         chat = await message.get_chat()
         user = await message.get_sender()
         userid = message.sender_id
-        entity = await message.client.get_entity(message.sender_id)
+        entity = await self._client.get_entity(message.sender_id)
 
         if (await is_linkedchannel(entity, chatid, userid, message)) or isinstance(entity, Channel):
             return
@@ -237,8 +238,8 @@ class BlockNonDiscussionMod(loader.Module):
             + "</code>)"
         )
 
-        if (await message.client.get_entity(chatid)).username:
-            link = f"https://t.me/{str((await message.client.get_entity(chatid)).username)}"
+        if (await self._client.get_entity(chatid)).username:
+            link = f"https://t.me/{str((await self._client.get_entity(chatid)).username)}"
 
         elif chat.admin_rights.invite_users:
             link = await message.client(functions.channels.GetFullChannelRequest(channel=chatid))
