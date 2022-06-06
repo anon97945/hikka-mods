@@ -1,4 +1,4 @@
-__version__ = (0, 1, 3)
+__version__ = (0, 1, 4)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -125,6 +125,7 @@ class BlockNonDiscussionMod(loader.Module):
         self._ratelimit = []
 
     async def client_ready(self, client, db):
+        self._client = client
         self._db = db
 
     async def bndcmd(self, message: Message):
@@ -217,7 +218,7 @@ class BlockNonDiscussionMod(loader.Module):
         chat = await message.get_chat()
         user = await message.get_sender()
         userid = message.sender_id
-        entity = await message.client.get_entity(message.sender_id)
+        entity = await self._client.get_entity(message.sender_id)
 
         if (await is_linkedchannel(entity, chatid, userid, message)) or isinstance(entity, Channel):
             return
@@ -237,8 +238,8 @@ class BlockNonDiscussionMod(loader.Module):
             + "</code>)"
         )
 
-        if (await message.client.get_entity(chatid)).username:
-            link = f"https://t.me/{str((await message.client.get_entity(chatid)).username)}"
+        if (await self._client.get_entity(chatid)).username:
+            link = f"https://t.me/{str((await self._client.get_entity(chatid)).username)}"
 
         elif chat.admin_rights.invite_users:
             link = await message.client(functions.channels.GetFullChannelRequest(channel=chatid))

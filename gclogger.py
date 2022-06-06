@@ -1,6 +1,20 @@
-#    Friendly Telegram (telegram userbot) module
-#    module author: @anon97945
+__version__ = (0, 0, 15)
 
+
+# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
+# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
+#
+#              © Copyright 2022
+#
+#          https://t.me/apodiktum_modules
+#
+# 🔒 Licensed under the GNU GPLv3
+# 🌐 https://www.gnu.org/licenses/agpl-3.0.html
+
+# meta developer: @anon97945
+
+# scope: hikka_only
+# scope: hikka_min 1.1.28
 
 import logging
 
@@ -69,6 +83,7 @@ class GroupChannelLoggerMod(loader.Module):
         self._ratelimit = []
 
     async def client_ready(self, client, db):
+        self._client = client
         self._db = db
 
     async def glcmd(self, message: Message):
@@ -104,8 +119,8 @@ class GroupChannelLoggerMod(loader.Module):
                 self._db.set(__name__, "gl", gl)
                 self._db.set(__name__, "sets", sets)
                 return await utils.answer(message, self.strings("stopped", message))
-            elif args[0] == "rem":
-                if represents_tgid(args[1]) or chatid_str not in gl:
+            elif args[0] == "rem" and (represents_tgid(args[1]) or chatid_str not in gl):
+
                     return await utils.answer(message, self.strings("error", message))
         if not represents_tgid(chatid_str):
             return await utils.answer(message, self.strings("error", message))
@@ -133,7 +148,7 @@ class GroupChannelLoggerMod(loader.Module):
         chatid_str = str(chatid)
         if message.is_private or chatid_str not in gl:
             return
-        entity = await message.client.get_entity(message.sender_id)
+        entity = await self._client.get_entity(message.sender_id)
         logchanid = int(sets[chatid_str].get("logchannel"))
         loggingchat = chatid
         chatsender = await message.get_sender()

@@ -1,4 +1,4 @@
-__version__ = (1, 0, 2)
+__version__ = (1, 0, 3)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -87,7 +87,7 @@ class AutoUpdateMod(loader.Module):
             ),
             loader.ConfigValue(
                 "update_delay",
-                "300",
+                "600",
                 doc=lambda: self.strings("_cfg_auto_update_delay"),
                 validator=loader.validators.Integer(minimum=60),
             ),

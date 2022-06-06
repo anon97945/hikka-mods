@@ -1,4 +1,4 @@
-__version__ = (0, 1, 1)
+__version__ = (0, 1, 2)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -15,7 +15,7 @@ __version__ = (0, 1, 1)
 
 # scope: inline
 # scope: hikka_only
-# scope: hikka_min 1.1.27
+# scope: hikka_min 1.2.4
 
 import logging
 import git
@@ -121,73 +121,109 @@ class anoninfoMod(loader.Module):
                 "custom_button1",
                 ["🔥 Apodiktum Hikka Modules 🔥", "https://t.me/apodiktum_modules"],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(min_len=0, max_len=2),
+                validator=loader.validators.Union(
+                    loader.validators.Series(fixed_len=2),
+                    loader.validators.NoneType(),
+                ),
             ),
             loader.ConfigValue(
                 "custom_button2",
                 [],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(min_len=0, max_len=2),
+                validator=loader.validators.Union(
+                    loader.validators.Series(fixed_len=2),
+                    loader.validators.NoneType(),
+                ),
             ),
             loader.ConfigValue(
                 "custom_button3",
                 [],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(min_len=0, max_len=2),
+                validator=loader.validators.Union(
+                    loader.validators.Series(fixed_len=2),
+                    loader.validators.NoneType(),
+                ),
             ),
             loader.ConfigValue(
                 "custom_button4",
                 ["🌘 Hikka EN Support chat", "https://t.me/hikka_en"],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(min_len=0, max_len=2),
+                validator=loader.validators.Union(
+                    loader.validators.Series(fixed_len=2),
+                    loader.validators.NoneType(),
+                ),
             ),
             loader.ConfigValue(
                 "custom_button5",
                 ["🌘 Hikka. userbot", "https://t.me/hikka_ub"],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(min_len=0, max_len=2),
+                validator=loader.validators.Union(
+                    loader.validators.Series(fixed_len=2),
+                    loader.validators.NoneType(),
+                ),
             ),
             loader.ConfigValue(
                 "custom_button6",
                 ["🌘 Hikka RU Support chat", "https://t.me/hikka_talks"],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(min_len=0, max_len=2),
+                validator=loader.validators.Union(
+                    loader.validators.Series(fixed_len=2),
+                    loader.validators.NoneType(),
+                ),
             ),
             loader.ConfigValue(
                 "custom_button7",
                 [],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(min_len=0, max_len=2),
+                validator=loader.validators.Union(
+                    loader.validators.Series(fixed_len=2),
+                    loader.validators.NoneType(),
+                ),
             ),
             loader.ConfigValue(
                 "custom_button8",
                 [],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(min_len=0, max_len=2),
+                validator=loader.validators.Union(
+                    loader.validators.Series(fixed_len=2),
+                    loader.validators.NoneType(),
+                ),
             ),
             loader.ConfigValue(
                 "custom_button9",
                 [],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(min_len=0, max_len=2),
+                validator=loader.validators.Union(
+                    loader.validators.Series(fixed_len=2),
+                    loader.validators.NoneType(),
+                ),
             ),
             loader.ConfigValue(
                 "custom_button10",
                 [],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(min_len=0, max_len=2),
+                validator=loader.validators.Union(
+                    loader.validators.Series(fixed_len=2),
+                    loader.validators.NoneType(),
+                ),
             ),
             loader.ConfigValue(
                 "custom_button11",
                 [],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(min_len=0, max_len=2),
+                validator=loader.validators.Union(
+                    loader.validators.Series(fixed_len=2),
+                    loader.validators.NoneType(),
+                ),
             ),
             loader.ConfigValue(
                 "custom_button12",
                 [],
                 lambda: self.strings("_cfg_cst_btn"),
-                validator=loader.validators.Series(min_len=0, max_len=2),
+                validator=loader.validators.Union(
+                    loader.validators.Series(fixed_len=2),
+                    loader.validators.NoneType(),
+                ),
             ),
         )
 
