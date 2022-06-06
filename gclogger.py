@@ -39,12 +39,30 @@ class GroupChannelLoggerMod(loader.Module):
     """Log given chats/channel to given group/channel"""
     strings = {
         "name": "Log Groups/Channel",
-        "start": "<b>[Grouplogger]</b> Activated.</b>",
-        "stopped": "<b>[Grouplogger]</b> Deactivated.</b>",
-        "turned_off": "<b>[Grouplogger]</b> Is now turned off.</b>",
-        "no_int": "<b>Your input was no int.</b>",
+        "start": "<b>[Grouplogger]</b> activated.",
+        "stopped": "<b>[Grouplogger]</b> deactivated.",
+        "turned_off": "<b>[Grouplogger]</b> Is now turned off.",
+        "no_id": "<b>Your input was no TG ID.</b>",
         "error": "<b>Your command was wrong.</b>",
-        "settings": "<b>[Grouplogger - Settings]</b> Current settings are:\n{}.",
+        "settings": "<b>[Grouplogger - Settings]</b> Current settings are:\n{}",
+    }
+
+    strings_de = {
+        "start": "<b>[Grouplogger]</b> aktiviert",
+        "stopped": "<b>[Grouplogger]</b> deaktiviert.",
+        "turned_off": "<b>[Grouplogger]</b> ist jetzt ausgeschaltet.",
+        "no_id": "<b>Ihre Eingabe war keine TG ID.</b>",
+        "error": "<b>Ihr Befehl war falsch.</b>",
+        "settings": "<b>[Grouplogger - Einstellungen]</b> Aktuelle Einstellungen sind:\n{}.",
+    }
+
+    strings_ru = {
+        "start": "<b>[Grouplogger]</b>активирован.",
+        "stopped": "<b>[Grouplogger]</b> остановлен.",
+        "turned_off": "<b>[Grouplogger]</b> Сейчас выключен.",
+        "no_id": "<b>Ты ввёл не телеграм айди.</b>",
+        "error": "<b>Команда не верная.</b>",
+        "settings": "<b>[Grouplogger - Settings]</b> Текущие настройки:\n{}",
     }
 
     def __init__(self):
@@ -93,7 +111,7 @@ class GroupChannelLoggerMod(loader.Module):
             return await utils.answer(message, self.strings("error", message))
         if chatid_str not in gl:
             if not represents_tgid(args[0]) or not represents_tgid(args[1]):
-                return await utils.answer(message, self.strings("no_int", message))
+                return await utils.answer(message, self.strings("no_id", message))
             gl.append(chatid_str)
             sets.setdefault(chatid_str, {})
             sets[chatid_str].setdefault("logchannel", args[1])
@@ -102,7 +120,7 @@ class GroupChannelLoggerMod(loader.Module):
             return await utils.answer(message, self.strings("start", message))
         if args[0] is not None and args[1] is not None:
             if not represents_tgid(args[0]) or not represents_tgid(args[1]):
-                return await utils.answer(message, self.strings("no_int", message))
+                return await utils.answer(message, self.strings("no_id", message))
             else:
                 sets[chatid_str].update({"logchannel": args[1]})
         self._db.set(__name__, "sets", sets)
