@@ -1,6 +1,7 @@
 anoninfo
 auto_update
 blocknondiscussion
+gclogger
 gtranslate
 lcr
 pmlog
