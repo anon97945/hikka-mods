@@ -124,11 +124,10 @@ class GroupChannelLoggerMod(loader.Module):
         senderid = (await message.get_sender()).id
         chattitle = (await message.get_chat()).title
         if chatsender.username:
-            name = chatsender.username
-            name = "@" + name
+            name = f"@{chatsender.username}"
         elif not isinstance(entity, Channel):
             if chatsender.last_name:
-                name = chatsender.first_name + " " + chatsender.last_name
+                name = f"{chatsender.first_name} {chatsender.last_name}"
             else:
                 name = chatsender.first_name
         else:
