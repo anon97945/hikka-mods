@@ -133,8 +133,26 @@ class GroupChannelLoggerMod(loader.Module):
         else:
             name = chatsender.title
         user_url = get_link(senderid)
-        link = "Chat: " + str(chattitle) + " | <code>" + str(loggingchat) + "</code>" + "\nUser: " + str(name) + \
-               " ID: " + "<a href='" + user_url + "'>" + str(senderid) + "</a>"
+        link = (
+            (
+                (
+                    (
+                        (
+                            f"Chat: {str(chattitle)} | <code>{str(loggingchat)}</code>"
+                            + "\nUser: "
+                            + str(name)
+                            + " ID: "
+                        )
+                        + "<a href='"
+                    )
+                    + user_url
+                )
+                + "'>"
+            )
+            + str(senderid)
+            + "</a>"
+        )
+
         try:
             await message.forward_to(logchanid)
             await message.client.send_message(logchanid, link)
