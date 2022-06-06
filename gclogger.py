@@ -120,8 +120,7 @@ class GroupChannelLoggerMod(loader.Module):
                 self._db.set(__name__, "sets", sets)
                 return await utils.answer(message, self.strings("stopped", message))
             elif args[0] == "rem" and (represents_tgid(args[1]) or chatid_str not in gl):
-
-                    return await utils.answer(message, self.strings("error", message))
+                return await utils.answer(message, self.strings("error", message))
         if not represents_tgid(chatid_str):
             return await utils.answer(message, self.strings("error", message))
         if chatid_str not in gl:
@@ -136,8 +135,7 @@ class GroupChannelLoggerMod(loader.Module):
         if args[0] is not None and args[1] is not None:
             if not represents_tgid(args[0]) or not represents_tgid(args[1]):
                 return await utils.answer(message, self.strings("no_id", message))
-            else:
-                sets[chatid_str].update({"logchannel": args[1]})
+            sets[chatid_str].update({"logchannel": args[1]})
         self._db.set(__name__, "sets", sets)
         return await utils.answer(message, self.strings("settings", message).format(str(sets[chatid_str])))
 
