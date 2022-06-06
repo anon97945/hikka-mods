@@ -7,7 +7,7 @@ import logging
 from telethon.errors import MessageIdInvalidError
 
 from .. import loader, utils
-from telethon.tl.types import Channel
+from telethon.tl.types import Message, User, Channel
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ class GroupChannelLoggerMod(loader.Module):
     async def client_ready(self, client, db):
         self._db = db
 
-    async def glcmd(self, message):
+    async def glcmd(self, message: Message):
         """Available commands:
            .gl rem <chatid>
              - Removes given chat from watcher.
@@ -126,7 +126,7 @@ class GroupChannelLoggerMod(loader.Module):
         self._db.set(__name__, "sets", sets)
         return await utils.answer(message, self.strings("settings", message).format(str(sets[chatid_str])))
 
-    async def watcher(self, message):
+    async def watcher(self, message: Message):
         gl = self._db.get(__name__, "gl", [])
         sets = self._db.get(__name__, "sets", {})
         chatid = utils.get_chat_id(message)
