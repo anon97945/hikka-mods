@@ -71,13 +71,10 @@ class GroupChannelLoggerMod(loader.Module):
         elif args[0] == "rem":
             chatid = args[1]
             chatid_str = str(chatid)
-        elif args[0] != "clearall" and args[0] != "rem":
+        elif args[0] != "clearall":
             return await utils.answer(message, self.strings("error", message))
         elif not args:
             return await utils.answer(message, self.strings("error", message))
-        elif args[0] != "clearall" and args[1] is None:
-            return await utils.answer(message, self.strings("error", message))
-
         if args:
             if args[0] == "clearall":
                 self._db.set(__name__, "gl", [])
@@ -103,14 +100,13 @@ class GroupChannelLoggerMod(loader.Module):
             self._db.set(__name__, "gl", gl)
             self._db.set(__name__, "sets", sets)
             return await utils.answer(message, self.strings("start", message))
-        if chatid_str in gl:
-            if args[0] is not None and args[1] is not None and chatid_str in gl:
-                if not represents_tgid(args[0]) or not represents_tgid(args[1]):
-                    return await utils.answer(message, self.strings("no_int", message))
-                else:
-                    sets[chatid_str].update({"logchannel": args[1]})
-            self._db.set(__name__, "sets", sets)
-            return await utils.answer(message, self.strings("settings", message).format(str(sets[chatid_str])))
+        if args[0] is not None and args[1] is not None:
+            if not represents_tgid(args[0]) or not represents_tgid(args[1]):
+                return await utils.answer(message, self.strings("no_int", message))
+            else:
+                sets[chatid_str].update({"logchannel": args[1]})
+        self._db.set(__name__, "sets", sets)
+        return await utils.answer(message, self.strings("settings", message).format(str(sets[chatid_str])))
 
     async def watcher(self, message):
         gl = self._db.get(__name__, "gl", [])
