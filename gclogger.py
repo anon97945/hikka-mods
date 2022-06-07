@@ -1,4 +1,4 @@
-__version__ = (0, 0, 22)
+__version__ = (0, 0, 23)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -21,6 +21,8 @@ import logging
 from telethon.errors import MessageIdInvalidError
 
 from .. import loader, utils
+from telethon import TelegramClient
+from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import Message, User, Channel
 
 logger = logging.getLogger(__name__)
@@ -53,6 +55,7 @@ class GroupChannelLoggerMod(loader.Module):
     """Log given chats/channel to given group/channel"""
     strings = {
         "name": "Group/Channel Logger",
+        "dev_channel": "@apodiktum_modules",
         "start": "<b>[Grouplogger]</b> activated.",
         "stopped": "<b>[Grouplogger]</b> deactivated.",
         "turned_off": "<b>[Grouplogger]</b> Is now turned off.",
@@ -84,6 +87,9 @@ class GroupChannelLoggerMod(loader.Module):
 
     def __init__(self):
         self._ratelimit = []
+
+    async def on_dlmod(self, client: TelegramClient, _):
+        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self._client = client

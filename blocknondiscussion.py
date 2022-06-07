@@ -1,4 +1,4 @@
-__version__ = (0, 1, 4)
+__version__ = (0, 1, 5)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -18,8 +18,9 @@ __version__ = (0, 1, 4)
 import asyncio
 import logging
 
-from telethon import functions
+from telethon import functions, TelegramClient
 from datetime import timedelta
+from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import User, Channel, Message
 from telethon.errors import UserNotParticipantError
 
@@ -69,6 +70,7 @@ class BlockNonDiscussionMod(loader.Module):
     """Block Comments For Non Discussion Members"""
     strings = {
         "name": "BlockNonDiscussion",
+        "dev_channel": "@apodiktum_modules",
         "not_dc": "<b>This is no Groupchat.</b>",
         "start": "<b>[BlockNonDiscussion]</b> Activated in this chat.</b>",
         "stopped": "<b>[BlockNonDiscussion]</b> Deactivated in this chat.</b>",
@@ -123,6 +125,9 @@ class BlockNonDiscussionMod(loader.Module):
 
     def __init__(self):
         self._ratelimit = []
+
+    async def on_dlmod(self, client: TelegramClient, _):
+        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self._client = client

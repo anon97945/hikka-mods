@@ -1,4 +1,4 @@
-__version__ = (0, 0, 2)
+__version__ = (0, 0, 5)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -21,8 +21,9 @@ import logging
 import pygments
 import os
 
-
 from .. import loader, utils
+from telethon import TelegramClient
+from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import Message
 from io import BytesIO
 from requests import get
@@ -49,13 +50,24 @@ class pypngMod(loader.Module):
     """Converts link/file from Py to PNG."""
     strings = {
         "name": "PyPNG",
+        "dev_channel": "@apodiktum_modules",
         "py2png": "<b>Converting Py to PNG</b>",
-        "no_file": "<b>Reply to file.py</b>",
+        "no_file": "<b>Reply to file.py or url</b>",
         "no_url": "<b>No url in reply found.</b>",
     }
 
+    async def on_dlmod(self, client: TelegramClient, _):
+        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
+
     async def client_ready(self, client, db):
         self.client = client
+
+    async def get_media(self, message: Message):
+        file = (
+            BytesIO((await self.fast_download(message.media)).getvalue())
+        )
+        file.seek(0)
+        return file
 
     async def pypngcmd(self, message: Message):
         """reply to url or py file"""
@@ -65,8 +77,8 @@ class pypngMod(loader.Module):
         pngfile = BytesIO()
         if not reply:
             return await utils.answer(message, self.strings("no_file"))
-        if media := reply.media:
-            await message.client.download_file(media, file)
+        if reply.file:
+            file = await self.get_media(reply)
             file.name = reply.file.name
         elif res := await _filefromurl(reply):
             file, file.name = res

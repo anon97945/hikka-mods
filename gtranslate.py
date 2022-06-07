@@ -1,4 +1,4 @@
-__version__ = (0, 0, 46)
+__version__ = (0, 0, 47)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -19,6 +19,8 @@ __version__ = (0, 0, 46)
 import logging
 import googletrans
 
+from telethon import TelegramClient
+from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import Message
 from .. import loader, utils
 
@@ -35,6 +37,7 @@ class gtranslateMod(loader.Module):
     """Google Translator"""
     strings = {
         "name": "Google Translator",
+        "dev_channel": "@apodiktum_modules",
         "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
         "invalid_text": "Invalid text to translate",
         "split_error": "Python split() error, if there is -> in the text, it must split!",
@@ -71,11 +74,14 @@ class gtranslateMod(loader.Module):
             ),
             loader.ConfigValue(
                 "vodka_easteregg",
-                "True",
+                "False",
                 doc=lambda: self.strings("_cfg_vodkatr_msg"),
                 validator=loader.validators.Boolean(),
             ),
         )
+
+    async def on_dlmod(self, client: TelegramClient, _):
+        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self._db = db

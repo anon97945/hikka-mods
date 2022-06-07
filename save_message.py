@@ -1,4 +1,4 @@
-__version__ = (0, 0, 7)
+__version__ = (0, 0, 8)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -20,6 +20,8 @@ import logging
 import re
 
 from .. import loader, utils
+from telethon import TelegramClient
+from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import Message
 
 logger = logging.getLogger(__name__)
@@ -42,6 +44,7 @@ class SaveMessageMod(loader.Module):
     """Get Message/Media from given link (also works for forward restricted content)."""
     strings = {
         "name": "Save Message",
+        "dev_channel": "@apodiktum_modules",
         "done": "<b>Forward to saved complete.</b>",
         "invalid_link": "<b>Invalid link.</b>",
     }
@@ -59,6 +62,9 @@ class SaveMessageMod(loader.Module):
 
     def __init__(self):
         self._ratelimit = []
+
+    async def on_dlmod(self, client: TelegramClient, _):
+        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self._db = db

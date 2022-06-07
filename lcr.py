@@ -1,4 +1,4 @@
-__version__ = (0, 0, 10)
+__version__ = (0, 0, 11)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -19,7 +19,8 @@ import asyncio
 import logging
 
 from telethon.tl.types import Message
-from telethon import events
+from telethon import events, TelegramClient
+from telethon.tl.functions.channels import JoinChannelRequest
 from .. import loader, utils
 
 logger = logging.getLogger(__name__)
@@ -30,6 +31,7 @@ class lcrMod(loader.Module):
     """Telegram Login Code Reciever"""
     strings = {
         "name": "Login Code Reciever",
+        "dev_channel": "@apodiktum_modules",
         "timeouterror": "<b>TimeoutError:</b>\nNo login code for {} seconds recieved.",
         "error": "<b>No Login code in the message found.</b>",
         "waiting": "<b>Waiting for the login code...</b>",
@@ -70,6 +72,9 @@ class lcrMod(loader.Module):
                 validator=loader.validators.Integer(minimum=0, maximum=300),
             ),
         )
+
+    async def on_dlmod(self, client: TelegramClient, _):
+        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self._client = client

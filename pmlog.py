@@ -1,4 +1,4 @@
-__version__ = (0, 0, 15)
+__version__ = (0, 0, 17)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -17,10 +17,12 @@ __version__ = (0, 0, 15)
 # scope: hikka_min 1.1.28
 
 import logging
-import io
 
+from telethon import TelegramClient
+from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import Message, User, Channel
 from telethon.errors import MessageIdInvalidError
+from io import BytesIO
 
 from .. import loader, utils
 
@@ -45,6 +47,7 @@ class PMLogMod(loader.Module):
     """Logs PMs to a group/channel"""
     strings = {
         "name": "PM Logger",
+        "dev_channel": "@apodiktum_modules",
         "_cfg_log_group": "Group or channel ID where to send the PMs.",
         "_cfg_whitelist": "Whether the list is a for excluded(True) or included(False) chats.",
         "_cfg_bots": "Whether to log bots or not.",
@@ -104,13 +107,16 @@ class PMLogMod(loader.Module):
             ),
         )
 
+    async def on_dlmod(self, client: TelegramClient, _):
+        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
+
     async def client_ready(self, client, db):
         self._db = db
         self._id = (await client.get_me(True)).user_id
 
     async def get_media(self, message: Message):
         file = (
-            io.BytesIO((await self.fast_download(message.media)).getvalue())
+            BytesIO((await self.fast_download(message.media)).getvalue())
         )
         file.seek(0)
         return file
@@ -145,7 +151,7 @@ class PMLogMod(loader.Module):
             except MessageIdInvalidError:
                 if not message.file or not pmlog_destr:
                     return
-                file = io.BytesIO()
+                file = BytesIO()
                 caption = message.text + "\n\n" + link
                 file = await self.get_media(message)
                 file.name = message.file.name or f"{message.file.media.id}{message.file.ext}"

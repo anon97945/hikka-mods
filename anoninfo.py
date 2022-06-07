@@ -1,4 +1,4 @@
-__version__ = (0, 1, 3)
+__version__ = (0, 1, 4)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -22,6 +22,8 @@ import git
 
 from telethon.tl.types import Message
 from telethon.utils import get_display_name
+from telethon import TelegramClient
+from telethon.tl.functions.channels import JoinChannelRequest
 
 from .. import loader, main, utils
 from ..inline.types import InlineQuery
@@ -35,6 +37,7 @@ class anoninfoMod(loader.Module):
 
     strings = {
         "name": "AnonInfo",
+        "dev_channel": "@apodiktum_modules",
         "owner": "Owner",
         "version": "Version",
         "build": "Build",
@@ -226,6 +229,9 @@ class anoninfoMod(loader.Module):
                 ),
             ),
         )
+
+    async def on_dlmod(self, client: TelegramClient, _):
+        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self._db = db

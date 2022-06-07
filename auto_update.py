@@ -1,4 +1,4 @@
-__version__ = (1, 0, 3)
+__version__ = (1, 0, 4)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -20,6 +20,8 @@ import logging
 import asyncio
 
 from .. import loader, utils
+from telethon import TelegramClient
+from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import Message
 
 logger = logging.getLogger(__name__)
@@ -50,6 +52,7 @@ class AutoUpdateMod(loader.Module):
     """Automatically update your Hikka Userbot"""
     strings = {
         "name": "HikkaAutoUpdater",
+        "dev_channel": "@apodiktum_modules",
         "updating": ("Hikka Userbot will be automatically updated in {} seconds.\n\n"
                      "Changelog:\n{}"),
         "_cfg_auto_update": "Whether the Hikka Userbot should automatically update or not.",
@@ -98,6 +101,9 @@ class AutoUpdateMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
         )
+
+    async def on_dlmod(self, client: TelegramClient, _):
+        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def _autoupdate(self, message):
         changes = "\n".join(message.raw_text.splitlines()[5:])

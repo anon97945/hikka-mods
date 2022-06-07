@@ -1,4 +1,4 @@
-__version__ = (0, 1, 64)
+__version__ = (0, 1, 65)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -27,6 +27,8 @@ from io import BytesIO
 from .. import loader, utils
 from subprocess import Popen, PIPE
 from pydub import AudioSegment, effects
+from telethon import TelegramClient
+from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import Message
 
 
@@ -98,6 +100,7 @@ async def speedup(bytes_io_file, fn, fe, speed):
 class TTSMod(loader.Module):
     strings = {
         "name": "Text To Speech",
+        "dev_channel": "@apodiktum_modules",
         "no_speed": "<b>[TTS]</b> Your input was an unsupported speed value.",
         "needspeed": "You need to provide a speed value between 0.25 and 3.0.",
         "no_reply": "<b>[TTS]</b> You need to reply to a voicemessage.",
@@ -146,6 +149,9 @@ class TTSMod(loader.Module):
                 validator=loader.validators.Float(minimum=0.25, maximum=3),
             ),
         )
+
+    async def on_dlmod(self, client: TelegramClient, _):
+        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self._db = db

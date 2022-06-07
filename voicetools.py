@@ -1,4 +1,4 @@
-__version__ = (1, 0, 3)
+__version__ = (1, 0, 4)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -27,6 +27,8 @@ import soundfile
 import pyrubberband
 
 from telethon.tl.types import Message
+from telethon import TelegramClient
+from telethon.tl.functions.channels import JoinChannelRequest
 from io import BytesIO
 from pydub import AudioSegment, effects
 from .. import loader, utils
@@ -238,6 +240,7 @@ class voicetoolsMod(loader.Module):
     """Change, pitch, enhance your Voice. Also includes optional automatic modes."""
     strings = {
         "name": "VoiceTools",
+        "dev_channel": "@apodiktum_modules",
         "dalek_start": "<b>[VoiceTools]</b> Auto DalekVoice activated.",
         "dalek_stopped": "<b>[VoiceTools]</b> Auto DalekVoice deactivated.",
         "vcanon_start": "<b>[VoiceTools]</b> Auto AnonVoice activated.",
@@ -422,6 +425,9 @@ class voicetoolsMod(loader.Module):
                 validator=loader.validators.Float(minimum=0.25, maximum=3),
             ),
         )
+
+    async def on_dlmod(self, client: TelegramClient, _):
+        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self._db = db
