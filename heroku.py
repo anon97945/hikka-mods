@@ -1,4 +1,4 @@
-__version__ = (0, 0, 4)
+__version__ = (0, 0, 5)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -19,10 +19,8 @@ __version__ = (0, 0, 4)
 
 
 import asyncio
-import os
 import requests
 import math
-import re
 import logging
 import heroku3
 
@@ -49,6 +47,7 @@ class herokumanagerMod(loader.Module):
         "set_var": "<b>[Heroku]</b> Setting variable...</b>",
         "get_var": "<b>[Heroku]</b> Getting variable...</b>",
         "get_usage": "<b>[Heroku]</b> Getting Dyno usage...</b>",
+        "wrong_platform": "<b>[Heroku]</b> This module only works on Heroku. {} is not supported.",
         "dyno_usage": ("<b><i><u>Dyno Usage</u></i></b>:\n"
                        # "\nDyno usage for <code>{}</code>:\n"
                        "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]\n"
@@ -63,12 +62,12 @@ class herokumanagerMod(loader.Module):
                         "<code>{}</code> = <code>{}</code>\n\n"
                         "<b>The Heroku Dyno will now be restarted.</b>"),
         "var_settings": ("<b>[Heroku]</b> Current Config:\n"
-                        "<code>{}</code> = <code>{}</code>"),
+                         "<code>{}</code> = <code>{}</code>"),
         "var_deleted": ("<b>[Heroku]</b> Variable successfully deleted:\n"
                         "<code>{}</code>\n\n"
                         "<b>The Heroku Dyno will now be restarted.</b>"),
         "var_not_exists": ("<b>[Heroku]</b> Variable does not exist:\n"
-                        "<code>{}</code>"),
+                           "<code>{}</code>"),
     }
 
     strings_ru = {
@@ -79,21 +78,22 @@ class herokumanagerMod(loader.Module):
         "set_var": "<b>[Heroku]</b> Настройка переменной...</b>",
         "get_var": "<b>[Heroku]</b> Получение переменной...</b>",
         "get_usage": "<b>[Heroku]</b> Получение использования Dyno...</b>",
+        "wrong_platform": "<b>[Heroku]</b> This module only works on Heroku. {} is not supported.",
         "usage_error": ("<b>Error:</b> Произошла ошибка.\n"
                         "<code>{}</code>"),
         "var_changed": ("<b>[Heroku]</b> Переменная успешно изменена на:\n"
                         "<code>{}</code> = <code>{}</code>\n\n"
                         "<b>Теперь Heroku Dyno будет перезапущен.</b>"),
         "var_added": ("<b>[Heroku]</b> Переменная успешно добавлена:\n"
-                        "<code>{}</code> = <code>{}</code>\n\n"
-                        "<b>Теперь Heroku Dyno будет перезапущен.</b>"),
+                      "<code>{}</code> = <code>{}</code>\n\n"
+                      "<b>Теперь Heroku Dyno будет перезапущен.</b>"),
         "var_settings": ("<b>[Heroku]</b> Текущая конфигурацияТекущая конфигурация:\n"
-                        "<code>{}</code> = <code>{}</code>"),
+                         "<code>{}</code> = <code>{}</code>"),
         "var_deleted": ("<b>[Heroku]</b> Переменная успешно удалена:\n"
                         "<code>{}</code>\n\n"
                         "<b>Теперь Heroku Dyno будет перезапущен.</b>"),
         "var_not_exists": ("<b>[Heroku]</b> Переменная не существует:\n"
-                        "<code>{}</code>"),
+                           "<code>{}</code>"),
         "_cmd_doc_heroset": ("⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Установить переменную настроек Heroku.\n"
                              "⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .heroset <variable> <some settings>"),
         "_cmd_doc_heroget": ("⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Получить переменную настроек Heroku.\n"
@@ -120,12 +120,15 @@ class herokumanagerMod(loader.Module):
         self._heroku_api_key = self._hconfig._ConfigVars__data["heroku_api_token"]
         self._heroku = heroku3.from_key(self._heroku_api_key)
         self._heroku_app = self._heroku.app(self._heroku_app_name)
+        self._platform = utils.get_named_platform()
 
     async def herousagecmd(self, message: Message):
         """
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Get Heroku Dyno Usage.
         """
+        if "Heroku" in self._platform:
+            return await utils.answer(message, self.strings("not_heroku").format(self._platform)))
         msg = await utils.answer(message, self.strings("get_usage"))
         useragent = ("Mozilla/5.0 (Linux; Android 10; SM-G975F)"
                      "AppleWebKit/537.36 (KHTML, like Gecko)"
@@ -164,7 +167,7 @@ class herokumanagerMod(loader.Module):
             AppPercentage = math.floor(App[0]["quota_used"] * 100 / quota)
         AppHours = math.floor(AppQuotaUsed / 60)
         AppMinutes = math.floor(AppQuotaUsed % 60)
-        AppName = self._heroku_app_name
+        # AppName = self._heroku_app_name
         await asyncio.sleep(1.5)
         return await utils.answer(msg, self.strings("dyno_usage").format(AppHours, AppMinutes, AppPercentage, hours, minutes, percentage))
 
@@ -175,6 +178,8 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Set Heroku Settings Variable.
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .heroset <variable> <some settings>
         """
+        if "Heroku" in self._platform:
+            return await utils.answer(message, self.strings("not_heroku").format(self._platform)))
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             heroku_var = self._heroku_app.config()
@@ -195,12 +200,13 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ Get Heroku Settings Variable.
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .heroget <variable>
         """
+        if "Heroku" in self._platform:
+            return await utils.answer(message, self.strings("not_heroku").format(self._platform)))
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             if len(args) > 1:
                 return await utils.answer(message, self.strings("args_error"))
             heroku_var = self._heroku_app.config()
-            # logger.error(heroku_var.to_dict())
             msg = await utils.answer(message, self.strings("get_var"))
             await asyncio.sleep(1.5)
             if args[0] in heroku_var:
@@ -215,6 +221,8 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ Get All Heroku Settings Variable. This may leak API!
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .herogetall --force
         """
+        if "Heroku" in self._platform:
+            return await utils.answer(message, self.strings("not_heroku").format(self._platform)))
         args = utils.get_args_raw(message.message)
         args = str(args).split()
         if args and args[0] == "--force":
@@ -231,8 +239,6 @@ class herokumanagerMod(loader.Module):
                     + heroku_var.to_dict()[x]
                     + "</code>\n\n"
                 )
-
-
             return await utils.answer(msg, cmpl_cnfg)
         return await utils.answer(message, self.strings("no_force"))
 
@@ -243,6 +249,8 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ Delete Heroku Settings Variable.
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .herodel <variable>
         """
+        if "Heroku" in self._platform:
+            return await utils.answer(message, self.strings("not_heroku").format(self._platform)))
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             if len(args) > 1:

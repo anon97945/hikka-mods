@@ -3,6 +3,7 @@ auto_update
 blocknondiscussion
 gclogger
 gtranslate
+heroku
 lcr
 pmlog
 pypng
