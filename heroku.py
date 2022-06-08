@@ -59,8 +59,8 @@ class herokumanagerMod(loader.Module):
                         "<code>{}</code> = <code>{}</code>\n\n"
                         "<b>The Heroku Dyno will now be restarted.</b>"),
         "var_added": ("<b>[Heroku]</b> Variable successfully added:\n"
-                        "<code>{}</code> = <code>{}</code>\n\n"
-                        "<b>The Heroku Dyno will now be restarted.</b>"),
+                      "<code>{}</code> = <code>{}</code>\n\n"
+                      "<b>The Heroku Dyno will now be restarted.</b>"),
         "var_settings": ("<b>[Heroku]</b> Current Config:\n"
                          "<code>{}</code> = <code>{}</code>"),
         "var_deleted": ("<b>[Heroku]</b> Variable successfully deleted:\n"
@@ -148,14 +148,14 @@ class herokumanagerMod(loader.Module):
         quota = result["account_quota"]
         quota_used = result["quota_used"]
 
-        """ - Used - """
+        # Used
         remaining_quota = quota - quota_used
         percentage = math.floor(remaining_quota / quota * 100)
         minutes_remaining = remaining_quota / 60
         hours = math.floor(minutes_remaining / 60)
         minutes = math.floor(minutes_remaining % 60)
 
-        """ - Current - """
+        # Current
         App = result["apps"]
         try:
             App[0]["quota_used"]
