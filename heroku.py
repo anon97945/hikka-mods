@@ -23,6 +23,7 @@ import requests
 import math
 import logging
 import heroku3
+import os
 
 from .. import loader, utils, main, heroku
 from telethon import TelegramClient
@@ -47,7 +48,7 @@ class herokumanagerMod(loader.Module):
         "set_var": "<b>[Heroku]</b> Setting variable...</b>",
         "get_var": "<b>[Heroku]</b> Getting variable...</b>",
         "get_usage": "<b>[Heroku]</b> Getting Dyno usage...</b>",
-        "wrong_platform": "<b>[Heroku]</b> This module only works on Heroku. {} is not supported.",
+        "wrong_platform": "[Heroku] This module only works on Heroku. {} is not supported.",
         "dyno_usage": ("<b><i><u>Dyno Usage</u></i></b>:\n"
                        # "\nDyno usage for <code>{}</code>:\n"
                        "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]\n"
@@ -78,7 +79,7 @@ class herokumanagerMod(loader.Module):
         "set_var": "<b>[Heroku]</b> Настройка переменной...</b>",
         "get_var": "<b>[Heroku]</b> Получение переменной...</b>",
         "get_usage": "<b>[Heroku]</b> Получение использования Dyno...</b>",
-        "wrong_platform": "<b>[Heroku]</b> Этот модуль работает только на Heroku. {} не поддерживается.",
+        "wrong_platform": "[Heroku] Этот модуль работает только на Heroku. {} не поддерживается.",
         "usage_error": ("<b>Error:</b> Произошла ошибка.\n"
                         "<code>{}</code>"),
         "var_changed": ("<b>[Heroku]</b> Переменная успешно изменена на:\n"
@@ -113,34 +114,35 @@ class herokumanagerMod(loader.Module):
         await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
+        platform = utils.get_named_platform()
+        if "Heroku" not in platform:
+            raise loader.LoadError(self.strings("wrong_platform").format(platform))
         self._db = db
         self._happ, self._hconfig = heroku.get_app(api_token=main.hikka.api_token)
         self._heroku_api = "https://api.heroku.com"
         self._heroku_app_name = self._happ.name
-        self._heroku_api_key = self._hconfig._ConfigVars__data["heroku_api_token"]
+        self._heroku_api_key = os.environ["heroku_api_token"]
         self._heroku = heroku3.from_key(self._heroku_api_key)
         self._heroku_app = self._heroku.app(self._heroku_app_name)
         self._platform = utils.get_named_platform()
+        self._herokuid = self._heroku.account().id
 
     async def herousagecmd(self, message: Message):
         """
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Get Heroku Dyno Usage.
         """
-        if "Heroku" not in self._platform:
-            return await utils.answer(message, self.strings("wrong_platform").format(self._platform))
         msg = await utils.answer(message, self.strings("get_usage"))
         useragent = ("Mozilla/5.0 (Linux; Android 10; SM-G975F)"
                      "AppleWebKit/537.36 (KHTML, like Gecko)"
                      "Chrome/80.0.3987.149 Mobile Safari/537.36"
                      )
-        u_id = self._heroku.account().id
         headers = {
          "User-Agent": useragent,
          "Authorization": f"Bearer {self._heroku_api_key}",
          "Accept": "application/vnd.heroku+json; version=3.account-quotas",
         }
-        path = f"/accounts/{u_id}/actions/get-quota"
+        path = f"/accounts/{self._herokuid}/actions/get-quota"
         r = requests.get(self._heroku_api + path, headers=headers)
         if r.status_code != 200:
             return await utils.answer(message, self.strings("usage_error").format(str(r.reason)))
@@ -178,8 +180,6 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Set Heroku Settings Variable.
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .heroset <variable> <some settings>
         """
-        if "Heroku" not in self._platform:
-            return await utils.answer(message, self.strings("wrong_platform").format(self._platform))
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             heroku_var = self._heroku_app.config()
@@ -200,8 +200,6 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ Get Heroku Settings Variable.
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .heroget <variable>
         """
-        if "Heroku" not in self._platform:
-            return await utils.answer(message, self.strings("wrong_platform").format(self._platform))
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             if len(args) > 1:
@@ -221,8 +219,6 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ Get All Heroku Settings Variable. This may leak API!
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .herogetall --force
         """
-        if "Heroku" not in self._platform:
-            return await utils.answer(message, self.strings("wrong_platform").format(self._platform))
         args = utils.get_args_raw(message.message)
         args = str(args).split()
         if args and args[0] == "--force":
@@ -249,8 +245,6 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ Delete Heroku Settings Variable.
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .herodel <variable>
         """
-        if "Heroku" not in self._platform:
-            return await utils.answer(message, self.strings("wrong_platform").format(self._platform))
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             if len(args) > 1:
