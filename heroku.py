@@ -78,7 +78,7 @@ class herokumanagerMod(loader.Module):
         "set_var": "<b>[Heroku]</b> Настройка переменной...</b>",
         "get_var": "<b>[Heroku]</b> Получение переменной...</b>",
         "get_usage": "<b>[Heroku]</b> Получение использования Dyno...</b>",
-        "wrong_platform": "<b>[Heroku]</b> This module only works on Heroku. {} is not supported.",
+        "wrong_platform": "<b>[Heroku]</b> Этот модуль работает только на Heroku. {} не поддерживается.",
         "usage_error": ("<b>Error:</b> Произошла ошибка.\n"
                         "<code>{}</code>"),
         "var_changed": ("<b>[Heroku]</b> Переменная успешно изменена на:\n"
@@ -127,8 +127,8 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Get Heroku Dyno Usage.
         """
-        if "Heroku" in self._platform:
-            return await utils.answer(message, self.strings("not_heroku").format(self._platform)))
+        if not "Heroku" in self._platform:
+            return await utils.answer(message, self.strings("wrong_platform").format(self._platform))
         msg = await utils.answer(message, self.strings("get_usage"))
         useragent = ("Mozilla/5.0 (Linux; Android 10; SM-G975F)"
                      "AppleWebKit/537.36 (KHTML, like Gecko)"
@@ -178,8 +178,8 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Set Heroku Settings Variable.
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .heroset <variable> <some settings>
         """
-        if "Heroku" in self._platform:
-            return await utils.answer(message, self.strings("not_heroku").format(self._platform)))
+        if not "Heroku" in self._platform:
+            return await utils.answer(message, self.strings("wrong_platform").format(self._platform))
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             heroku_var = self._heroku_app.config()
@@ -200,8 +200,8 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ Get Heroku Settings Variable.
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .heroget <variable>
         """
-        if "Heroku" in self._platform:
-            return await utils.answer(message, self.strings("not_heroku").format(self._platform)))
+        if not "Heroku" in self._platform:
+            return await utils.answer(message, self.strings("wrong_platform").format(self._platform))
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             if len(args) > 1:
@@ -221,8 +221,8 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ Get All Heroku Settings Variable. This may leak API!
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .herogetall --force
         """
-        if "Heroku" in self._platform:
-            return await utils.answer(message, self.strings("not_heroku").format(self._platform)))
+        if not "Heroku" in self._platform:
+            return await utils.answer(message, self.strings("wrong_platform").format(self._platform))
         args = utils.get_args_raw(message.message)
         args = str(args).split()
         if args and args[0] == "--force":
@@ -249,8 +249,8 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ Delete Heroku Settings Variable.
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .herodel <variable>
         """
-        if "Heroku" in self._platform:
-            return await utils.answer(message, self.strings("not_heroku").format(self._platform)))
+        if not "Heroku" in self._platform:
+            return await utils.answer(message, self.strings("wrong_platform").format(self._platform))
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             if len(args) > 1:
