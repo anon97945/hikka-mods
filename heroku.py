@@ -137,7 +137,7 @@ class herokumanagerMod(loader.Module):
          "Authorization": f"Bearer {self._heroku_api_key}",
          "Accept": "application/vnd.heroku+json; version=3.account-quotas",
         }
-        path = "/accounts/" + u_id + "/actions/get-quota"
+        path = f"/accounts/{u_id}/actions/get-quota"
         r = requests.get(self._heroku_api + path, headers=headers)
         if r.status_code != 200:
             return await utils.answer(message, self.strings("usage_error").format(str(r.reason)))
@@ -176,8 +176,7 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .heroset <variable> <some settings>
         """
         args = utils.get_args_raw(message.message)
-        args = str(args).split()
-        if args:
+        if args := str(args).split():
             heroku_var = self._heroku_app.config()
             msg = await utils.answer(message, self.strings("set_var"))
             await asyncio.sleep(1.5)
@@ -197,8 +196,7 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .heroget <variable>
         """
         args = utils.get_args_raw(message.message)
-        args = str(args).split()
-        if args:
+        if args := str(args).split():
             if len(args) > 1:
                 return await utils.answer(message, self.strings("args_error"))
             heroku_var = self._heroku_app.config()
@@ -227,7 +225,13 @@ class herokumanagerMod(loader.Module):
             await asyncio.sleep(1.5)
             cmpl_cnfg = ""
             for x in heroku_var.to_dict():
-                cmpl_cnfg = cmpl_cnfg + "<code>" + x + "</code>" + ":\n<code>" + heroku_var.to_dict()[x] + "</code>\n\n"
+                cmpl_cnfg = (
+                    f"{cmpl_cnfg}<code>{x}</code>"
+                    + ":\n<code>"
+                    + heroku_var.to_dict()[x]
+                    + "</code>\n\n"
+                )
+
 
             return await utils.answer(msg, cmpl_cnfg)
         return await utils.answer(message, self.strings("no_force"))
@@ -240,8 +244,7 @@ class herokumanagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .herodel <variable>
         """
         args = utils.get_args_raw(message.message)
-        args = str(args).split()
-        if args:
+        if args := str(args).split():
             if len(args) > 1:
                 return await utils.answer(message, self.strings("args_error"))
             heroku_var = self._heroku_app.config()
