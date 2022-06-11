@@ -256,8 +256,7 @@ class anoninfoMod(loader.Module):
         platform = utils.get_named_platform()
 
         return (
-            "🌚"
-            + self.config["custom_message"].format(
+            self.config["custom_message"].format(
                 me=me,
                 version=version,
                 build=build,
