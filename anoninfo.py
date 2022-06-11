@@ -1,4 +1,4 @@
-__version__ = (0, 1, 4)
+__version__ = (0, 1, 5)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -94,7 +94,6 @@ class anoninfoMod(loader.Module):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "custom_message",
-                "no",
                 doc=lambda: self.strings("_cfg_cst_msg"),
             ),
             loader.ConfigValue(
@@ -266,7 +265,7 @@ class anoninfoMod(loader.Module):
                 platform=platform,
                 upd=upd
             )
-            if self.config["custom_message"] != "no"
+            if self.config["custom_message"] and self.config["custom_message"] != "no"
             else (
                 "<b>🌚 Anondamus Hikka Info</b>\n"
                 f"<b>🤴 {self.strings('owner')}: </b>{me}\n\n"
