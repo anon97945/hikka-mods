@@ -1,4 +1,4 @@
-__version__ = (0, 0, 12)
+__version__ = (0, 0, 13)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -19,6 +19,7 @@ import asyncio
 import logging
 
 from telethon.tl.types import Message
+from telethon import events
 from .. import loader, utils
 
 logger = logging.getLogger(__name__)

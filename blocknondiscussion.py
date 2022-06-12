@@ -1,4 +1,4 @@
-__version__ = (0, 1, 6)
+__version__ = (0, 1, 7)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -19,6 +19,7 @@ import asyncio
 import logging
 
 from datetime import timedelta
+from telethon import functions
 from telethon.tl.types import User, Channel, Message
 from telethon.errors import UserNotParticipantError
 
