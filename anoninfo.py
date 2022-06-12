@@ -1,4 +1,4 @@
-__version__ = (0, 1, 5)
+__version__ = (0, 1, 6)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -11,7 +11,7 @@ __version__ = (0, 1, 5)
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
-# meta developer: @anon97945 | @hikariatama
+# meta developer: @apodiktum_modules
 
 # scope: inline
 # scope: hikka_only
@@ -22,8 +22,6 @@ import git
 
 from telethon.tl.types import Message
 from telethon.utils import get_display_name
-from telethon import TelegramClient
-from telethon.tl.functions.channels import JoinChannelRequest
 
 from .. import loader, main, utils
 from ..inline.types import InlineQuery
@@ -228,9 +226,6 @@ class anoninfoMod(loader.Module):
                 ),
             ),
         )
-
-    async def on_dlmod(self, client: TelegramClient, _):
-        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self._db = db

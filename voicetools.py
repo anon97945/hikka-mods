@@ -1,4 +1,4 @@
-__version__ = (1, 0, 4)
+__version__ = (1, 0, 5)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -11,7 +11,7 @@ __version__ = (1, 0, 4)
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
-# meta developer: @anon97945
+# meta developer: @apodiktum_modules
 
 # scope: hikka_only
 # scope: hikka_min 1.1.28
@@ -27,8 +27,6 @@ import soundfile
 import pyrubberband
 
 from telethon.tl.types import Message
-from telethon import TelegramClient
-from telethon.tl.functions.channels import JoinChannelRequest
 from io import BytesIO
 from pydub import AudioSegment, effects
 from .. import loader, utils
@@ -425,9 +423,6 @@ class voicetoolsMod(loader.Module):
                 validator=loader.validators.Float(minimum=0.25, maximum=3),
             ),
         )
-
-    async def on_dlmod(self, client: TelegramClient, _):
-        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self._db = db

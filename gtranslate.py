@@ -1,4 +1,4 @@
-__version__ = (0, 0, 47)
+__version__ = (0, 0, 48)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -11,7 +11,7 @@ __version__ = (0, 0, 47)
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
-# meta developer: @anon97945
+# meta developer: @apodiktum_modules
 
 # scope: hikka_only
 # requires: googletrans==4.0.0-rc1
@@ -19,8 +19,6 @@ __version__ = (0, 0, 47)
 import logging
 import googletrans
 
-from telethon import TelegramClient
-from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import Message
 from .. import loader, utils
 
@@ -79,9 +77,6 @@ class gtranslateMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
         )
-
-    async def on_dlmod(self, client: TelegramClient, _):
-        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self._db = db

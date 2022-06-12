@@ -1,4 +1,4 @@
-__version__ = (1, 0, 4)
+__version__ = (1, 0, 5)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -11,7 +11,7 @@ __version__ = (1, 0, 4)
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
-# meta developer: @anon97945
+# meta developer: @apodiktum_modules
 
 # scope: hikka_only
 # scope: hikka_min 1.1.28
@@ -20,8 +20,6 @@ import logging
 import asyncio
 
 from .. import loader, utils
-from telethon import TelegramClient
-from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import Message
 
 logger = logging.getLogger(__name__)
@@ -101,9 +99,6 @@ class AutoUpdateMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
         )
-
-    async def on_dlmod(self, client: TelegramClient, _):
-        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def _autoupdate(self, message):
         changes = "\n".join(message.raw_text.splitlines()[5:])

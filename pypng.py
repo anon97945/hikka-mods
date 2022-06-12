@@ -1,4 +1,4 @@
-__version__ = (0, 0, 5)
+__version__ = (0, 0, 6)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -11,7 +11,7 @@ __version__ = (0, 0, 5)
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
-# meta developer: @anon97945
+# meta developer: @apodiktum_modules
 
 # scope: hikka_only
 # scope: hikka_min 1.1.28
@@ -22,8 +22,6 @@ import pygments
 import os
 
 from .. import loader, utils
-from telethon import TelegramClient
-from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import Message
 from io import BytesIO
 from requests import get
@@ -55,9 +53,6 @@ class pypngMod(loader.Module):
         "no_file": "<b>Reply to file.py or url</b>",
         "no_url": "<b>No url in reply found.</b>",
     }
-
-    async def on_dlmod(self, client: TelegramClient, _):
-        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self.client = client

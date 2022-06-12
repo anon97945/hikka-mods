@@ -1,4 +1,4 @@
-__version__ = (0, 1, 5)
+__version__ = (0, 1, 6)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -11,16 +11,14 @@ __version__ = (0, 1, 5)
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
-# meta developer: @anon97945
+# meta developer: @apodiktum_modules
 
 # scope: hikka_only
 
 import asyncio
 import logging
 
-from telethon import functions, TelegramClient
 from datetime import timedelta
-from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import User, Channel, Message
 from telethon.errors import UserNotParticipantError
 
@@ -125,9 +123,6 @@ class BlockNonDiscussionMod(loader.Module):
 
     def __init__(self):
         self._ratelimit = []
-
-    async def on_dlmod(self, client: TelegramClient, _):
-        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self._client = client

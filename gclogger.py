@@ -1,4 +1,4 @@
-__version__ = (0, 0, 23)
+__version__ = (0, 0, 24)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -11,7 +11,7 @@ __version__ = (0, 0, 23)
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
-# meta developer: @anon97945
+# meta developer: @apodiktum_modules
 
 # scope: hikka_only
 # scope: hikka_min 1.1.28
@@ -21,8 +21,6 @@ import logging
 from telethon.errors import MessageIdInvalidError
 
 from .. import loader, utils
-from telethon import TelegramClient
-from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import Message, User, Channel
 
 logger = logging.getLogger(__name__)
@@ -87,9 +85,6 @@ class GroupChannelLoggerMod(loader.Module):
 
     def __init__(self):
         self._ratelimit = []
-
-    async def on_dlmod(self, client: TelegramClient, _):
-        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self._client = client

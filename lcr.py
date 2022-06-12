@@ -1,4 +1,4 @@
-__version__ = (0, 0, 11)
+__version__ = (0, 0, 12)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -19,8 +19,6 @@ import asyncio
 import logging
 
 from telethon.tl.types import Message
-from telethon import events, TelegramClient
-from telethon.tl.functions.channels import JoinChannelRequest
 from .. import loader, utils
 
 logger = logging.getLogger(__name__)
@@ -72,9 +70,6 @@ class lcrMod(loader.Module):
                 validator=loader.validators.Integer(minimum=0, maximum=300),
             ),
         )
-
-    async def on_dlmod(self, client: TelegramClient, _):
-        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         self._client = client

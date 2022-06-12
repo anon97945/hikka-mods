@@ -1,4 +1,4 @@
-__version__ = (0, 0, 9)
+__version__ = (0, 0, 10)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -26,8 +26,6 @@ import heroku3
 import os
 
 from .. import loader, utils, main, heroku
-from telethon import TelegramClient
-from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.tl.types import Message
 
 logger = logging.getLogger(__name__)
@@ -109,9 +107,6 @@ class herokumanagerMod(loader.Module):
 
     def __init__(self):
         self._ratelimit = []
-
-    async def on_dlmod(self, client: TelegramClient, _):
-        await client(JoinChannelRequest(channel=self.strings("dev_channel")))
 
     async def client_ready(self, client, db):
         platform = utils.get_named_platform()
