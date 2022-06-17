@@ -234,9 +234,14 @@ class ApodiktumAdminToolsMod(loader.Module):
         user: Union[User, int],
     ):
         try:
-            await self.inline.bot.kick_chat_member(
+            if isinstance(user, Channel):
+                return await self.inline.bot.ban_chat_sender_chat(
+                    int(f"-100{getattr(chat, 'id', chat)}"),
+                    f"-100{user.id}",
+                )
+            return await self.inline.bot.kick_chat_member(
                 int(f"-100{getattr(chat, 'id', chat)}"),
-                user.id
+                user.id,
             )
         except Exception:
             pass
