@@ -1,4 +1,4 @@
-__version__ = (0, 1, 0)
+__version__ = (0, 1, 5)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -18,6 +18,7 @@ __version__ = (0, 1, 0)
 import asyncio
 import logging
 
+from threading import Thread
 from typing import Union
 from datetime import timedelta
 from telethon import functions
@@ -75,7 +76,7 @@ def to_bool(value):
 
 
 async def is_member(c, u, message):
-    if c != (await message.client.get_me(True)).user_id:
+    if c != message.client._tg_id:
         try:
             await message.client.get_permissions(c, u)
             return True
@@ -84,10 +85,10 @@ async def is_member(c, u, message):
 
 
 @loader.tds
-class AnonAdminToolsMod(loader.Module):
+class ApodiktumAdminToolsMod(loader.Module):
     """Toolpack for Channel and Group Admins"""
     strings = {
-        "name": "AnonAdminTools",
+        "name": "ApodiktumAdminTools",
         "dev_channel": "@apodiktum_modules",
         "not_dc": "<b>This is no Groupchat.</b>",
         "no_int": "<b>Your input was no int.</b>",
@@ -171,22 +172,35 @@ class AnonAdminToolsMod(loader.Module):
     async def client_ready(self, client, db):
         self._client = client
         self._db = db
+        self._pt_task = asyncio.ensure_future(self._global_queue_handler())
+
+    async def on_unload(self):
+        self._pt_task.cancel()
+        return
 
     async def _mute(
         self,
         chat: Union[Chat, int],
-        userid,
-        MUTETIMER,
+        user: Union[User, int],
+        message: Union[None, Message] = None,
+        userid: Union[None, int] = None,
+        MUTETIMER: int = 0,
+        UseBot: bool = False,
     ):
-        try:
-            await self.inline.bot.restrict_chat_member(
-                int(f"-100{getattr(chat, 'id', chat)}"),
-                userid,
-                permissions=ChatPermissions(can_send_messages=False),
-                until_date=timedelta(minutes=MUTETIMER),
-            )
-        except Exception:
-            pass
+        if UseBot:
+            try:
+                await self.inline.bot.restrict_chat_member(
+                    int(f"-100{getattr(chat, 'id', chat)}"),
+                    userid,
+                    permissions=ChatPermissions(can_send_messages=False),
+                    until_date=timedelta(minutes=MUTETIMER),
+                )
+                return
+            except Exception:
+                pass
+        await message.client.edit_permissions(chat.id, user.id,
+                                              timedelta(minutes=MUTETIMER), send_messages=False)
+        return
 
     async def _ban(
         self,
@@ -205,17 +219,21 @@ class AnonAdminToolsMod(loader.Module):
         self,
         chat: Union[Chat, int],
         message: Union[None, Message] = None,
+        UseBot: bool = False,
     ):
         chat_id = getattr(chat, 'id', chat)
-        try:
-            await self.inline.bot.delete_message(
-                int(f"-100{chat_id}"),
-                message.id,
-            )
-        except MessageToDeleteNotFound:
-            pass
-        except (MessageCantBeDeleted, BotKicked, ChatNotFound):
-            pass
+        if UseBot:
+            try:
+                await self.inline.bot.delete_message(
+                    int(f"-100{chat_id}"),
+                    message.id,
+                )
+                return
+            except MessageToDeleteNotFound:
+                pass
+            except (MessageCantBeDeleted, BotKicked, ChatNotFound):
+                pass
+        return await message.delete()
 
     async def _promote_bot(self, chat_id: int):
         try:
@@ -242,7 +260,7 @@ class AnonAdminToolsMod(loader.Module):
 
     async def _check_inlinebot(self, chat, inline_bot_id, message):
         chat_id = getattr(chat, 'id', chat)
-        if chat_id != (await message.client.get_me(True)).user_id:
+        if chat_id != message.client._tg_id:
             try:
                 bot_perms = await message.client.get_permissions(chat_id, inline_bot_id)
                 if bot_perms.is_admin and bot_perms.ban_users and bot_perms.delete_messages:
@@ -252,6 +270,26 @@ class AnonAdminToolsMod(loader.Module):
                 return False
             except UserNotParticipantError:
                 return bool(chat.admin_rights.add_admins and await self._promote_bot(chat_id))
+
+    def _get_usertag(self, user, user_id):
+        if isinstance(user, Channel):
+            if user.username:
+                usertag = f"<a href=https://t.me/{user.username}>{user.title}</a> (<code>" + str(user_id) + "</code>)"
+            else:
+                usertag = f"{user.title}(<code>" + str(user_id) + "</code>)"
+        else:
+            usertag = f"<a href=tg://user?id={str(user_id)}>{user.first_name}</a> (<code>" + str(user_id) + "</code>)"
+        return usertag
+
+    async def _get_link(self, message, chat_id, chat):
+        if chat.username:
+            link = f"https://t.me/{chat.username}"
+        elif chat.admin_rights.invite_users:
+            link = await message.client(functions.channels.GetFullChannelRequest(channel=chat_id))
+            link = link.full_chat.exported_invite.link
+        else:
+            link = ""
+        return link
 
     async def bndcmd(self, message: Message):
         """Available commands:
@@ -409,110 +447,131 @@ class AnonAdminToolsMod(loader.Module):
             self._db.set(__name__, "bcu_sets", sets)
             return await utils.answer(message, self.strings("bcu_settings").format(str(sets[chatid_str])))
 
-    async def watcher(self, message: Message):
-        if not isinstance(message, Message):
+    async def p__bcu(
+        self,
+        chat: Chat,
+        user: User,
+        message: Message,
+        bcu: list,
+        bcu_sets: dict,
+    ) -> bool:
+        chatid_str = str(chat.id)
+        if message.is_private or chatid_str not in bcu or not isinstance(user, Channel):
             return
-        bnd = self._db.get(__name__, "bnd", [])
-        bnd_sets = self._db.get(__name__, "bnd_sets", {})
-        bcu = self._db.get(__name__, "bcu", [])
-        bcu_sets = self._db.get(__name__, "bcu_sets", {})
-        chat_id = message.chat.id
-        chatid_str = str(chat_id)
-        if message.is_private or (chatid_str not in bnd and chatid_str not in bcu):
-            return
-        chat = await self._client.get_entity(message.chat)
-        user = await self._client.get_entity(message.sender_id)
-        user_id = user.id
-        inline_bot_id = self.inline.bot_id
-        UseBot = await self._check_inlinebot(chat, inline_bot_id, message)
+        UseBot = await self._check_inlinebot(chat, self.inline.bot_id, message)
         if (
             (chat.admin_rights or chat.creator)
             and (not chat.admin_rights.delete_messages
                  or not chat.admin_rights)
         ):
             return
-        if isinstance(user, Channel):
-            if user.username:
-                usertag = (
-                    (
-                        f"<a href=https://t.me/{user.username}>{user.title}"
-                        + "</a> (<code>"
-                    )
-                    + str(user_id)
-                    + "</code>)"
-                )
-            else:
-                usertag = (
-                    (
-                        f"{user.title}"
-                        + "(<code>"
-                    )
-                    + str(user_id)
-                    + "</code>)"
-                )
-        else:
-            usertag = (
-                (
-                    f"<a href=tg://user?id={str(user_id)}>{user.first_name}"
-                    + "</a> (<code>"
-                )
-                + str(user_id)
-                + "</code>)"
-            )
-        if chat.username:
-            link = f"https://t.me/{chat.username}"
+        usertag = self._get_usertag(user, user.id)
 
-        elif chat.admin_rights.invite_users:
-            link = await message.client(functions.channels.GetFullChannelRequest(channel=chat_id))
-            link = link.full_chat.exported_invite.link
-        else:
-            link = ""
-
-        if chatid_str in bcu and isinstance(user, Channel):
-            if await is_linkedchannel(user, chat_id, user_id, message):
-                return
+        if await is_linkedchannel(user, chat.id, user.id, message):
+            return
+        await self._delete_message(chat, message, UseBot)
+        if bcu_sets[chatid_str].get("ban") is True:
             if UseBot:
-                await self._delete_message(chat, message)
+                await self._ban(chat, user.id)
             else:
-                await message.delete()
-            if bcu_sets[chatid_str].get("ban") is True:
-                if UseBot:
-                    await self._ban(chat, user_id)
-                else:
-                    await message.client(EditBannedRequest(chat_id, user_id, ChatBannedRights(view_messages=False)))
-            if bcu_sets[chatid_str].get("notify") is True:
-                msgs = await utils.answer(message, self.strings("bcu_triggered", message).format(usertag))
-                if bcu_sets[chatid_str].get("deltimer") != "0":
-                    DELTIMER = int(bcu_sets[chatid_str].get("deltimer"))
+                await message.client(EditBannedRequest(chat.id, user.id, ChatBannedRights(view_messages=False)))
+        if bcu_sets[chatid_str].get("notify") is True:
+            msgs = await utils.answer(message, self.strings("bcu_triggered", message).format(usertag))
+            if bcu_sets[chatid_str].get("deltimer") != "0":
+                DELTIMER = int(bcu_sets[chatid_str].get("deltimer"))
+                await asyncio.sleep(DELTIMER)
+                await self._delete_message(chat, message, UseBot)
+        return
+
+    async def p__bnd(
+        self,
+        chat: Chat,
+        user: User,
+        message: Message,
+        bnd: list,
+        bnd_sets: dict,
+    ) -> bool:
+        chatid_str = str(chat.id)
+        if message.is_private or chatid_str not in bnd or not isinstance(user, User):
+            return
+        UseBot = await self._check_inlinebot(chat, self.inline.bot_id, message)
+        if (
+            (chat.admin_rights or chat.creator)
+            and (not chat.admin_rights.delete_messages
+                 or not chat.admin_rights)
+        ):
+            return
+        usertag = self._get_usertag(user, user.id)
+        link = await self._get_link(message, chat.id, chat)
+
+        if not await is_member(chat.id, user.id, message):
+            await self._delete_message(chat, message, UseBot)
+            if (
+                chat.admin_rights.ban_users
+                and bnd_sets[chatid_str].get("mute") is not None
+                and bnd_sets[chatid_str].get("mute") != "0"
+            ):
+                MUTETIMER = bnd_sets[chatid_str].get("mute")
+                await self._mute(chat, user, message, user.id, MUTETIMER, UseBot)
+            if bnd_sets[chatid_str].get("notify") is True:
+                msgs = await utils.answer(message, self.strings("bnd_triggered").format(usertag, link))
+                if bnd_sets[chatid_str].get("deltimer") != "0":
+                    DELTIMER = int(bnd_sets[chatid_str].get("deltimer"))
                     await asyncio.sleep(DELTIMER)
-                    await message.client.delete_messages(chat_id, msgs)
+                    await self._delete_message(chat, message, UseBot)
+        return
 
-            return
+    async def watcher(self, message: Message):
+        self._global_queue += [message]
 
-        if chatid_str in bnd and isinstance(user, User):
-            if not await is_member(chat_id, user_id, message):
-                if UseBot:
-                    await self._delete_message(chat, message)
-                else:
-                    await message.delete()
-                if (
-                    chat.admin_rights.ban_users
-                    and bnd_sets[chatid_str].get("mute") is not None
-                    and bnd_sets[chatid_str].get("mute") != "0"
-                ):
-                    MUTETIMER = bnd_sets[chatid_str].get("mute")
-                    if UseBot:
-                        await self._mute(chat, user_id, MUTETIMER)
-                    else:
-                        await message.client.edit_permissions(chat_id, user_id,
-                                                              timedelta(minutes=MUTETIMER), send_messages=False)
-                if bnd_sets[chatid_str].get("notify") is True:
-                    msgs = await utils.answer(message, self.strings("bnd_triggered").format(usertag, link))
-                    if bnd_sets[chatid_str].get("deltimer") != "0":
-                        DELTIMER = int(bnd_sets[chatid_str].get("deltimer"))
-                        await asyncio.sleep(DELTIMER)
-                        if UseBot:
-                            await self._delete_message(chat, msgs)
-                        else:
-                            await message.client.delete_messages(chat_id, msgs)
+    async def _global_queue_handler(self):
+        while True:
+            while self._global_queue:
+                await self._global_queue_handler_process(self._global_queue.pop(0))
+            await asyncio.sleep(0)
+
+    async def _global_queue_handler_process(self, message: Message):
+        if not isinstance(getattr(message, "chat", 0), (Chat, Channel)) or not isinstance(message, Message):
             return
+        chat_id = utils.get_chat_id(message)
+        try:
+            user_id = (
+                getattr(message, "sender_id", False)
+                or message.action_message.action.users[0]
+            )
+        except Exception:
+            try:
+                user_id = message.action_message.action.from_id.user_id
+            except Exception:
+                try:
+                    user_id = message.from_id.user_id
+                except Exception:
+                    try:
+                        user_id = message.action_message.from_id.user_id
+                    except Exception:
+                        try:
+                            user_id = message.action.from_user.id
+                        except Exception:
+                            try:
+                                user_id = (await message.get_user()).id
+                            except Exception:
+                                logger.debug(f"Can't extract entity from event {type(message)}")
+                                return
+        user_id = (
+            int(str(user_id)[4:]) if str(user_id).startswith("-100") else int(user_id)
+        )
+        bnd = self._db.get(__name__, "bnd", [])
+        bnd_sets = self._db.get(__name__, "bnd_sets", {})
+        bcu = self._db.get(__name__, "bcu", [])
+        bcu_sets = self._db.get(__name__, "bcu_sets", {})
+        gl = self._db.get(__name__, "gl", [])
+        gl_sets = self._db.get(__name__, "gl_sets", {})
+        # if str(chat_id) in bnd or str(chat_id) in bcu or str(user_id) in gl:
+        if str(chat_id) in bnd or str(chat_id) in bcu:
+            logger.error("was auch immer")
+            chat = await self._client.get_entity(chat_id)
+            user = await self._client.get_entity(user_id)
+            # asyncio.get_event_loop().create_task(self.p__gl(chat, user, message, gl, gl_sets))
+            asyncio.get_event_loop().create_task(self.p__bnd(chat, user, message, bnd, bnd_sets))
+            asyncio.get_event_loop().create_task(self.p__bcu(chat, user, message, bcu, bcu_sets))
+        return
