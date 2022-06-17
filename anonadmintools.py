@@ -68,6 +68,12 @@ def represents_int(s: str) -> bool:
     except loader.validators.ValidationError:
         return False
 
+def represents_tgid(s: str) -> bool:
+    try:
+        loader.validators.TelegramID().validate(s)
+        return True
+    except loader.validators.ValidationError:
+        return False
 
 def to_bool(value: str) -> bool:
     try:
@@ -89,6 +95,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         "no_int": "<b>Your input was no int.</b>",
         "error": "<b>Your command was wrong.</b>",
         "permerror": "<b>You have no delete permissions in this chat.</b>",
+        "no_id": "<b>Your input was no TG ID.</b>",
         "bnd_start": "<b>[BlockNonDiscussion]</b> Activated in this chat.</b>",
         "bnd_stopped": "<b>[BlockNonDiscussion]</b> Deactivated in this chat.</b>",
         "bnd_turned_off": "<b>[BlockNonDiscussion]</b> The module is now turned off in all chats.</b>",
@@ -104,9 +111,16 @@ class ApodiktumAdminToolsMod(loader.Module):
         "bcu_turned_off": "<b>[BlockChannelUser]</b> The module is now turned off in all chats.</b>",
         "bcu_settings": ("<b>[BlockChannelUser]</b> Current settings in this "
                          "chat are:\n{}."),
-        "bcu_db_string": ("<b>[BlockChannelUser]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
-                          "\n\nChateinstellungen:\n{}"),
+        "bcu_db_string": ("<b>[BlockChannelUser]</b> Current Database:\n\nWatcher:\n{}"
+                          "\n\nChatsettings:\n{}"),
         "bcu_triggered": "{}, you can't write as a channel here.",
+        "gl_start": "<b>[Grouplogger]</b> Activated in this chat.</b>",
+        "gl_stopped": "<b>[Grouplogger]</b> Deactivated in this chat.</b>",
+        "gl_turned_off": "<b>[Grouplogger]</b> The module is now turned off in all chats.</b>",
+        "gl_settings": ("<b>[Grouplogger]</b> Current settings in this "
+                         "chat are:\n{}."),
+        "gl_db_string": ("<b>[Grouplogger]</b> Current Database:\n\nWatcher:\n{}"
+                          "\n\nChatsettings:\n{}"),
     }
 
     strings_de = {
@@ -114,6 +128,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         "no_int": "<b>Ihre Eingabe war keine Zahl.</b>",
         "error": "<b>Dein Befehl war falsch.</b>",
         "permerror": "<b>Sie haben in diesem Chat keine Löschberechtigung.</b>",
+        "no_id": "<b>Ihre Eingabe war keine TG ID.</b>",
         "bnd_start": "<b>[BlockNonDiscussion]</b> In diesem Chat aktiviert.</b>",
         "bnd_stopped": "<b>[BlockNonDiscussion]</b> Der Chat wurde aus der Liste entfernt.</b>",
         "bnd_turned_off": "<b>[BlockNonDiscussion]</b> In allen Chats ausgeschaltet.</b>",
@@ -131,7 +146,15 @@ class ApodiktumAdminToolsMod(loader.Module):
                          "Chat:\n{}."),
         "bcu_db_string": ("<b>[BlockChannelUser]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
                           "\n\nChateinstellungen:\n{}"),
-        "bcu_triggered": "{}, ты не можешь писать тут от имени канала.",
+        "bcu_triggered": "{}, du kannst hier nicht als Kanal schreiben.",
+        "gl_start": "<b>[Grouplogger]</b> In diesem Chat aktiviert.</b>",
+        "gl_stopped": "<b>[Grouplogger]</b> Der Chat wurde aus der Liste entfernt.</b>",
+        "gl_turned_off": "<b>[Grouplogger]</b> In allen Chats ausgeschaltet.</b>",
+        "gl_settings": ("<b>[Grouplogger]</b> Aktuelle Einstellungen in diesem "
+                         "Chat:\n{}."),
+        "gl_db_string": ("<b>[Grouplogger]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
+                          "\n\nChateinstellungen:\n{}"),
+
     }
 
     strings_ru = {
@@ -139,13 +162,14 @@ class ApodiktumAdminToolsMod(loader.Module):
         "no_int": "<b>Ваш ввод не является целочисленным типом (int)</b>",
         "error": "<b>Неверная команда</b>",
         "permerror": "<b>Вы не имеете права на удаление сообщений в этом чате</b>",
+        "no_id": "<b>Ты ввёл не телеграм айди.</b>",
         "bnd_start": "<b>[BlockNonDiscussion]</b> Активировано в этом чате</b>",
         "bnd_stopped": "<b>[BlockNonDiscussion]</b> Деактивировано в этом чате</b>",
         "bnd_turned_off": "<b>[BlockNonDiscussion]</b> Теперь этот модуль выключен во всех чатах</b>",
         "bnd_settings": ("<b>[BlockNonDiscussion]</b> Текущие настройки "
                          "в этом чате:\n{}."),
         "bnd_db_string": ("<b>[BlockNonDiscussion]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
-                          "\n\nChatsettings:\n{}"),
+                          "\n\Настройки чата:\n{}"),
         "bnd_triggered": ("{}, комментарии ограничены для участников группы обсуждения, "
                           "Пожалуйста, для начала присоединитесь к нашей группе обсуждения."
                           "\n\n👉🏻 {}\n\nС уважением, администраторы."),
@@ -155,8 +179,15 @@ class ApodiktumAdminToolsMod(loader.Module):
         "bcu_settings": ("<b>[BlockChannelUser]</b> Текущие настройки "
                          "в этом чате:\n{}."),
         "bcu_db_string": ("<b>[BlockChannelUser]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
-                          "\n\nChatsettings:\n{}"),
-        "bcu_triggered": "",
+                          "\n\Настройки чата:\n{}"),
+        "bcu_triggered": "{}, ты не можешь писать тут от имени канала.",
+        "gl_start": "<b>[Grouplogger]</b> Активировано в этом чате</b>",
+        "gl_stopped": "<b>[Grouplogger]</b> Деактивировано в этом чате</b>",
+        "gl_turned_off": "<b>[Grouplogger]</b> Теперь этот модуль выключен во всех чатах</b>",
+        "gl_settings": ("<b>[Grouplogger]</b> Текущие настройки "
+                         "в этом чате:\n{}."),
+        "gl_db_string": ("<b>[Grouplogger]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
+                          "\n\Настройки чата:\n{}"),
     }
 
     _global_queue = []
@@ -294,13 +325,13 @@ class ApodiktumAdminToolsMod(loader.Module):
     ):
         if isinstance(user, Channel):
             return (
-                f"<a href=https://t.me/{user.username}>{user.title}</a> (<code>{str(user_id)}</code>)"
+                f"<a href=tg://resolve?domain={user.username}>{user.title}</a> (<code>{str(user_id)}</code>)"
                 if user.username
                 else f"{user.title}(<code>{str(user_id)}</code>)"
             )
         return f"<a href=tg://user?id={str(user_id)}>{user.first_name}</a> (<code>{str(user_id)}</code>)"
 
-    async def _get_link(
+    async def _get_invite_link(
         self,
         chat: Union[Chat, int],
         message: Union[None, Message] = None,
@@ -470,6 +501,84 @@ class ApodiktumAdminToolsMod(loader.Module):
             self._db.set(__name__, "bcu_sets", sets)
             return await utils.answer(message, self.strings("bcu_settings").format(str(sets[chatid_str])))
 
+
+
+
+    async def glcmd(self, message: Message):
+        """Available commands:
+           .gl <chatid> <logchannelid>
+             - Logs given groupchat in given channel.
+           .gl rem <chatid>
+             - Removes given chat from watcher.
+           .gl db
+             - Shows the current database.
+           .gl settings
+             - Shows the current configuration of the chat.
+           .gl clearall
+             - Clears the db of the module."""
+
+        gl = self._db.get(__name__, "gl", [])
+        sets = self._db.get(__name__, "gl_sets", {})
+        args = utils.get_args_raw(message).lower()
+        args = str(args).split()
+        chat = await self._client.get_entity(message.chat)
+
+        if args and args[0] == "clearall":
+            self._db.set(__name__, "gl", [])
+            self._db.set(__name__, "gl_sets", {})
+            return await utils.answer(message, self.strings("gl_turned_off", message))
+
+        if args and args[0] == "db":
+            return await utils.answer(message, self.strings("gl_db_string").format(str(gl), str(sets)))
+
+        if args[0] is not None and represents_tgid(args[0]):
+            chatid = args[0]
+            chatid_str = str(chatid)
+        elif args[0] == "rem":
+            chatid = args[1]
+            chatid_str = str(chatid)
+        elif args[0] == "db":
+            return await utils.answer(message, self.strings("gl_db_string").format(str(sets)))
+        elif args[0] != "clearall":
+            return await utils.answer(message, self.strings("error"))
+        elif not args:
+            return await utils.answer(message, self.strings("error"))
+        if args:
+            if args[0] == "rem" and represents_tgid(args[1]) and chatid_str in gl:
+                gl.remove(chatid_str)
+                sets.pop(chatid_str)
+                self._db.set(__name__, "gl", gl)
+                self._db.set(__name__, "gl_sets", sets)
+                return await utils.answer(message, self.strings("gl_stopped"))
+            if args[0] == "rem" and (represents_tgid(args[1]) or chatid_str not in gl):
+                return await utils.answer(message, self.strings("error"))
+        if not represents_tgid(chatid_str):
+            return await utils.answer(message, self.strings("error"))
+        if chatid_str not in gl:
+            if not represents_tgid(args[0]) or not represents_tgid(args[1]):
+                return await utils.answer(message, self.strings("no_id"))
+            gl.append(chatid_str)
+            sets.setdefault(chatid_str, {})
+            sets[chatid_str].setdefault("logchannel", args[1])
+            self._db.set(__name__, "gl", gl)
+            self._db.set(__name__, "gl_sets", sets)
+            return await utils.answer(message, self.strings("gl_start"))
+        if args[0] is not None and args[1] is not None:
+            if not represents_tgid(args[0]) or not represents_tgid(args[1]):
+                return await utils.answer(message, self.strings("no_id"))
+            sets[chatid_str].update({"logchannel": args[1]})
+        elif args[0] != "settings" and chatid_str in gl:
+            return
+        self._db.set(__name__, "gl_sets", sets)
+        return await utils.answer(message, self.strings("gl_settings").format(str(sets[chatid_str])))
+
+
+
+
+
+
+
+
     async def p__bcu(
         self,
         chat: Union[Chat, int],
@@ -525,7 +634,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         ):
             return
         usertag = self._get_usertag(user)
-        link = await self._get_link(chat, message)
+        link = await self._get_invite_link(chat, message)
 
         if not await self._is_member(chat.id, user.id, self._tg_id, message):
             await self._delete_message(chat, message, UseBot)
@@ -543,6 +652,59 @@ class ApodiktumAdminToolsMod(loader.Module):
                     await asyncio.sleep(DELTIMER)
                     await self._delete_message(chat, msgs, UseBot)
         return
+
+
+
+
+
+
+
+
+    async def t__gl(
+        self,
+        chat: Union[Chat, int],
+        user: Union[User, int],
+        message: Union[None, Message] = None,
+        bnd: list,
+        bnd_sets: dict,
+    ) -> bool:
+        chatid_str = str(chat.id)
+        if message.is_private or chatid_str not in bnd or not isinstance(user, User):
+            return
+        UseBot = await self._check_inlinebot(chat, self.inline.bot_id, self._tg_id, message)
+        if (
+            (chat.admin_rights or chat.creator)
+            and (not chat.admin_rights.delete_messages
+                 or not chat.admin_rights)
+        ):
+            return
+        usertag = self._get_usertag(user)
+        link = await self._get_invite_link(chat, message)
+
+        if not await self._is_member(chat.id, user.id, self._tg_id, message):
+            await self._delete_message(chat, message, UseBot)
+            if (
+                chat.admin_rights.ban_users
+                and bnd_sets[chatid_str].get("mute") is not None
+                and bnd_sets[chatid_str].get("mute") != "0"
+            ):
+                MUTETIMER = bnd_sets[chatid_str].get("mute")
+                await self._mute(chat, user, message, MUTETIMER, UseBot)
+            if bnd_sets[chatid_str].get("notify") is True:
+                msgs = await utils.answer(message, self.strings("bnd_triggered").format(usertag, link))
+                if bnd_sets[chatid_str].get("deltimer") != "0":
+                    DELTIMER = int(bnd_sets[chatid_str].get("deltimer"))
+                    await asyncio.sleep(DELTIMER)
+                    await self._delete_message(chat, msgs, UseBot)
+        return
+
+
+
+
+
+
+
+
 
     async def watcher(self, message: Message):
         self._global_queue += [message]
@@ -589,12 +751,10 @@ class ApodiktumAdminToolsMod(loader.Module):
         bcu_sets = self._db.get(__name__, "bcu_sets", {})
         gl = self._db.get(__name__, "gl", [])
         gl_sets = self._db.get(__name__, "gl_sets", {})
-        # if str(chat_id) in bnd or str(chat_id) in bcu or str(user_id) in gl:
-        if str(chat_id) in bnd or str(chat_id) in bcu:
-            logger.error("was auch immer")
+        if str(chat_id) in bnd or str(chat_id) in bcu or str(user_id) in gl:
             chat = await self._client.get_entity(chat_id)
             user = await self._client.get_entity(user_id)
-            # asyncio.get_event_loop().create_task(self.p__gl(chat, user, message, gl, gl_sets))
+            asyncio.get_event_loop().create_task(self.p__gl(chat, user, message, gl, gl_sets))
             asyncio.get_event_loop().create_task(self.p__bnd(chat, user, message, bnd, bnd_sets))
             asyncio.get_event_loop().create_task(self.p__bcu(chat, user, message, bcu, bcu_sets))
         return
