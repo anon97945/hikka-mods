@@ -1,4 +1,4 @@
-__version__ = (0, 1, 7)
+__version__ = (0, 1, 8)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -66,7 +66,10 @@ async def is_member(c, u, message):
 
 @loader.tds
 class BlockNonDiscussionMod(loader.Module):
-    """Block Comments For Non Discussion Members"""
+    """
+    Block Comments For Non Discussion Members
+    Will not be updated any further! Download ApodiktumAdminTools instead!
+    """
     strings = {
         "name": "BlockNonDiscussion",
         "dev_channel": "@apodiktum_modules",

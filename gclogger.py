@@ -1,4 +1,4 @@
-__version__ = (0, 0, 24)
+__version__ = (0, 0, 25)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -50,7 +50,10 @@ def get_link(user: User or Channel) -> str:
 
 @loader.tds
 class GroupChannelLoggerMod(loader.Module):
-    """Log given chats/channel to given group/channel"""
+    """
+    Log given chats/channel to given group/channel
+    Will not be updated any further! Download ApodiktumAdminTools instead!
+    """
     strings = {
         "name": "Group/Channel Logger",
         "dev_channel": "@apodiktum_modules",
