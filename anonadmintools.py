@@ -331,7 +331,7 @@ class AnonAdminToolsMod(loader.Module):
                 if not represents_int(args[1]):
                     return await utils.answer(message, self.strings("no_int"))
                 sets[chatid_str].update({"deltimer": args[1]})
-            elif args[0] != "bnd_settings" and chatid_str in bnd:
+            elif args[0] != "settings" and chatid_str in bnd:
                 return
             self._db.set(__name__, "bnd_sets", sets)
             return await utils.answer(message, self.strings("bnd_settings").format(str(sets[chatid_str])))
@@ -412,7 +412,7 @@ class AnonAdminToolsMod(loader.Module):
                     return await utils.answer(message, self.strings("no_int", message))
                 else:
                     sets[chatid_str].update({"deltimer": args[1]})
-            elif args[0] != "bcu_settings" and chatid_str in bnd:
+            elif args[0] != "settings" and chatid_str in bcu:
                 return
             self._db.set(__name__, "bcu_sets", sets)
             return await utils.answer(message, self.strings("bcu_settings").format(str(sets[chatid_str])))
