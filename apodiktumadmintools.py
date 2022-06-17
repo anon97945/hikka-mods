@@ -540,13 +540,13 @@ class ApodiktumAdminToolsMod(loader.Module):
         chatid = chat.id
         chatid_str = str(chatid)
 
+        if not args:
+            return await utils.answer(message, self.strings("error"))
+
         if args and args[0] == "clearall":
             self._db.set(__name__, "gl", [])
             self._db.set(__name__, "gl_sets", {})
             return await utils.answer(message, self.strings("gl_turned_off", message))
-
-        if not args:
-            return await utils.answer(message, self.strings("error"))
         if args[0] == "db":
             return await utils.answer(message, self.strings("gl_db_string").format(str(gl), str(sets)))
         if args[0] is not None and represents_tgid(args[0]):
