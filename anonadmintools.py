@@ -18,7 +18,6 @@ __version__ = (0, 1, 5)
 import asyncio
 import logging
 
-from threading import Thread
 from typing import Union
 from datetime import timedelta
 from telethon import functions
@@ -76,7 +75,7 @@ def to_bool(value):
 
 
 async def is_member(c, u, message):
-    if c != message.client._tg_id:
+    if c != self._tg_id:
         try:
             await message.client.get_permissions(c, u)
             return True
@@ -260,7 +259,7 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     async def _check_inlinebot(self, chat, inline_bot_id, message):
         chat_id = getattr(chat, 'id', chat)
-        if chat_id != message.client._tg_id:
+        if chat_id != self._tg_id:
             try:
                 bot_perms = await message.client.get_permissions(chat_id, inline_bot_id)
                 if bot_perms.is_admin and bot_perms.ban_users and bot_perms.delete_messages:
@@ -278,9 +277,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 if user.username
                 else f"{user.title}(<code>{str(user_id)}</code>)"
             )
-
-        else:
-            return f"<a href=tg://user?id={str(user_id)}>{user.first_name}</a> (<code>{str(user_id)}</code>)"
+        return f"<a href=tg://user?id={str(user_id)}>{user.first_name}</a> (<code>{str(user_id)}</code>)"
 
     async def _get_link(self, message, chat_id, chat):
         if chat.username:
@@ -481,7 +478,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             if bcu_sets[chatid_str].get("deltimer") != "0":
                 DELTIMER = int(bcu_sets[chatid_str].get("deltimer"))
                 await asyncio.sleep(DELTIMER)
-                await self._delete_message(chat, message, UseBot)
+                await self._delete_message(chat, msgs, UseBot)
         return
 
     async def p__bnd(
@@ -519,7 +516,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 if bnd_sets[chatid_str].get("deltimer") != "0":
                     DELTIMER = int(bnd_sets[chatid_str].get("deltimer"))
                     await asyncio.sleep(DELTIMER)
-                    await self._delete_message(chat, message, UseBot)
+                    await self._delete_message(chat, msgs, UseBot)
         return
 
     async def watcher(self, message: Message):
