@@ -584,8 +584,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         chat: Union[Chat, int],
         user: Union[User, int],
         message: Union[None, Message] = None,
-        bcu: list,
-        bcu_sets: dict,
+        bcu: list = None,
+        bcu_sets: dict = None,
     ) -> bool:
         chatid_str = str(chat.id)
         if message.is_private or chatid_str not in bcu or not isinstance(user, Channel):
@@ -620,8 +620,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         chat: Union[Chat, int],
         user: Union[User, int],
         message: Union[None, Message] = None,
-        bnd: list,
-        bnd_sets: dict,
+        bnd: list = None,
+        bnd_sets: dict = None,
     ) -> bool:
         chatid_str = str(chat.id)
         if message.is_private or chatid_str not in bnd or not isinstance(user, User):
@@ -660,13 +660,13 @@ class ApodiktumAdminToolsMod(loader.Module):
 
 
 
-    async def t__gl(
+    async def p__gl(
         self,
         chat: Union[Chat, int],
         user: Union[User, int],
         message: Union[None, Message] = None,
-        bnd: list,
-        bnd_sets: dict,
+        bnd: list = None,
+        bnd_sets: dict = None,
     ) -> bool:
         chatid_str = str(chat.id)
         if message.is_private or chatid_str not in bnd or not isinstance(user, User):
