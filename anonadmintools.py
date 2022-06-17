@@ -18,20 +18,10 @@ __version__ = (0, 1, 0)
 import asyncio
 import logging
 
-from typing import List, Union
-from threading import Thread
+from typing import Union
 from datetime import timedelta
 from telethon import functions
 from telethon.errors import UserNotParticipantError
-from ..inline.types import InlineCall
-from aiogram.types import ChatPermissions
-from aiogram.utils.exceptions import (
-    MessageCantBeDeleted,
-    MessageToDeleteNotFound,
-    ChatNotFound,
-    BotKicked,
-)
-
 from telethon.tl.types import (
     Channel,
     Chat,
@@ -40,11 +30,17 @@ from telethon.tl.types import (
     User,
     ChatBannedRights,
 )
-
 from telethon.tl.functions.channels import (
     EditAdminRequest,
     InviteToChannelRequest,
     EditBannedRequest,
+)
+from aiogram.types import ChatPermissions
+from aiogram.utils.exceptions import (
+    MessageCantBeDeleted,
+    MessageToDeleteNotFound,
+    ChatNotFound,
+    BotKicked,
 )
 
 from .. import loader, utils
@@ -175,7 +171,6 @@ class AnonAdminToolsMod(loader.Module):
     async def client_ready(self, client, db):
         self._client = client
         self._db = db
-        # self._pt_task = asyncio.ensure_future(self._global_queue_handler())
 
     async def _mute(
         self,
@@ -219,7 +214,7 @@ class AnonAdminToolsMod(loader.Module):
             )
         except MessageToDeleteNotFound:
             pass
-        except (MessageCantBeDeleted, BotKicked, ChatNotFound) as e:
+        except (MessageCantBeDeleted, BotKicked, ChatNotFound):
             pass
 
     async def _promote_bot(self, chat_id: int):
@@ -436,7 +431,7 @@ class AnonAdminToolsMod(loader.Module):
         if (
             (chat.admin_rights or chat.creator)
             and (not chat.admin_rights.delete_messages
-            or not chat.admin_rights)
+                 or not chat.admin_rights)
         ):
             return
         if isinstance(user, Channel):
@@ -477,7 +472,7 @@ class AnonAdminToolsMod(loader.Module):
             link = ""
 
         if chatid_str in bcu and isinstance(user, Channel):
-            if (await is_linkedchannel(user, chat_id, user_id, message)):
+            if await is_linkedchannel(user, chat_id, user_id, message):
                 return
             if UseBot:
                 await self._delete_message(chat, message)
@@ -513,7 +508,7 @@ class AnonAdminToolsMod(loader.Module):
                         await self._mute(chat, user_id, MUTETIMER)
                     else:
                         await message.client.edit_permissions(chat_id, user_id,
-                                                            timedelta(minutes=MUTETIMER), send_messages=False)
+                                                              timedelta(minutes=MUTETIMER), send_messages=False)
                 if bnd_sets[chatid_str].get("notify") is True:
                     msgs = await utils.answer(message, self.strings("bnd_triggered").format(usertag, link))
                     if bnd_sets[chatid_str].get("deltimer") != "0":
