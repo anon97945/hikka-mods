@@ -1,4 +1,4 @@
-__version__ = (0, 9, 6)
+__version__ = (0, 9, 13)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -88,7 +88,9 @@ def to_bool(value: str) -> bool:
 
 @loader.tds
 class ApodiktumAdminToolsMod(loader.Module):
-    """Toolpack for Channel and Group Admins"""
+    """
+    Toolpack for Channel and Group Admins.
+    """
     strings = {
         "name": "ApodiktumAdminTools",
         "dev_channel": "@apodiktum_modules",
@@ -155,7 +157,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                         "Chat:\n{}"),
         "gl_db_string": ("<b>[Grouplogger]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
                          "\n\nChateinstellungen:\n{}"),
-
+        "_cls_doc": "Toolpack für Kanal- und Gruppenadministratoren.",
     }
 
     strings_ru = {
@@ -189,6 +191,47 @@ class ApodiktumAdminToolsMod(loader.Module):
                         "в этом чате:\n{}"),
         "gl_db_string": ("<b>[Grouplogger]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
                          "\n\nНастройки чата:\n{}"),
+        "_cmd_doc_bcu": (" ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n"
+                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Переключает BlockChannelUser для текущего чата.\n"
+                         ".bcu notify <true/false>\n"
+                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Переключает уведомление.\n"
+                         ".bcu ban <true/false>\n"
+                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Банит канал.\n"
+                         ".bcu deltimer <секунды/или 0>\n"
+                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Удаляет уведомление в считанные секунды. 0, чтобы отключить.\n"
+                         ".bcu settings\n"
+                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую конфигурацию чата.\n"
+                         ".bcu db\n"
+                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую базу данных.\n"
+                         ".bcu clearall\n"
+                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Очищает базу данных от BlockChannelUser.\n"),
+
+        "_cmd_doc_bnd": (" ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n"
+                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Переключает BlockNonDiscussion для текущего чата.\n"
+                         ".bnd notify <true/false>\n"
+                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Переключает уведомление.\n"
+                         ".bnd mute <минут/или 0>\n"
+                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Заглушает пользователя на Х минут. 0 чтобы отключить.\n"
+                         ".bnd deltimer <секунды/или 0>\n"
+                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Удаляет уведомление в считанные секунды. 0 чтобы отключить.\n"
+                         ".bnd settings\n"
+                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую конфигурацию чата.\n"
+                         ".bnd db\n"
+                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую базу данных.\n"
+                         ".bnd clearall\n"
+                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Очищает базу данных от BlockNonDiscussion.\n"),
+
+        "_cmd_doc_gl": ("⁭⁫⁪⁫⁬⁭⁫⁪<chatid> <logchannelid>\n"
+                        " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Регистрирует групповой чат на данном канале.\n"
+                        ".gl rem <chatid>\n"
+                        " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Удаляет данный чат из наблюдателя.\n"
+                        ".gl db\n"
+                        " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показываеттекущую базу данных.\n"
+                        ".gl settings\n"
+                        " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую конфигурацию чата.\n"
+                        ".gl clearall\n"
+                        " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Очищает базу данных от Group/Channel Logger.\n"),
+        "_cls_doc": "Пакет инструментов для администраторов каналов и групп.",
     }
 
     _global_queue = []
@@ -365,21 +408,20 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     async def bndcmd(self, message: Message):
         """
-        Available commands:
-           .bnd
-             - Toggles the module for the current chat.
-           .bnd notify <true/false>
-             - Toggles the notification message.
-           .bnd mute <minutes/or 0>
-             - Mutes the user for x minutes. 0 to disable.
-           .bnd deltimer <seconds/or 0>
-             - Deletes the notification message in seconds. 0 to disable.
-           .bnd settings
-             - Shows the current configuration of the chat.
-           .bnd db
-             - Shows the current database.
-           .bnd clearall
-             - Clears the db of the module
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Toggles BlockNonDiscussion for the current chat.
+        .bnd notify <true/false>
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Toggles the notification message.
+        .bnd mute <minutes/or 0>
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Mutes the user for x minutes. 0 to disable.
+        .bnd deltimer <seconds/or 0>
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Deletes the notification message in seconds. 0 to disable.
+        .bnd settings
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Shows the current configuration of the chat.
+        .bnd db
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Shows the current database.
+        .bnd clearall
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Clears the db of BlockNonDiscussion.
         """
         bnd = self.get("bnd", [])
         sets = self.get("bnd_sets", {})
@@ -446,21 +488,20 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     async def bcucmd(self, message: Message):
         """
-        Available commands:
-           .bcu
-             - Toggles the module for the current chat.
-           .bcu notify <true/false>
-             - Toggles the notification message.
-           .bcu ban <true/false>
-            - Bans the channel.
-           .bcu deltimer <seconds/or 0>
-            - Deletes the notification message in seconds. 0 to disable.
-           .bcu settings
-             - Shows the current configuration of the chat.
-           .bcu db
-             - Shows the current database.
-           .bcu clearall
-            - Clears the db of the module
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Toggles BlockChannelUser for the current chat.
+        .bcu notify <true/false>
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Toggles the notification message.
+        .bcu ban <true/false>
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Bans the channel.
+        .bcu deltimer <seconds/or 0>
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Deletes the notification message in seconds. 0 to disable.
+        .bcu settings
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Shows the current configuration of the chat.
+        .bcu db
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Shows the current database.
+        .bcu clearall
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Clears the db of BlockChannelUser.
         """
         bcu = self.get("bcu", [])
         sets = self.get("bcu_sets", {})
@@ -527,19 +568,17 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     async def glcmd(self, message: Message):
         """
-        Available commands:
-           .gl <chatid> <logchannelid>
-             - Logs given groupchat in given channel.
-           .gl rem <chatid>
-             - Removes given chat from watcher.
-           .gl db
-             - Shows the current database.
-           .gl settings
-             - Shows the current configuration of the chat.
-           .gl clearall
-             - Clears the db of the module.
+        <chatid> <logchannelid>
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Logs given groupchat in given channel.
+        .gl rem <chatid>
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Removes given chat from watcher.
+        .gl db
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Shows the current database.
+        .gl settings
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Shows the current configuration of the chat.
+        .gl clearall
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Clears the db of Group/Channel Logger.
         """
-
         gl = self.get("gl", [])
         sets = self.get("gl_sets", {})
         args = utils.get_args_raw(message).lower()
