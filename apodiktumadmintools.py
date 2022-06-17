@@ -1,4 +1,4 @@
-__version__ = (0, 1, 5)
+__version__ = (0, 9, 0)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -536,26 +536,31 @@ class ApodiktumAdminToolsMod(loader.Module):
         sets = self._db.get(__name__, "gl_sets", {})
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
+        chat = await self._client.get_entity(message.chat)
+        chatid = chat.id
+        chatid_str = str(chatid)
 
         if args and args[0] == "clearall":
             self._db.set(__name__, "gl", [])
             self._db.set(__name__, "gl_sets", {})
             return await utils.answer(message, self.strings("gl_turned_off", message))
 
-        if args and args[0] == "db":
-            return await utils.answer(message, self.strings("gl_db_string").format(str(gl), str(sets)))
-
-        if args[0] is not None and represents_tgid(args[0]):
-            chatid = args[0]
-            chatid_str = str(chatid)
-        elif args[0] == "rem":
-            chatid = args[1]
-            chatid_str = str(chatid)
-        elif args[0] == "db":
-            return await utils.answer(message, self.strings("gl_db_string").format(str(sets)))
-        elif args[0] != "clearall":
-            return await utils.answer(message, self.strings("error"))
-        elif not args:
+        if args:
+            if args[0] == "db":
+                return await utils.answer(message, self.strings("gl_db_string").format(str(gl), str(sets)))
+            if args[0] is not None and represents_tgid(args[0]):
+                chatid = args[0]
+                chatid_str = str(chatid)
+            elif args[0] == "rem":
+                chatid = args[1]
+                chatid_str = str(chatid)
+            elif args[0] == "db":
+                return await utils.answer(message, self.strings("gl_db_string").format(str(sets)))
+            elif args[0] != "clearall" and args[0] != "settings":
+                return await utils.answer(message, self.strings("error"))
+            elif not args:
+                return await utils.answer(message, self.strings("error"))
+        else:
             return await utils.answer(message, self.strings("error"))
         if args:
             if args[0] == "rem" and represents_tgid(args[1]) and chatid_str in gl:
@@ -577,7 +582,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             self._db.set(__name__, "gl", gl)
             self._db.set(__name__, "gl_sets", sets)
             return await utils.answer(message, self.strings("gl_start"))
-        if args[0] is not None and args[1] is not None:
+        if len(args) == 2:
             if not represents_tgid(args[0]) or not represents_tgid(args[1]):
                 return await utils.answer(message, self.strings("no_id"))
             sets[chatid_str].update({"logchannel": args[1]})
