@@ -328,17 +328,17 @@ class ApodiktumAdminToolsMod(loader.Module):
         if isinstance(user, Channel):
             if WithID:
                 return (f"<a href=tg://resolve?domain={user.username}>{user.title}</a> (<code>{str(user.id)}</code>)"
-                if user.username
+                    if user.username
                     else f"{user.title}(<code>{str(user.id)}</code>)")
             return (f"<a href=tg://resolve?domain={user.username}>{user.title}</a>"
-            if user.username
-                else f"{user.title}")
+                if user.username
+                    else f"{user.title}")
         if WithID:
             return (f"<a href=tg://resolve?domain={user.username}>{user.first_name}</a> (<code>{str(user.id)}</code>)"
-            if user.username
+                if user.username
                 else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a> (<code>{str(user.id)}</code>)")
         return (f"<a href=tg://resolve?domain={user.username}>{user.first_name}</a>"
-        if user.username
+            if user.username
             else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a>")
 
     @staticmethod
