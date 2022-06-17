@@ -1,3 +1,4 @@
+anonadmintools
 anoninfo
 auto_update
 blocknondiscussion
