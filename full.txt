@@ -1,8 +1,6 @@
 anoninfo
 apodiktumadmintools
 auto_update
-blocknondiscussion
-gclogger
 gtranslate
 heroku
 lcr
