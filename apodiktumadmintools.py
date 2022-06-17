@@ -308,7 +308,6 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     @staticmethod
     async def _is_member(
-        self,
         chat: Union[Chat, int],
         user: Union[User, int],
         self_id: Union[None, int],
@@ -323,7 +322,6 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     @staticmethod
     def _get_tag(
-        self,
         user: Union[User, int],
         WithID: bool = False,
     ):
@@ -353,7 +351,6 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     @staticmethod
     async def _get_invite_link(
-        self,
         chat: Union[Chat, int],
         message: Union[None, Message] = None,
     ):
@@ -691,7 +688,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 await message.client.send_message(logchan_id, message=msgs)
                 await message.client.send_message(logchan_id, link)
             return
-            
+
     async def watcher(self, message: Message):
         self._global_queue += [message]
 
