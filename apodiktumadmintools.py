@@ -232,19 +232,23 @@ class ApodiktumAdminToolsMod(loader.Module):
         self,
         chat: Union[Chat, int],
         user: Union[User, int],
+        message: Union[None, Message] = None,
+        UseBot: bool = False,
     ):
-        try:
-            if isinstance(user, Channel):
-                return await self.inline.bot.ban_chat_sender_chat(
+        if UseBot:
+            try:
+                if isinstance(user, Channel):
+                    return await self.inline.bot.ban_chat_sender_chat(
+                        int(f"-100{getattr(chat, 'id', chat)}"),
+                        f"-100{user.id}",
+                    )
+                return await self.inline.bot.kick_chat_member(
                     int(f"-100{getattr(chat, 'id', chat)}"),
-                    f"-100{user.id}",
+                    user.id,
                 )
-            return await self.inline.bot.kick_chat_member(
-                int(f"-100{getattr(chat, 'id', chat)}"),
-                user.id,
-            )
-        except Exception:
-            pass
+            except Exception:
+                pass
+        await message.client(EditBannedRequest(chat.id, user.id, ChatBannedRights(until_date=None, view_messages=True)))
 
     async def _delete_message(
         self,
@@ -286,10 +290,9 @@ class ApodiktumAdminToolsMod(loader.Module):
                     rank="Bot",
                 )
             )
-
             return True
         except Exception:
-            logger.exception("Cleaner promotion failed!")
+            logger.debug(f"Cleaner promotion in chat {chat_id} failed!")
             return False
 
     async def _check_inlinebot(
@@ -607,10 +610,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             return
         await self._delete_message(chat, message, UseBot)
         if bcu_sets[chatid_str].get("ban") is True:
-            if UseBot:
-                await self._ban(chat, user)
-            else:
-                await message.client(EditBannedRequest(chat.id, user.id, ChatBannedRights(view_messages=False)))
+            await self._ban(chat, user, message, UseBot)
         if bcu_sets[chatid_str].get("notify") is True:
             msgs = await utils.answer(message, self.strings("bcu_triggered", message).format(usertag))
             if bcu_sets[chatid_str].get("deltimer") != "0":
