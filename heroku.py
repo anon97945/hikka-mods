@@ -1,4 +1,4 @@
-__version__ = (0, 0, 10)
+__version__ = (0, 0, 12)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
@@ -11,7 +11,7 @@ __version__ = (0, 0, 10)
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
-# meta developer: @anon97945 | @apodiktum_modules
+# meta developer: @apodiktum_modules
 
 # scope: hikka_only
 # scope: hikka_min 1.2.4
@@ -48,7 +48,7 @@ class herokumanagerMod(loader.Module):
         "get_usage": "<b>[🦸🏼‍♂️ Hero!ku]</b> Getting Dyno usage...</b>",
         "wrong_platform": "[🦸🏼‍♂️ Hero!ku] This module only works on Heroku. {} is not supported.",
         "dyno_usage": ("<b><i><u>Dyno Usage</u></i></b>:\n"
-                       # "\nDyno usage for <code>{}</code>:\n"
+                       "\nDyno usage for <code>Hikka Userbot</code>:\n"
                        "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]\n"
                        "Dyno hours quota remaining this month:\n"
                        "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]"),
@@ -78,6 +78,11 @@ class herokumanagerMod(loader.Module):
         "get_var": "<b>[🦸🏼‍♂️ Hero!ku]</b> Получение переменной...</b>",
         "get_usage": "<b>[🦸🏼‍♂️ Hero!ku]</b> Получение использования Dyno...</b>",
         "wrong_platform": "[🦸🏼‍♂️ Hero!ku] Этот модуль работает только на Heroku. {} не поддерживается.",
+        "dyno_usage": ("<b><i><u>Использовано Дино</u></i></b>:\n"
+                       "\Использовано дино для <code>Hikka Userbot</code>:\n"
+                       "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]\n"
+                       "Оставшаяся квота Дино в этом месяце:\n"
+                       "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]"),
         "usage_error": ("<b>Error:</b> Произошла ошибка.\n"
                         "<code>{}</code>"),
         "var_changed": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Переменная успешно изменена на:\n"
@@ -116,6 +121,7 @@ class herokumanagerMod(loader.Module):
         self._happ, self._hconfig = heroku.get_app(api_token=main.hikka.api_token)
         self._heroku_api = "https://api.heroku.com"
         self._heroku_app_name = self._happ.name
+        self._heroku_app_id = self._happ.id
         self._heroku_api_key = os.environ["heroku_api_token"]
         self._heroku = heroku3.from_key(self._heroku_api_key)
         self._heroku_app = self._heroku.app(self._heroku_app_name)
@@ -153,15 +159,19 @@ class herokumanagerMod(loader.Module):
         minutes = math.floor(minutes_remaining % 60)
 
         # Current
+        logger.error(result)
         App = result["apps"]
         try:
-            App[0]["quota_used"]
+            for app in App:
+                if app["app_uuid"] == self._heroku_app_id:
+                    app_quota_used = app["quota_used"]
+                    break
         except IndexError:
             AppQuotaUsed = 0
             AppPercentage = 0
         else:
-            AppQuotaUsed = App[0]["quota_used"] / 60
-            AppPercentage = math.floor(App[0]["quota_used"] * 100 / quota)
+            AppQuotaUsed = app_quota_used / 60
+            AppPercentage = math.floor(app_quota_used * 100 / quota)
         AppHours = math.floor(AppQuotaUsed / 60)
         AppMinutes = math.floor(AppQuotaUsed % 60)
         # AppName = self._heroku_app_name
