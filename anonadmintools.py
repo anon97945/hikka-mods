@@ -21,7 +21,7 @@ import logging
 from typing import Union
 from datetime import timedelta
 from telethon import functions
-from telethon.errors import UserNotParticipantError
+from telethon.errors import UserNotParticipantError, MessageIdInvalidError
 from telethon.tl.types import (
     Channel,
     Chat,
@@ -318,18 +318,17 @@ class ApodiktumAdminToolsMod(loader.Module):
             except UserNotParticipantError:
                 return False
 
-    def _get_usertag(
+    def _get_tag(
         self,
         user: Union[User, int],
-        user_id: Union[None, int],
     ):
         if isinstance(user, Channel):
             return (
-                f"<a href=tg://resolve?domain={user.username}>{user.title}</a> (<code>{str(user_id)}</code>)"
+                f"<a href=tg://resolve?domain={user.username}>{user.title}</a> (<code>{str(user.id)}</code>)"
                 if user.username
-                else f"{user.title}(<code>{str(user_id)}</code>)"
+                else f"{user.title}(<code>{str(user.id)}</code>)"
             )
-        return f"<a href=tg://user?id={str(user_id)}>{user.first_name}</a> (<code>{str(user_id)}</code>)"
+        return f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a> (<code>{str(user.id)}</code>)"
 
     async def _get_invite_link(
         self,
@@ -501,9 +500,6 @@ class ApodiktumAdminToolsMod(loader.Module):
             self._db.set(__name__, "bcu_sets", sets)
             return await utils.answer(message, self.strings("bcu_settings").format(str(sets[chatid_str])))
 
-
-
-
     async def glcmd(self, message: Message):
         """Available commands:
            .gl <chatid> <logchannelid>
@@ -572,13 +568,6 @@ class ApodiktumAdminToolsMod(loader.Module):
         self._db.set(__name__, "gl_sets", sets)
         return await utils.answer(message, self.strings("gl_settings").format(str(sets[chatid_str])))
 
-
-
-
-
-
-
-
     async def p__bcu(
         self,
         chat: Union[Chat, int],
@@ -597,7 +586,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                  or not chat.admin_rights)
         ):
             return
-        usertag = self._get_usertag(user, user.id)
+        usertag = self._get_tag(user)
 
         if await is_linkedchannel(user, chat.id, message):
             return
@@ -633,7 +622,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                  or not chat.admin_rights)
         ):
             return
-        usertag = self._get_usertag(user)
+        usertag = self._get_tag(user)
         link = await self._get_invite_link(chat, message)
 
         if not await self._is_member(chat.id, user.id, self._tg_id, message):
@@ -665,9 +654,45 @@ class ApodiktumAdminToolsMod(loader.Module):
         chat: Union[Chat, int],
         user: Union[User, int],
         message: Union[None, Message] = None,
-        bnd: list = None,
-        bnd_sets: dict = None,
+        gl: list = None,
+        gl_sets: dict = None,
     ) -> bool:
+        chatid_str = str(chat.id)
+        if message.is_private or chatid_str not in gl:
+            return
+        logchan_id = int(gl_sets[chatid_str].get("logchannel"))
+        # chatsender = await message.get_sender()
+        # if chatsender is None:
+        #     return
+        # sender_tag = self._get_tag(chatsender)
+        chat_tag = self._get_tag(chat)
+        user_tag = self._get_tag(user)
+        link = (
+            f"Chat: {chat_tag} | #{str(chat.id)}"
+            + "\nUser: "
+            + str(user_tag)
+            + " ID: " + str(user.id)
+        )
+
+        try:
+            await message.forward_to(logchan_id)
+            await message.client.send_message(logchan_id, link)
+            return
+        except Exception as e:
+            if "FORWARDS_RESTRICTED" in str(e):
+                msgs = await message.client.get_messages(chat.id, ids=message.id)
+                await message.client.send_message(logchan_id, message=msgs)
+                await message.client.send_message(logchan_id, link)
+            return
+            
+
+
+
+
+
+
+
+
         chatid_str = str(chat.id)
         if message.is_private or chatid_str not in bnd or not isinstance(user, User):
             return
@@ -678,7 +703,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                  or not chat.admin_rights)
         ):
             return
-        usertag = self._get_usertag(user)
+        usertag = self._get_tag(user)
         link = await self._get_invite_link(chat, message)
 
         if not await self._is_member(chat.id, user.id, self._tg_id, message):
