@@ -561,15 +561,14 @@ class ApodiktumAdminToolsMod(loader.Module):
             return await utils.answer(message, self.strings("error"))
         elif not args:
             return await utils.answer(message, self.strings("error"))
-        if args:
-            if args[0] == "rem" and represents_tgid(args[1]) and chatid_str in gl:
-                gl.remove(chatid_str)
-                sets.pop(chatid_str)
-                self._db.set(__name__, "gl", gl)
-                self._db.set(__name__, "gl_sets", sets)
-                return await utils.answer(message, self.strings("gl_stopped"))
-            if args[0] == "rem" and (represents_tgid(args[1]) or chatid_str not in gl):
-                return await utils.answer(message, self.strings("error"))
+        if args[0] == "rem" and represents_tgid(args[1]) and chatid_str in gl:
+            gl.remove(chatid_str)
+            sets.pop(chatid_str)
+            self._db.set(__name__, "gl", gl)
+            self._db.set(__name__, "gl_sets", sets)
+            return await utils.answer(message, self.strings("gl_stopped"))
+        if args[0] == "rem" and (represents_tgid(args[1]) or chatid_str not in gl):
+            return await utils.answer(message, self.strings("error"))
         if not represents_tgid(chatid_str):
             return await utils.answer(message, self.strings("error"))
         if chatid_str not in gl:
