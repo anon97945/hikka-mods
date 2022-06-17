@@ -643,13 +643,6 @@ class ApodiktumAdminToolsMod(loader.Module):
                     await self._delete_message(chat, msgs, UseBot)
         return
 
-
-
-
-
-
-
-
     async def p__gl(
         self,
         chat: Union[Chat, int],
@@ -662,10 +655,6 @@ class ApodiktumAdminToolsMod(loader.Module):
         if message.is_private or chatid_str not in gl:
             return
         logchan_id = int(gl_sets[chatid_str].get("logchannel"))
-        # chatsender = await message.get_sender()
-        # if chatsender is None:
-        #     return
-        # sender_tag = self._get_tag(chatsender)
         chat_tag = self._get_tag(chat)
         user_tag = self._get_tag(user)
         link = (
@@ -686,52 +675,6 @@ class ApodiktumAdminToolsMod(loader.Module):
                 await message.client.send_message(logchan_id, link)
             return
             
-
-
-
-
-
-
-
-
-        chatid_str = str(chat.id)
-        if message.is_private or chatid_str not in bnd or not isinstance(user, User):
-            return
-        UseBot = await self._check_inlinebot(chat, self.inline.bot_id, self._tg_id, message)
-        if (
-            (chat.admin_rights or chat.creator)
-            and (not chat.admin_rights.delete_messages
-                 or not chat.admin_rights)
-        ):
-            return
-        usertag = self._get_tag(user)
-        link = await self._get_invite_link(chat, message)
-
-        if not await self._is_member(chat.id, user.id, self._tg_id, message):
-            await self._delete_message(chat, message, UseBot)
-            if (
-                chat.admin_rights.ban_users
-                and bnd_sets[chatid_str].get("mute") is not None
-                and bnd_sets[chatid_str].get("mute") != "0"
-            ):
-                MUTETIMER = bnd_sets[chatid_str].get("mute")
-                await self._mute(chat, user, message, MUTETIMER, UseBot)
-            if bnd_sets[chatid_str].get("notify") is True:
-                msgs = await utils.answer(message, self.strings("bnd_triggered").format(usertag, link))
-                if bnd_sets[chatid_str].get("deltimer") != "0":
-                    DELTIMER = int(bnd_sets[chatid_str].get("deltimer"))
-                    await asyncio.sleep(DELTIMER)
-                    await self._delete_message(chat, msgs, UseBot)
-        return
-
-
-
-
-
-
-
-
-
     async def watcher(self, message: Message):
         self._global_queue += [message]
 
