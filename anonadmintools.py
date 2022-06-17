@@ -273,13 +273,14 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     def _get_usertag(self, user, user_id):
         if isinstance(user, Channel):
-            if user.username:
-                usertag = f"<a href=https://t.me/{user.username}>{user.title}</a> (<code>" + str(user_id) + "</code>)"
-            else:
-                usertag = f"{user.title}(<code>" + str(user_id) + "</code>)"
+            return (
+                f"<a href=https://t.me/{user.username}>{user.title}</a> (<code>{str(user_id)}</code>)"
+                if user.username
+                else f"{user.title}(<code>{str(user_id)}</code>)"
+            )
+
         else:
-            usertag = f"<a href=tg://user?id={str(user_id)}>{user.first_name}</a> (<code>" + str(user_id) + "</code>)"
-        return usertag
+            return f"<a href=tg://user?id={str(user_id)}>{user.first_name}</a> (<code>{str(user_id)}</code>)"
 
     async def _get_link(self, message, chat_id, chat):
         if chat.username:
