@@ -60,7 +60,6 @@ async def is_linkedchannel(
     if full_chat.full_chat.linked_chat_id:
         return chat == int(full_chat.full_chat.linked_chat_id)
 
-
 def represents_int(s: str) -> bool:
     try:
         loader.validators.Integer().validate(s)
@@ -322,14 +321,31 @@ class ApodiktumAdminToolsMod(loader.Module):
     def _get_tag(
         self,
         user: Union[User, int],
+        WithID: bool = False,
     ):
-        if isinstance(user, Channel):
+        if isinstance(user, Channel) and WithID:
             return (
                 f"<a href=tg://resolve?domain={user.username}>{user.title}</a> (<code>{str(user.id)}</code>)"
                 if user.username
                 else f"{user.title}(<code>{str(user.id)}</code>)"
             )
-        return f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a> (<code>{str(user.id)}</code>)"
+        elif isinstance(user, Channel):
+             return (
+                f"<a href=tg://resolve?domain={user.username}>{user.title}</a>"
+                if user.username
+                else f"{user.title}"
+            )
+        if WithID:
+            return (
+                f"<a href=tg://resolve?domain={user.username}>{user.first_name}</a> (<code>{str(user.id)}</code>)"
+                if user.username
+                else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a> (<code>{str(user.id)}</code>)"
+            )
+        return (
+            f"<a href=tg://resolve?domain={user.username}>{user.first_name}</a>"
+            if user.username
+            else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a>"
+        )
 
     async def _get_invite_link(
         self,
@@ -587,9 +603,9 @@ class ApodiktumAdminToolsMod(loader.Module):
                  or not chat.admin_rights)
         ):
             return
-        usertag = self._get_tag(user)
+        usertag = self._get_tag(user, True)
 
-        if await is_linkedchannel(user, chat.id, message):
+        if await is_linkedchannel(user, chat, message):
             return
         await self._delete_message(chat, message, UseBot)
         if bcu_sets[chatid_str].get("ban") is True:
@@ -623,7 +639,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                  or not chat.admin_rights)
         ):
             return
-        usertag = self._get_tag(user)
+        usertag = self._get_tag(user, True)
         link = await self._get_invite_link(chat, message)
 
         if not await self._is_member(chat.id, user.id, self._tg_id, message):
@@ -655,15 +671,12 @@ class ApodiktumAdminToolsMod(loader.Module):
         if message.is_private or chatid_str not in gl:
             return
         logchan_id = int(gl_sets[chatid_str].get("logchannel"))
-        chat_tag = self._get_tag(chat)
-        user_tag = self._get_tag(user)
+        chat_tag = self._get_tag(chat, False)
+        user_tag = self._get_tag(user, False)
         link = (
-            f"Chat: {chat_tag} | #{str(chat.id)}"
-            + "\nUser: "
-            + str(user_tag)
-            + " ID: " + str(user.id)
+            f"Chat: {chat_tag} | #ID_{chat.id}"
+            + f"\nUser: {user_tag} | #ID_{chat.id}"
         )
-
         try:
             await message.forward_to(logchan_id)
             await message.client.send_message(logchan_id, link)
@@ -720,7 +733,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         bcu_sets = self._db.get(__name__, "bcu_sets", {})
         gl = self._db.get(__name__, "gl", [])
         gl_sets = self._db.get(__name__, "gl_sets", {})
-        if str(chat_id) in bnd or str(chat_id) in bcu or str(user_id) in gl:
+        if str(chat_id) in bnd or str(chat_id) in bcu or str(chat_id) in gl:
             chat = await self._client.get_entity(chat_id)
             user = await self._client.get_entity(user_id)
             asyncio.get_event_loop().create_task(self.p__gl(chat, user, message, gl, gl_sets))
