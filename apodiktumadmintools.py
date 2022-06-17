@@ -543,7 +543,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         if not args:
             return await utils.answer(message, self.strings("error"))
 
-        if args and args[0] == "clearall":
+        if args[0] == "clearall":
             self._db.set(__name__, "gl", [])
             self._db.set(__name__, "gl_sets", {})
             return await utils.answer(message, self.strings("gl_turned_off", message))
