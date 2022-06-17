@@ -53,16 +53,11 @@ logger = logging.getLogger(__name__)
 
 
 async def is_linkedchannel(e, c, u, message):
-    if not isinstance(e, User):
-        full_chat = await message.client(functions.channels.GetFullChannelRequest(channel=u))
-        if full_chat.full_chat.linked_chat_id:
-            linked_channel_id = int(full_chat.full_chat.linked_chat_id)
-            if c == linked_channel_id:
-                return True
-            else:
-                return False
-    else:
+    if isinstance(e, User):
         return False
+    full_chat = await message.client(functions.channels.GetFullChannelRequest(channel=u))
+    if full_chat.full_chat.linked_chat_id:
+        return c == int(full_chat.full_chat.linked_chat_id)
 
 
 def represents_int(s):
@@ -229,24 +224,22 @@ class AnonAdminToolsMod(loader.Module):
 
     async def _promote_bot(self, chat_id: int):
         try:
-            await self._client(
-                InviteToChannelRequest(
-                    int(chat_id),
-                    [self.inline.bot_username],
-                )
-            )
+            await self._client(InviteToChannelRequest(chat_id, [self.inline.bot_username]))
         except Exception:
             logger.warning("Unable to invite cleaner to chat. Maybe he's already there?")  # fmt: skip
 
         try:
             await self._client(
                 EditAdminRequest(
-                    channel=int(chat_id),
+                    channel=chat_id,
                     user_id=self.inline.bot_username,
-                    admin_rights=ChatAdminRights(ban_users=True, delete_messages=True),
+                    admin_rights=ChatAdminRights(
+                        ban_users=True, delete_messages=True
+                    ),
                     rank="Bot",
                 )
             )
+
             return True
         except Exception:
             logger.exception("Cleaner promotion failed!")
@@ -263,9 +256,7 @@ class AnonAdminToolsMod(loader.Module):
                     return True
                 return False
             except UserNotParticipantError:
-                if chat.admin_rights.add_admins and await self._promote_bot(chat_id):
-                    return True
-                return False
+                return bool(chat.admin_rights.add_admins and await self._promote_bot(chat_id))
 
     async def bndcmd(self, message: Message):
         """Available commands:
@@ -369,11 +360,10 @@ class AnonAdminToolsMod(loader.Module):
         chatid = chat.id
         chatid_str = str(chatid)
 
-        if args:
-            if args[0] == "clearall":
-                self._db.set(__name__, "bcu", [])
-                self._db.set(__name__, "bcu_sets", {})
-                return await utils.answer(message, self.strings("bcu_turned_off", message))
+        if args and args[0] == "clearall":
+            self._db.set(__name__, "bcu", [])
+            self._db.set(__name__, "bcu_sets", {})
+            return await utils.answer(message, self.strings("bcu_turned_off", message))
 
         if args and args[0] == "db":
             return await utils.answer(message, self.strings("bcu_db_string").format(str(bcu), str(sets)))
@@ -382,11 +372,13 @@ class AnonAdminToolsMod(loader.Module):
             await utils.answer(message, self.strings("not_dc", message))
             return
 
-        if not chat.admin_rights and not chat.creator:
+        if (
+            (chat.admin_rights or chat.creator)
+            and not chat.admin_rights.delete_messages
+            or not chat.admin_rights
+            and not chat.creator
+        ):
             return await utils.answer(message, self.strings("permerror", message))
-        else:
-            if not chat.admin_rights.delete_messages:
-                return await utils.answer(message, self.strings("permerror", message))
 
         if not args:
             if chatid_str not in bcu:
@@ -406,7 +398,7 @@ class AnonAdminToolsMod(loader.Module):
                 return await utils.answer(message, self.strings("bcu_stopped", message))
 
         if chatid_str in bcu:
-            if args[0] == "notify" and args[1] is not None and chatid_str in bcu:
+            if args[0] == "notify" and args[1] is not None:
                 if not isinstance(to_bool(args[1]), bool):
                     return await utils.answer(message, self.strings("error", message))
                 sets[chatid_str].update({"notify": to_bool(args[1])})
