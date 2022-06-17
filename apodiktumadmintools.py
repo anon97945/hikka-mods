@@ -325,11 +325,11 @@ class ApodiktumAdminToolsMod(loader.Module):
         user: Union[User, int],
         WithID: bool = False,
     ):
-        if isinstance(user, Channel) and WithID:
-            return (f"<a href=tg://resolve?domain={user.username}>{user.title}</a> (<code>{str(user.id)}</code>)"
-                if user.username
-                else f"{user.title}(<code>{str(user.id)}</code>)")
         if isinstance(user, Channel):
+            if WithID:
+                return (f"<a href=tg://resolve?domain={user.username}>{user.title}</a> (<code>{str(user.id)}</code>)"
+                    if user.username
+                    else f"{user.title}(<code>{str(user.id)}</code>)")
             return (f"<a href=tg://resolve?domain={user.username}>{user.title}</a>"
                 if user.username
                 else f"{user.title}")
