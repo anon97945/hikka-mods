@@ -31,6 +31,7 @@ from telethon.tl.types import (
     ChatBannedRights,
 )
 from telethon.tl.functions.channels import (
+    GetFullChannelRequest,
     EditAdminRequest,
     InviteToChannelRequest,
     EditBannedRequest,
@@ -48,15 +49,19 @@ from .. import loader, utils
 logger = logging.getLogger(__name__)
 
 
-async def is_linkedchannel(e, c, u, message):
-    if isinstance(e, User):
+async def is_linkedchannel(
+    chat: Union[Chat, int],
+    user: Union[User, int],
+    message: Union[None, Message] = None,
+):
+    if isinstance(user, User):
         return False
-    full_chat = await message.client(functions.channels.GetFullChannelRequest(channel=u))
+    full_chat = await message.client(GetFullChannelRequest(channel=user.id))
     if full_chat.full_chat.linked_chat_id:
-        return c == int(full_chat.full_chat.linked_chat_id)
+        return chat == int(full_chat.full_chat.linked_chat_id)
 
 
-def represents_int(s):
+def represents_int(s: str) -> bool:
     try:
         loader.validators.Integer().validate(s)
         return True
@@ -64,7 +69,7 @@ def represents_int(s):
         return False
 
 
-def to_bool(value):
+def to_bool(value: str) -> bool:
     try:
         loader.validators.Boolean().validate(value)
         if str(value).lower() in ("true"):
@@ -173,7 +178,6 @@ class ApodiktumAdminToolsMod(loader.Module):
         chat: Union[Chat, int],
         user: Union[User, int],
         message: Union[None, Message] = None,
-        userid: Union[None, int] = None,
         MUTETIMER: int = 0,
         UseBot: bool = False,
     ):
@@ -181,7 +185,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             try:
                 await self.inline.bot.restrict_chat_member(
                     int(f"-100{getattr(chat, 'id', chat)}"),
-                    userid,
+                    user.id,
                     permissions=ChatPermissions(can_send_messages=False),
                     until_date=timedelta(minutes=MUTETIMER),
                 )
@@ -195,12 +199,11 @@ class ApodiktumAdminToolsMod(loader.Module):
     async def _ban(
         self,
         chat: Union[Chat, int],
-        userid,
     ):
         try:
             await self.inline.bot.kick_chat_member(
                 int(f"-100{getattr(chat, 'id', chat)}"),
-                userid
+                user.id
             )
         except Exception:
             pass
@@ -225,7 +228,10 @@ class ApodiktumAdminToolsMod(loader.Module):
                 pass
         return await message.delete()
 
-    async def _promote_bot(self, chat_id: int):
+    async def _promote_bot(
+        self,
+        chat_id: Union[Chat, int],
+    ):
         try:
             await self._client(InviteToChannelRequest(chat_id, [self.inline.bot_username]))
         except Exception:
@@ -248,7 +254,13 @@ class ApodiktumAdminToolsMod(loader.Module):
             logger.exception("Cleaner promotion failed!")
             return False
 
-    async def _check_inlinebot(self, chat, inline_bot_id, self_id, message):
+    async def _check_inlinebot(
+        self,
+        chat: Union[Chat, int],
+        inline_bot_id: Union[None, int],
+        self_id: Union[None, int],
+        message: Union[None, Message] = None,
+    ):
         chat_id = getattr(chat, 'id', chat)
         if chat_id != self_id:
             try:
@@ -261,15 +273,25 @@ class ApodiktumAdminToolsMod(loader.Module):
             except UserNotParticipantError:
                 return bool(chat.admin_rights.add_admins and await self._promote_bot(chat_id))
 
-    async def _is_member(self, c, u, self_id, message):
-        if c != self_id:
+    async def _is_member(
+        self,
+        chat: Union[Chat, int],
+        user: Union[User, int],
+        self_id: Union[None, int],
+        message: Union[None, Message] = None,
+    ):
+        if chat != self_id:
             try:
-                await message.client.get_permissions(c, u)
+                await message.client.get_permissions(chat, user)
                 return True
             except UserNotParticipantError:
                 return False
 
-    def _get_usertag(self, user, user_id):
+    def _get_usertag(
+        self,
+        user: Union[User, int],
+        user_id: Union[None, int],
+    ):
         if isinstance(user, Channel):
             return (
                 f"<a href=https://t.me/{user.username}>{user.title}</a> (<code>{str(user_id)}</code>)"
@@ -278,11 +300,15 @@ class ApodiktumAdminToolsMod(loader.Module):
             )
         return f"<a href=tg://user?id={str(user_id)}>{user.first_name}</a> (<code>{str(user_id)}</code>)"
 
-    async def _get_link(self, message, chat_id, chat):
+    async def _get_link(
+        self,
+        chat: Union[Chat, int],
+        message: Union[None, Message] = None,
+    ):
         if chat.username:
             link = f"https://t.me/{chat.username}"
         elif chat.admin_rights.invite_users:
-            link = await message.client(functions.channels.GetFullChannelRequest(channel=chat_id))
+            link = await message.client(GetFullChannelRequest(channel=chat.id))
             link = link.full_chat.exported_invite.link
         else:
             link = ""
@@ -366,7 +392,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             self._db.set(__name__, "bnd_sets", sets)
             return await utils.answer(message, self.strings("bnd_settings").format(str(sets[chatid_str])))
 
-    async def bcucmd(self, message):
+    async def bcucmd(self, message: Message):
         """Available commands:
            .bcu
              - Toggles the module for the current chat.
@@ -446,9 +472,9 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     async def p__bcu(
         self,
-        chat: Chat,
-        user: User,
-        message: Message,
+        chat: Union[Chat, int],
+        user: Union[User, int],
+        message: Union[None, Message] = None,
         bcu: list,
         bcu_sets: dict,
     ) -> bool:
@@ -464,12 +490,12 @@ class ApodiktumAdminToolsMod(loader.Module):
             return
         usertag = self._get_usertag(user, user.id)
 
-        if await is_linkedchannel(user, chat.id, user.id, message):
+        if await is_linkedchannel(user, chat.id, message):
             return
         await self._delete_message(chat, message, UseBot)
         if bcu_sets[chatid_str].get("ban") is True:
             if UseBot:
-                await self._ban(chat, user.id)
+                await self._ban(chat)
             else:
                 await message.client(EditBannedRequest(chat.id, user.id, ChatBannedRights(view_messages=False)))
         if bcu_sets[chatid_str].get("notify") is True:
@@ -482,9 +508,9 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     async def p__bnd(
         self,
-        chat: Chat,
-        user: User,
-        message: Message,
+        chat: Union[Chat, int],
+        user: Union[User, int],
+        message: Union[None, Message] = None,
         bnd: list,
         bnd_sets: dict,
     ) -> bool:
@@ -498,8 +524,8 @@ class ApodiktumAdminToolsMod(loader.Module):
                  or not chat.admin_rights)
         ):
             return
-        usertag = self._get_usertag(user, user.id)
-        link = await self._get_link(message, chat.id, chat)
+        usertag = self._get_usertag(user)
+        link = await self._get_link(chat, message)
 
         if not await self._is_member(chat.id, user.id, self._tg_id, message):
             await self._delete_message(chat, message, UseBot)
@@ -509,7 +535,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 and bnd_sets[chatid_str].get("mute") != "0"
             ):
                 MUTETIMER = bnd_sets[chatid_str].get("mute")
-                await self._mute(chat, user, message, user.id, MUTETIMER, UseBot)
+                await self._mute(chat, user, message, MUTETIMER, UseBot)
             if bnd_sets[chatid_str].get("notify") is True:
                 msgs = await utils.answer(message, self.strings("bnd_triggered").format(usertag, link))
                 if bnd_sets[chatid_str].get("deltimer") != "0":
