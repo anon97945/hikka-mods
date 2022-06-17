@@ -72,7 +72,7 @@ def represents_int(s: str) -> bool:
 def to_bool(value: str) -> bool:
     try:
         loader.validators.Boolean().validate(value)
-        if str(value).lower() in ("true"):
+        if value.lower() in "true":
             return True
         return False
     except loader.validators.ValidationError:
