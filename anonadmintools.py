@@ -385,12 +385,11 @@ class AnonAdminToolsMod(loader.Module):
                 self._db.set(__name__, "bcu", bcu)
                 self._db.set(__name__, "bcu_sets", sets)
                 return await utils.answer(message, self.strings("bcu_start", message))
-            else:
-                bcu.remove(chatid_str)
-                sets.pop(chatid_str)
-                self._db.set(__name__, "bcu", bcu)
-                self._db.set(__name__, "bcu_sets", sets)
-                return await utils.answer(message, self.strings("bcu_stopped", message))
+            bcu.remove(chatid_str)
+            sets.pop(chatid_str)
+            self._db.set(__name__, "bcu", bcu)
+            self._db.set(__name__, "bcu_sets", sets)
+            return await utils.answer(message, self.strings("bcu_stopped", message))
 
         if chatid_str in bcu:
             if args[0] == "notify" and args[1] is not None:
@@ -400,13 +399,11 @@ class AnonAdminToolsMod(loader.Module):
             elif args[0] == "ban" and args[1] is not None and chatid_str in bcu:
                 if not isinstance(to_bool(args[1]), bool):
                     return await utils.answer(message, self.strings("no_int", message))
-                else:
-                    sets[chatid_str].update({"ban": to_bool(args[1])})
+                sets[chatid_str].update({"ban": to_bool(args[1])})
             elif args[0] == "deltimer" and args[1] is not None and chatid_str in bcu:
                 if not represents_int(args[1]):
                     return await utils.answer(message, self.strings("no_int", message))
-                else:
-                    sets[chatid_str].update({"deltimer": args[1]})
+                sets[chatid_str].update({"deltimer": args[1]})
             elif args[0] != "settings" and chatid_str in bcu:
                 return
             self._db.set(__name__, "bcu_sets", sets)
