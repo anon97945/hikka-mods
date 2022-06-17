@@ -74,15 +74,6 @@ def to_bool(value):
         return None
 
 
-async def is_member(c, u, message):
-    if c != self._tg_id:
-        try:
-            await message.client.get_permissions(c, u)
-            return True
-        except UserNotParticipantError:
-            return False
-
-
 @loader.tds
 class ApodiktumAdminToolsMod(loader.Module):
     """Toolpack for Channel and Group Admins"""
@@ -257,9 +248,9 @@ class ApodiktumAdminToolsMod(loader.Module):
             logger.exception("Cleaner promotion failed!")
             return False
 
-    async def _check_inlinebot(self, chat, inline_bot_id, message):
+    async def _check_inlinebot(self, chat, inline_bot_id, self_id, message):
         chat_id = getattr(chat, 'id', chat)
-        if chat_id != self._tg_id:
+        if chat_id != self_id:
             try:
                 bot_perms = await message.client.get_permissions(chat_id, inline_bot_id)
                 if bot_perms.is_admin and bot_perms.ban_users and bot_perms.delete_messages:
@@ -269,6 +260,14 @@ class ApodiktumAdminToolsMod(loader.Module):
                 return False
             except UserNotParticipantError:
                 return bool(chat.admin_rights.add_admins and await self._promote_bot(chat_id))
+
+    async def _is_member(self, c, u, self_id, message):
+        if c != self_id:
+            try:
+                await message.client.get_permissions(c, u)
+                return True
+            except UserNotParticipantError:
+                return False
 
     def _get_usertag(self, user, user_id):
         if isinstance(user, Channel):
@@ -456,7 +455,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         chatid_str = str(chat.id)
         if message.is_private or chatid_str not in bcu or not isinstance(user, Channel):
             return
-        UseBot = await self._check_inlinebot(chat, self.inline.bot_id, message)
+        UseBot = await self._check_inlinebot(chat, self.inline.bot_id, self._tg_id, message)
         if (
             (chat.admin_rights or chat.creator)
             and (not chat.admin_rights.delete_messages
@@ -492,7 +491,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         chatid_str = str(chat.id)
         if message.is_private or chatid_str not in bnd or not isinstance(user, User):
             return
-        UseBot = await self._check_inlinebot(chat, self.inline.bot_id, message)
+        UseBot = await self._check_inlinebot(chat, self.inline.bot_id, self._tg_id, message)
         if (
             (chat.admin_rights or chat.creator)
             and (not chat.admin_rights.delete_messages
@@ -502,7 +501,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         usertag = self._get_usertag(user, user.id)
         link = await self._get_link(message, chat.id, chat)
 
-        if not await is_member(chat.id, user.id, message):
+        if not await self._is_member(chat.id, user.id, self._tg_id, message):
             await self._delete_message(chat, message, UseBot)
             if (
                 chat.admin_rights.ban_users
