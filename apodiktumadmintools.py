@@ -20,8 +20,7 @@ import logging
 
 from typing import Union
 from datetime import timedelta
-from telethon import functions
-from telethon.errors import UserNotParticipantError, MessageIdInvalidError
+from telethon.errors import UserNotParticipantError
 from telethon.tl.types import (
     Channel,
     Chat,
@@ -60,6 +59,7 @@ async def is_linkedchannel(
     if full_chat.full_chat.linked_chat_id:
         return chat == int(full_chat.full_chat.linked_chat_id)
 
+
 def represents_int(s: str) -> bool:
     try:
         loader.validators.Integer().validate(s)
@@ -67,12 +67,14 @@ def represents_int(s: str) -> bool:
     except loader.validators.ValidationError:
         return False
 
+
 def represents_tgid(s: str) -> bool:
     try:
         loader.validators.TelegramID().validate(s)
         return True
     except loader.validators.ValidationError:
         return False
+
 
 def to_bool(value: str) -> bool:
     try:
@@ -117,9 +119,9 @@ class ApodiktumAdminToolsMod(loader.Module):
         "gl_stopped": "<b>[Grouplogger]</b> Deactivated in this chat.</b>",
         "gl_turned_off": "<b>[Grouplogger]</b> The module is now turned off in all chats.</b>",
         "gl_settings": ("<b>[Grouplogger]</b> Current settings in this "
-                         "chat are:\n{}."),
+                        "chat are:\n{}."),
         "gl_db_string": ("<b>[Grouplogger]</b> Current Database:\n\nWatcher:\n{}"
-                          "\n\nChatsettings:\n{}"),
+                         "\n\nChatsettings:\n{}"),
     }
 
     strings_de = {
@@ -150,9 +152,9 @@ class ApodiktumAdminToolsMod(loader.Module):
         "gl_stopped": "<b>[Grouplogger]</b> Der Chat wurde aus der Liste entfernt.</b>",
         "gl_turned_off": "<b>[Grouplogger]</b> In allen Chats ausgeschaltet.</b>",
         "gl_settings": ("<b>[Grouplogger]</b> Aktuelle Einstellungen in diesem "
-                         "Chat:\n{}."),
+                        "Chat:\n{}."),
         "gl_db_string": ("<b>[Grouplogger]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
-                          "\n\nChateinstellungen:\n{}"),
+                         "\n\nChateinstellungen:\n{}"),
 
     }
 
@@ -168,7 +170,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         "bnd_settings": ("<b>[BlockNonDiscussion]</b> Текущие настройки "
                          "в этом чате:\n{}."),
         "bnd_db_string": ("<b>[BlockNonDiscussion]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
-                          "\n\Настройки чата:\n{}"),
+                          "\n\nНастройки чата:\n{}"),
         "bnd_triggered": ("{}, комментарии ограничены для участников группы обсуждения, "
                           "Пожалуйста, для начала присоединитесь к нашей группе обсуждения."
                           "\n\n👉🏻 {}\n\nС уважением, администраторы."),
@@ -178,15 +180,15 @@ class ApodiktumAdminToolsMod(loader.Module):
         "bcu_settings": ("<b>[BlockChannelUser]</b> Текущие настройки "
                          "в этом чате:\n{}."),
         "bcu_db_string": ("<b>[BlockChannelUser]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
-                          "\n\Настройки чата:\n{}"),
+                          "\n\nНастройки чата:\n{}"),
         "bcu_triggered": "{}, ты не можешь писать тут от имени канала.",
         "gl_start": "<b>[Grouplogger]</b> Активировано в этом чате</b>",
         "gl_stopped": "<b>[Grouplogger]</b> Деактивировано в этом чате</b>",
         "gl_turned_off": "<b>[Grouplogger]</b> Теперь этот модуль выключен во всех чатах</b>",
         "gl_settings": ("<b>[Grouplogger]</b> Текущие настройки "
-                         "в этом чате:\n{}."),
+                        "в этом чате:\n{}."),
         "gl_db_string": ("<b>[Grouplogger]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
-                          "\n\Настройки чата:\n{}"),
+                         "\n\nНастройки чата:\n{}"),
     }
 
     _global_queue = []
@@ -304,6 +306,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             except UserNotParticipantError:
                 return bool(chat.admin_rights.add_admins and await self._promote_bot(chat_id))
 
+    @staticmethod
     async def _is_member(
         self,
         chat: Union[Chat, int],
@@ -318,6 +321,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             except UserNotParticipantError:
                 return False
 
+    @staticmethod
     def _get_tag(
         self,
         user: Union[User, int],
@@ -328,9 +332,9 @@ class ApodiktumAdminToolsMod(loader.Module):
                 f"<a href=tg://resolve?domain={user.username}>{user.title}</a> (<code>{str(user.id)}</code>)"
                 if user.username
                 else f"{user.title}(<code>{str(user.id)}</code>)"
-            )
+       )
         elif isinstance(user, Channel):
-             return (
+            return (
                 f"<a href=tg://resolve?domain={user.username}>{user.title}</a>"
                 if user.username
                 else f"{user.title}"
@@ -347,6 +351,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a>"
         )
 
+    @staticmethod
     async def _get_invite_link(
         self,
         chat: Union[Chat, int],
@@ -534,7 +539,6 @@ class ApodiktumAdminToolsMod(loader.Module):
         sets = self._db.get(__name__, "gl_sets", {})
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
-        chat = await self._client.get_entity(message.chat)
 
         if args and args[0] == "clearall":
             self._db.set(__name__, "gl", [])
