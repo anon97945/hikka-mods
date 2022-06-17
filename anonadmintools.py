@@ -230,6 +230,7 @@ class ApodiktumAdminToolsMod(loader.Module):
     async def _ban(
         self,
         chat: Union[Chat, int],
+        user: Union[User, int],
     ):
         try:
             await self.inline.bot.kick_chat_member(
@@ -593,7 +594,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         await self._delete_message(chat, message, UseBot)
         if bcu_sets[chatid_str].get("ban") is True:
             if UseBot:
-                await self._ban(chat)
+                await self._ban(chat, user)
             else:
                 await message.client(EditBannedRequest(chat.id, user.id, ChatBannedRights(view_messages=False)))
         if bcu_sets[chatid_str].get("notify") is True:
