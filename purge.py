@@ -134,7 +134,8 @@ class ApodiktumPurgeMod(loader.Module):
         self._db = db
         self._client = client
 
-    async def _purge_messages(self, message, chat, user_id, purge_count):
+    @staticmethod
+    async def _purge_messages(message, chat, user_id, purge_count):
         itermsg = message.client.iter_messages(entity=chat, limit=None)
         msgs = []
         msg_count = 0
@@ -242,7 +243,8 @@ class ApodiktumPurgeMod(loader.Module):
             return logger.info(self.strings("purge_success").format(str(msg_count)))
         return
 
-    async def delcmd(self, message: Message):
+    @staticmethod
+    async def delcmd(message: Message):
         """
         Delete the replied message.
         """
