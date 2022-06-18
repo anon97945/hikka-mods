@@ -1,10 +1,12 @@
-__version__ = (0, 1, 67)
+__version__ = (0, 1, 68)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
 # █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
 #
 #              © Copyright 2022
+#
+#             developed by @anon97945
 #
 #          https://t.me/apodiktum_modules
 #
@@ -98,7 +100,7 @@ async def speedup(bytes_io_file, fn, fe, speed):
 class TTSMod(loader.Module):
     strings = {
         "name": "Text To Speech",
-        "dev_channel": "@apodiktum_modules",
+        "developer": "@anon97945",
         "no_speed": "<b>[TTS]</b> Your input was an unsupported speed value.",
         "needspeed": "You need to provide a speed value between 0.25 and 3.0.",
         "no_reply": "<b>[TTS]</b> You need to reply to a voicemessage.",

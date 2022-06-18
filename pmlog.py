@@ -1,10 +1,12 @@
-__version__ = (0, 0, 18)
+__version__ = (0, 0, 19)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
 # █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
 #
 #              © Copyright 2022
+#
+#             developed by @anon97945
 #
 #          https://t.me/apodiktum_modules
 #
@@ -42,10 +44,12 @@ def get_link(user: User or Channel) -> str:
 
 @loader.tds
 class PMLogMod(loader.Module):
-    """Logs PMs to a group/channel"""
+    """
+    Logs PMs to a group/channel
+    """
     strings = {
         "name": "PM Logger",
-        "dev_channel": "@apodiktum_modules",
+        "developer": "@anon97945",
         "_cfg_log_group": "Group or channel ID where to send the PMs.",
         "_cfg_whitelist": "Whether the list is a for excluded(True) or included(False) chats.",
         "_cfg_bots": "Whether to log bots or not.",

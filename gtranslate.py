@@ -1,10 +1,12 @@
-__version__ = (0, 0, 48)
+__version__ = (0, 0, 49)
 
 
 # ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
 # █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
 #
 #              © Copyright 2022
+#
+#             developed by @anon97945
 #
 #          https://t.me/apodiktum_modules
 #
@@ -32,10 +34,12 @@ logger = logging.getLogger(__name__)
 
 @loader.tds
 class gtranslateMod(loader.Module):
-    """Google Translator"""
+    """
+    Google Translator
+    """
     strings = {
         "name": "Google Translator",
-        "dev_channel": "@apodiktum_modules",
+        "developer": "@anon97945",
         "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
         "invalid_text": "Invalid text to translate",
         "split_error": "Python split() error, if there is -> in the text, it must split!",
