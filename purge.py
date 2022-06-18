@@ -136,7 +136,6 @@ class ApodiktumPurgeMod(loader.Module):
 
     async def _purge_messages(self, message, chat, user_id, purge_count):
         itermsg = message.client.iter_messages(entity=chat, limit=None)
-        i = 0
         msgs = []
         msg_count = 0
         if purge_count == "all":
@@ -148,6 +147,7 @@ class ApodiktumPurgeMod(loader.Module):
                         await message.client.delete_messages(chat, msgs)
                         msgs.clear()
         else:
+            i = 0
             async for msg in itermsg:
                 if msg.sender_id == user_id:
                     if i == purge_count:
@@ -199,16 +199,13 @@ class ApodiktumPurgeMod(loader.Module):
         chat = message.chat
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
-        if not represents_int(args[0]) and not "all" in args:
+        if not represents_int(args[0]) and "all" not in args:
             await utils.answer(message, self.strings("no_int"))
             return
         if len(args) > 1:
             await utils.answer(message, self.strings("err_cmd_wrong"))
             return
-        if len(args) == 1 and "all" in args:
-            purge_count = "all"
-        else:
-            purge_count = int(args[0])
+        purge_count = "all" if len(args) == 1 and "all" in args else int(args[0])
         user_id = self._tg_id
         await message.delete()
         msg_count = await self._purge_messages(message, chat, user_id, purge_count)
@@ -224,11 +221,10 @@ class ApodiktumPurgeMod(loader.Module):
         Delete all messages from the replied user.
         """
         chat = message.chat
-        if message.is_reply:
-            reply = await message.get_reply_message()
-            user_id = reply.sender_id
-        else:
+        if not message.is_reply:
             return await utils.answer(message, self.strings("no_reply"))
+        reply = await message.get_reply_message()
+        user_id = reply.sender_id
         if (
             (chat.admin_rights or chat.creator)
             and not chat.admin_rights.delete_messages
@@ -273,7 +269,7 @@ class ApodiktumPurgeMod(loader.Module):
                 if i == 2:
                     old_msg = msg.raw_text
                     new_msg = args
-                    await msg.edit(args)
+                    await msg.edit(new_msg)
                     await message.delete()
                     break
                 i = i + 1
@@ -287,7 +283,7 @@ class ApodiktumPurgeMod(loader.Module):
         """
         args = utils.get_args_raw(message)
         args = str(args).split()
-        if not len(args) >= 2:
+        if len(args) < 2:
             await utils.answer(message, self.strings("err_cmd_wrong"))
             return
         counter = int(" ".join(args[:1]))
