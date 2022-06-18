@@ -5,6 +5,7 @@ gtranslate
 heroku
 lcr
 pmlog
+purge
 pypng
 save_message
 tts

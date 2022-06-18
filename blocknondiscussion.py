@@ -1,10 +1,12 @@
-__version__ = (0, 1, 8)
+__version__ = (0, 1, 10)
 
 
-# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
-# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
+# ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
+# █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
 #              © Copyright 2022
+#
+#             developed by @anon97945
 #
 #          https://t.me/apodiktum_modules
 #
@@ -72,7 +74,7 @@ class BlockNonDiscussionMod(loader.Module):
     """
     strings = {
         "name": "BlockNonDiscussion",
-        "dev_channel": "@apodiktum_modules",
+        "developer": "@anon97945",
         "not_dc": "<b>This is no Groupchat.</b>",
         "start": "<b>[BlockNonDiscussion]</b> Activated in this chat.</b>",
         "stopped": "<b>[BlockNonDiscussion]</b> Deactivated in this chat.</b>",

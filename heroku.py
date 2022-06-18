@@ -1,10 +1,12 @@
-__version__ = (0, 0, 12)
+__version__ = (0, 0, 14)
 
 
-# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
-# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
+# ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
+# █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
 #              © Copyright 2022
+#
+#             developed by @anon97945
 #
 #          https://t.me/apodiktum_modules
 #
@@ -38,7 +40,7 @@ class herokumanagerMod(loader.Module):
     """
     strings = {
         "name": "Heroku Manager",
-        "dev_channel": "@apodiktum_modules",
+        "developer": "@anon97945",
         "restarted": "<b>[🦸🏼‍♂️ Hero!ku]</b> Restart finished.",
         "args_error": "<b>[🦸🏼‍♂️ Hero!ku]</b> Too many args are given.",
         "no_args": "<b>[🦸🏼‍♂️ Hero!ku]</b> No args are given...</b>",

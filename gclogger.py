@@ -1,10 +1,12 @@
-__version__ = (0, 0, 25)
+__version__ = (0, 0, 27)
 
 
-# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
-# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
+# ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
+# █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
 #              © Copyright 2022
+#
+#             developed by @anon97945
 #
 #          https://t.me/apodiktum_modules
 #
@@ -56,7 +58,7 @@ class GroupChannelLoggerMod(loader.Module):
     """
     strings = {
         "name": "Group/Channel Logger",
-        "dev_channel": "@apodiktum_modules",
+        "developer": "@anon97945",
         "start": "<b>[Grouplogger]</b> activated.",
         "stopped": "<b>[Grouplogger]</b> deactivated.",
         "turned_off": "<b>[Grouplogger]</b> Is now turned off.",

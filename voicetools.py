@@ -1,10 +1,12 @@
-__version__ = (1, 0, 5)
+__version__ = (1, 0, 7)
 
 
-# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
-# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
+# ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
+# █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
 #              © Copyright 2022
+#
+#             developed by @anon97945
 #
 #          https://t.me/apodiktum_modules
 #
@@ -235,10 +237,12 @@ class Waveshaper():
 
 @loader.tds
 class voicetoolsMod(loader.Module):
-    """Change, pitch, enhance your Voice. Also includes optional automatic modes."""
+    """
+    Change, pitch, enhance your Voice. Also includes optional automatic modes.
+    """
     strings = {
         "name": "VoiceTools",
-        "dev_channel": "@apodiktum_modules",
+        "developer": "@anon97945",
         "dalek_start": "<b>[VoiceTools]</b> Auto DalekVoice activated.",
         "dalek_stopped": "<b>[VoiceTools]</b> Auto DalekVoice deactivated.",
         "vcanon_start": "<b>[VoiceTools]</b> Auto AnonVoice activated.",

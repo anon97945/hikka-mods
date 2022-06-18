@@ -1,10 +1,12 @@
-__version__ = (0, 9, 13)
+__version__ = (0, 9, 16)
 
 
-# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
-# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
+# ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
+# █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
 #              © Copyright 2022
+#
+#             developed by @anon97945
 #
 #          https://t.me/apodiktum_modules
 #
@@ -92,10 +94,10 @@ class ApodiktumAdminToolsMod(loader.Module):
     Toolpack for Channel and Group Admins.
     """
     strings = {
-        "name": "ApodiktumAdminTools",
-        "dev_channel": "@apodiktum_modules",
+        "name": "Apodiktum Admin Tools",
+        "developer": "@anon97945",
         "not_dc": "<b>This is no Groupchat.</b>",
-        "no_int": "<b>Your input was no int.</b>",
+        "no_int": "<b>Your input was no Integer.</b>",
         "error": "<b>Your command was wrong.</b>",
         "permerror": "<b>You have no delete permissions in this chat.</b>",
         "no_id": "<b>Your input was no TG ID.</b>",
@@ -128,7 +130,7 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     strings_de = {
         "not_dc": "<b>Dies ist kein Gruppenchat.</b>",
-        "no_int": "<b>Ihre Eingabe war keine Zahl.</b>",
+        "no_int": "<b>Ihre Eingabe war keine Integer.</b>",
         "error": "<b>Dein Befehl war falsch.</b>",
         "permerror": "<b>Sie haben in diesem Chat keine Löschberechtigung.</b>",
         "no_id": "<b>Ihre Eingabe war keine TG ID.</b>",

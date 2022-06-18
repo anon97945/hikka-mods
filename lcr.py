@@ -1,17 +1,19 @@
-__version__ = (0, 0, 13)
+__version__ = (0, 0, 15)
 
 
-# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
-# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
+# ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
+# █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
 #              © Copyright 2022
+#
+#             developed by @anon97945
 #
 #          https://t.me/apodiktum_modules
 #
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
-# meta developer: @anon97945
+# meta developer: @apodiktum_modules
 
 # scope: hikka_only
 
@@ -27,10 +29,12 @@ logger = logging.getLogger(__name__)
 
 @loader.tds
 class lcrMod(loader.Module):
-    """Telegram Login Code Reciever"""
+    """
+    Telegram Login Code Reciever
+    """
     strings = {
         "name": "Login Code Reciever",
-        "dev_channel": "@apodiktum_modules",
+        "developer": "@anon97945",
         "timeouterror": "<b>TimeoutError:</b>\nNo login code for {} seconds recieved.",
         "error": "<b>No Login code in the message found.</b>",
         "waiting": "<b>Waiting for the login code...</b>",

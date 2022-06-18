@@ -1,10 +1,12 @@
-__version__ = (0, 0, 8)
+__version__ = (0, 0, 10)
 
 
-# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
-# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
+# ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
+# █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
 #              © Copyright 2022
+#
+#             developed by @anon97945
 #
 #          https://t.me/apodiktum_modules
 #
@@ -39,10 +41,12 @@ def get_ids(link):
 
 @loader.tds
 class SaveMessageMod(loader.Module):
-    """Get Message/Media from given link (also works for forward restricted content)."""
+    """
+    Get Message/Media from given link (also works for forward restricted content).
+    """
     strings = {
         "name": "Save Message",
-        "dev_channel": "@apodiktum_modules",
+        "developer": "@anon97945",
         "done": "<b>Forward to saved complete.</b>",
         "invalid_link": "<b>Invalid link.</b>",
     }

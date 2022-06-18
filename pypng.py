@@ -1,10 +1,12 @@
-__version__ = (0, 0, 6)
+__version__ = (0, 0, 8)
 
 
-# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
-# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
+# ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
+# █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
 #              © Copyright 2022
+#
+#             developed by @anon97945
 #
 #          https://t.me/apodiktum_modules
 #
@@ -45,10 +47,12 @@ async def _filefromurl(message):
 
 @loader.tds
 class pypngMod(loader.Module):
-    """Converts link/file from Py to PNG."""
+    """
+    Converts link/file from Py to PNG.
+    """
     strings = {
         "name": "PyPNG",
-        "dev_channel": "@apodiktum_modules",
+        "developer": "@anon97945",
         "py2png": "<b>Converting Py to PNG</b>",
         "no_file": "<b>Reply to file.py or url</b>",
         "no_url": "<b>No url in reply found.</b>",

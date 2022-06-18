@@ -1,12 +1,14 @@
-__version__ = (0, 1, 6)
+__version__ = (0, 1, 8)
 
 
-# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
-# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
+# ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
+# █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
 #              © Copyright 2022
 #
-# https://t.me/apodiktum_modules | https://t.me/hikariatama
+#             developed by @anon97945
+#
+#          https://t.me/apodiktum_modules
 #
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
@@ -31,11 +33,13 @@ logger = logging.getLogger(__name__)
 
 @loader.tds
 class anoninfoMod(loader.Module):
-    """Show userbot info"""
+    """
+    Show userbot info
+    """
 
     strings = {
         "name": "AnonInfo",
-        "dev_channel": "@apodiktum_modules",
+        "developer": "@anon97945",
         "owner": "Owner",
         "version": "Version",
         "build": "Build",

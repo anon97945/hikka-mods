@@ -1,10 +1,12 @@
-__version__ = (1, 0, 5)
+__version__ = (1, 0, 7)
 
 
-# ▄▀█ █▄░█ █▀█ █▄░█ █▀▄ ▄▀█ █▀▄▀█ █░█ █▀
-# █▀█ █░▀█ █▄█ █░▀█ █▄▀ █▀█ █░▀░█ █▄█ ▄█
+# ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
+# █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
 #              © Copyright 2022
+#
+#             developed by @anon97945
 #
 #          https://t.me/apodiktum_modules
 #
@@ -47,10 +49,12 @@ async def buttonhandler(bmsg, chatid, caption1, caption2, data_btn1, data_btn2):
 
 @loader.tds
 class AutoUpdateMod(loader.Module):
-    """Automatically update your Hikka Userbot"""
+    """
+    Automatically update your Hikka Userbot
+    """
     strings = {
         "name": "HikkaAutoUpdater",
-        "dev_channel": "@apodiktum_modules",
+        "developer": "@anon97945",
         "updating": ("Hikka Userbot will be automatically updated in {} seconds.\n\n"
                      "Changelog:\n{}"),
         "_cfg_auto_update": "Whether the Hikka Userbot should automatically update or not.",
