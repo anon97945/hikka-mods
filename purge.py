@@ -167,7 +167,7 @@ class ApodiktumPurgeMod(loader.Module):
     async def _purge_user_messages(chat, user_id, purge_count, message):
         msgs = []
         msg_count = 0
-        itermsg = message.client.iter_messages(entity=chat, limit=None, reverse=False)
+        itermsg = message.client.iter_messages(entity=chat)
         if purge_count == "all":
             async for msg in itermsg:
                 if msg.sender_id == user_id:
@@ -195,7 +195,7 @@ class ApodiktumPurgeMod(loader.Module):
     @staticmethod
     async def _purge_messages(chat, self_id, can_delete, message):
         msg_count = 0
-        itermsg = message.client.iter_messages(entity=chat, min_id=message.reply_to_msg_id, limit=None, reverse=True)
+        itermsg = message.client.iter_messages(entity=chat, min_id=message.reply_to_msg_id, reverse=True)
         msgs = [message.reply_to_msg_id]
         async for msg in itermsg:
             if can_delete:
