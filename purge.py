@@ -1,4 +1,4 @@
-__version__ = (0, 1, 8)
+__version__ = (0, 1, 9)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -69,11 +69,11 @@ class ApodiktumPurgeMod(loader.Module):
         "_cls_doc:": ("Module zum entfernen von Nachrichten(normalerweise spam, etc.).\n"
                       "Check `.config apodiktum purge` um das Protokollieren zu aktivieren/deaktivieren."),
         "_cmd_doc_del": ("Löscht die beantwortete Nachricht.\n"
-                         "- Verwendung: .del <Antwort>"),
+                         "- Verwendung: .adel <Antwort>"),
         "_cmd_doc_edit": ("Bearbeitet die letzte Nachricht.\n"
                           "- Verwendung: .edit <Nachricht>"),
         "_cmd_doc_purge": ("Löscht alle Nachrichten bis zu und inklusive der Antwort.\n"
-                           "- Verwendung: .purge <Antwort>"),
+                           "- Verwendung: .apurge <Antwort>"),
         "_cmd_doc_purgeme": ("Löscht x (oder alle) Nachrichten von dir.\n"
                              "- Verwendung: .purgeme <anzahl/all>"),
         "_cmd_doc_purgeuser": ("Löscht alle Nachrichten von einem Nutzer.\n"
@@ -89,11 +89,11 @@ class ApodiktumPurgeMod(loader.Module):
         "edit_success": ("Bearbeitung erfolgreich.\n"
                          "Alte Nachricht:\n{}\n\n\nNeue Nachricht:\n{}"),
         "err_cmd_wrong": "<b>Deine Eingabe war falsch.</b>",
-        "err_purge_start": "<b>Bitte antworte auf eine Nachricht, um den Purge zu starten.</b>",
+        "err_purge_start": "<b>Bitte antworte auf eine Nachricht, um die Löschung zu starten.</b>",
         "no_int": "<b>Dein Eingabe war kein Integer.</b>",
         "permerror": "<b>Du hast keine Berechtigung, diesen Befehl zu verwenden.</b>",
         "purge_cmpl": "<b>Purge fertig!</b>\n<code>{}</code> Nachrichten wurden gelöscht.",
-        "purge_success": "Purge von {} Nachrichten erfolgreich durchgeführt.",
+        "purge_success": "Löschung von {} Nachrichten erfolgreich durchgeführt.",
         "sd_success": "Nachricht nach {} Sekunden erfolgreich gelöscht.",
     }
 
@@ -105,9 +105,9 @@ class ApodiktumPurgeMod(loader.Module):
         "_cls_doc": ("Модуль для очистки спама и т.д."
                      "Проверьте `.config apodiktum purge`, чтобы включить/выключить ведение журнала."),
         "_cmd_doc_edit": ("Редактирует последнее сообщение.\n"
-                          "- Использование: .edit <сообщение>"),
+                          "- Использование: .aedit <сообщение>"),
         "_cmd_doc_purge": ("Удаляет все сообщения до и включая ответ.\n"
-                           "- Использование: .purge <реплай>"),
+                           "- Использование: .apurge <реплай>"),
         "_cmd_doc_purgeme": ("Удаляет x (или все) сообщений от вас.\n"
                              "- Использование: .purgeme <количество/все>"),
         "_cmd_doc_purgeuser": ("Удаляет все сообщения от определенного пользователя.\n"
@@ -165,10 +165,10 @@ class ApodiktumPurgeMod(loader.Module):
         self._client = client
 
     @staticmethod
-    async def _purge_messages(message, chat, user_id, purge_count):
-        itermsg = message.client.iter_messages(entity=chat, limit=None)
+    async def _purge_user_messages(chat, user_id, purge_count, message):
         msgs = []
         msg_count = 0
+        itermsg = message.client.iter_messages(entity=chat, limit=None, reverse=True)
         if purge_count == "all":
             async for msg in itermsg:
                 if msg.sender_id == user_id:
@@ -193,28 +193,49 @@ class ApodiktumPurgeMod(loader.Module):
             await message.client.delete_messages(chat, msgs)
         return msg_count
 
-    async def purgecmd(self, message: Message):
-        """
-        Delete all messages up to and including the reply.
-        - Usage: .purge <reply>
-        """
-        chat = message.chat
+    @staticmethod
+    async def _purge_messages(chat, self_id, can_delete, message):
         msgs = []
-        itermsg = message.client.iter_messages(chat, min_id=message.reply_to_msg_id, reverse=True)
         msg_count = 0
-        if message.reply_to_msg_id is not None:
-            async for msg in itermsg:
+        itermsg = message.client.iter_messages(entity=chat, min_id=message.reply_to_msg_id, limit=None, reverse=True)
+        msgs.append(message.reply_to_msg_id)
+        async for msg in itermsg:
+            if not can_delete:
+                if msg.sender_id == self_id:
+                    msgs.append(msg)
+                    if msg.id != message.id:
+                        msg_count += 1
+            else:
                 msgs.append(msg)
                 msg_count += 1
-                msgs.append(message.reply_to_msg_id)
-                if len(msgs) == 100:
-                    await message.client.delete_messages(chat, msgs)
-                    msgs = []
+            if len(msgs) >= 99:
+                await message.client.delete_messages(chat, msgs)
+                msgs.clear() 
+        if msgs:
+            await message.client.delete_messages(chat, msgs)
+        return msg_count
+
+    async def apurgecmd(self, message: Message):
+        """
+        Delete all messages up to and including the reply.
+        - Usage: .apurge <reply>
+        """
+        chat = message.chat
+        can_delete = False
+        if (
+            (chat.admin_rights or chat.creator)
+            and chat.admin_rights.delete_messages
+            or chat.admin_rights
+            and chat.creator
+        ):
+            can_delete = True
+
+        if message.reply_to_msg_id is not None:
+            msg_count = await self._purge_messages(chat, self._tg_id, can_delete, message)
         else:
             await utils.answer(message, self.strings("err_purge_start"))
             return
-        if msgs:
-            await message.client.delete_messages(chat, msgs)
+
         done = await message.client.send_message(chat.id, self.strings("purge_cmpl").format(str(msg_count)))
         await asyncio.sleep(2)
         await done.delete()
@@ -228,22 +249,21 @@ class ApodiktumPurgeMod(loader.Module):
         - Usage: .spurge <reply>
         """
         chat = message.chat
-        msgs = []
-        itermsg = message.client.iter_messages(chat, min_id=message.reply_to_msg_id, reverse=True)
-        msg_count = 0
+        can_delete = False
+        if (
+            (chat.admin_rights or chat.creator)
+            and chat.admin_rights.delete_messages
+            or chat.admin_rights
+            and chat.creator
+        ):
+            can_delete = True
+
         if message.reply_to_msg_id is not None:
-            async for msg in itermsg:
-                msgs.append(msg)
-                msg_count += 1
-                msgs.append(message.reply_to_msg_id)
-                if len(msgs) == 100:
-                    await message.client.delete_messages(chat, msgs)
-                    msgs = []
+            msg_count = await self._purge_messages(chat, self._tg_id, can_delete, message)
         else:
             await utils.answer(message, self.strings("err_purge_start"))
             return
-        if msgs:
-            await message.client.delete_messages(chat, msgs)
+
         if self.config["log_purge"]:
             return logger.info(self.strings("purge_success").format(str(msg_count)))
         return
@@ -265,7 +285,7 @@ class ApodiktumPurgeMod(loader.Module):
         purge_count = "all" if len(args) == 1 and "all" in args else int(args[0])
         user_id = self._tg_id
         await message.delete()
-        msg_count = await self._purge_messages(message, chat, user_id, purge_count)
+        msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
         done = await message.client.send_message(chat.id, self.strings("purge_cmpl").format(str(msg_count)))
         await asyncio.sleep(2)
         await done.delete()
@@ -290,7 +310,7 @@ class ApodiktumPurgeMod(loader.Module):
         purge_count = "all" if len(args) == 1 and "all" in args else int(args[0])
         user_id = self._tg_id
         await message.delete()
-        msg_count = await self._purge_messages(message, chat, user_id, purge_count)
+        msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
         if self.config["log_purgeme"]:
             return logger.info(self.strings("purge_success").format(str(msg_count)))
         return
@@ -314,7 +334,7 @@ class ApodiktumPurgeMod(loader.Module):
             return await utils.answer(message, self.strings("permerror"))
         purge_count = "all"
         await message.delete()
-        msg_count = await self._purge_messages(message, chat, user_id, purge_count)
+        msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
         done = await message.client.send_message(chat.id, self.strings("purge_cmpl").format(str(msg_count)))
         await asyncio.sleep(2)
         await done.delete()
@@ -341,23 +361,22 @@ class ApodiktumPurgeMod(loader.Module):
             return await utils.answer(message, self.strings("permerror"))
         purge_count = "all"
         await message.delete()
-        msg_count = await self._purge_messages(message, chat, user_id, purge_count)
+        msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
         if self.config["log_purgeme"]:
             return logger.info(self.strings("purge_success").format(str(msg_count)))
         return
 
-    @staticmethod
-    async def delcmd(message: Message):
+    async def adelcmd(self, message: Message):
         """
         Delete the replied message.
-          - Usage: .del <reply>
+          - Usage: .adel <reply>
         """
         reply = await message.get_reply_message()
         if reply:
             try:
                 await reply.delete()
                 await message.delete()
-            except rpcbaseerrors.RPCError:
+            except Exception:
                 pass
 
     async def editcmd(self, message: Message):
