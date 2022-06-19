@@ -71,7 +71,7 @@ class ApodiktumPurgeMod(loader.Module):
         "_cmd_doc_del": ("Löscht die beantwortete Nachricht.\n"
                          "- Verwendung: .del <Antwort>"),
         "_cmd_doc_edit": ("Bearbeitet die letzte Nachricht.\n"
-                            "- Verwendung: .edit <Nachricht>"),
+                          "- Verwendung: .edit <Nachricht>"),
         "_cmd_doc_purge": ("Löscht alle Nachrichten bis zu und inklusive der Antwort.\n"
                            "- Verwendung: .purge <Antwort>"),
         "_cmd_doc_purgeme": ("Löscht x (oder alle) Nachrichten von dir.\n"

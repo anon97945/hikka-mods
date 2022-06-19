@@ -96,8 +96,7 @@ class ApodiktumDNDMod(loader.Module):
 
     strings_ru = {
         "_cfg_afk_no_grp": "Если установлено в True, AFK не будет отвечать в группах.",
-        "_cls_doc": "AFK модуль с расширенным функционалом.",
-        "_cls_doc": "Блокирует и репортит входящие сообщения от незнакомцев",
+        "_cls_doc": "",
         "_cmd_doc_allowpm": "<пользователь> - Разрешить пользователю писать тебе в ЛС",
         "_cmd_doc_delstatus": "<short_name> - Удалить статус",
         "_cmd_doc_newstatus": "<short_name> <уведомлять|0/1> <текст> - Создать новый статус\nПример: .newstatus test 1 Hello!",
@@ -236,7 +235,7 @@ class ApodiktumDNDMod(loader.Module):
         logger.info(self.strings("_log_msg_unapproved").format(user))
         return
 
-    async def _send_pmbl_message(self, message, contact, started_by_you, active_peer):
+    async def _send_pmbl_message(self, message, contact, started_by_you, active_peer, self_id):
         if len(self._ratelimit_pmbl) < self._ratelimit_pmbl_threshold:
             try:
                 await self._client.send_file(
@@ -259,7 +258,7 @@ class ApodiktumDNDMod(loader.Module):
                 peer = await self._client.get_entity(message.peer_id)
 
             await self.inline.bot.send_message(
-                self._client._tg_id,
+                self_id,
                 self.strings("banned_log").format(
                     peer.id,
                     utils.escape_html(peer.first_name),
@@ -626,8 +625,7 @@ class ApodiktumDNDMod(loader.Module):
             if self.config["ignore_contacts"]:
                 if user.contact:
                     return self._approve(cid, "ignore_contacts")
-                else:
-                    contact = False
+                contact = False
 
         first_message = (
             await self._client.get_messages(
@@ -642,8 +640,7 @@ class ApodiktumDNDMod(loader.Module):
             and first_message.sender_id == self._tg_id
         ):
             return self._approve(cid, "started_by_you")
-        else:
-            started_by_you = False
+        started_by_you = False
 
         active_peer = await self._active_peer(message, cid)
         if active_peer:
@@ -656,7 +653,7 @@ class ApodiktumDNDMod(loader.Module):
             )
         )
 
-        await self._send_pmbl_message(message, contact, started_by_you, active_peer)
+        await self._send_pmbl_message(message, contact, started_by_you, active_peer, self._tg_id)
         await self._punish_handler(cid)
 
         self._approve(cid, "banned")
