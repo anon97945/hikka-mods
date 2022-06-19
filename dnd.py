@@ -226,14 +226,12 @@ class ApodiktumDNDMod(loader.Module):
         self._whitelist = list(set(self._whitelist))
         self.set("whitelist", self._whitelist)
         logger.info(self.strings("_log_msg_approved").format(user, reason))
-        return
 
     def _unapprove(self, user: int):
         self._whitelist = list(set(self._whitelist))
         self._whitelist = list(filter(lambda x: x != user, self._whitelist))
         self.set("whitelist", self._whitelist)
         logger.info(self.strings("_log_msg_unapproved").format(user))
-        return
 
     async def _send_pmbl_message(self, message, contact, started_by_you, active_peer, self_id):
         if len(self._ratelimit_pmbl) < self._ratelimit_pmbl_threshold:
