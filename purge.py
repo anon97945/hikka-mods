@@ -195,22 +195,20 @@ class ApodiktumPurgeMod(loader.Module):
 
     @staticmethod
     async def _purge_messages(chat, self_id, can_delete, message):
-        msgs = []
         msg_count = 0
         itermsg = message.client.iter_messages(entity=chat, min_id=message.reply_to_msg_id, limit=None, reverse=True)
-        msgs.append(message.reply_to_msg_id)
+        msgs = [message.reply_to_msg_id]
         async for msg in itermsg:
-            if not can_delete:
-                if msg.sender_id == self_id:
-                    msgs.append(msg)
-                    if msg.id != message.id:
-                        msg_count += 1
-            else:
+            if can_delete:
                 msgs.append(msg)
                 msg_count += 1
+            elif msg.sender_id == self_id:
+                msgs.append(msg)
+                if msg.id != message.id:
+                    msg_count += 1
             if len(msgs) >= 99:
                 await message.client.delete_messages(chat, msgs)
-                msgs.clear() 
+                msgs.clear()
         if msgs:
             await message.client.delete_messages(chat, msgs)
         return msg_count
@@ -221,16 +219,16 @@ class ApodiktumPurgeMod(loader.Module):
         - Usage: .apurge <reply>
         """
         chat = message.chat
-        can_delete = False
-        if (
-            (chat.admin_rights or chat.creator)
-            and chat.admin_rights.delete_messages
-            or chat.admin_rights
-            and chat.creator
-        ):
-            can_delete = True
-
         if message.reply_to_msg_id is not None:
+            can_delete = bool(
+                (
+                    (chat.admin_rights or chat.creator)
+                    and chat.admin_rights.delete_messages
+                    or chat.admin_rights
+                    and chat.creator
+                )
+            )
+
             msg_count = await self._purge_messages(chat, self._tg_id, can_delete, message)
         else:
             await utils.answer(message, self.strings("err_purge_start"))
@@ -249,16 +247,16 @@ class ApodiktumPurgeMod(loader.Module):
         - Usage: .spurge <reply>
         """
         chat = message.chat
-        can_delete = False
-        if (
-            (chat.admin_rights or chat.creator)
-            and chat.admin_rights.delete_messages
-            or chat.admin_rights
-            and chat.creator
-        ):
-            can_delete = True
-
         if message.reply_to_msg_id is not None:
+            can_delete = bool(
+                (
+                    (chat.admin_rights or chat.creator)
+                    and chat.admin_rights.delete_messages
+                    or chat.admin_rights
+                    and chat.creator
+                )
+            )
+
             msg_count = await self._purge_messages(chat, self._tg_id, can_delete, message)
         else:
             await utils.answer(message, self.strings("err_purge_start"))
