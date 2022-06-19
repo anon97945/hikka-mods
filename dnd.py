@@ -590,8 +590,8 @@ class ApodiktumDNDMod(loader.Module):
             and isinstance(message, Message)
             and isinstance(message.peer_id, PeerUser)
             and self.config["PMBL_Active"]
-            and not chat_id
-            in {
+            and chat_id
+            not in {
                 1271266957,  # @replies
                 777000,  # Telegram Notifications
                 self._tg_id,  # Self
@@ -681,7 +681,7 @@ class ApodiktumDNDMod(loader.Module):
         gone = datetime.datetime.fromtimestamp(self.get("gone")).replace(microsecond=0)
         diff = now - gone
 
-        if message.is_private or (not self.config["afk_no_group"] and not message.is_private):
+        if message.is_private or not self.config["afk_no_group"]:
             m = await utils.answer(
                 message,
                 self.strings("afk_message").format(self.get("texts", {"": ""})[self.get("status", "")], diff),
