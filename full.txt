@@ -1,7 +1,6 @@
 anoninfo
 apodiktumadmintools
 auto_update
-dnd
 gtranslate
 heroku
 lcr
