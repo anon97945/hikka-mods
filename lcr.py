@@ -1,4 +1,4 @@
-__version__ = (0, 0, 15)
+__version__ = (0, 0, 16)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -14,8 +14,8 @@ __version__ = (0, 0, 15)
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
 # meta developer: @apodiktum_modules
-
 # scope: hikka_only
+# scope: hikka_min 1.1.28
 
 import asyncio
 import logging
@@ -35,34 +35,33 @@ class lcrMod(loader.Module):
     strings = {
         "name": "Login Code Reciever",
         "developer": "@anon97945",
-        "timeouterror": "<b>TimeoutError:</b>\nNo login code for {} seconds recieved.",
-        "error": "<b>No Login code in the message found.</b>",
-        "waiting": "<b>Waiting for the login code...</b>",
-        "not_pchat": "<b>This is no private chat. Use <code>.lcr group --force</code></b>",
-        "not_group": "This command is for groups only.",
-        "no_self": "<b>You can't use it on yourself.</b>",
         "_cfg_timeout": "<b>Define a time to wait for the Code.</b>",
+        "error": "<b>No Login code in the message found.</b>",
+        "no_self": "<b>You can't use it on yourself.</b>",
+        "not_group": "This command is for groups only.",
+        "not_pchat": "<b>This is no private chat. Use <code>.lcr group --force</code></b>",
+        "timeouterror": "<b>TimeoutError:</b>\nNo login code for {} seconds recieved.",
+        "waiting": "<b>Waiting for the login code...</b>",
     }
 
     strings_de = {
-        "timeouterror": "<b>TimeoutError:</b>\nKein Anmeldecode für {} Sekunden erhalten.",
-        "error": "<b>Kein Anmeldecode in der Nachricht gefunden.</b>",
-        "waiting": "<b>Warten auf den Anmeldecode...</b>",
-        "not_pchat": "<b>Dies ist kein privater Chat. Verwenden Sie <code>.lcr group --force</code></b>",
-        "not_group": "Dieser Befehl ist nur für Gruppen.",
-        "no_self": "<b>Sie können es nicht an sich selbst verwenden.</b>",
         "_cfg_timeout": "<b>Definieren Sie eine Wartezeit für den Code.</b>",
+        "error": "<b>Kein Anmeldecode in der Nachricht gefunden.</b>",
+        "no_self": "<b>Sie können es nicht an sich selbst verwenden.</b>",
+        "not_group": "Dieser Befehl ist nur für Gruppen.",
+        "not_pchat": "<b>Dies ist kein privater Chat. Verwenden Sie <code>.lcr group --force</code></b>",
+        "timeouterror": "<b>TimeoutError:</b>\nKein Anmeldecode für {} Sekunden erhalten.",
+        "waiting": "<b>Warten auf den Anmeldecode...</b>",
     }
 
     strings_ru = {
-        "timeouterror": "<b>TimeoutError:</b>\nНе получен код за {} секунд.",
-        "error": "<b>Код входа не найден в сообщении.</b>",
-        "waiting": "<b>Ожидание кода для входа...</b>",
-        "not_pchat": "<b>Это не приватный чат. Используйте <code>.lcr группа --force</code></b>",
-        "not_group": "Эта команда только для групп.",
-        "no_self": "<b>Вы не можете использовать это на себе.</b>",
         "_cfg_timeout": "<b>Определите время ожидания кода.</b>",
-        "translated_by": "@MUTANTP7AY3R5",
+        "error": "<b>Код входа не найден в сообщении.</b>",
+        "no_self": "<b>Вы не можете использовать это на себе.</b>",
+        "not_group": "Эта команда только для групп.",
+        "not_pchat": "<b>Это не приватный чат. Используйте <code>.lcr группа --force</code></b>",
+        "timeouterror": "<b>TimeoutError:</b>\nНе получен код за {} секунд.",
+        "waiting": "<b>Ожидание кода для входа...</b>",
     }
 
     def __init__(self):

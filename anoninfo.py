@@ -1,4 +1,4 @@
-__version__ = (0, 1, 8)
+__version__ = (0, 1, 9)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -39,65 +39,61 @@ class anoninfoMod(loader.Module):
 
     strings = {
         "name": "AnonInfo",
+        "_cfg_banner": "Set `True` in order to disable an media banner.",
+        "_cfg_cst_bnr": "Custom Banner.",
+        "_cfg_cst_btn": "Custom button. Leave empty to remove button.",
+        "_cfg_cst_frmt": "Custom fileformat for Banner.",
+        "_cfg_cst_msg": "Custom message for info. May contain {me}, {version}, {build}, {prefix}, {platform}, {upd} keywords.",
+        "_cfg_inline_banner": "Set `True` in order to disable an inline media banner.",
+        "build": "Build",
+        "description": "ℹ This will not compromise any sensitive info.",
         "developer": "@anon97945",
         "owner": "Owner",
-        "version": "Version",
-        "build": "Build",
         "prefix": "Prefix",
         "send_info": "Send userbot info.",
-        "description": "ℹ This will not compromise any sensitive info.",
         "up-to-date": "😌 Up-to-date.",
         "update_required": "😕 Update required </b><code>.update</code><b>",
-        "_cfg_cst_msg": "Custom message for info. May contain {me}, {version}, {build}, {prefix}, {platform}, {upd} keywords.",
-        "_cfg_cst_btn": "Custom button. Leave empty to remove button.",
-        "_cfg_cst_bnr": "Custom Banner.",
-        "_cfg_cst_frmt": "Custom fileformat for Banner.",
-        "_cfg_banner": "Set `True` in order to disable an media banner.",
-        "_cfg_inline_banner": "Set `True` in order to disable an inline media banner.",
+        "version": "Version",
     }
 
     strings_de = {
-        "owner": "Eigentümer",
-        "version": "Version",
+        "_cfg_banner": "Setzen Sie `True`, um das Media Banner zu deaktivieren.",
+        "_cfg_cst_bnr": "Benutzerdefiniertes Banner.",
+        "_cfg_cst_btn": "Benutzerdefinierte Schaltfläche für Informationen. Leer lassen, um die Schaltfläche zu entfernen.",
+        "_cfg_cst_frmt": "Benutzerdefiniertes Dateiformat für das Banner.",
+        "_cfg_cst_msg": "Benutzerdefinierte Nachricht für Info. Kann die Schlüsselwörter {me}, {version}, {build}, {prefix}, {platform}, {upd} enthalten.",
+        "_cfg_inline_banner": "Setzen Sie `True`, um das Inline Media Banner zu deaktivieren.",
+        "_ihandle_doc_info": "Отправить информацию о юзерботе",
         "build": "Build",
+        "description": "ℹ Dadurch werden keine sensiblen Daten gefährdet.",
+        "owner": "Eigentümer",
         "prefix": "Prefix",
         "send_info": "Benutzerbot-Informationen senden.",
-        "description": "ℹ Dadurch werden keine sensiblen Daten gefährdet.",
-        "_ihandle_doc_info": "Отправить информацию о юзерботе",
         "up-to-date": "😌 Up-to-date",
         "update_required": "😕 Aktualisierung erforderlich </b><code>.update</code><b>",
-        "_cfg_cst_msg": "Benutzerdefinierte Nachricht für Info. Kann die Schlüsselwörter {me}, {version}, {build}, {prefix}, {platform}, {upd} enthalten.",
-        "_cfg_cst_btn": "Benutzerdefinierte Schaltfläche für Informationen. Leer lassen, um die Schaltfläche zu entfernen.",
-        "_cfg_cst_bnr": "Benutzerdefiniertes Banner.",
-        "_cfg_cst_frmt": "Benutzerdefiniertes Dateiformat für das Banner.",
-        "_cfg_banner": "Setzen Sie `True`, um das Media Banner zu deaktivieren.",
-        "_cfg_inline_banner": "Setzen Sie `True`, um das Inline Media Banner zu deaktivieren.",
+        "version": "Version",
     }
 
     strings_ru = {
-        "owner": "Владелец",
-        "version": "Версия",
+        "_cfg_banner": "Поставь `True`, чтобы отключить баннер-картинку.",
+        "_cfg_cst_bnr": "Кастомный баннер.",
+        "_cfg_cst_btn": "Кастомная кнопка в сообщении в info. Оставь пустым, чтобы убрать кнопку.",
+        "_cfg_cst_frmt": "Кастомный формат файла для баннера.",
+        "_cfg_cst_msg": "Кастомный текст сообщения в info. Может содержать ключевые слова {me}, {version}, {build}, {prefix}, {platform}, {upd}.",
+        "_cfg_inline_banner": "Установите `True`, чтобы отключить встроенный медиа-баннер",
+        "_ihandle_doc_info": "Отправить информацию о юзерботе.",
         "build": "Сборка",
+        "description": "ℹ Это не раскроет никакой личной информации.",
+        "owner": "Владелец",
         "prefix": "Префикс",
         "send_info": "Отправить информацию о юзерботе.",
-        "description": "ℹ Это не раскроет никакой личной информации.",
-        "_ihandle_doc_info": "Отправить информацию о юзерботе.",
         "up-to-date": "😌 Актуальная версия.",
         "update_required": "😕 Требуется обновление </b><code>.update</code><b>",
-        "_cfg_cst_msg": "Кастомный текст сообщения в info. Может содержать ключевые слова {me}, {version}, {build}, {prefix}, {platform}, {upd}.",
-        "_cfg_cst_btn": "Кастомная кнопка в сообщении в info. Оставь пустым, чтобы убрать кнопку.",
-        "_cfg_cst_bnr": "Кастомный баннер.",
-        "_cfg_cst_frmt": "Кастомный формат файла для баннера.",
-        "_cfg_banner": "Поставь `True`, чтобы отключить баннер-картинку.",
-        "_cfg_inline_banner": "Установите `True`, чтобы отключить встроенный медиа-баннер",
+        "version": "Версия",
     }
 
     def __init__(self):
         self.config = loader.ModuleConfig(
-            loader.ConfigValue(
-                "custom_message",
-                doc=lambda: self.strings("_cfg_cst_msg"),
-            ),
             loader.ConfigValue(
                 "custom_banner",
                 "https://t.me/file_dumbster/6",
@@ -108,6 +104,10 @@ class anoninfoMod(loader.Module):
                 "video",
                 lambda: self.strings("_cfg_cst_frmt"),
                 validator=loader.validators.Choice(["photo", "video", "audio", "gif"]),
+            ),
+            loader.ConfigValue(
+                "custom_message",
+                doc=lambda: self.strings("_cfg_cst_msg"),
             ),
             loader.ConfigValue(
                 "disable_banner",

@@ -1,4 +1,4 @@
-__version__ = (0, 1, 10)
+__version__ = (0, 1, 11)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -75,56 +75,54 @@ class BlockNonDiscussionMod(loader.Module):
     strings = {
         "name": "BlockNonDiscussion",
         "developer": "@anon97945",
-        "not_dc": "<b>This is no Groupchat.</b>",
-        "start": "<b>[BlockNonDiscussion]</b> Activated in this chat.</b>",
-        "stopped": "<b>[BlockNonDiscussion]</b> Deactivated in this chat.</b>",
-        "turned_off": "<b>[BlockNonDiscussion]</b> The module is now turned off in all chats.</b>",
-        "no_int": "<b>Your input was no int.</b>",
+        "db_string": ("<b>[BlockNonDiscussion - Settings]</b> Current Database:\n\nWatcher:\n{}"
+                      "\n\nChatsettings:\n{}"),
         "error": "<b>Your command was wrong.</b>",
+        "no_int": "<b>Your input was no int.</b>",
+        "not_dc": "<b>This is no Groupchat.</b>",
         "permerror": "<b>You have no delete permissions in this chat.</b>",
         "settings": ("<b>[BlockNonDiscussion - Settings]</b> Current settings in this "
                      "chat are:\n{}."),
-        "db_string": ("<b>[BlockNonDiscussion - Settings]</b> Current Database:\n\nWatcher:\n{}"
-                      "\n\nChatsettings:\n{}"),
+        "start": "<b>[BlockNonDiscussion]</b> Activated in this chat.</b>",
+        "stopped": "<b>[BlockNonDiscussion]</b> Deactivated in this chat.</b>",
         "triggered": ("{}, the comments are limited to discussiongroup members, "
                       "please join our discussiongroup first."
                       "\n\n👉🏻 {}\n\nRespectfully, the admins."),
+        "turned_off": "<b>[BlockNonDiscussion]</b> The module is now turned off in all chats.</b>",
     }
 
     strings_de = {
-        "name": "BlockNonDiscussion",
-        "not_dc": "<b>Dies ist kein Gruppenchat.</b>",
-        "start": "<b>[BlockNonDiscussion]</b> In diesem Chat aktiviert.</b>",
-        "stopped": "<b>[BlockNonDiscussion]</b> Der Chat wurde aus der Liste entfernt.</b>",
-        "turned_off": "<b>[BlockNonDiscussion]</b> In allen Chats ausgeschaltet.</b>",
-        "no_int": "<b>Ihre Eingabe war keine Zahl.</b>",
+        "db_string": ("<b>[BlockNonDiscussion - Settings]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
+                      "\n\nChateinstellungen:\n{}"),
         "error": "<b>Dein Befehl war falsch.</b>",
+        "no_int": "<b>Ihre Eingabe war keine Zahl.</b>",
+        "not_dc": "<b>Dies ist kein Gruppenchat.</b>",
         "permerror": "<b>Sie haben in diesem Chat keine Löschberechtigung.</b>",
         "settings": ("<b>[BlockNonDiscussion - Settings]</b> Aktuelle Einstellungen in diesem "
                      "Chat:\n{}."),
-        "db_string": ("<b>[BlockNonDiscussion - Settings]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
-                      "\n\nChateinstellungen:\n{}"),
+        "start": "<b>[BlockNonDiscussion]</b> In diesem Chat aktiviert.</b>",
+        "stopped": "<b>[BlockNonDiscussion]</b> Der Chat wurde aus der Liste entfernt.</b>",
         "triggered": ("{}, die Kommentarfunktion wurde auf die Chatmitglieder begrenzt, "
                       "tritt bitte zuerst unserem Chat bei."
                       "\n\n👉🏻 {}\n\nHochachtungsvoll, die Obrigkeit."),
+        "turned_off": "<b>[BlockNonDiscussion]</b> In allen Chats ausgeschaltet.</b>",
     }
 
     strings_ru = {
-        "not_dc": "<b>Это не групповой чат</b>",
-        "start": "<b>[BlockNonDiscussion]</b> Активировано в этом чате</b>",
-        "stopped": "<b>[BlockNonDiscussion]</b> Деактивировано в этом чате</b>",
-        "turned_off": "<b>[BlockNonDiscussion]</b> Теперь этот модуль выключен во всех чатах</b>",
-        "no_int": "<b>Ваш ввод не является целочисленным типом (int)</b>",
+        "db_string": ("<b>[BlockNonDiscussion - Settings]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
+                      "\n\nChatsettings:\n{}"),
         "error": "<b>Неверная команда</b>",
+        "no_int": "<b>Ваш ввод не является целочисленным типом (int)</b>",
+        "not_dc": "<b>Это не групповой чат</b>",
         "permerror": "<b>Вы не имеете права на удаление сообщений в этом чате</b>",
         "settings": ("<b>[BlockNonDiscussion - Settings]</b> Текущие настройки "
                      "в этом чате:\n{}."),
-        "db_string": ("<b>[BlockNonDiscussion - Settings]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
-                      "\n\nChatsettings:\n{}"),
+        "start": "<b>[BlockNonDiscussion]</b> Активировано в этом чате</b>",
+        "stopped": "<b>[BlockNonDiscussion]</b> Деактивировано в этом чате</b>",
         "triggered": ("{}, комментарии ограничены для участников группы обсуждения, "
                       "Пожалуйста, для начала присоединитесь к нашей группе обсуждения."
                       "\n\n👉🏻 {}\n\nС уважением, администраторы."),
-        "translated_by": "@MUTANTP7AY3R5",
+        "turned_off": "<b>[BlockNonDiscussion]</b> Теперь этот модуль выключен во всех чатах</b>",
     }
 
     def __init__(self):

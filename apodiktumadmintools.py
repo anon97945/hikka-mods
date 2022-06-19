@@ -1,4 +1,4 @@
-__version__ = (0, 9, 16)
+__version__ = (0, 9, 18)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -16,6 +16,7 @@ __version__ = (0, 9, 16)
 # meta developer: @apodiktum_modules
 
 # scope: hikka_only
+# scope: hikka_min 1.1.28
 
 import asyncio
 import logging
@@ -96,103 +97,74 @@ class ApodiktumAdminToolsMod(loader.Module):
     strings = {
         "name": "Apodiktum Admin Tools",
         "developer": "@anon97945",
-        "not_dc": "<b>This is no Groupchat.</b>",
-        "no_int": "<b>Your input was no Integer.</b>",
-        "error": "<b>Your command was wrong.</b>",
-        "permerror": "<b>You have no delete permissions in this chat.</b>",
-        "no_id": "<b>Your input was no TG ID.</b>",
-        "bnd_start": "<b>[BlockNonDiscussion]</b> Activated in this chat.</b>",
-        "bnd_stopped": "<b>[BlockNonDiscussion]</b> Deactivated in this chat.</b>",
-        "bnd_turned_off": "<b>[BlockNonDiscussion]</b> The module is now turned off in all chats.</b>",
-        "bnd_settings": ("<b>[BlockNonDiscussion]</b> Current settings in this "
+        "bcu_db_string": ("<b>[BlockChannelUser]</b> Current Database:\n\nWatcher:\n{}"
+                          "\n\nChatsettings:\n{}"),
+        "bcu_settings": ("<b>[BlockChannelUser]</b> Current settings in this "
                          "chat are:\n{}"),
+        "bcu_start": "<b>[BlockChannelUser]</b> Activated in this chat.</b>",
+        "bcu_stopped": "<b>[BlockChannelUser]</b> Deactivated in this chat.</b>",
+        "bcu_triggered": "{}, you can't write as a channel here.",
+        "bcu_turned_off": "<b>[BlockChannelUser]</b> The module is now turned off in all chats.</b>",
         "bnd_db_string": ("<b>[BlockNonDiscussion]</b> Current Database:\n\nWatcher:\n{}"
                           "\n\nChatsettings:\n{}"),
+        "bnd_settings": ("<b>[BlockNonDiscussion]</b> Current settings in this "
+                         "chat are:\n{}"),
+        "bnd_start": "<b>[BlockNonDiscussion]</b> Activated in this chat.</b>",
+        "bnd_stopped": "<b>[BlockNonDiscussion]</b> Deactivated in this chat.</b>",
         "bnd_triggered": ("{}, the comments are limited to discussiongroup members, "
                           "please join our discussiongroup first."
                           "\n\n👉🏻 {}\n\nRespectfully, the admins."),
-        "bcu_start": "<b>[BlockChannelUser]</b> Activated in this chat.</b>",
-        "bcu_stopped": "<b>[BlockChannelUser]</b> Deactivated in this chat.</b>",
-        "bcu_turned_off": "<b>[BlockChannelUser]</b> The module is now turned off in all chats.</b>",
-        "bcu_settings": ("<b>[BlockChannelUser]</b> Current settings in this "
-                         "chat are:\n{}"),
-        "bcu_db_string": ("<b>[BlockChannelUser]</b> Current Database:\n\nWatcher:\n{}"
-                          "\n\nChatsettings:\n{}"),
-        "bcu_triggered": "{}, you can't write as a channel here.",
+        "bnd_turned_off": "<b>[BlockNonDiscussion]</b> The module is now turned off in all chats.</b>",
+        "error": "<b>Your command was wrong.</b>",
+        "gl_db_string": ("<b>[Grouplogger]</b> Current Database:\n\nWatcher:\n{}"
+                         "\n\nChatsettings:\n{}"),
+        "gl_settings": ("<b>[Grouplogger]</b> Current settings in this "
+                        "chat are:\n{}"),
         "gl_start": "<b>[Grouplogger]</b> Activated for the given chat.</b>",
         "gl_stopped": "<b>[Grouplogger]</b> Deactivated in this chat.</b>",
         "gl_turned_off": "<b>[Grouplogger]</b> The module is now turned off in all chats.</b>",
-        "gl_settings": ("<b>[Grouplogger]</b> Current settings in this "
-                        "chat are:\n{}"),
-        "gl_db_string": ("<b>[Grouplogger]</b> Current Database:\n\nWatcher:\n{}"
-                         "\n\nChatsettings:\n{}"),
+        "no_id": "<b>Your input was no TG ID.</b>",
+        "no_int": "<b>Your input was no Integer.</b>",
+        "not_dc": "<b>This is no Groupchat.</b>",
+        "permerror": "<b>You have no delete permissions in this chat.</b>",
     }
 
     strings_de = {
-        "not_dc": "<b>Dies ist kein Gruppenchat.</b>",
-        "no_int": "<b>Ihre Eingabe war keine Integer.</b>",
-        "error": "<b>Dein Befehl war falsch.</b>",
-        "permerror": "<b>Sie haben in diesem Chat keine Löschberechtigung.</b>",
-        "no_id": "<b>Ihre Eingabe war keine TG ID.</b>",
-        "bnd_start": "<b>[BlockNonDiscussion]</b> In diesem Chat aktiviert.</b>",
-        "bnd_stopped": "<b>[BlockNonDiscussion]</b> Der Chat wurde aus der Liste entfernt.</b>",
-        "bnd_turned_off": "<b>[BlockNonDiscussion]</b> In allen Chats ausgeschaltet.</b>",
-        "bnd_settings": ("<b>[BlockNonDiscussion - Settings]</b> Aktuelle Einstellungen in diesem "
+        "_cls_doc": "Toolpack für Kanal- und Gruppenadministratoren.",
+        "bcu_db_string": ("<b>[BlockChannelUser]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
+                          "\n\nChateinstellungen:\n{}"),
+        "bcu_settings": ("<b>[BlockChannelUser]</b> Aktuelle Einstellungen in diesem "
                          "Chat:\n{}"),
+        "bcu_start": "<b>[BlockChannelUser]</b> In diesem Chat aktiviert.</b>",
+        "bcu_stopped": "<b>[BlockChannelUser]</b> Der Chat wurde aus der Liste entfernt.</b>",
+        "bcu_triggered": "{}, du kannst hier nicht als Kanal schreiben.",
+        "bcu_turned_off": "<b>[BlockChannelUser]</b> In allen Chats ausgeschaltet.</b>",
         "bnd_db_string": ("<b>[BlockNonDiscussion - Settings]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
                           "\n\nChateinstellungen:\n{}"),
+        "bnd_settings": ("<b>[BlockNonDiscussion - Settings]</b> Aktuelle Einstellungen in diesem "
+                         "Chat:\n{}"),
+        "bnd_start": "<b>[BlockNonDiscussion]</b> In diesem Chat aktiviert.</b>",
+        "bnd_stopped": "<b>[BlockNonDiscussion]</b> Der Chat wurde aus der Liste entfernt.</b>",
         "bnd_triggered": ("{}, die Kommentarfunktion wurde auf die Chatmitglieder begrenzt, "
                           "tritt bitte zuerst unserem Chat bei."
                           "\n\n👉🏻 {}\n\nHochachtungsvoll, die Obrigkeit."),
-        "bcu_start": "<b>[BlockChannelUser]</b> In diesem Chat aktiviert.</b>",
-        "bcu_stopped": "<b>[BlockChannelUser]</b> Der Chat wurde aus der Liste entfernt.</b>",
-        "bcu_turned_off": "<b>[BlockChannelUser]</b> In allen Chats ausgeschaltet.</b>",
-        "bcu_settings": ("<b>[BlockChannelUser]</b> Aktuelle Einstellungen in diesem "
-                         "Chat:\n{}"),
-        "bcu_db_string": ("<b>[BlockChannelUser]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
-                          "\n\nChateinstellungen:\n{}"),
-        "bcu_triggered": "{}, du kannst hier nicht als Kanal schreiben.",
+        "bnd_turned_off": "<b>[BlockNonDiscussion]</b> In allen Chats ausgeschaltet.</b>",
+        "error": "<b>Dein Befehl war falsch.</b>",
+        "gl_db_string": ("<b>[Grouplogger]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
+                         "\n\nChateinstellungen:\n{}"),
+        "gl_settings": ("<b>[Grouplogger]</b> Aktuelle Einstellungen in diesem "
+                        "Chat:\n{}"),
         "gl_start": "<b>[Grouplogger]</b> In gewähltem Chat aktiviert.</b>",
         "gl_stopped": "<b>[Grouplogger]</b> Der Chat wurde aus der Liste entfernt.</b>",
         "gl_turned_off": "<b>[Grouplogger]</b> In allen Chats ausgeschaltet.</b>",
-        "gl_settings": ("<b>[Grouplogger]</b> Aktuelle Einstellungen in diesem "
-                        "Chat:\n{}"),
-        "gl_db_string": ("<b>[Grouplogger]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
-                         "\n\nChateinstellungen:\n{}"),
-        "_cls_doc": "Toolpack für Kanal- und Gruppenadministratoren.",
+        "no_id": "<b>Ihre Eingabe war keine TG ID.</b>",
+        "no_int": "<b>Ihre Eingabe war keine Integer.</b>",
+        "not_dc": "<b>Dies ist kein Gruppenchat.</b>",
+        "permerror": "<b>Sie haben in diesem Chat keine Löschberechtigung.</b>",
     }
 
     strings_ru = {
-        "not_dc": "<b>Это не групповой чат</b>",
-        "no_int": "<b>Ваш ввод не является целочисленным типом (int)</b>",
-        "error": "<b>Неверная команда</b>",
-        "permerror": "<b>Вы не имеете права на удаление сообщений в этом чате</b>",
-        "no_id": "<b>Ты ввёл не телеграм айди.</b>",
-        "bnd_start": "<b>[BlockNonDiscussion]</b> Активировано в этом чате</b>",
-        "bnd_stopped": "<b>[BlockNonDiscussion]</b> Деактивировано в этом чате</b>",
-        "bnd_turned_off": "<b>[BlockNonDiscussion]</b> Теперь этот модуль выключен во всех чатах</b>",
-        "bnd_settings": ("<b>[BlockNonDiscussion]</b> Текущие настройки "
-                         "в этом чате:\n{}"),
-        "bnd_db_string": ("<b>[BlockNonDiscussion]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
-                          "\n\nНастройки чата:\n{}"),
-        "bnd_triggered": ("{}, комментарии ограничены для участников группы обсуждения, "
-                          "Пожалуйста, для начала присоединитесь к нашей группе обсуждения."
-                          "\n\n👉🏻 {}\n\nС уважением, администраторы."),
-        "bcu_start": "<b>[BlockChannelUser]</b> Активировано в этом чате</b>",
-        "bcu_stopped": "<b>[BlockChannelUser]</b> Деактивировано в этом чате</b>",
-        "bcu_turned_off": "<b>[BlockChannelUser]</b> Теперь этот модуль выключен во всех чатах</b>",
-        "bcu_settings": ("<b>[BlockChannelUser]</b> Текущие настройки "
-                         "в этом чате:\n{}"),
-        "bcu_db_string": ("<b>[BlockChannelUser]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
-                          "\n\nНастройки чата:\n{}"),
-        "bcu_triggered": "{}, ты не можешь писать тут от имени канала.",
-        "gl_start": "<b>[Grouplogger]</b> Активирован в выбранном чате.</b>",
-        "gl_stopped": "<b>[Grouplogger]</b> Деактивировано в этом чате.</b>",
-        "gl_turned_off": "<b>[Grouplogger]</b> Теперь этот модуль выключен во всех чатах.</b>",
-        "gl_settings": ("<b>[Grouplogger]</b> Текущие настройки "
-                        "в этом чате:\n{}"),
-        "gl_db_string": ("<b>[Grouplogger]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
-                         "\n\nНастройки чата:\n{}"),
+        "_cls_doc": "Пакет инструментов для администраторов каналов и групп.",
         "_cmd_doc_bcu": (" ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n"
                          " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Переключает BlockChannelUser для текущего чата.\n"
                          ".bcu notify <true/false>\n"
@@ -233,7 +205,36 @@ class ApodiktumAdminToolsMod(loader.Module):
                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую конфигурацию чата.\n"
                         ".gl clearall\n"
                         " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Очищает базу данных от Group/Channel Logger.\n"),
-        "_cls_doc": "Пакет инструментов для администраторов каналов и групп.",
+        "bcu_db_string": ("<b>[BlockChannelUser]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
+                          "\n\nНастройки чата:\n{}"),
+        "bcu_settings": ("<b>[BlockChannelUser]</b> Текущие настройки "
+                         "в этом чате:\n{}"),
+        "bcu_start": "<b>[BlockChannelUser]</b> Активировано в этом чате</b>",
+        "bcu_stopped": "<b>[BlockChannelUser]</b> Деактивировано в этом чате</b>",
+        "bcu_triggered": "{}, ты не можешь писать тут от имени канала.",
+        "bcu_turned_off": "<b>[BlockChannelUser]</b> Теперь этот модуль выключен во всех чатах</b>",
+        "bnd_db_string": ("<b>[BlockNonDiscussion]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
+                          "\n\nНастройки чата:\n{}"),
+        "bnd_settings": ("<b>[BlockNonDiscussion]</b> Текущие настройки "
+                         "в этом чате:\n{}"),
+        "bnd_start": "<b>[BlockNonDiscussion]</b> Активировано в этом чате</b>",
+        "bnd_stopped": "<b>[BlockNonDiscussion]</b> Деактивировано в этом чате</b>",
+        "bnd_triggered": ("{}, комментарии ограничены для участников группы обсуждения, "
+                          "Пожалуйста, для начала присоединитесь к нашей группе обсуждения."
+                          "\n\n👉🏻 {}\n\nС уважением, администраторы."),
+        "bnd_turned_off": "<b>[BlockNonDiscussion]</b> Теперь этот модуль выключен во всех чатах</b>",
+        "error": "<b>Неверная команда</b>",
+        "gl_db_string": ("<b>[Grouplogger]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
+                         "\n\nНастройки чата:\n{}"),
+        "gl_settings": ("<b>[Grouplogger]</b> Текущие настройки "
+                        "в этом чате:\n{}"),
+        "gl_start": "<b>[Grouplogger]</b> Активирован в выбранном чате.</b>",
+        "gl_stopped": "<b>[Grouplogger]</b> Деактивировано в этом чате.</b>",
+        "gl_turned_off": "<b>[Grouplogger]</b> Теперь этот модуль выключен во всех чатах.</b>",
+        "no_id": "<b>Ты ввёл не телеграм айди.</b>",
+        "no_int": "<b>Ваш ввод не является целочисленным типом (int)</b>",
+        "not_dc": "<b>Это не групповой чат</b>",
+        "permerror": "<b>Вы не имеете права на удаление сообщений в этом чате</b>",
     }
 
     _global_queue = []

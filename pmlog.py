@@ -1,4 +1,4 @@
-__version__ = (0, 0, 20)
+__version__ = (0, 0, 21)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -50,49 +50,49 @@ class PMLogMod(loader.Module):
     strings = {
         "name": "PM Logger",
         "developer": "@anon97945",
-        "_cfg_log_group": "Group or channel ID where to send the PMs.",
-        "_cfg_whitelist": "Whether the list is a for excluded(True) or included(False) chats.",
         "_cfg_bots": "Whether to log bots or not.",
-        "_cfg_selfdestructive": "Whether selfdestructive media should be logged or not. This violates TG TOS!",
+        "_cfg_log_group": "Group or channel ID where to send the PMs.",
         "_cfg_loglist": "Add telegram id's to log them.",
+        "_cfg_selfdestructive": "Whether selfdestructive media should be logged or not. This violates TG TOS!",
+        "_cfg_whitelist": "Whether the list is a for excluded(True) or included(False) chats.",
     }
 
     strings_de = {
-        "_cfg_log_group": "Gruppen- oder Kanal-ID, an die die PMs gesendet werden sollen.",
-        "_cfg_whitelist": "Ob die Liste für ausgeschlossene (Wahr) oder eingeschlossene (Falsch) Chats ist.",
         "_cfg_bots": "Ob Bots geloggt werden sollen oder nicht.",
-        "_cfg_selfdestructive": "Ob selbstzerstörende Medien geloggt werden sollen oder nicht. Dies verstößt gegen die TG TOS!",
+        "_cfg_log_group": "Gruppen- oder Kanal-ID, an die die PMs gesendet werden sollen.",
         "_cfg_loglist": "Fügen Sie Telegram-IDs hinzu, um sie zu protokollieren.",
+        "_cfg_selfdestructive": "Ob selbstzerstörende Medien geloggt werden sollen oder nicht. Dies verstößt gegen die TG TOS!",
+        "_cfg_whitelist": "Ob die Liste für ausgeschlossene (Wahr) oder eingeschlossene (Falsch) Chats ist.",
     }
 
     strings_ru = {
-        "_cfg_log_group": "Айди группы или канала для отправки личных сообщений.",
-        "_cfg_whitelist": "Является ли список для исключённых (True) или включённых чатов (False).",
         "_cfg_bots": "Регистрировать ботов или нет",
-        "_cfg_selfdestructive": "Должны ли самоуничтожающиеся медиафайлы регистрироваться или нет. Это нарушает «Условия использования Telegram» (ToS)",
+        "_cfg_log_group": "Айди группы или канала для отправки личных сообщений.",
         "_cfg_loglist": "Добавьте айди Telegram, чтобы зарегистрировать их",
-        "translated_by": "@MUTANTP7AY3R5",
+        "_cfg_selfdestructive": "Должны ли самоуничтожающиеся медиафайлы регистрироваться или нет. Это нарушает «Условия использования Telegram» (ToS)",
+        "_cfg_whitelist": "Является ли список для исключённых (True) или включённых чатов (False).",
     }
 
     def __init__(self):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
+                "log_bots",
+                "False",
+                doc=lambda: self.strings("_cfg_bots"),
+                validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
                 "log_group",
                 doc=lambda: self.strings("_cfg_log_group"),
                 validator=loader.validators.TelegramID(),
             ),
             loader.ConfigValue(
-                "whitelist",
-                "false",
-                doc=lambda: self.strings("_cfg_whitelist"),
-                validator=loader.validators.Boolean(),
-            ),
-            loader.ConfigValue(
-                "log_bots",
-                "False",
-                doc=lambda: self.strings("_cfg_bots"),
-                validator=loader.validators.Boolean(),
+                "log_list",
+                doc=lambda: self.strings("_cfg_loglist"),
+                validator=loader.validators.Series(
+                    validator=loader.validators.TelegramID()
+                ),
             ),
             loader.ConfigValue(
                 "log_self_destr",
@@ -101,11 +101,10 @@ class PMLogMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
-                "log_list",
-                doc=lambda: self.strings("_cfg_loglist"),
-                validator=loader.validators.Series(
-                    validator=loader.validators.TelegramID()
-                ),
+                "whitelist",
+                "false",
+                doc=lambda: self.strings("_cfg_whitelist"),
+                validator=loader.validators.Boolean(),
             ),
         )
 
