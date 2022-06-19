@@ -1,4 +1,4 @@
-__version__ = (0, 1, 10)
+__version__ = (0, 1, 11)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -167,7 +167,7 @@ class ApodiktumPurgeMod(loader.Module):
     async def _purge_user_messages(chat, user_id, purge_count, message):
         msgs = []
         msg_count = 0
-        itermsg = message.client.iter_messages(entity=chat, limit=None, reverse=True)
+        itermsg = message.client.iter_messages(entity=chat, limit=None, reverse=False)
         if purge_count == "all":
             async for msg in itermsg:
                 if msg.sender_id == user_id:
