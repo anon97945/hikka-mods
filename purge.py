@@ -1,4 +1,4 @@
-__version__ = (0, 1, 6)
+__version__ = (0, 1, 8)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -16,6 +16,7 @@ __version__ = (0, 1, 6)
 # meta developer: @apodiktum_modules
 
 # scope: hikka_only
+# scope: hikka_min 1.1.28
 
 import asyncio
 import logging
@@ -45,94 +46,100 @@ class ApodiktumPurgeMod(loader.Module):
     strings = {
         "name": "Apodiktum Purge",
         "developer": "@anon97945",
+        "_cfg_log_edit": "Log `edit` as info.",
+        "_cfg_log_purge": "Log purge `count` as info.",
+        "_cfg_log_purgeme": "Log `purgeme `count as info.",
+        "_cfg_log_sd": "Log `sd` as info.",
+        "edit_success": ("Edit done successfully.\n"
+                         "Old message:\n{}\n\n\nNew message:\n{}"),
+        "err_cmd_wrong": "<b>Your command was wrong.</b>",
+        "err_purge_start": "<b>Please reply to a message to start purging.</b>",
         "no_int": "<b>Your input was no integer.</b>",
         "permerror": "<b>You don't have permission to use this command.</b>",
         "purge_cmpl": "<b>Purge complete!</b>\nPurged <code>{}</code> messages.",
         "purge_success": "Purge of {} messages done successfully.",
-        "edit_success": ("Edit done successfully.\n"
-                         "Old message:\n{}\n\n\nNew message:\n{}"),
         "sd_success": "Message after {} seconds successfully deleted.",
-        "err_purge_start": "<b>Please reply to a message to start purging.</b>",
-        "err_cmd_wrong": "<b>Your command was wrong.</b>",
-        "_cfg_log_purge": "Log purge `count` as info.",
-        "_cfg_log_purgeme": "Log `purgeme `count as info.",
-        "_cfg_log_edit": "Log `edit` as info.",
-        "_cfg_log_sd": "Log `sd` as info.",
     }
 
     strings_de = {
-        "no_int": "<b>Dein Eingabe war kein Integer.</b>",
-        "purge_cmpl": "<b>Purge fertig!</b>\n<code>{}</code> Nachrichten wurden gelöscht.",
-        "permerror": "<b>Du hast keine Berechtigung, diesen Befehl zu verwenden.</b>",
-        "purge_success": "Purge von {} Nachrichten erfolgreich durchgeführt.",
-        "edit_success": ("Bearbeitung erfolgreich.\n"
-                         "Alte Nachricht:\n{}\n\n\nNeue Nachricht:\n{}"),
-        "sd_success": "Nachricht nach {} Sekunden erfolgreich gelöscht.",
-        "err_purge_start": "<b>Bitte antworte auf eine Nachricht, um den Purge zu starten.</b>",
-        "err_cmd_wrong": "<b>Deine Eingabe war falsch.</b>",
-        "_cmd_doc_del": ("Löscht die beantwortete Nachricht.\n"
-                         "- Verwendung: .del <Antwort>"),
-        "_cmd_doc_purge": ("Löscht alle Nachrichten bis zu und inklusive der Antwort.\n"
-                           "- Verwendung: .purge <Antwort>"),
-        "_cmd_doc_spurge": ("Löscht alle Nachrichten bis zu und inklusive der Antwort ohne Benachrichtigung.\n"
-                            "- Verwendung: .spurge <Antwort>"),
-        "_cmd_doc_purgeme": ("Löscht x (oder alle) Nachrichten von dir.\n"
-                             "- Verwendung: .purgeme <anzahl/all>"),
-        "_cmd_doc_spurgeme": ("Löscht x (oder alle) Nachrichten von dir ohne Benachrichtigung.\n"
-                              "- Verwendung: .spurgeme <anzahl/all>"),
-        "_cmd_doc_purgeuser": ("Löscht alle Nachrichten von einem Nutzer.\n"
-                               "- Verwendung: .purgeuser <Antwort>"),
-        "_cmd_doc_spurgeuser": ("Löscht alle Nachrichten von einem Nutzer ohne Benachrichtigung.\n"
-                                "- Verwendung: .spurgeuser <Antwort>"),
-        "_cmd_doc_edit": ("Bearbeitet die letzte Nachricht.\n"
-                            "- Verwendung: .edit <Nachricht>"),
-        "_cmd_doc_sd": ("Löscht die letzte Nachricht nach x Sekunden. Funktioniert auch mit Medien.\n"
-                        "Verwendung: .sd <Sekunden> <Nachricht>"),
+        "_cfg_log_edit": "Protokollieren Sie `edit` Nachrichten als Info.",
         "_cfg_log_purge": "Protokollieren Sie die Anzahl der `purge` Nachrichten als Info.",
         "_cfg_log_purgeme": "Protokollieren Sie die Anzahl der `purgeme` Nachrichten als Info.",
-        "_cfg_log_edit": "Protokollieren Sie `edit` Nachrichten als Info.",
         "_cfg_log_sd": "Protokollieren `self-destructive` Nachrichten als Info.",
         "_cls_doc:": ("Module zum entfernen von Nachrichten(normalerweise spam, etc.).\n"
                       "Check `.config apodiktum purge` um das Protokollieren zu aktivieren/deaktivieren."),
+        "_cmd_doc_del": ("Löscht die beantwortete Nachricht.\n"
+                         "- Verwendung: .del <Antwort>"),
+        "_cmd_doc_edit": ("Bearbeitet die letzte Nachricht.\n"
+                            "- Verwendung: .edit <Nachricht>"),
+        "_cmd_doc_purge": ("Löscht alle Nachrichten bis zu und inklusive der Antwort.\n"
+                           "- Verwendung: .purge <Antwort>"),
+        "_cmd_doc_purgeme": ("Löscht x (oder alle) Nachrichten von dir.\n"
+                             "- Verwendung: .purgeme <anzahl/all>"),
+        "_cmd_doc_purgeuser": ("Löscht alle Nachrichten von einem Nutzer.\n"
+                               "- Verwendung: .purgeuser <Antwort>"),
+        "_cmd_doc_sd": ("Löscht die letzte Nachricht nach x Sekunden. Funktioniert auch mit Medien.\n"
+                        "Verwendung: .sd <Sekunden> <Nachricht>"),
+        "_cmd_doc_spurge": ("Löscht alle Nachrichten bis zu und inklusive der Antwort ohne Benachrichtigung.\n"
+                            "- Verwendung: .spurge <Antwort>"),
+        "_cmd_doc_spurgeme": ("Löscht x (oder alle) Nachrichten von dir ohne Benachrichtigung.\n"
+                              "- Verwendung: .spurgeme <anzahl/all>"),
+        "_cmd_doc_spurgeuser": ("Löscht alle Nachrichten von einem Nutzer ohne Benachrichtigung.\n"
+                                "- Verwendung: .spurgeuser <Antwort>"),
+        "edit_success": ("Bearbeitung erfolgreich.\n"
+                         "Alte Nachricht:\n{}\n\n\nNeue Nachricht:\n{}"),
+        "err_cmd_wrong": "<b>Deine Eingabe war falsch.</b>",
+        "err_purge_start": "<b>Bitte antworte auf eine Nachricht, um den Purge zu starten.</b>",
+        "no_int": "<b>Dein Eingabe war kein Integer.</b>",
+        "permerror": "<b>Du hast keine Berechtigung, diesen Befehl zu verwenden.</b>",
+        "purge_cmpl": "<b>Purge fertig!</b>\n<code>{}</code> Nachrichten wurden gelöscht.",
+        "purge_success": "Purge von {} Nachrichten erfolgreich durchgeführt.",
+        "sd_success": "Nachricht nach {} Sekunden erfolgreich gelöscht.",
     }
 
     strings_ru = {
-        "no_int": "<b>Ваш ввод не является целочисленным типом (int)</b>",
-        "purge_cmpl": "<b>Очистка завершена!</b>\nОчищено <code>{}</code> сообщений.",
-        "permerror": "<b>У вас нет прав на использование этой команды.</b>",
-        "purge_success": "Очистка< {} сообщений завершена успешно.",
-        "edit_success": ("Редактирование завершено успешно.\n"
-                         "Старое сообщение:\n{}\n\n\nНовое сообщение:\n{}"),
-        "sd_success": "Сообщение после {} секунд успешно удалено.",
-        "err_purge_start": "<b>Пожалуйста, ответьте на сообщение для начала очистки.</b>",
-        "err_cmd_wrong": "<b>Ваш команда была неверной.</b>",
-        "_cmd_doc_purge": ("Удаляет все сообщения до и включая ответ.\n"
-                           "- Использование: .purge <реплай>"),
-        "_cmd_doc_spurge": ("Удаляет все сообщения до и включая ответ без оповещения.\n"
-                            "- Использование: .spurge <реплай>"),
-        "_cmd_doc_purgeme": ("Удаляет x (или все) сообщений от вас.\n"
-                             "- Использование: .purgeme <количество/все>"),
-        "_cmd_doc_spurgeme": ("Удаляет x (или все) сообщений от вас без оповещения.\n"
-                              "- Использование: .spurgeme <количество/все>"),
-        "_cmd_doc_purgeuser": ("Удаляет все сообщения от определенного пользователя.\n"
-                               "- Использование: .purgeuser <реплай>"),
-        "_cmd_doc_spurgeuser": ("Удаляет все сообщения от определенного пользователя без оповещения.\n"
-                                "- Использование: .spurgeuser <реплай>"),
-        "_cmd_doc_edit": ("Редактирует последнее сообщение.\n"
-                          "- Использование: .edit <сообщение>"),
-        "_cmd_doc_sd": ("Удаляет последнее сообщение через x секунд.\n"
-                        "- Использование: .sd <секунды> <сообщение>"),
+        "_cfg_log_edit": "Логировать редактирование сообщения как info.",
         "_cfg_log_purge": "Логировать количество очищенных сообщений как info.",
         "_cfg_log_purgeme": "Логировать количество удаленных сообщений от вас как info.",
-        "_cfg_log_edit": "Логировать редактирование сообщения как info.",
         "_cfg_log_sd": "Логировать создание сообщения как info.",
         "_cls_doc": ("Модуль для очистки спама и т.д."
-                     "Проверьте `.config apodiktum purge`, чтобы включить/выключить ведение журнала.")
+                     "Проверьте `.config apodiktum purge`, чтобы включить/выключить ведение журнала."),
+        "_cmd_doc_edit": ("Редактирует последнее сообщение.\n"
+                          "- Использование: .edit <сообщение>"),
+        "_cmd_doc_purge": ("Удаляет все сообщения до и включая ответ.\n"
+                           "- Использование: .purge <реплай>"),
+        "_cmd_doc_purgeme": ("Удаляет x (или все) сообщений от вас.\n"
+                             "- Использование: .purgeme <количество/все>"),
+        "_cmd_doc_purgeuser": ("Удаляет все сообщения от определенного пользователя.\n"
+                               "- Использование: .purgeuser <реплай>"),
+        "_cmd_doc_sd": ("Удаляет последнее сообщение через x секунд.\n"
+                        "- Использование: .sd <секунды> <сообщение>"),
+        "_cmd_doc_spurge": ("Удаляет все сообщения до и включая ответ без оповещения.\n"
+                            "- Использование: .spurge <реплай>"),
+        "_cmd_doc_spurgeme": ("Удаляет x (или все) сообщений от вас без оповещения.\n"
+                              "- Использование: .spurgeme <количество/все>"),
+        "_cmd_doc_spurgeuser": ("Удаляет все сообщения от определенного пользователя без оповещения.\n"
+                                "- Использование: .spurgeuser <реплай>"),
+        "edit_success": ("Редактирование завершено успешно.\n"
+                         "Старое сообщение:\n{}\n\n\nНовое сообщение:\n{}"),
+        "err_cmd_wrong": "<b>Ваш команда была неверной.</b>",
+        "err_purge_start": "<b>Пожалуйста, ответьте на сообщение для начала очистки.</b>",
+        "no_int": "<b>Ваш ввод не является целочисленным типом (int)</b>",
+        "permerror": "<b>У вас нет прав на использование этой команды.</b>",
+        "purge_cmpl": "<b>Очистка завершена!</b>\nОчищено <code>{}</code> сообщений.",
+        "purge_success": "Очистка< {} сообщений завершена успешно.",
+        "sd_success": "Сообщение после {} секунд успешно удалено.",
     }
 
     def __init__(self):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
+            loader.ConfigValue(
+                "log_edit",
+                False,
+                doc=lambda: self.strings("_cfg_log_edit"),
+                validator=loader.validators.Boolean(),
+            ),
             loader.ConfigValue(
                 "log_purge",
                 False,
@@ -143,12 +150,6 @@ class ApodiktumPurgeMod(loader.Module):
                 "log_purgeme",
                 False,
                 doc=lambda: self.strings("_cfg_log_purgeme"),
-                validator=loader.validators.Boolean(),
-            ),
-            loader.ConfigValue(
-                "log_edit",
-                False,
-                doc=lambda: self.strings("_cfg_log_edit"),
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(

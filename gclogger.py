@@ -1,4 +1,4 @@
-__version__ = (0, 0, 27)
+__version__ = (0, 0, 28)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -59,33 +59,33 @@ class GroupChannelLoggerMod(loader.Module):
     strings = {
         "name": "Group/Channel Logger",
         "developer": "@anon97945",
+        "db_string": "<b>[Grouplogger - Settings]</b> Current Database:\n\nWatcher:\n{}",
+        "error": "<b>Your command was wrong.</b>",
+        "no_id": "<b>Your input was no TG ID.</b>",
+        "settings": "<b>[Grouplogger - Settings]</b> Current settings are:\n{}",
         "start": "<b>[Grouplogger]</b> activated.",
         "stopped": "<b>[Grouplogger]</b> deactivated.",
         "turned_off": "<b>[Grouplogger]</b> Is now turned off.",
-        "no_id": "<b>Your input was no TG ID.</b>",
-        "error": "<b>Your command was wrong.</b>",
-        "db_string": "<b>[Grouplogger - Settings]</b> Current Database:\n\nWatcher:\n{}",
-        "settings": "<b>[Grouplogger - Settings]</b> Current settings are:\n{}",
     }
 
     strings_de = {
+        "db_string": "<b>[Grouplogger - Settings]</b> Aktuelle Datenbank:\n\nWatcher:\n{}",
+        "error": "<b>Ihr Befehl war falsch.</b>",
+        "no_id": "<b>Ihre Eingabe war keine TG ID.</b>",
+        "settings": "<b>[Grouplogger - Einstellungen]</b> Aktuelle Einstellungen sind:\n{}.",
         "start": "<b>[Grouplogger]</b> aktiviert",
         "stopped": "<b>[Grouplogger]</b> deaktiviert.",
         "turned_off": "<b>[Grouplogger]</b> ist jetzt ausgeschaltet.",
-        "no_id": "<b>Ihre Eingabe war keine TG ID.</b>",
-        "error": "<b>Ihr Befehl war falsch.</b>",
-        "db_string": "<b>[Grouplogger - Settings]</b> Aktuelle Datenbank:\n\nWatcher:\n{}",
-        "settings": "<b>[Grouplogger - Einstellungen]</b> Aktuelle Einstellungen sind:\n{}.",
     }
 
     strings_ru = {
+        "db_string": "<b>[Grouplogger - Settings]</b> Текущая база данных:\n\nНаблюдающий:\n{}",
+        "error": "<b>Команда не верная.</b>",
+        "no_id": "<b>Ты ввёл не телеграм айди.</b>",
+        "settings": "<b>[Grouplogger - Settings]</b> Текущие настройки:\n{}",
         "start": "<b>[Grouplogger]</b>активирован.",
         "stopped": "<b>[Grouplogger]</b> остановлен.",
         "turned_off": "<b>[Grouplogger]</b> Сейчас выключен.",
-        "no_id": "<b>Ты ввёл не телеграм айди.</b>",
-        "error": "<b>Команда не верная.</b>",
-        "db_string": "<b>[Grouplogger - Settings]</b> Текущая база данных:\n\nНаблюдающий:\n{}",
-        "settings": "<b>[Grouplogger - Settings]</b> Текущие настройки:\n{}",
     }
 
     def __init__(self):

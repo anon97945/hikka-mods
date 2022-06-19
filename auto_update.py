@@ -1,4 +1,4 @@
-__version__ = (1, 0, 7)
+__version__ = (1, 0, 8)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -55,30 +55,30 @@ class AutoUpdateMod(loader.Module):
     strings = {
         "name": "HikkaAutoUpdater",
         "developer": "@anon97945",
-        "updating": ("Hikka Userbot will be automatically updated in {} seconds.\n\n"
-                     "Changelog:\n{}"),
         "_cfg_auto_update": "Whether the Hikka Userbot should automatically update or not.",
-        "_cfg_update_skip": "The update was skipped due to {}.\n{}",
         "_cfg_auto_update_delay": "Choose a delay to wait to start the automatic update.",
         "_cfg_update_msg_read": "Whether to mark the message as read or not.",
+        "_cfg_update_skip": "The update was skipped due to {}.\n{}",
+        "updating": ("Hikka Userbot will be automatically updated in {} seconds.\n\n"
+                     "Changelog:\n{}"),
     }
 
     strings_de = {
-        "updating": ("Hikka Userbot wird in {} Sekunden automatisch aktualisiert.\n\n"
-                     "Changelog:\n{}"),
         "_cfg_auto_update": "Ob der Hikka Userbot automatisch aktualisieren soll oder nicht.",
-        "_cfg_update_skip": "Das Update wurde wegen {} übersprungen.\n{}",
         "_cfg_auto_update_delay": "Wählen Sie eine Wartezeit bis zum Start des automatischen Updates.",
         "_cfg_update_msg_read": "Ob die Nachricht als gelesen markiert werden soll oder nicht.",
+        "_cfg_update_skip": "Das Update wurde wegen {} übersprungen.\n{}",
+        "updating": ("Hikka Userbot wird in {} Sekunden automatisch aktualisiert.\n\n"
+                     "Changelog:\n{}"),
     }
 
     strings_ru = {
-        "updating": ("Хикка будет автоматически обновлена через {} секунд.\n\n"
-                     "Список изменений:\n{}"),
         "_cfg_auto_update": "Должен ли Hikka UserBot обновляться автоматически или нет.",
-        "_cfg_update_skip": "Обновление было пропущено из-за {}.\n{}",
         "_cfg_auto_update_delay": "Выберите задержку для автоматического обновления.",
         "_cfg_update_msg_read": "Будет ли отмечать сообщение обновления как прочтённое или нет.",
+        "_cfg_update_skip": "Обновление было пропущено из-за {}.\n{}",
+        "updating": ("Хикка будет автоматически обновлена через {} секунд.\n\n"
+                     "Список изменений:\n{}"),
     }
 
     def __init__(self):
@@ -91,16 +91,16 @@ class AutoUpdateMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
-                "update_delay",
-                "600",
-                doc=lambda: self.strings("_cfg_auto_update_delay"),
-                validator=loader.validators.Integer(minimum=60),
-            ),
-            loader.ConfigValue(
                 "mark_read",
                 "True",
                 doc=lambda: self.strings("_cfg_update_msg_read"),
                 validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
+                "update_delay",
+                "600",
+                doc=lambda: self.strings("_cfg_auto_update_delay"),
+                validator=loader.validators.Integer(minimum=60),
             ),
         )
 

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 50)
+__version__ = (0, 0, 52)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -16,6 +16,7 @@ __version__ = (0, 0, 50)
 # meta developer: @apodiktum_modules
 
 # scope: hikka_only
+# scope: hikka_min 1.1.28
 # requires: googletrans==4.0.0-rc1
 
 import logging
@@ -40,29 +41,27 @@ class gtranslateMod(loader.Module):
     strings = {
         "name": "Google Translator",
         "developer": "@anon97945",
-        "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
-        "invalid_text": "Invalid text to translate",
-        "split_error": "Python split() error, if there is -> in the text, it must split!",
         "_cfg_lang_msg": "Language to translate to by default.",
         "_cfg_vodkatr_msg": "If `RU` should be displayed as `Vodka`.",
+        "invalid_text": "Invalid text to translate",
+        "split_error": "Python split() error, if there is -> in the text, it must split!",
+        "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
     }
 
     strings_de = {
-        "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
-        "invalid_text": "Ungültiger Text zum Übersetzen.",
-        "split_error": "Python split() error, wenn -> im Text steht, muss es gesplittet werden!",
         "_cfg_lang_msg": "Sprache, in die standardmäßig übersetzt werden soll.",
         "_cfg_vodkatr_msg": "Ob `RU` als `Vodka` angezeigt werden soll.",
+        "invalid_text": "Ungültiger Text zum Übersetzen.",
+        "split_error": "Python split() error, wenn -> im Text steht, muss es gesplittet werden!",
+        "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
     }
 
     strings_ru = {
-        "name": "Google Translator",
-        "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
-        "invalid_text": "Неправильный текст для перевода",
-        "split_error": "Ошибка в функции Python – split(). Если в тексте есть ->, то это должно быть разделено.",
         "_cfg_lang_msg": "Язык на который переводится по умолчанию.",
         "_cfg_vodkatr_msg": "Если `RU`, то должно отображаться как `Vodka`.",
-        "translated_by": "@MUTANTP7AY3R5",
+        "invalid_text": "Неправильный текст для перевода",
+        "split_error": "Ошибка в функции Python – split(). Если в тексте есть ->, то это должно быть разделено.",
+        "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
     }
 
     def __init__(self):

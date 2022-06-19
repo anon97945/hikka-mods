@@ -1,4 +1,4 @@
-__version__ = (0, 0, 8)
+__version__ = (0, 0, 9)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -53,9 +53,9 @@ class pypngMod(loader.Module):
     strings = {
         "name": "PyPNG",
         "developer": "@anon97945",
-        "py2png": "<b>Converting Py to PNG</b>",
         "no_file": "<b>Reply to file.py or url</b>",
         "no_url": "<b>No url in reply found.</b>",
+        "py2png": "<b>Converting Py to PNG</b>",
     }
 
     async def client_ready(self, client, db):
@@ -69,7 +69,9 @@ class pypngMod(loader.Module):
         return file
 
     async def pypngcmd(self, message: Message):
-        """reply to url or py file"""
+        """
+        reply to url or py file
+        """
         await utils.answer(message, self.strings("py2png"))
         reply = await message.get_reply_message()
         file = BytesIO()

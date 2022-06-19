@@ -1,4 +1,4 @@
-__version__ = (0, 0, 10)
+__version__ = (0, 0, 11)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -59,7 +59,6 @@ class SaveMessageMod(loader.Module):
     strings_ru = {
         "done": "<b>Перешлите для завершения сохранения.</b>",
         "invalid_link": "<b>Неверная ссылка.</b>",
-        "translated_by": "@MUTANTP7AY3R5",
     }
 
     def __init__(self):
