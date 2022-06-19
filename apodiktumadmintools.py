@@ -60,10 +60,7 @@ async def is_linkedchannel(
         full_chat = await message.client(GetFullChannelRequest(channel=user.id))
         if full_chat.full_chat.linked_chat_id:
             linked_channel_id = full_chat.full_chat.linked_chat_id
-            if chat.id == linked_channel_id:
-                return True
-            else:
-                return False
+            return chat.id == linked_channel_id
     else:
         return False
 
