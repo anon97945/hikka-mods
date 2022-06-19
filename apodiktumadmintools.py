@@ -56,11 +56,16 @@ async def is_linkedchannel(
     user: Union[User, int],
     message: Union[None, Message] = None,
 ):
-    if isinstance(user, User):
+    if not isinstance(user, User):
+        full_chat = await message.client(GetFullChannelRequest(channel=user.id))
+        if full_chat.full_chat.linked_chat_id:
+            linked_channel_id = full_chat.full_chat.linked_chat_id
+            if chat.id == linked_channel_id:
+                return True
+            else:
+                return False
+    else:
         return False
-    full_chat = await message.client(GetFullChannelRequest(channel=user.id))
-    if full_chat.full_chat.linked_chat_id:
-        return chat == int(full_chat.full_chat.linked_chat_id)
 
 
 def represents_int(s: str) -> bool:
