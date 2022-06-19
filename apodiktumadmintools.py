@@ -1,4 +1,4 @@
-__version__ = (0, 9, 18)
+__version__ = (1, 0, 1)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -60,7 +60,7 @@ async def is_linkedchannel(
         return False
     full_chat = await message.client(GetFullChannelRequest(channel=user.id))
     if full_chat.full_chat.linked_chat_id:
-        return chat == int(full_chat.full_chat.linked_chat_id)
+        return chat.id == int(full_chat.full_chat.linked_chat_id)
 
 
 def represents_int(s: str) -> bool:
@@ -539,7 +539,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 bcu.append(chatid_str)
                 sets.setdefault(chatid_str, {})
                 sets[chatid_str].setdefault("notify", True)
-                sets[chatid_str].setdefault("ban", False)
+                sets[chatid_str].setdefault("ban", True)
                 sets[chatid_str].setdefault("deltimer", 60)
                 self.set("bcu", bcu)
                 self.set("bcu_sets", sets)
