@@ -1,4 +1,4 @@
-__version__ = (0, 1, 9)
+__version__ = (0, 1, 10)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -22,7 +22,6 @@ import asyncio
 import logging
 
 from telethon.tl.types import Message
-from telethon.errors import rpcbaseerrors
 
 from .. import loader, utils
 
