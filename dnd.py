@@ -1,4 +1,4 @@
-__version__ = (0, 1, 2)
+__version__ = (0, 1, 3)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -81,8 +81,8 @@ class ApodiktumDNDMod(loader.Module):
         "approved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> approved in pm.</b>',
         "args_pmban": "ℹ️ <b>Example usage: </b><code>.pmbanlast 5</code>",
         "available_statuses": "<b>🦊 Available statuses:</b>\n\n",
-        "banned": ("😊 <b>Hey there •ᴗ•</b>\n<b>Unit «SIGMA»<b>, the <b>guardian</b> of this account. You are <b>not approved</b>! "
-                   "You can contact my owner <b>in chat</b>, if you need help.\n<b>I need to ban you in terms of security.</b>"),
+        "banned": ("😊 <b>Hey there •ᴗ•</b>\n<b>i am Unit «SIGMA»<b>, the <b>guardian</b> of this account. You are <b>not approved</b>! "
+                   "You can contact my owner <b>in a groupchat</b>, if you need help.\n<b>I need to ban you in terms of security.</b>"),
         "banned_log": ('👮 <b>I banned <a href="tg://user?id={}">{}</a>.</b>\n\n<b>{} Contact</b>\n<b>{} Started by you</b>\n<b>{} '
                        'Active conversation</b>\n\n<b>✊ Actions</b>\n\n<b>{} Reported spam</b>\n<b>{} Deleted dialog</b>\n<b>{} Banned</b>\n\n<b>ℹ️ Message</b>\n<code>{}</code>'),
         "blocked": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> blocked.</b>',
@@ -115,7 +115,7 @@ class ApodiktumDNDMod(loader.Module):
         "_cmd_doc_block": "<ответ> - Блокирует этого пользователя без предупреждения.",
         "_cmd_doc_unblock": "<ответ> - Разблокировать этого пользователя.",
         "_cmd_doc_delstatus": "<короткое_название> - Удаляет статус.",
-        "_cmd_doc_newstatus": ("<short_name> <notif|0/1> <text>\n"
+        "_cmd_doc_newstatus": ("<короткое_название> <notif|0/1> <text>\n"
                               " - Новый статус\n"
                               " - Пример: .newstatus test 1 Привет!"),
         "_cmd_doc_pmbanlast": "<число> - Блокирует и удалыеь диалоги с большим кол-вом новых пользователей.",
