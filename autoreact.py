@@ -1,4 +1,4 @@
-__version__ = (0, 1, 1)
+__version__ = (0, 1, 2)
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
@@ -97,4 +97,11 @@ class ApodiktumAutoReactMod(loader.Module):
         except ReactionInvalidError:
             if self.config["raise_error"]:
                 logger.info(f"ReactionInvalidError: {emoji} in chat {chatid}")
+            return False
+        except Exception as e:
+            if self.config["raise_error"]:
+                if "PREMIUM_ACCOUNT_REQUIRED" in str(e):
+                    logger.info(f"PREMIUM_ACCOUNT_REQUIRED: {emoji} in chat {chatid}")
+                else:
+                    logger.info(f"Error: {e}")
             return False
