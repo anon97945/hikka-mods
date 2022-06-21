@@ -99,12 +99,10 @@ class ApodiktumAutoReactMod(loader.Module):
                 logger.info(f"ReactionInvalidError: {emoji} in chat {chatid}")
             return False
         except Exception as e:
-            if "PREMIUM_ACCOUNT_REQUIRED" in str(e):
-                if self.config["raise_error"]:
+            if self.config["raise_error"]:
+                if "PREMIUM_ACCOUNT_REQUIRED" in str(e):
                     logger.info(f"PREMIUM_ACCOUNT_REQUIRED: {emoji} in chat {chatid}")
-                return False
-            else:
-                if self.config["raise_error"]:
+                else:
                     logger.info(f"Error: {e}")
-                return False
+            return False
 
