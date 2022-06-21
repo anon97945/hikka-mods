@@ -57,7 +57,7 @@ class ApodiktumAutoReactMod(loader.Module):
                 "reactions",
                 doc=lambda: self.strings("_cfg_doc_reactions"),
                 validator=loader.validators.Series(
-                    validator=loader.validators.RegExp("^(?:(?:\d+)[|](?:\d+|global)|(?:\d+|all)[|]\d+)(?:[|][👍👎❤️🔥🥰👏😁🤔🤯😱🤬😢🎉🤩🤮💩🙏👌🕊🤡🥱🥴😍🐳🌚🌭💯🤣❤️‍🔥])+$")
+                    validator=loader.validators.RegExp(r"^(?:(?:\d+)[|](?:\d+|global)|(?:\d+|all)[|]\d+)(?:[|][👍👎❤️🔥🥰👏😁🤔🤯😱🤬😢🎉🤩🤮💩🙏👌🕊🤡🥱🥴😍🐳🌚🌭💯🤣❤️‍🔥])+$")
                 ),
             ),
         )
