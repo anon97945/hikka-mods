@@ -93,5 +93,5 @@ class ApodiktumAutoReactMod(loader.Module):
             return True
         except ReactionInvalidError:
             if self.config["raise_error"]:
-                logger.info("ReactionInvalidError: {} in chat {}".format(emoji, chatid))
+                logger.info(f"ReactionInvalidError: {emoji} in chat {chatid}")
             return False
