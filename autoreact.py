@@ -105,4 +105,3 @@ class ApodiktumAutoReactMod(loader.Module):
                 else:
                     logger.info(f"Error: {e}")
             return False
-
