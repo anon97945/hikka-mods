@@ -153,7 +153,10 @@ class ApodiktumAutoReactMod(loader.Module):
             chatid = int(chatid)
         if userid != "all":
             userid = int(userid)
-        if chatid in self.config["delay_chats"] or userid in self.config["delay_chats"]:
+        if (
+            chatid in self.config["delay_chats"]
+            or userid in self.config["delay_chats"]
+        ):
             if (
                 chatid not in self.config["random_delay_chats"]
                 or userid not in self.config["random_delay_chats"]
