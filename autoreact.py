@@ -139,19 +139,25 @@ class ApodiktumAutoReactMod(loader.Module):
                         return
 
     async def _delay(self):
-        if self.config["global_delay"] and not self.config["random_delay"]:
-            await asyncio.sleep(self.config["global_delay"])
-        elif self.config["global_delay"] and self.config["random_delay"]:
-            await asyncio.sleep(round(random.uniform(0, self.config["global_delay"]), 2))
+        if self.config["global_delay"]:
+            if not self.config["random_delay"]:
+                await asyncio.sleep(self.config["global_delay"])
+            else:
+                await asyncio.sleep(round(random.uniform(0, self.config["global_delay"]), 2))
 
     async def _reactions_chance(self, reactions_chance):
         for reactions_chance in reactions_chance:
             userid, chatid, chance = reactions_chance.split("|")
             if userid == "all" and chatid == "global":
                 return
-            if (str(message.sender_id) == userid or userid == "all") and (str(utils.get_chat_id(message)) == chatid or chatid == "global"):
-                if random.random() > float(chance):
-                    return False
+            if (
+                (str(message.sender_id) == userid or userid == "all")
+                and (
+                    str(utils.get_chat_id(message)) == chatid or chatid == "global"
+                )
+                and random.random() > float(chance)
+            ):
+                return False
         return True
 
     async def _react_message(self, message, emoji, chatid):
