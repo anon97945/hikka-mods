@@ -139,7 +139,7 @@ class ApodiktumAutoReactMod(loader.Module):
             if userid == "all" and chatid == "global":
                 return
             if (
-                (str(message.sender_id) == userid or userid == "all") 
+                (str(message.sender_id) == userid or userid == "all")
                 and (str(utils.get_chat_id(message)) == chatid or chatid == "global")
             ):
                 if not await self._reactions_chance(reactions_chance, message):
