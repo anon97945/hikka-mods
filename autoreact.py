@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 class ApodiktumAutoReactMod(loader.Module):
     """
     AutoReact to messages.
+    Check the `.config apodiktum autoreact`
     """
     strings = {
         "name": "Apodiktum AutoReact",
@@ -58,6 +59,7 @@ class ApodiktumAutoReactMod(loader.Module):
             ),
             loader.ConfigValue(
                 "reactions",
+                ["all|1792410946|❤️|👍|🔥"]
                 doc=lambda: self.strings("_cfg_doc_reactions"),
                 validator=loader.validators.Series(
                     validator=loader.validators.RegExp(r"^(?:(?:\d+)[|](?:\d+|global)|(?:\d+|all)[|]\d+)(?:[|][👍👎❤️🔥🥰👏😁🤔🤯😱🤬😢🎉🤩🤮💩🙏👌🕊🤡🥱🥴😍🐳🌚🌭💯🤣❤️‍🔥]|[|][\u2764])+")
