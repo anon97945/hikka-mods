@@ -39,7 +39,7 @@ class ShowViewsMod(loader.Module):
     def __init__(self):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
-                "logchan",
+                "channel",
                 "None",
                 lambda: self.strings("_cfg_cst_channel"),
                 validator=loader.validators.Union(
@@ -60,7 +60,7 @@ class ShowViewsMod(loader.Module):
         chat = message.chat
         args = utils.get_args_raw(message)
 
-        if not self.config["logchan"]:
+        if not self.config["channel"]:
             await utils.answer(message, self.strings("no_channel"))
             return
         if not args:
@@ -68,7 +68,7 @@ class ShowViewsMod(loader.Module):
             return
 
         await message.delete()
-        msg = await message.client.send_message(self.config["logchan"], args)
+        msg = await message.client.send_message(self.config["channel"], args)
         await msg.forward_to(chat.id)
         if msg.out:
             await msg.delete()
