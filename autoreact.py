@@ -40,7 +40,9 @@ class ApodiktumAutoReactMod(loader.Module):
         "no_command": "<b>This is no command. Everything is configured within</b>\n<code>.config apodiktum autoreact</code>\n\n<b><i><u>This module was created by {}.</u></i></b>",
         "_cfg_doc_raise_error": "Raise an error if the emoji is not valid.",
         "_cfg_doc_shuffle": "Shuffles the list of given emojis.",
-        "_cfg_doc_global_delay": "The delay between reactions are send in seconds.",
+        "_cfg_doc_delay": "The delay between reactions are send in seconds.",
+        "_cfg_doc_delay_chats": "List of delay chats.\nIf the chat is in the list, the delay is used.",
+        "_cfg_doc_random_delay_chats": "List of random delay chats.\nIf the chat is in the list, a random delay is used.",
         "_cfg_doc_random_delay": "Randomizes the delay between reactions. Randomness is between 0 and the global delay.",
         "_cfg_doc_reactions_chance": ("The chance of reacting to a message.\n0.0 is the chance of not reacting to a message.\n1.0 is the chance of reacting to a message every time."
                                       "Pattern:\n<userid/all>|<chatid/global>|<percentage(0.00-1)>\n\nExample:\n1234567|global|0.8"),
@@ -59,12 +61,19 @@ class ApodiktumAutoReactMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
-                "global_delay",
+                "delay",
                 0.5,
-                doc=lambda: self.strings("_cfg_doc_global_delay"),
+                doc=lambda: self.strings("_cfg_doc_delay"),
                 validator=loader.validators.Union(
                     loader.validators.Float(minimum=0, maximum=600),
                     loader.validators.NoneType(),
+                ),
+            ),
+            loader.ConfigValue(
+                "delay_chats",
+                doc=lambda: self.strings("_cfg_doc_delay_chats"),
+                validator=loader.validators.Series(
+                    loader.validators.TelegramID(),
                 ),
             ),
             loader.ConfigValue(
@@ -74,10 +83,11 @@ class ApodiktumAutoReactMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
-                "random_delay",
-                False,
-                doc=lambda: self.strings("_cfg_doc_random_delay"),
-                validator=loader.validators.Boolean(),
+                "random_delay_chats",
+                doc=lambda: self.strings("_cfg_doc_random_delay_chats"),
+                validator=loader.validators.Series(
+                    loader.validators.TelegramID(),
+                ),
             ),
             loader.ConfigValue(
                 "reactions",
@@ -133,17 +143,21 @@ class ApodiktumAutoReactMod(loader.Module):
                     return
                 if self.config["shuffle_reactions"]:
                     emojis = random.sample(emojis, len(emojis))
-                await self._delay()
+                await self._delay(chatid, userid)
                 for emoji in emojis:
                     if await self._react_message(message, emoji, chatid):
                         return
 
-    async def _delay(self):
-        if self.config["global_delay"]:
-            if not self.config["random_delay"]:
-                await asyncio.sleep(self.config["global_delay"])
+    async def _delay(self, chatid, userid):
+        if chatid != "global":
+            chatid = int(chatid)
+        if userid != "all":
+            userid = int(userid)
+        if chatid in self.config["delay_chats"] or userid in self.config["delay_chats"]:
+            if not chatid in self.config["random_delay_chats"] or userid in self.config["random_delay_chats"]:
+                await asyncio.sleep(self.config["delay"])
             else:
-                await asyncio.sleep(round(random.uniform(0, self.config["global_delay"]), 2))
+                await asyncio.sleep(round(random.uniform(0, self.config["delay"]), 2))
 
     @staticmethod
     async def _reactions_chance(reactions_chance, message: Message):
