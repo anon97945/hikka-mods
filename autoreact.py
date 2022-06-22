@@ -129,7 +129,7 @@ class ApodiktumAutoReactMod(loader.Module):
             if userid == "all" and chatid == "global":
                 return
             if (str(message.sender_id) == userid or userid == "all") and (str(utils.get_chat_id(message)) == chatid or chatid == "global"):
-                if not await self._reactions_chance(reactions_chance):
+                if not await self._reactions_chance(reactions_chance, message):
                     return
                 if self.config["shuffle_reactions"]:
                     emojis = random.sample(emojis, len(emojis))
@@ -145,9 +145,10 @@ class ApodiktumAutoReactMod(loader.Module):
             else:
                 await asyncio.sleep(round(random.uniform(0, self.config["global_delay"]), 2))
 
-    async def _reactions_chance(self, reactions_chance):
-        for reactions_chance in reactions_chance:
-            userid, chatid, chance = reactions_chance.split("|")
+    @staticmethod
+    async def _reactions_chance(reactions_chance, message: Message):
+        for r_chance in reactions_chance:
+            userid, chatid, chance = r_chance.split("|")
             if userid == "all" and chatid == "global":
                 return
             if (
