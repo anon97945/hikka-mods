@@ -12,6 +12,9 @@ __version__ = (0, 0, 1)
 
 # meta developer: @apodiktum_modules
 
+# scope: hikka_only
+# scope: hikka_min 1.1.28
+
 from .. import loader, utils
 from telethon.tl.types import Message
 
@@ -27,6 +30,7 @@ class ShowViewsMod(loader.Module):
     """
     strings = {
         "name": "ShowViews",
+        "developer": "@anon97945",
         "no_args": "No message to send.",
         "no_channel": "No channel set.",
         "_cfg_cst_channel": "The Channel ID to send the message from.",
@@ -65,6 +69,6 @@ class ShowViewsMod(loader.Module):
 
         await message.delete()
         msg = await message.client.send_message(self.config["logchan"], args)
-        fwd_msg = await msg.forward_to(chat.id)
+        await msg.forward_to(chat.id)
         if msg.out:
             await msg.delete()
