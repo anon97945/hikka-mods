@@ -10,5 +10,6 @@ pmlog
 purge
 pypng
 save_message
+show_viewer
 tts
 voicetools
