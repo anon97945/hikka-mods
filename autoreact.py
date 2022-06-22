@@ -154,7 +154,7 @@ class ApodiktumAutoReactMod(loader.Module):
         if userid != "all":
             userid = int(userid)
         if chatid in self.config["delay_chats"] or userid in self.config["delay_chats"]:
-            if not chatid in self.config["random_delay_chats"] or userid in self.config["random_delay_chats"]:
+            if not chatid in self.config["random_delay_chats"] or userid not in self.config["random_delay_chats"]:
                 await asyncio.sleep(self.config["delay"])
             else:
                 await asyncio.sleep(round(random.uniform(0, self.config["delay"]), 2))
