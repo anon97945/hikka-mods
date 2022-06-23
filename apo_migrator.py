@@ -78,19 +78,19 @@ class ApodiktumMigratorMod(loader.Module):
 
         if self.get("hash") == "04981f54ad91b153542793ed8848f0f3":
             await self.inline.form(message=message,
-                                         text=self.strings("already_migrated"),
-                                         reply_markup=[
-                                                        {
-                                                            "text": self.strings("_btn_force"),
-                                                            "callback": self._migrate,
-                                                            "args": (chat_id,),
-                                                        },
-                                                        {
-                                                            "text": self.strings("_btn_close"),
-                                                            "callback": self._close
-                                                        }
-                                                      ]
-                                        )
+                                   text=self.strings("already_migrated"),
+                                   reply_markup=[
+                                                    {
+                                                        "text": self.strings("_btn_force"),
+                                                        "callback": self._migrate,
+                                                        "args": (chat_id,),
+                                                    },
+                                                    {
+                                                        "text": self.strings("_btn_close"),
+                                                        "callback": self._close
+                                                    }
+                                                ]
+                                 )
             return
         msg = await self.inline.form(message=message,
                                      text=self.strings("migrate_now"),
