@@ -43,6 +43,7 @@ Links = {
     "https://github.com/anon97945/hikka-mods/raw/master/apodiktumadmintools.py": "https://github.com/anon97945/hikka-mods/raw/master/admintools.py",
 }
 
+
 @loader.tds
 class ApodiktumMigratorMod(loader.Module):
     """
@@ -73,11 +74,10 @@ class ApodiktumMigratorMod(loader.Module):
         """
         This will migrate all your old modules to new ones, including Config.
         """
-        name = self.strings("name")
         chat_id = utils.get_chat_id(message)
 
         if self.get("hash") == "04981f54ad91b153542793ed8848f0f3":
-            msg = await self.inline.form(message=message,
+            await self.inline.form(message=message,
                                          text=self.strings("already_migrated"),
                                          reply_markup=[
                                                         {
@@ -116,8 +116,8 @@ class ApodiktumMigratorMod(loader.Module):
                         reply_markup={"text": self.strings("_btn_restart"),
                                       "callback": self._restart,
                                       "args": (chat_id,)
-                                     }
-                        )
+                                      }
+                       )
 
     async def _restart(self, call: InlineCall, chat_id):
         await call.delete()
@@ -138,18 +138,18 @@ class ApodiktumMigratorMod(loader.Module):
     async def _close(self, call) -> None:
         await call.delete()
 
-    async def _key_rename(self, old_db, list):
+    async def _key_rename(self, old_db, mlist):
         new_dict = {}
         for key, value in zip(old_db.keys(), old_db.values()):
-            new_key = list.get(key, key)
+            new_key = mlist.get(key, key)
             new_dict[new_key] = old_db[key]
-        for old_key, new_key in list.items():
+        for old_key, new_key in mlist.items():
             if new_key in new_dict:
                 logger.info(self.strings("_log_doc_migrates").format("old URL", old_key, new_key))
         return new_dict
 
-    async def _update_key_value(self, new_db, list):
-        for old_value, new_value in list.items():
+    async def _update_key_value(self, new_db, mlist):
+        for old_value, new_value in mlist.items():
             for key, value in new_db.items():
                 if value == old_value:
                     new_db[key] = new_value
