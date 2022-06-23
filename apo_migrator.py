@@ -92,8 +92,8 @@ class ApodiktumMigratorMod(loader.Module):
                                                 ])
             return
         await self.inline.form(message=message,
-                              text=self.strings("migrate_now"),
-                              reply_markup=[
+                               text=self.strings("migrate_now"),
+                               reply_markup=[
                                                 {
                                                     "text": self.strings("_btn_yes"),
                                                     "callback": self._migrate,
