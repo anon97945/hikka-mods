@@ -92,18 +92,18 @@ class ApodiktumMigratorMod(loader.Module):
                                                 ])
             return
         await self.inline.form(message=message,
-                                     text=self.strings("migrate_now"),
-                                     reply_markup=[
-                                                    {
-                                                        "text": self.strings("_btn_yes"),
-                                                        "callback": self._migrate,
-                                                        "args": (chat_id,),
-                                                    },
-                                                    {
-                                                        "text": self.strings("_btn_no"),
-                                                        "callback": self._close,
-                                                    },
-                                                  ])
+                              text=self.strings("migrate_now"),
+                              reply_markup=[
+                                                {
+                                                    "text": self.strings("_btn_yes"),
+                                                    "callback": self._migrate,
+                                                    "args": (chat_id,),
+                                                },
+                                                {
+                                                    "text": self.strings("_btn_no"),
+                                                    "callback": self._close,
+                                                },
+                                                ])
 
     async def _migrate(self, call: InlineCall, chat_id):
         logger.info(self.strings("_log_doc_migrating"))
