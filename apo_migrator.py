@@ -61,7 +61,7 @@ class ApodiktumMigratorMod(loader.Module):
         "_log_doc_migrates": "Migrated {}:\n{}\nto\n{}.",
         "_log_doc_migrating": "Migrating modules...",
         "already_migrated": "<b>[Error] You already migrated your modules.</b>",
-        "migrate_now": "<b>Hello👋🏻,\ndo you want to migrate now?</b>",
+        "migrate_now": "<b>Hello👋🏻,\ndo you want to migrate now?\nEnsure to backup your DB before!</b>\n<code>.backupdb</code>",
         "restart_now": "<b><u>Done.</u>\nDo you want to restart now?</b>",
     }
 
