@@ -90,7 +90,7 @@ class ApodiktumMigratorMod(loader.Module):
                                                         "callback": self._close
                                                     }
                                                 ]
-                                 )
+            )
             return
         msg = await self.inline.form(message=message,
                                      text=self.strings("migrate_now"),
@@ -105,7 +105,7 @@ class ApodiktumMigratorMod(loader.Module):
                                                         "callback": self._close,
                                                     },
                                                   ]
-                                    )
+        )
 
     async def _migrate(self, call: InlineCall, chat_id):
         logger.info(self.strings("_log_doc_migrating"))
@@ -117,7 +117,7 @@ class ApodiktumMigratorMod(loader.Module):
                                       "callback": self._restart,
                                       "args": (chat_id,)
                                       }
-                       )
+        )
 
     async def _restart(self, call: InlineCall, chat_id):
         await call.delete()
