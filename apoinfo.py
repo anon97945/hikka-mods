@@ -1,4 +1,4 @@
-__version__ = (0, 1, 9)
+__version__ = (0, 1, 10)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -32,13 +32,14 @@ logger = logging.getLogger(__name__)
 
 
 @loader.tds
-class anoninfoMod(loader.Module):
+class ApodiktumInfoMod(loader.Module):
     """
     Show userbot info
     """
 
     strings = {
-        "name": "AnonInfo",
+        "name": "Apo Info",
+        "developer": "@anon97945",
         "_cfg_banner": "Set `True` in order to disable an media banner.",
         "_cfg_cst_bnr": "Custom Banner.",
         "_cfg_cst_btn": "Custom button. Leave empty to remove button.",
@@ -47,7 +48,6 @@ class anoninfoMod(loader.Module):
         "_cfg_inline_banner": "Set `True` in order to disable an inline media banner.",
         "build": "Build",
         "description": "ℹ This will not compromise any sensitive info.",
-        "developer": "@anon97945",
         "owner": "Owner",
         "prefix": "Prefix",
         "send_info": "Send userbot info.",
@@ -63,6 +63,7 @@ class anoninfoMod(loader.Module):
         "_cfg_cst_frmt": "Benutzerdefiniertes Dateiformat für das Banner.",
         "_cfg_cst_msg": "Benutzerdefinierte Nachricht für Info. Kann die Schlüsselwörter {me}, {version}, {build}, {prefix}, {platform}, {upd} enthalten.",
         "_cfg_inline_banner": "Setzen Sie `True`, um das Inline Media Banner zu deaktivieren.",
+        "_cmd_doc_capoinfo": "Dadurch wird die Konfiguration für das Modul geöffnet.",
         "_ihandle_doc_info": "Отправить информацию о юзерботе",
         "build": "Build",
         "description": "ℹ Dadurch werden keine sensiblen Daten gefährdet.",
@@ -81,6 +82,7 @@ class anoninfoMod(loader.Module):
         "_cfg_cst_frmt": "Кастомный формат файла для баннера.",
         "_cfg_cst_msg": "Кастомный текст сообщения в info. Может содержать ключевые слова {me}, {version}, {build}, {prefix}, {platform}, {upd}.",
         "_cfg_inline_banner": "Установите `True`, чтобы отключить встроенный медиа-баннер",
+        "_cmd_doc_capoinfo": "Это откроет конфиг для модуля.",
         "_ihandle_doc_info": "Отправить информацию о юзерботе.",
         "build": "Сборка",
         "description": "ℹ Это не раскроет никакой личной информации.",
@@ -265,7 +267,7 @@ class anoninfoMod(loader.Module):
             )
             if self.config["custom_message"] and self.config["custom_message"] != "no"
             else (
-                "<b>🌚 Anondamus Hikka Info</b>\n"
+                "<b>🌚 Apodiktum Hikka Info</b>\n"
                 f"<b>🤴 {self.strings('owner')}: </b>{me}\n\n"
                 f"<b>🔮 {self.strings('version')}: </b>{version} {build}\n"
                 f"<b>{upd}</b>\n\n"
@@ -286,7 +288,7 @@ class anoninfoMod(loader.Module):
         )
 
     @loader.inline_everyone
-    async def anoninfo_inline_handler(self, query: InlineQuery) -> dict:
+    async def apoinfo_inline_handler(self, query: InlineQuery) -> dict:
         """Send userbot info"""
         m = {x: self._get_mark(x) for x in range(13)}
         btns = [
@@ -321,8 +323,17 @@ class anoninfoMod(loader.Module):
             "reply_markup": btns,
         }
 
+    async def capoinfocmd(self, message: Message):
+        """
+        This will open the config for the module.
+        """
+        name = self.strings("name")
+        await self.allmodules.commands["config"](
+            await utils.answer(message, f"{self.get_prefix()}config {name}")
+        )
+
     @loader.unrestricted
-    async def anoninfocmd(self, message: Message):
+    async def apoinfocmd(self, message: Message):
         """Send userbot info"""
         m = {x: self._get_mark(x) for x in range(13)}
         btns = [

@@ -1,4 +1,4 @@
-__version__ = (0, 1, 4)
+__version__ = (0, 1, 5)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -61,7 +61,7 @@ class ApodiktumDNDMod(loader.Module):
     """
 
     strings = {
-        "name": "Apodiktum DND",
+        "name": "Apo DND",
         "developer": "@anon97945",
         "_cfg_active_threshold": "What number of your messages is required to trust peer.",
         "_cfg_afk_no_grp": "If set to true, AFK will not reply in groups.",
@@ -110,6 +110,7 @@ class ApodiktumDNDMod(loader.Module):
                      "-> Избавляет от беспокойства, когда вы недоступны."
                      "Смотрите `.config apodiktum dnd`."),
         "_cmd_doc_allowpm": "<ответ или username> - Разрешает пользователю писать вам в ЛС.",
+        "_cmd_doc_cdnd": "Это откроет конфиг для модуля.",
         "_cmd_doc_denypm": "<ответ или username> - Запрещает пользователю писать вам в ЛС.",
         "_cmd_doc_report": "<ответ> - Отправляет жалобу на пользователя на СПАМ. Использовать только в ЛС.",
         "_cmd_doc_block": "<ответ> - Блокирует этого пользователя без предупреждения.",
@@ -324,6 +325,15 @@ class ApodiktumDNDMod(loader.Module):
             await self._client(
                 DeleteHistoryRequest(peer=cid, just_clear=True, max_id=0)
             )
+
+    async def cdndcmd(self, message: Message):
+        """
+        This will open the config for the module.
+        """
+        name = self.strings("name")
+        await self.allmodules.commands["config"](
+            await utils.answer(message, f"{self.get_prefix()}config {name}")
+        )
 
     async def pmbanlastcmd(self, message: Message):
         """

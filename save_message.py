@@ -1,4 +1,4 @@
-__version__ = (0, 0, 11)
+__version__ = (0, 0, 12)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -40,12 +40,12 @@ def get_ids(link):
 
 
 @loader.tds
-class SaveMessageMod(loader.Module):
+class ApodiktumSaveMessageMod(loader.Module):
     """
     Get Message/Media from given link (also works for forward restricted content).
     """
     strings = {
-        "name": "Save Message",
+        "name": "Apo SaveMessage",
         "developer": "@anon97945",
         "done": "<b>Forward to saved complete.</b>",
         "invalid_link": "<b>Invalid link.</b>",

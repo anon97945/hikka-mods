@@ -1,4 +1,4 @@
-__version__ = (1, 0, 8)
+__version__ = (1, 0, 9)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -48,12 +48,12 @@ async def buttonhandler(bmsg, chatid, caption1, caption2, data_btn1, data_btn2):
 
 
 @loader.tds
-class AutoUpdateMod(loader.Module):
+class ApodiktumAutoUpdateMod(loader.Module):
     """
     Automatically update your Hikka Userbot
     """
     strings = {
-        "name": "HikkaAutoUpdater",
+        "name": "Apo AutoUpdater",
         "developer": "@anon97945",
         "_cfg_auto_update": "Whether the Hikka Userbot should automatically update or not.",
         "_cfg_auto_update_delay": "Choose a delay to wait to start the automatic update.",
@@ -68,6 +68,7 @@ class AutoUpdateMod(loader.Module):
         "_cfg_auto_update_delay": "Wählen Sie eine Wartezeit bis zum Start des automatischen Updates.",
         "_cfg_update_msg_read": "Ob die Nachricht als gelesen markiert werden soll oder nicht.",
         "_cfg_update_skip": "Das Update wurde wegen {} übersprungen.\n{}",
+        "_cmd_doc_cautoupdate": "Dadurch wird die Konfiguration für das Modul geöffnet.",
         "updating": ("Hikka Userbot wird in {} Sekunden automatisch aktualisiert.\n\n"
                      "Changelog:\n{}"),
     }
@@ -77,6 +78,7 @@ class AutoUpdateMod(loader.Module):
         "_cfg_auto_update_delay": "Выберите задержку для автоматического обновления.",
         "_cfg_update_msg_read": "Будет ли отмечать сообщение обновления как прочтённое или нет.",
         "_cfg_update_skip": "Обновление было пропущено из-за {}.\n{}",
+        "_cmd_doc_cautoupdate": "Это откроет конфиг для модуля.",
         "updating": ("Хикка будет автоматически обновлена через {} секунд.\n\n"
                      "Список изменений:\n{}"),
     }
@@ -102,6 +104,15 @@ class AutoUpdateMod(loader.Module):
                 doc=lambda: self.strings("_cfg_auto_update_delay"),
                 validator=loader.validators.Integer(minimum=60),
             ),
+        )
+
+    async def cautoupdatecmd(self, message: Message):
+        """
+        This will open the config for the module.
+        """
+        name = self.strings("name")
+        await self.allmodules.commands["config"](
+            await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
 
     async def _autoupdate(self, message):

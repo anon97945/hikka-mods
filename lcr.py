@@ -1,4 +1,4 @@
-__version__ = (0, 0, 16)
+__version__ = (0, 0, 17)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -28,12 +28,12 @@ logger = logging.getLogger(__name__)
 
 
 @loader.tds
-class lcrMod(loader.Module):
+class ApodiktumLCRMod(loader.Module):
     """
     Telegram Login Code Reciever
     """
     strings = {
-        "name": "Login Code Reciever",
+        "name": "Apo LoginCodeReciever",
         "developer": "@anon97945",
         "_cfg_timeout": "<b>Define a time to wait for the Code.</b>",
         "error": "<b>No Login code in the message found.</b>",

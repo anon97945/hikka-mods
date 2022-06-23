@@ -1,4 +1,4 @@
-__version__ = (0, 1, 11)
+__version__ = (0, 1, 12)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -43,7 +43,7 @@ class ApodiktumPurgeMod(loader.Module):
     Check the `.config apodiktum purge` to enable/disable logging.
     """
     strings = {
-        "name": "Apodiktum Purge",
+        "name": "Apo Purge",
         "developer": "@anon97945",
         "_cfg_log_edit": "Log `edit` as info.",
         "_cfg_log_purge": "Log purge `count` as info.",
@@ -85,6 +85,7 @@ class ApodiktumPurgeMod(loader.Module):
                               "- Verwendung: .spurgeme <anzahl/all>"),
         "_cmd_doc_spurgeuser": ("Löscht alle Nachrichten von einem Nutzer ohne Benachrichtigung.\n"
                                 "- Verwendung: .spurgeuser <Antwort>"),
+        "_cmd_doc_cheroku": "Dadurch wird die Konfiguration für das Modul geöffnet.",
         "edit_success": ("Bearbeitung erfolgreich.\n"
                          "Alte Nachricht:\n{}\n\n\nNeue Nachricht:\n{}"),
         "err_cmd_wrong": "<b>Deine Eingabe war falsch.</b>",
@@ -119,6 +120,7 @@ class ApodiktumPurgeMod(loader.Module):
                               "- Использование: .spurgeme <количество/все>"),
         "_cmd_doc_spurgeuser": ("Удаляет все сообщения от определенного пользователя без оповещения.\n"
                                 "- Использование: .spurgeuser <реплай>"),
+        "_cmd_doc_cpurge": "Это откроет конфиг для модуля.",
         "edit_success": ("Редактирование завершено успешно.\n"
                          "Старое сообщение:\n{}\n\n\nНовое сообщение:\n{}"),
         "err_cmd_wrong": "<b>Ваш команда была неверной.</b>",
@@ -211,6 +213,15 @@ class ApodiktumPurgeMod(loader.Module):
         if msgs:
             await message.client.delete_messages(chat, msgs)
         return msg_count
+
+    async def cpurgecmd(self, message: Message):
+        """
+        This will open the config for the module.
+        """
+        name = self.strings("name")
+        await self.allmodules.commands["config"](
+            await utils.answer(message, f"{self.get_prefix()}config {name}")
+        )
 
     async def apurgecmd(self, message: Message):
         """

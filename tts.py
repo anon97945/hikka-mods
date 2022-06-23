@@ -1,4 +1,4 @@
-__version__ = (0, 1, 70)
+__version__ = (0, 1, 71)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -99,9 +99,9 @@ async def speedup(bytes_io_file, fn, fe, speed):
 
 
 @loader.tds
-class TTSMod(loader.Module):
+class ApodiktumTTSMod(loader.Module):
     strings = {
-        "name": "Text To Speech",
+        "name": "Apo TextToSpeech",
         "developer": "@anon97945",
         "_cfg_tts_lang": "Set your language code for the TTS here.",
         "_cfg_tts_speed": "Set the desired speech speed.",
@@ -116,6 +116,7 @@ class TTSMod(loader.Module):
     strings_de = {
         "_cfg_tts_lang": "Stellen Sie hier Ihren Sprachcode für TTS ein.",
         "_cfg_tts_speed": "Stellen Sie die gewünschte Sprechgeschwindigkeit ein.",
+        "_cmd_doc_ctts": "Dadurch wird die Konfiguration für das Modul geöffnet.",
         "needspeed": "Sie müssen einen Geschwindigkeitswert zwischen 0.25 und 3.0 angeben.",
         "needvoice": "<b>[TTS]</b> Dieser Befehl benötigt eine Sprachnachricht.",
         "no_reply": "<b>[TTS]</b> Sie müssen auf eine Sprachnachricht antworten.",
@@ -127,6 +128,7 @@ class TTSMod(loader.Module):
     strings_ru = {
         "_cfg_tts_lang": "Установите ваш код страны для TTS здесь.",
         "_cfg_tts_speed": "Установите желаемую скорость речи.",
+        "_cmd_doc_ctts": "Это откроет конфиг для модуля.",
         "needspeed": "Вам нужно предоставить значение скорости между 0.25 и 3.0",
         "needvoice": "<b>[TTS]</b> Этой команде нужно голосовое сообщение.",
         "no_reply": "<b>[TTS]</b> Вам нужно сделать реплай на голосовое сообщение.",
@@ -154,6 +156,15 @@ class TTSMod(loader.Module):
     async def client_ready(self, client, db):
         self._db = db
         self._client = client
+
+    async def cttscmd(self, message: Message):
+        """
+        This will open the config for the module.
+        """
+        name = self.strings("name")
+        await self.allmodules.commands["config"](
+            await utils.answer(message, f"{self.get_prefix()}config {name}")
+        )
 
     async def ttscmd(self, message: Message):
         """Convert text to speech with Google APIs"""

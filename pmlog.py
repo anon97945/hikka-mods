@@ -1,4 +1,4 @@
-__version__ = (0, 0, 21)
+__version__ = (0, 0, 22)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -43,12 +43,12 @@ def get_link(user: User or Channel) -> str:
 
 
 @loader.tds
-class PMLogMod(loader.Module):
+class ApodiktumPMLogMod(loader.Module):
     """
     Logs PMs to a group/channel
     """
     strings = {
-        "name": "PM Logger",
+        "name": "Apo PMLogger",
         "developer": "@anon97945",
         "_cfg_bots": "Whether to log bots or not.",
         "_cfg_log_group": "Group or channel ID where to send the PMs.",
@@ -63,6 +63,7 @@ class PMLogMod(loader.Module):
         "_cfg_loglist": "Fügen Sie Telegram-IDs hinzu, um sie zu protokollieren.",
         "_cfg_selfdestructive": "Ob selbstzerstörende Medien geloggt werden sollen oder nicht. Dies verstößt gegen die TG TOS!",
         "_cfg_whitelist": "Ob die Liste für ausgeschlossene (Wahr) oder eingeschlossene (Falsch) Chats ist.",
+        "_cmd_doc_cpmlog": "Dadurch wird die Konfiguration für das Modul geöffnet.",
     }
 
     strings_ru = {
@@ -71,6 +72,7 @@ class PMLogMod(loader.Module):
         "_cfg_loglist": "Добавьте айди Telegram, чтобы зарегистрировать их",
         "_cfg_selfdestructive": "Должны ли самоуничтожающиеся медиафайлы регистрироваться или нет. Это нарушает «Условия использования Telegram» (ToS)",
         "_cfg_whitelist": "Является ли список для исключённых (True) или включённых чатов (False).",
+        "_cmd_doc_cpmlog": "Это откроет конфиг для модуля.",
     }
 
     def __init__(self):
@@ -118,6 +120,15 @@ class PMLogMod(loader.Module):
         )
         file.seek(0)
         return file
+
+    async def cpmlogcmd(self, message: Message):
+        """
+        This will open the config for the module.
+        """
+        name = self.strings("name")
+        await self.allmodules.commands["config"](
+            await utils.answer(message, f"{self.get_prefix()}config {name}")
+        )
 
     async def watcher(self, message: Message):
         if not message.is_private or not isinstance(message, Message):

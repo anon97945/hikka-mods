@@ -1,5 +1,5 @@
-anoninfo
-apodiktumadmintools
+apoinfo
+admintools
 auto_update
 autoreact
 dnd
