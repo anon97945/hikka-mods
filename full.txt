@@ -1,5 +1,6 @@
-apoinfo
 admintools
+apo_migrator
+apoinfo
 auto_update
 autoreact
 dnd

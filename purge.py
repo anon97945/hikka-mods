@@ -67,6 +67,7 @@ class ApodiktumPurgeMod(loader.Module):
         "_cfg_log_sd": "Protokollieren `self-destructive` Nachrichten als Info.",
         "_cls_doc:": ("Module zum entfernen von Nachrichten(normalerweise spam, etc.).\n"
                       "Check `.config apodiktum purge` um das Protokollieren zu aktivieren/deaktivieren."),
+        "_cmd_doc_cpurge": "Dadurch wird die Konfiguration für das Modul geöffnet.",
         "_cmd_doc_del": ("Löscht die beantwortete Nachricht.\n"
                          "- Verwendung: .adel <Antwort>"),
         "_cmd_doc_edit": ("Bearbeitet die letzte Nachricht.\n"
@@ -85,7 +86,6 @@ class ApodiktumPurgeMod(loader.Module):
                               "- Verwendung: .spurgeme <anzahl/all>"),
         "_cmd_doc_spurgeuser": ("Löscht alle Nachrichten von einem Nutzer ohne Benachrichtigung.\n"
                                 "- Verwendung: .spurgeuser <Antwort>"),
-        "_cmd_doc_cheroku": "Dadurch wird die Konfiguration für das Modul geöffnet.",
         "edit_success": ("Bearbeitung erfolgreich.\n"
                          "Alte Nachricht:\n{}\n\n\nNeue Nachricht:\n{}"),
         "err_cmd_wrong": "<b>Deine Eingabe war falsch.</b>",
@@ -104,6 +104,7 @@ class ApodiktumPurgeMod(loader.Module):
         "_cfg_log_sd": "Логировать создание сообщения как info.",
         "_cls_doc": ("Модуль для очистки спама и т.д."
                      "Проверьте `.config apodiktum purge`, чтобы включить/выключить ведение журнала."),
+        "_cmd_doc_cpurge": "Это откроет конфиг для модуля.",
         "_cmd_doc_edit": ("Редактирует последнее сообщение.\n"
                           "- Использование: .aedit <сообщение>"),
         "_cmd_doc_purge": ("Удаляет все сообщения до и включая ответ.\n"
@@ -120,7 +121,6 @@ class ApodiktumPurgeMod(loader.Module):
                               "- Использование: .spurgeme <количество/все>"),
         "_cmd_doc_spurgeuser": ("Удаляет все сообщения от определенного пользователя без оповещения.\n"
                                 "- Использование: .spurgeuser <реплай>"),
-        "_cmd_doc_cpurge": "Это откроет конфиг для модуля.",
         "edit_success": ("Редактирование завершено успешно.\n"
                          "Старое сообщение:\n{}\n\n\nНовое сообщение:\n{}"),
         "err_cmd_wrong": "<b>Ваш команда была неверной.</b>",

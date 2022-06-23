@@ -31,9 +31,9 @@ class ApodiktumShowViewsMod(loader.Module):
     strings = {
         "name": "Apo ShowViews",
         "developer": "@anon97945",
+        "_cfg_cst_channel": "The Channel ID to send the message from.",
         "no_args": "No message to send.",
         "no_channel": "No channel set.",
-        "_cfg_cst_channel": "The Channel ID to send the message from.",
     }
 
     def __init__(self):
