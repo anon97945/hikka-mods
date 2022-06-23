@@ -1,4 +1,4 @@
-__version__ = (1, 0, 1)
+__version__ = (1, 0, 2)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -95,7 +95,7 @@ class ApodiktumAdminToolsMod(loader.Module):
     Toolpack for Channel and Group Admins.
     """
     strings = {
-        "name": "Apodiktum Admin Tools",
+        "name": "Apo AdminTools",
         "developer": "@anon97945",
         "bcu_db_string": ("<b>[BlockChannelUser]</b> Current Database:\n\nWatcher:\n{}"
                           "\n\nChatsettings:\n{}"),
@@ -131,6 +131,7 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     strings_de = {
         "_cls_doc": "Toolpack für Kanal- und Gruppenadministratoren.",
+        "_cmd_doc_cadmintools": "Dadurch wird die Konfiguration für das Modul geöffnet.",
         "bcu_db_string": ("<b>[BlockChannelUser]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
                           "\n\nChateinstellungen:\n{}"),
         "bcu_settings": ("<b>[BlockChannelUser]</b> Aktuelle Einstellungen in diesem "
@@ -165,6 +166,7 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     strings_ru = {
         "_cls_doc": "Пакет инструментов для администраторов каналов и групп.",
+        "_cmd_doc_cadmintools": "Это откроет конфиг для модуля.",
         "_cmd_doc_bcu": (" ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n"
                          " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Переключает BlockChannelUser для текущего чата.\n"
                          ".bcu notify <true/false>\n"
@@ -408,6 +410,15 @@ class ApodiktumAdminToolsMod(loader.Module):
         else:
             link = ""
         return link
+
+    async def cadmintoolscmd(self, message: Message):
+        """
+        This will open the config for the module.
+        """
+        name = self.strings("name")
+        await self.allmodules.commands["config"](
+            await utils.answer(message, f"{self.get_prefix()}config {name}")
+        )
 
     async def bndcmd(self, message: Message):
         """

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 1)
+__version__ = (0, 0, 4)
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
@@ -24,16 +24,16 @@ logger = logging.getLogger(__name__)
 
 
 @loader.tds
-class ShowViewsMod(loader.Module):
+class ApodiktumShowViewsMod(loader.Module):
     """
     Send a message to get the current count of viewers.
     """
     strings = {
-        "name": "ShowViews",
+        "name": "Apo ShowViews",
         "developer": "@anon97945",
+        "_cfg_cst_channel": "The Channel ID to send the message from.",
         "no_args": "No message to send.",
         "no_channel": "No channel set.",
-        "_cfg_cst_channel": "The Channel ID to send the message from.",
     }
 
     def __init__(self):

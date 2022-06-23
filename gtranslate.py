@@ -1,4 +1,4 @@
-__version__ = (0, 0, 52)
+__version__ = (0, 0, 53)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -34,12 +34,12 @@ logger = logging.getLogger(__name__)
 
 
 @loader.tds
-class gtranslateMod(loader.Module):
+class ApodiktumGTranslateMod(loader.Module):
     """
     Google Translator
     """
     strings = {
-        "name": "Google Translator",
+        "name": "Apo GoogleTranslator",
         "developer": "@anon97945",
         "_cfg_lang_msg": "Language to translate to by default.",
         "_cfg_vodkatr_msg": "If `RU` should be displayed as `Vodka`.",
@@ -51,6 +51,7 @@ class gtranslateMod(loader.Module):
     strings_de = {
         "_cfg_lang_msg": "Sprache, in die standardmäßig übersetzt werden soll.",
         "_cfg_vodkatr_msg": "Ob `RU` als `Vodka` angezeigt werden soll.",
+        "_cmd_doc_cgtranslate": "Dadurch wird die Konfiguration für das Modul geöffnet.",
         "invalid_text": "Ungültiger Text zum Übersetzen.",
         "split_error": "Python split() error, wenn -> im Text steht, muss es gesplittet werden!",
         "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
@@ -59,6 +60,7 @@ class gtranslateMod(loader.Module):
     strings_ru = {
         "_cfg_lang_msg": "Язык на который переводится по умолчанию.",
         "_cfg_vodkatr_msg": "Если `RU`, то должно отображаться как `Vodka`.",
+        "_cmd_doc_cgtranslate": "Это откроет конфиг для модуля.",
         "invalid_text": "Неправильный текст для перевода",
         "split_error": "Ошибка в функции Python – split(). Если в тексте есть ->, то это должно быть разделено.",
         "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
@@ -86,6 +88,15 @@ class gtranslateMod(loader.Module):
         self._client = client
         self._me = await client.get_me()
         self.tr = googletrans.Translator()
+
+    async def cgtranslatecmd(self, message: Message):
+        """
+        This will open the config for the module.
+        """
+        name = self.strings("name")
+        await self.allmodules.commands["config"](
+            await utils.answer(message, f"{self.get_prefix()}config {name}")
+        )
 
     async def gtranslatecmd(self, message: Message):
         """.gtranslate [from_lang->][->to_lang] <text>"""

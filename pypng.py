@@ -1,4 +1,4 @@
-__version__ = (0, 0, 9)
+__version__ = (0, 0, 10)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -46,12 +46,12 @@ async def _filefromurl(message):
 
 
 @loader.tds
-class pypngMod(loader.Module):
+class ApodiktumPyPNGMod(loader.Module):
     """
     Converts link/file from Py to PNG.
     """
     strings = {
-        "name": "PyPNG",
+        "name": "Apo PyPNG",
         "developer": "@anon97945",
         "no_file": "<b>Reply to file.py or url</b>",
         "no_url": "<b>No url in reply found.</b>",

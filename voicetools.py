@@ -1,4 +1,4 @@
-__version__ = (1, 0, 8)
+__version__ = (1, 0, 9)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -236,12 +236,12 @@ class Waveshaper():
 
 
 @loader.tds
-class voicetoolsMod(loader.Module):
+class ApodiktumVoiceToolsMod(loader.Module):
     """
     Change, pitch, enhance your Voice. Also includes optional automatic modes.
     """
     strings = {
-        "name": "VoiceTools",
+        "name": "Apo VoiceTools",
         "developer": "@anon97945",
         "_cfg_gain_lvl": "Set the desired volume gain level for auto normalize.",
         "_cfg_nr_lvl": "Set the desired noisereduction level.",
@@ -299,6 +299,7 @@ class voicetoolsMod(loader.Module):
         "_cfg_nr_lvl": "Stellen Sie den gewünschten Rauschunterdrückungspegel ein.",
         "_cfg_pitch_lvl": "Stellen Sie den gewünschten Tonhöhenpegel für die automatische Tonhöheneinstellung ein.",
         "_cfg_speed_lvl": "Stellen Sie die gewünschte Geschwindigkeitsstufe für die automatische Geschwindigkeit ein.",
+        "_cmd_doc_cvoicetoolscmd": "Dadurch wird die Konfiguration für das Modul geöffnet.",
         "audiodenoiser_txt": "<b>[VoiceTools] Die Hintergrundgeräusche werden entfernt.</b>",
         "audiohandler_txt": "<b>[VoiceTools] Der Ton wird transkodiert.</b>",
         "audiovolume_txt": "<b>[VoiceTools] Das Audiovolumen wird angepasst.</b>",
@@ -351,6 +352,7 @@ class voicetoolsMod(loader.Module):
         "_cfg_nr_lvl": "Установите желаемый уровень шумоподавления.",
         "_cfg_pitch_lvl": "Установите желаемый уровень высоты тона для автонастройки.",
         "_cfg_speed_lvl": "Установите желаемый уровень скорости для автоматической скорости.",
+        "_cmd_doc_cvoicetoolscmd": "Это откроет конфиг для модуля.",
         "audiodenoiser_txt": "<b>[VoiceTools] Фоновый шум удаляется.</b>",
         "audiohandler_txt": "<b>[VoiceTools] Аудио перекодируется.</b>",
         "audiovolume_txt": "<b>[VoiceTools] Аудиогромкость изменяется.</b>",
@@ -456,6 +458,15 @@ class voicetoolsMod(loader.Module):
             )
         file.seek(0)
         return file
+
+    async def cvoicetoolscmd(self, message: Message):
+        """
+        This will open the config for the module.
+        """
+        name = self.strings("name")
+        await self.allmodules.commands["config"](
+            await utils.answer(message, f"{self.get_prefix()}config {name}")
+        )
 
     async def vtdalekcmd(self, message):
         """reply to a file to change the voice"""

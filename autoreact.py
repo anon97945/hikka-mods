@@ -1,4 +1,4 @@
-__version__ = (0, 1, 9)
+__version__ = (0, 1, 10)
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
@@ -35,7 +35,7 @@ class ApodiktumAutoReactMod(loader.Module):
     Check the `.config apodiktum autoreact`
     """
     strings = {
-        "name": "Apodiktum AutoReact",
+        "name": "Apo AutoReact",
         "developer": "@anon97945",
         "_cfg_doc_raise_error": "Raise an error if the emoji is not valid.",
         "_cfg_doc_shuffle": "Shuffles the list of given emojis.",
@@ -65,7 +65,7 @@ class ApodiktumAutoReactMod(loader.Module):
                                "Вы не можете использовать оба варианта одновременно! Это также работает для каналов! Вам нужно использовать ALL!\n\n"
                                "Pattern:\n<userid/all>|<chatid/global>|<emoji1>|<emoji2>|<emoji3>...\n\nПример:\nall|1792410946|❤️|👍|🔥\nДля каналов:\nall|<channelid>|❤️|👍|🔥"),
         "_cls_doc": "Автореакция на сообщения.\nПроверьте .config apodiktum autoreact.",
-        "_cmd_doc_autoreact": "Это откроет конфиг для модуля."
+        "_cmd_doc_cautoreact": "Это откроет конфиг для модуля.",
     }
 
     def __init__(self):
@@ -132,12 +132,13 @@ class ApodiktumAutoReactMod(loader.Module):
         self._db = db
         self._client = client
 
-    async def autoreactcmd(self, message: Message):
+    async def cautoreactcmd(self, message: Message):
         """
         This will open the config for the module.
         """
+        name = self.strings("name")
         await self.allmodules.commands["config"](
-            await utils.answer(message, f"{self.get_prefix()}config apodiktum autoreact")
+            await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
 
     async def watcher(self, message: Message):

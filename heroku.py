@@ -1,4 +1,4 @@
-__version__ = (0, 0, 15)
+__version__ = (0, 0, 16)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -34,12 +34,12 @@ logger = logging.getLogger(__name__)
 
 
 @loader.tds
-class herokumanagerMod(loader.Module):
+class ApodiktumHerokuManagerMod(loader.Module):
     """
     Show Remaining Dyno Usage And Manage The Settings Of Your 🦸🏼‍♂️ Hero!ku Hikka Instance.
     """
     strings = {
-        "name": "Heroku Manager",
+        "name": "Apo HerokuManager",
         "developer": "@anon97945",
         "args_error": "<b>[🦸🏼‍♂️ Hero!ku]</b> Too many args are given.",
         "dyno_usage": ("<b><i><u>Dyno Usage</u></i></b>:\n"
