@@ -168,7 +168,12 @@ class ApodiktumDonatorsMod(loader.Module):
             ):
                 msg_lines = msg.raw_text.splitlines()
                 for lines in msg_lines:
-                    if "€" in lines.lower() or "$" in lines.lower() or "£" in lines.lower() or "₽" in lines.lower():
+                    if (
+                        "€" in lines.lower()
+                        or "$" in lines.lower()
+                        or "£" in lines.lower()
+                        or "₽" in lines.lower()
+                    ):
                         for z in lines.split():
                             if "€" in z:
                                 z = z.replace("€", "")
