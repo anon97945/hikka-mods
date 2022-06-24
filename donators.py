@@ -159,7 +159,7 @@ class ApodiktumDonatorsMod(loader.Module):
         amounts_usd = []
         amounts_gbp = []
         amounts_rub = []
-        itermsg = message.client.iter_messages(entity=int(self.config[]), limit=None)
+        itermsg = message.client.iter_messages(entity=int(self.config["logchannel"]), limit=None)
         async for msg in itermsg:
             if (
                 msg
@@ -267,7 +267,7 @@ class ApodiktumDonatorsMod(loader.Module):
         )
 
         await message.client.send_message(
-            int(self.config["log"]),
+            int(self.config["logchannel"]),
             string_kick,
             schedule=(date.today() + timedelta(days=(int(amount)/monthly_amount*30))),
         )
