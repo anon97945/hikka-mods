@@ -4,6 +4,7 @@ apoinfo
 auto_update
 autoreact
 dnd
+donators
 gtranslate
 heroku
 lcr
