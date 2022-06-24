@@ -83,7 +83,7 @@ class ApodiktumDonatorsMod(loader.Module):
     def __init__(self):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
-                "channel",
+                "logchannel",
                 "None",
                 lambda: self.strings("_cfg_cst_logchannel"),
                 validator=loader.validators.Union(
@@ -99,7 +99,7 @@ class ApodiktumDonatorsMod(loader.Module):
                 ),
             ),
             loader.ConfigValue(
-                "mothly_amount",
+                "monthly_amount",
                 10,
                 doc=lambda: self.strings("_cfg_cst_monthlyamount"),
                 validator=loader.validators.Integer(minimum=1)
@@ -151,7 +151,7 @@ class ApodiktumDonatorsMod(loader.Module):
         """
         Calculate the amount of donations.
         """
-        if not self.config["channel"]:
+        if not self.config["logchannel"]:
             await utils.answer(message, self.strings("no_channel"))
             return
         amounts = ""
@@ -159,7 +159,7 @@ class ApodiktumDonatorsMod(loader.Module):
         amounts_usd = []
         amounts_gbp = []
         amounts_rub = []
-        itermsg = message.client.iter_messages(entity=int(self.config["channel"]), limit=None)
+        itermsg = message.client.iter_messages(entity=int(self.config[]), limit=None)
         async for msg in itermsg:
             if (
                 msg
@@ -213,7 +213,7 @@ class ApodiktumDonatorsMod(loader.Module):
         .donsave 100 € amazon vip 123-123-123-123, 456-456-456-456 | as reply!
         """
         reply = await message.get_reply_message()
-        if not self.config["channel"]:
+        if not self.config["logchannel"]:
             await utils.answer(message, self.strings("no_channel"))
             return
         if not reply:
@@ -228,7 +228,7 @@ class ApodiktumDonatorsMod(loader.Module):
         if not args:
             await utils.answer(message, self.strings("no_args"))
             return
-        monthly_amount = self.config["mothly_amount"]
+        monthly_amount = self.config["monthly_amount"]
         today = date.today()
         uname = user.first_name
         if user.last_name:
@@ -262,12 +262,12 @@ class ApodiktumDonatorsMod(loader.Module):
                        + f"#{self.strings('code')} {code}\n")
 
         msg = await message.client.send_message(
-            int(self.config["channel"]),
+            int(self.config["logchannel"]),
             string_join,
         )
 
         await message.client.send_message(
-            int(self.config["channel"]),
+            int(self.config["log"]),
             string_kick,
             schedule=(date.today() + timedelta(days=(int(amount)/monthly_amount*30))),
         )
@@ -278,9 +278,9 @@ class ApodiktumDonatorsMod(loader.Module):
         await msg.react("👍")
 
     async def watcher(self, message: Message):
-        if not isinstance(message, Message) or not self.config["channel"]:
+        if not isinstance(message, Message) or not self.config["logchannel"]:
             return
-        if utils.get_chat_id(message) != self.config["channel"]:
+        if utils.get_chat_id(message) != self.config["logchannel"]:
             return
         if "#kick" not in message.raw_text.lower():
             return
