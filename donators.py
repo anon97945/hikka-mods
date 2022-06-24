@@ -167,9 +167,9 @@ class ApodiktumDonatorsMod(loader.Module):
                 and "#join" in msg.raw_text.lower()
             ):
                 msg_lines = msg.raw_text.splitlines()
-                for amount in msg_lines:
-                    if self.strings("amount") in amount.lower():
-                        for z in amount.split():
+                for lines in msg_lines:
+                    if "€" in lines.lower() or "$" in lines.lower() or "£" in lines.lower() or "₽" in lines.lower():
+                        for z in lines.split():
                             if "€" in z:
                                 z = z.replace("€", "")
                                 if z.isdigit():
@@ -242,7 +242,7 @@ class ApodiktumDonatorsMod(loader.Module):
                        + f"#{self.strings('username')} {username}\n"
                        + f"#ID_{userid}\n"
                        + f"#{self.strings('dtype')} {dtype}\n"
-                       + f"#{self.strings('amount')} {amount} {currency}\n"
+                       + f"#{self.strings('amount')} {amount}{currency}\n"
                        + f"#{self.strings('rank')} {rank}\n"
                        + f"#{self.strings('code')} {code}\n")
 
@@ -252,7 +252,7 @@ class ApodiktumDonatorsMod(loader.Module):
                        + f"#{self.strings('username')} {username}\n"
                        + f"#ID_{userid}\n"
                        + f"#{self.strings('dtype')} {dtype}\n"
-                       + f"#{self.strings('amount')} {amount} {currency}\n"
+                       + f"#{self.strings('amount')} {amount}{currency}\n"
                        + f"#{self.strings('rank')} {rank}\n"
                        + f"#{self.strings('code')} {code}\n")
 
