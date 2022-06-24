@@ -160,29 +160,32 @@ class ApodiktumDonatorsMod(loader.Module):
         amounts_rub = []
         itermsg = message.client.iter_messages(entity=int(self.config["channel"]), limit=None)
         async for msg in itermsg:
-            if msg and isinstance(msg, Message):
-                if "#join" in msg.raw_text.lower():
-                    msg_lines = msg.raw_text.splitlines()
-                    for amount in msg_lines:
-                        if "#betrag" in amount.lower() or "#amount" in amount.lower():
-                            res = [int(i) for i in amount.split() if i.isdigit()]
-                            for z in amount.split():
-                                if "€" in z:
-                                    z = z.replace("€", "")
-                                    if z.isdigit():
-                                        amounts_euro.append(int(z))
-                                if "$" in z:
-                                    z = z.replace("$", "")
-                                    if z.isdigit():
-                                        amounts_usd.append(int(z))
-                                if "£" in z:
-                                    z = z.replace("£", "")
-                                    if z.isdigit():
-                                        amounts_gbp.append(int(z))
-                                if "₽" in z:
-                                    z = z.replace("₽", "")
-                                    if z.isdigit():
-                                        amounts_rub.append(int(z))
+            if (
+                msg
+                and isinstance(msg, Message)
+                and "#join" in msg.raw_text.lower()
+            ):
+                msg_lines = msg.raw_text.splitlines()
+                for amount in msg_lines:
+                    if "#betrag" in amount.lower() or "#amount" in amount.lower():
+                        res = [int(i) for i in amount.split() if i.isdigit()]
+                        for z in amount.split():
+                            if "€" in z:
+                                z = z.replace("€", "")
+                                if z.isdigit():
+                                    amounts_euro.append(int(z))
+                            if "$" in z:
+                                z = z.replace("$", "")
+                                if z.isdigit():
+                                    amounts_usd.append(int(z))
+                            if "£" in z:
+                                z = z.replace("£", "")
+                                if z.isdigit():
+                                    amounts_gbp.append(int(z))
+                            if "₽" in z:
+                                z = z.replace("₽", "")
+                                if z.isdigit():
+                                    amounts_rub.append(int(z))
         if amounts_euro:
             amounts += f"<code>{sum(amounts_euro)}€</code>\n"
         if amounts_usd:
@@ -224,11 +227,8 @@ class ApodiktumDonatorsMod(loader.Module):
         today = date.today()
         uname = user.first_name
         if user.last_name:
-            uname += " " + user.last_name
-        if user.username:
-            username = f"@{user.username}"
-        else:
-            username = ""
+            uname += f" {user.last_name}"
+        username = f"@{user.username}" if user.username else ""
         userid = user.id
         amount = args[0]
         currency = args[1]
@@ -275,9 +275,9 @@ class ApodiktumDonatorsMod(loader.Module):
     async def watcher(self, message: Message):
         if not isinstance(message, Message) or not self.config["channel"]:
             return
-        if not utils.get_chat_id(message) == self.config["channel"]:
-            return  
-        if not "#kick" in message.raw_text.lower():
+        if utils.get_chat_id(message) != self.config["channel"]:
+            return
+        if "#kick" not in message.raw_text.lower():
             return
         msg_lines = message.raw_text.splitlines()
         for text in msg_lines:
