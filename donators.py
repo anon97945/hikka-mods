@@ -41,7 +41,7 @@ class ApodiktumDonatorsMod(loader.Module):
         "_cfg_cst_monthlyamount": "The monthly cost of the subscription.",
         "_cfg_doc_log_kick": "Logs successful kicks from the chats.",
         "_log_doc_kicked": "Kicked {} from {}.",
-        "amount": "<b><u>Total amount of donations:</u></b>\n{}",
+        "total_amount": "<b><u>Total amount of donations:</u></b>\n{}",
         "amount": "Amount",
         "code": "Code",
         "date": "Date",
@@ -64,7 +64,7 @@ class ApodiktumDonatorsMod(loader.Module):
         "_cfg_cst_monthlyamount": "Die monatlichen Kosten des Abonnements.",
         "_log_doc_kicked": "{} von {} gekickt.",
         "_log_doc_log_kicks": "Protokolliert die erfolgreichen Kicks aus den Chats.",
-        "amount": "<b><u>Gesamtbetrag der Spenden:</u></b>\n{}",
+        "total_amount": "<b><u>Gesamtbetrag der Spenden:</u></b>\n{}",
         "amount": "Betrag",
         "code": "Code",
         "date": "Datum",
@@ -154,6 +154,7 @@ class ApodiktumDonatorsMod(loader.Module):
         if not self.config["channel"]:
             await utils.answer(message, self.strings("no_channel"))
             return
+        amounts = ""
         amounts_euro = []
         amounts_usd = []
         amounts_gbp = []
@@ -168,7 +169,6 @@ class ApodiktumDonatorsMod(loader.Module):
                 msg_lines = msg.raw_text.splitlines()
                 for amount in msg_lines:
                     if "#betrag" in amount.lower() or "#amount" in amount.lower():
-                        res = [int(i) for i in amount.split() if i.isdigit()]
                         for z in amount.split():
                             if "€" in z:
                                 z = z.replace("€", "")
@@ -195,7 +195,7 @@ class ApodiktumDonatorsMod(loader.Module):
         if amounts_rub:
             amounts += f"<code>{sum(amounts_rub)}₽</code>\n"
         if amounts:
-            await utils.answer(message, self.strings("amount").format(amounts))
+            await utils.answer(message, self.strings("total_amount").format(amounts))
         else:
             await utils.answer(message, self.strings("no_amount"))
 
@@ -237,25 +237,24 @@ class ApodiktumDonatorsMod(loader.Module):
         code = str(args[4:]).upper()
 
         string_join = ("#Join\n",
-                  + f"#{self.strings('date')} {today}\n"
-                  + f"#{self.strings('uname')} {uname}\n"
-                  + f"#{self.strings('username')} {username}\n"
-                  + f"#ID_{userid}\n"
-                  + f"#{self.strings('dtype')} {dtype}\n"
-                  + f"#{self.strings('amount')} {amount} {currency}\n"
-                  + f"#{self.strings('rank')} {rank}\n"
-                  + f"#{self.strings('code')} {code}\n")
+                       + f"#{self.strings('date')} {today}\n"
+                       + f"#{self.strings('uname')} {uname}\n"
+                       + f"#{self.strings('username')} {username}\n"
+                       + f"#ID_{userid}\n"
+                       + f"#{self.strings('dtype')} {dtype}\n"
+                       + f"#{self.strings('amount')} {amount} {currency}\n"
+                       + f"#{self.strings('rank')} {rank}\n"
+                       + f"#{self.strings('code')} {code}\n")
 
         string_kick = ("#Kick\n",
-                  + f"#{self.strings('date')} {today}\n"
-                  + f"#{self.strings('uname')} {uname}\n"
-                  + f"#{self.strings('username')} {username}\n"
-                  + f"#ID_{userid}\n"
-                  + f"#{self.strings('dtype')} {dtype}\n"
-                  + f"#{self.strings('amount')} {amount} {currency}\n"
-                  + f"#{self.strings('rank')} {rank}\n"
-                  + f"#{self.strings('code')} {code}\n")
-
+                       + f"#{self.strings('date')} {today}\n"
+                       + f"#{self.strings('uname')} {uname}\n"
+                       + f"#{self.strings('username')} {username}\n"
+                       + f"#ID_{userid}\n"
+                       + f"#{self.strings('dtype')} {dtype}\n"
+                       + f"#{self.strings('amount')} {amount} {currency}\n"
+                       + f"#{self.strings('rank')} {rank}\n"
+                       + f"#{self.strings('code')} {code}\n")
 
         msg = await message.client.send_message(
             int(self.config["channel"]),
