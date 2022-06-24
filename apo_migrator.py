@@ -155,13 +155,13 @@ class ApodiktumMigratorMod(loader.Module):
         for old_name, new_name in mlist.items():
             if old_name in self._db.keys():
                 old_config = self._db[old_name]
-                for key, value in old_config.items():
+                for key, _value in old_config.items():
                     self._db.set(new_name, key, self._db.get(old_name, key))
                     logger.info(self.strings("_log_doc_migrated_db").format(typename, old_name, new_name, self._db.get(old_name, key)))
 
     async def _key_rename(self, old_db, mlist):
         new_dict = {}
-        for key, value in zip(old_db.keys(), old_db.values()):
+        for key, _value in zip(old_db.keys(), old_db.values()):
             new_key = mlist.get(key, key)
             new_dict[new_key] = old_db[key]
         for old_key, new_key in mlist.items():
