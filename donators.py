@@ -168,7 +168,7 @@ class ApodiktumDonatorsMod(loader.Module):
             ):
                 msg_lines = msg.raw_text.splitlines()
                 for amount in msg_lines:
-                    if "#betrag" in amount.lower() or "#amount" in amount.lower():
+                    if self.strings("amount") in amount.lower():
                         for z in amount.split():
                             if "€" in z:
                                 z = z.replace("€", "")
