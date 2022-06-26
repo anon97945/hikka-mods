@@ -11,7 +11,7 @@ __version__ = (0, 1, 11)
 #          https://t.me/apodiktum_modules
 #
 # 🔒 Licensed under the GNU GPLv3
-# 🌐 https://www.gnu.org/licenses/agpl-3.0.html
+# 🌐 https://www.gnu.org/licenses/gpl-3.0.html
 
 # meta developer: @apodiktum_modules
 
