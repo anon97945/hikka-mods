@@ -42,7 +42,7 @@ class ApoAutoMigratorMod(loader.Module):
         "name": "Apo-AutoMigratior",
         "developer": "@anon97945",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
-        "_cfg_cst_auto_migrate": "Wheather log auto migrate as info(True) or debug(False).",
+        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
     }
 
@@ -137,72 +137,72 @@ class ApoAutoMigratorMod(loader.Module):
         if self.db_classname[0] in self._db.keys():
             await utils.answer(message, f"\nOld DB ({self.db_classname[0]}): {self._db[self.db_classname[0]]}\n\nNew DB ({self.db_classname[1]}): {self._db[self.db_classname[1]]}")
         else:
-            await utils.answer(message, f"\nOld DB ({self.db_classname[0]}): `Deleted`\n\nNew DB ({self.db_classname[1]}): {self._db[self.db_classname[1]]}")
+            await utils.answer(message, f"\nOld DB ({self.db_classname[0]}): `None/Deleted`\n\nNew DB ({self.db_classname[1]}): {self._db[self.db_classname[1]]}")
 
     async def remhashscmd(self, message: Message):
         """
         This will remove the hashs.
         """
-        if not await self._remhash(message):
+        if not await self._remhash():
             await utils.answer(message, "No hashs to remove!")
             return
         await utils.answer(message, "Removed hashs!")
 
-    async def _remhash(self, message):
+    async def _remhash(self):
         try:
             self._db[self.__class__.__name__].pop("hashs")
             return True
         except KeyError:
             return False
 
-    async def _reset(self, int: int, db1, db2, db_name2):
-        if int == 1:
+    async def _reset(self, number: int, db1, db2, db_name2):
+        if number == 1:
             self._clear_dbs(db1)
             self._default_newdb(db2, db_name2)
             self._remove_hashs(db1, db2)
 
-            configdb = {"custom_link": "https://t.me/link/1", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True",}
+            configdb = {"custom_link": "https://t.me/link/1", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True"}
             self._db.set(db1, "__config__", configdb)
             return True
 
-        if int == 2:
+        if number == 2:
             self._clear_dbs(db1)
             self._default_newdb(db2, db_name2)
             self._remove_hashs(db1, db2)
 
-            configdb = {"custom_link": "https://t.me/link/5", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True",}
+            configdb = {"custom_link": "https://t.me/link/5", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True"}
             self._db.set(db1, "__config__", configdb)
             return True
 
-        elif int == 3:
+        if number == 3:
             self._clear_dbs(db1)
             self._default_newdb(db2, db_name2)
             self._remove_hashs(db1, db2)
 
-            configdb = {"custom_link": "https://t.me/link/2", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True",}
+            configdb = {"custom_link": "https://t.me/link/2", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True"}
             self._db.set(db2, "__config__", configdb)
 
             self.lookup(db_name2).config["custom_link"] = "https://t.me/link/2"
             return True
 
-        elif int == 4:
+        if number == 4:
             self._clear_dbs(db1)
             self._default_newdb(db2, db_name2)
             self._remove_hashs(db1, db2)
 
-            configdb = {"custom_link": "https://t.me/link/3", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "False",}
+            configdb = {"custom_link": "https://t.me/link/3", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "False"}
             self._db.set(db1, "__config__", configdb)
 
             self.lookup(db_name2).config["custom_link"] = "https://t.me/link/3"
             self.lookup(db_name2).config["auto_migrate_debug"] = "True"
             return True
 
-        elif int == 5:
+        if number == 5:
             self._clear_dbs(db1)
             self._default_newdb(db2, db_name2)
             self._remove_hashs(db1, db2)
 
-            configdb = {"custom_link": "https://t.me/link/2", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True",}
+            configdb = {"custom_link": "https://t.me/link/2", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True"}
             self._db.set(db1, "__config__", configdb)
 
             self.lookup(db_name2).config["custom_link"] = "https://t.me/link/2"
@@ -379,14 +379,14 @@ class MigratorClass():
 
     async def _copy_config_init(self, migration, old_classname, new_classname, old_name, new_name, category):
         if category == "classname":
-            if self._classname != old_classname and (old_classname in self._db.keys() and self._db[old_classname] and old_classname != None):
+            if self._classname != old_classname and (old_classname in self._db.keys() and self._db[old_classname] and old_classname is not None):
                 await self._logger(f"{migration} | {category} | old_value: {str(old_classname)} | new_value: {str(new_classname)}", self.debug)
                 await self._copy_config(category, old_classname, new_classname, new_name)
             else:
                 await self._logger(self.strings["_log_doc_migrated_db_not_found"].format(category, old_classname, new_classname))
         elif category == "name":
             await self._logger(f"{migration} | {category} | old_value: {str(old_name)} | new_value: {str(new_name)}", self.debug)
-            if self._name != old_name and (old_name in self._db.keys() and self._db[old_name] and old_name != None):
+            if self._name != old_name and (old_name in self._db.keys() and self._db[old_name] and old_name is not None):
                 await self._copy_config(category, old_name, new_name, new_classname)
             else:
                 await self._logger(self.strings["_log_doc_migrated_db_not_found"].format(category, old_name, new_name))
@@ -406,7 +406,8 @@ class MigratorClass():
             new_classname = self._classname
         return old_classname, new_classname, old_name, new_name
 
-    async def _get_changes(self, changes):
+    @staticmethod
+    async def _get_changes(changes):
         old_value = None
         new_value = None
         for state, value in changes:
@@ -477,5 +478,4 @@ class MigratorClass():
     async def _logger(self, log_string, debug: bool = False):
         if debug or self.log:
             return logger.info(log_string)
-        else:
-            return logger.debug(log_string)
+        return logger.debug(log_string)
