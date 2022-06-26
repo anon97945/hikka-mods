@@ -63,43 +63,43 @@ class ApoAutoMigratorMod(loader.Module):
                 "custom_link",
                 "https://t.me/link/0",
                 validator=loader.validators.Link(),
-            ), #  for test commands
+            ),  # for test commands
             loader.ConfigValue(
                 "auto_migrate",
                 True,
                 doc=lambda: self.strings("_cfg_cst_auto_migrate"),
                 validator=loader.validators.Boolean(),
-            ), #  for MigratorClass
+            ),  # for MigratorClass
             loader.ConfigValue(
                 "auto_migrate_log",
                 True,
                 doc=lambda: self.strings("_cfg_cst_auto_migrate_log"),
                 validator=loader.validators.Boolean(),
-            ), #  for MigratorClass
+            ),  # for MigratorClass
             loader.ConfigValue(
                 "auto_migrate_debug",
                 False,
                 doc=lambda: self.strings("_cfg_cst_auto_migrate_debug"),
                 validator=loader.validators.Boolean(),
-            ), #  for MigratorClass
+            ),  # for MigratorClass
         )
 
     async def client_ready(self, client, db):
         self._db = db
         self._client = client
 
-        #  MigratorClass
+          # MigratorClass
         self._migrator = MigratorClass() # MigratorClass define
         await self._migrator.init(client, db, self, self.__class__.__name__, self.strings("name"), self.config["auto_migrate_log"], self.config["auto_migrate_debug"]) # MigratorClass Initiate
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
-        #  MigratorClass
+          # MigratorClass
 
-        #  for test commands
+          # for test commands
         self.db_classname = list(self.db_classnames.values())
         self.db_name = list(self.db_names.values())
-        #  for test commands
+          # for test commands
 
-    #  some test commands
+      # some test commands
     async def cmigrocmd(self, message: Message):
         """
         This will open the config for the module.
