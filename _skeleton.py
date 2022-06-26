@@ -135,7 +135,6 @@ class ApodiktumSkeletonMod(loader.Module):
             return
         await utils.answer(message, self.strings("skeleton_argmsg").format(args))
 
-
     async def watcher(self, message):
         """
         This is a watcher.
