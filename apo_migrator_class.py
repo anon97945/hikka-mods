@@ -1,4 +1,4 @@
-__version__ = (0, 0, 4)
+__version__ = (0, 0, 5)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -22,6 +22,7 @@ import logging
 
 import json
 
+import collections  # for MigratorClass
 import hashlib  # for MigratorClass
 import copy     # for MigratorClass
 
@@ -52,7 +53,7 @@ class ApoAutoMigratorMod(loader.Module):
     }
 
     db_names = {
-        "db1": "MigratorMod",
+        "db1": "Migrator",
         "db2": "Apo-AutoMigratior",
     }
 
@@ -124,8 +125,8 @@ class ApoAutoMigratorMod(loader.Module):
         This will reset the module.
         """
         args = utils.get_args_raw(message)
-        if await self._reset(int(args), self.db_classname[0], self.db_classname[1], self.db_name[1]):
-            await utils.answer(message, f"Reset done.\nOld DB ({self.db_classname[0]}): {self._db[self.db_classname[0]]}\n\nNew DB ({self.db_classname[1]}): {self._db[self.db_classname[1]]}")
+        if await self._reset(int(args), self.db_classname[0], self.db_classname[1], self.db_name[0], self.db_name[1]):
+            await utils.answer(message, f"Reset done.\nOld ClassDB ({self.db_classname[0]}): {self._db[self.db_classname[0]]}\n\nNew ClassDB ({self.db_classname[1]}): {self._db[self.db_classname[1]]}\n\nOld NameDB ({self.db_name[0]}): {self._db[self.db_name[0]]}\n\nNew NameDB ({self.db_name[1]}): {self._db[self.db_name[1]]}")
         else:
             await utils.answer(message, "no reset")
 
@@ -134,9 +135,9 @@ class ApoAutoMigratorMod(loader.Module):
         This will reset the module.
         """
         if self.db_classname[0] in self._db.keys():
-            await utils.answer(message, f"\nOld DB ({self.db_classname[0]}): {self._db[self.db_classname[0]]}\n\nNew DB ({self.db_classname[1]}): {self._db[self.db_classname[1]]}")
+            await utils.answer(message, f"\nOld ClassDB ({self.db_classname[0]}): {self._db[self.db_classname[0]]}\n\nNew ClassDB ({self.db_classname[1]}): {self._db[self.db_classname[1]]}\nOld NameDB ({self.db_name[0]}): {self._db[self.db_name[0]]}\n\nNew NameDB ({self.db_name[1]}): {self._db[self.db_name[1]]}")
         else:
-            await utils.answer(message, f"\nOld DB ({self.db_classname[0]}): `None/Deleted`\n\nNew DB ({self.db_classname[1]}): {self._db[self.db_classname[1]]}")
+            await utils.answer(message, f"\nOld ClassDB ({self.db_classname[0]}): `None/Deleted`\n\nNew ClassDB ({self.db_classname[1]}): {self._db[self.db_classname[1]]}\n\nOld NameDB ({self.db_name[0]}): `None/Deleted`\nNew NameDB ({self.db_name[1]}): {self._db[self.db_name[1]]}")
 
     async def remhashscmd(self, message: Message):
         """
@@ -154,55 +155,80 @@ class ApoAutoMigratorMod(loader.Module):
         except KeyError:
             return False
 
-    async def _reset(self, number: int, db1, db2, db_name2):
+    async def _reset(self, number: int, db1, db2, db_name1, db_name2):
         if number == 1:
-            self._clear_dbs(db1)
-            self._default_newdb(db2, db_name2)
+            self._clear_dbs(db1, db_name1, db_name2)
+            self._default_newdb(db2, db_name1, db_name2)
             self._remove_hashs(db1, db2)
+
+            confignamedb = {"some_name": "some_value"}
+            self._db.set(db_name1, "__config__", confignamedb)
+            db_name1 = self._db.get(db_name1, "hello", {})
+            db_name1.setdefault("hello", "world")
 
             configdb = {"custom_link": "https://t.me/link/1", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True"}
             self._db.set(db1, "__config__", configdb)
             return True
 
         if number == 2:
-            self._clear_dbs(db1)
-            self._default_newdb(db2, db_name2)
+            self._clear_dbs(db1, db_name1, db_name2)
+            self._default_newdb(db2, db_name1, db_name2)
             self._remove_hashs(db1, db2)
+
+            confignamedb = {"some_name": "some_value"}
+            self._db.set(db_name1, "__config__", confignamedb)
+            db_name1 = self._db.get(db_name1, "hello", {})
+            db_name1.setdefault("hello", "world")
 
             configdb = {"custom_link": "https://t.me/link/5", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True"}
             self._db.set(db1, "__config__", configdb)
             return True
 
         if number == 3:
-            self._clear_dbs(db1)
-            self._default_newdb(db2, db_name2)
+            self._clear_dbs(db1, db_name1, db_name2)
+            self._default_newdb(db2, db_name1, db_name2)
             self._remove_hashs(db1, db2)
 
             configdb = {"custom_link": "https://t.me/link/2", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True"}
             self._db.set(db2, "__config__", configdb)
 
+            confignamedb = {"some_name": "some_value"}
+            self._db.set(db_name1, "__config__", confignamedb)
+            db_name1 = self._db.get(db_name1, "hello", {})
+            db_name1.setdefault("hello", "world")
+
             self.lookup(db_name2).config["custom_link"] = "https://t.me/link/2"
             return True
 
         if number == 4:
-            self._clear_dbs(db1)
-            self._default_newdb(db2, db_name2)
+            self._clear_dbs(db1, db_name1, db_name2)
+            self._default_newdb(db2, db_name1, db_name2)
             self._remove_hashs(db1, db2)
 
             configdb = {"custom_link": "https://t.me/link/3", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "False"}
             self._db.set(db1, "__config__", configdb)
+
+            confignamedb = {"some_name": "some_value"}
+            self._db.set(db_name1, "__config__", confignamedb)
+            db_name1 = self._db.get(db_name1, "hello", {})
+            db_name1.setdefault("hello", "world")
 
             self.lookup(db_name2).config["custom_link"] = "https://t.me/link/3"
             self.lookup(db_name2).config["auto_migrate_debug"] = "True"
             return True
 
         if number == 5:
-            self._clear_dbs(db1)
-            self._default_newdb(db2, db_name2)
+            self._clear_dbs(db1, db_name1, db_name2)
+            self._default_newdb(db2, db_name1, db_name2)
             self._remove_hashs(db1, db2)
 
             configdb = {"custom_link": "https://t.me/link/2", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True"}
             self._db.set(db1, "__config__", configdb)
+
+            confignamedb = {"some_name": "some_value"}
+            self._db.set(db_name1, "__config__", confignamedb)
+            db_name1 = self._db.get(db_name1, "hello", {})
+            db_name1.setdefault("hello", "world")
 
             self.lookup(db_name2).config["custom_link"] = "https://t.me/link/2"
             self.lookup(db_name2).config["auto_migrate_debug"] = "True"
@@ -215,16 +241,20 @@ class ApoAutoMigratorMod(loader.Module):
             self._db[db2].pop("hashs")
         return True
 
-    def _clear_dbs(self, db1):
+    def _clear_dbs(self, db1, db_name1, db_name2):
         self._db[db1] = {}
         self._db[db1].clear()
+        self._db[db_name1] = {}
+        self._db[db_name1].clear()
+        self._db[db_name2] = {}
 
-    def _default_newdb(self, db2, db_name2):
+    def _default_newdb(self, db2, db_name1, db_name2):
         configdb2 = {"custom_link": "https://t.me/link/0", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True"}
 
         self._db.set(db2, "__config__", configdb2)
         for key, value in configdb2.items():
             self.lookup(db_name2).config[key] = value
+        self._db[db_name1].setdefault("1234", "5678")
 
 
 class MigratorClass():
@@ -256,7 +286,7 @@ class MigratorClass():
                 "new": "ApoAutoMigratorMod",
             },
             "name": {
-                "old": "MigratorMod",
+                "old": "Migrator",
                 "new": "Apo-AutoMigratior",
             },
             "config": {
@@ -441,8 +471,12 @@ class MigratorClass():
 
     async def _copy_config(self, category, old_name, new_name, name):
         if self._db[new_name]:
+            temp_db = {new_name: copy.deepcopy(self._db[new_name])}
             self._db[new_name].clear()
-        self._db[new_name] = copy.deepcopy(self._db[old_name])
+            self._db[new_name] = await self._deep_dict_merge(temp_db[new_name], self._db[old_name])
+            temp_db.pop(new_name)
+        else:
+            self._db[new_name] = copy.deepcopy(self._db[old_name])
         self._db.pop(old_name)
         await self._logger(self.strings["_log_doc_migrated_db"].format(category, old_name, new_name, self._db[new_name]))
         if category == "classname":
@@ -450,6 +484,21 @@ class MigratorClass():
         if category == "name":
             await self._make_dynamic_config(new_name, name)
         return
+
+    async def _deep_dict_merge(self, dct1, dct2, override=True) -> dict:
+        merged = copy.deepcopy(dct1)
+        for k, v2 in dct2.items():
+            if k in merged:
+                v1 = merged[k]
+                if isinstance(v1, dict) and isinstance(v2, collections.Mapping):
+                    merged[k] = await self._deep_dict_merge(v1, v2, override)
+                elif isinstance(v1, list) and isinstance(v2, list):
+                    merged[k] = v1 + v2
+                elif override:
+                    merged[k] = copy.deepcopy(v2)
+            else:
+                merged[k] = copy.deepcopy(v2)
+        return merged
 
     async def _make_dynamic_config(self, new_name, new_classname=None):
         if new_classname is None:
