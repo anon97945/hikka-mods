@@ -102,7 +102,7 @@ class ApodiktumSkeletonMod(loader.Module):
 
     async def on_unload(self):
         return
-    
+
     async def on_dlmod(self, client, _):
         return
 

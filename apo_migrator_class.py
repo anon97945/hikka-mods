@@ -63,44 +63,43 @@ class ApoAutoMigratorMod(loader.Module):
                 "custom_link",
                 "https://t.me/link/0",
                 validator=loader.validators.Link(),
-            ), # for test commands
+            ),  # for test commands
             loader.ConfigValue(
                 "auto_migrate",
                 True,
                 doc=lambda: self.strings("_cfg_cst_auto_migrate"),
                 validator=loader.validators.Boolean(),
-            ), # for MigratorClass
+            ),  # for MigratorClass
             loader.ConfigValue(
                 "auto_migrate_log",
                 True,
                 doc=lambda: self.strings("_cfg_cst_auto_migrate_log"),
                 validator=loader.validators.Boolean(),
-            ), # for MigratorClass
+            ),  # for MigratorClass
             loader.ConfigValue(
                 "auto_migrate_debug",
                 False,
                 doc=lambda: self.strings("_cfg_cst_auto_migrate_debug"),
                 validator=loader.validators.Boolean(),
-            ), # for MigratorClass
+            ),  # for MigratorClass
         )
 
     async def client_ready(self, client, db):
         self._db = db
         self._client = client
 
-        # MigratorClass
+          # MigratorClass
         self._migrator = MigratorClass() # MigratorClass define
         await self._migrator.init(client, db, self, self.__class__.__name__, self.strings("name"), self.config["auto_migrate_log"], self.config["auto_migrate_debug"]) # MigratorClass Initiate
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
-        # MigratorClass
+          # MigratorClass
 
-        # for test commands
+          # for test commands
         self.db_classname = list(self.db_classnames.values())
         self.db_name = list(self.db_names.values())
-        # for test commands
+          # for test commands
 
-
-    # some test commands
+      # some test commands
     async def cmigrocmd(self, message: Message):
         """
         This will open the config for the module.
@@ -214,19 +213,18 @@ class ApoAutoMigratorMod(loader.Module):
             self._db[db1].pop("hashs")
         if "hashs" in self._db[db2].keys():
             self._db[db2].pop("hashs")
-            return True
+        return True
 
     def _clear_dbs(self, db1):
         self._db[db1] = {}
         self._db[db1].clear()
 
     def _default_newdb(self, db2, db_name2):
-        configdb2 = {"custom_link": "https://t.me/link/0", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True",}
+        configdb2 = {"custom_link": "https://t.me/link/0", "auto_migrate": "False", "auto_migrate_log": "True", "auto_migrate_debug": "True"}
 
         self._db.set(db2, "__config__", configdb2)
         for key, value in configdb2.items():
             self.lookup(db_name2).config[key] = value
-        return
 
 
 class MigratorClass():
@@ -255,15 +253,15 @@ class MigratorClass():
         "migration1": {
             "classname": {
                 "old": "MigratorMod",
-                "new": "ApoAutoMigratorMod" 
+                "new": "ApoAutoMigratorMod",
             },
             "name": {
-                "old": "MigratorMod", 
-                "new": "Apo-AutoMigratior"
+                "old": "MigratorMod",
+                "new": "Apo-AutoMigratior",
             },
             "config": {
                 "custom_link": {
-                    "old": "https://t.me/link/1", 
+                    "old": "https://t.me/link/1",
                     "new": "https://t.me/link/2",
                 },
             },
@@ -275,11 +273,11 @@ class MigratorClass():
             },
             "config": {
                 "custom_link": {
-                    "old": "https://t.me/link/2", 
+                    "old": "https://t.me/link/2",
                     "new": "https://t.me/link/3",
                 },
                 "auto_migrate_debug": {
-                    "old": "True", 
+                    "old": "True",
                     "new": "False",
                 },
             },
@@ -307,6 +305,7 @@ class MigratorClass():
         self.modules = modules
         self.log = log
         self.debug = debug
+        self.hashs = []
         self.hashs = self._db.get(self._classname, "hashs", [])
 
     async def migrate(self, log: bool = False, debug: bool = False):
@@ -330,7 +329,7 @@ class MigratorClass():
             await self._logger(f"Open migrations: {migrate} | Skip migration.", self.debug)
             return False
         return False
-        
+
     async def auto_migrate_handler(self, auto_migrate: bool = False):
         self.hashs = self._db.get(self._classname, "hashs", [])
         migrate = await self.check_new_migration()
@@ -355,8 +354,6 @@ class MigratorClass():
 
     async def check_new_migration(self):
         chash = hashlib.md5(self._migrate_to.encode('utf-8')).hexdigest()
-        if not self.hashs:
-            self.hashs = []
         return chash not in self.hashs
 
     async def full_migrated(self):
@@ -391,7 +388,7 @@ class MigratorClass():
             else:
                 await self._logger(self.strings["_log_doc_migrated_db_not_found"].format(category, old_name, new_name))
         elif category == "config":
-                await self._migrate_cfg_values(migration, category, new_name, new_classname)
+            await self._migrate_cfg_values(migration, category, new_name, new_classname)
         return
 
     async def _get_names(self, migration):
