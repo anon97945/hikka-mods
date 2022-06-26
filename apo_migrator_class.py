@@ -88,18 +88,18 @@ class ApoAutoMigratorMod(loader.Module):
         self._db = db
         self._client = client
 
-          # MigratorClass
-        self._migrator = MigratorClass() # MigratorClass define
-        await self._migrator.init(client, db, self, self.__class__.__name__, self.strings("name"), self.config["auto_migrate_log"], self.config["auto_migrate_debug"]) # MigratorClass Initiate
-        await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
-          # MigratorClass
+        # MigratorClass
+        self._migrator = MigratorClass()  # MigratorClass define
+        await self._migrator.init(client, db, self, self.__class__.__name__, self.strings("name"), self.config["auto_migrate_log"], self.config["auto_migrate_debug"])  # MigratorClass Initiate
+        await self._migrator.auto_migrate_handler(self.config["auto_migrate"])  # MigratorClass auto migrate handler
+        # MigratorClass
 
-          # for test commands
+        # for test commands
         self.db_classname = list(self.db_classnames.values())
         self.db_name = list(self.db_names.values())
-          # for test commands
+        # for test commands
 
-      # some test commands
+    # some test commands
     async def cmigrocmd(self, message: Message):
         """
         This will open the config for the module.
@@ -294,8 +294,8 @@ class MigratorClass():
         modules: str,  # type: ignore
         classname: str,  # type: ignore
         name: str,  # type: ignore
-        log: bool = False, # type: ignore
-        debug: bool = False, # type: ignore
+        log: bool = False,  # type: ignore
+        debug: bool = False,  # type: ignore
     ):
         self._client = client
         self._db = db
