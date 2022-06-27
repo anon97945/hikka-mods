@@ -1,4 +1,5 @@
-__version__ = (1, 0, 2)
+import contextlib
+__version__ = (1, 0, 4)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -131,7 +132,6 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     strings_de = {
         "_cls_doc": "Toolpack für Kanal- und Gruppenadministratoren.",
-        "_cmd_doc_cadmintools": "Dadurch wird die Konfiguration für das Modul geöffnet.",
         "bcu_db_string": ("<b>[BlockChannelUser]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
                           "\n\nChateinstellungen:\n{}"),
         "bcu_settings": ("<b>[BlockChannelUser]</b> Aktuelle Einstellungen in diesem "
@@ -166,7 +166,6 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     strings_ru = {
         "_cls_doc": "Пакет инструментов для администраторов каналов и групп.",
-        "_cmd_doc_cadmintools": "Это откроет конфиг для модуля.",
         "_cmd_doc_bcu": (" ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n"
                          " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Переключает BlockChannelUser для текущего чата.\n"
                          ".bcu notify <true/false>\n"
@@ -262,7 +261,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         UseBot: bool = False,
     ):
         if UseBot:
-            try:
+            with contextlib.suppress(Exception):
                 await self.inline.bot.restrict_chat_member(
                     int(f"-100{getattr(chat, 'id', chat)}"),
                     user.id,
@@ -270,8 +269,6 @@ class ApodiktumAdminToolsMod(loader.Module):
                     until_date=timedelta(minutes=MUTETIMER),
                 )
                 return
-            except Exception:
-                pass
         await message.client.edit_permissions(chat.id, user.id,
                                               timedelta(minutes=MUTETIMER), send_messages=False)
         return
@@ -284,7 +281,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         UseBot: bool = False,
     ):
         if UseBot:
-            try:
+            with contextlib.suppress(Exception):
                 if isinstance(user, Channel):
                     return await self.inline.bot.ban_chat_sender_chat(
                         int(f"-100{getattr(chat, 'id', chat)}"),
@@ -294,8 +291,6 @@ class ApodiktumAdminToolsMod(loader.Module):
                     int(f"-100{getattr(chat, 'id', chat)}"),
                     user.id,
                 )
-            except Exception:
-                pass
         await message.client(EditBannedRequest(chat.id, user.id, ChatBannedRights(until_date=None, view_messages=True)))
 
     async def _delete_message(
@@ -410,15 +405,6 @@ class ApodiktumAdminToolsMod(loader.Module):
         else:
             link = ""
         return link
-
-    async def cadmintoolscmd(self, message: Message):
-        """
-        This will open the config for the module.
-        """
-        name = self.strings("name")
-        await self.allmodules.commands["config"](
-            await utils.answer(message, f"{self.get_prefix()}config {name}")
-        )
 
     async def bndcmd(self, message: Message):
         """
