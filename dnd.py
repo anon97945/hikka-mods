@@ -1,4 +1,4 @@
-__version__ = (0, 1, 5)
+__version__ = (0, 1, 8)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -587,17 +587,24 @@ class ApodiktumDNDMod(loader.Module):
 
     async def watcher(self, message: Message):
         self._global_queue += [message]
+        logger.debug("[Apo DND] added message to global DND queue")
 
     async def _global_queue_handler(self):
         while True:
             while self._global_queue:
-                await self._global_queue_handler_process(self._global_queue.pop(0))
+                logger.debug("[Apo DND] global_queue_handler while `self._global_queue`")
+                try:
+                    await self._global_queue_handler_process(self._global_queue.pop(0))
+                except Exception as e:
+                    logger.exception(f"[Apo DND] global_queue_handler_process error:\n{str(e)}")
             await asyncio.sleep(0)
 
     async def _global_queue_handler_process(self, message: Message):
+        logger.debug("[Apo DND] global_queue_handler_process")
         is_pmbl = False
         if not isinstance(message, Message):
             return
+        logger.debug("[Apo DND] global_queue_handler_process: message is Message")
         chat_id = utils.get_chat_id(message)
         try:
             user_id = (
@@ -709,7 +716,9 @@ class ApodiktumDNDMod(loader.Module):
         if not isinstance(message, Message) or not self.get("status", False):
             return
         if getattr(message.to_id, "user_id", None) == self._tg_id:
+            logger.debug("[Apo DND] p__afk: is self")
             if user.id in self._ratelimit_afk or user.is_self or user.bot or user.verified:
+                logger.debug("[Apo DND] p__afk: user is self, bot or verified")
                 return
         elif not message.mentioned:
             return
