@@ -59,7 +59,7 @@ class ApodiktumSkeletonMod(loader.Module):
         "_cfg_skel_series": "Это скелетная конфигурация с сериями.",
         "_cfg_skel_union": "Это скелетная конфигурация с объединением.",
         "_cls_doc": "Это скелетный модуль.",
-        "_cmd_doc_cadmintools": "Это откроет конфиг для модуля.",
+        "_cmd_doc_skeleton": "Это откроет конфиг для модуля.",
         "_cmd_skeletoargs": "Это команда с аргументами.\n{}",
         "_cmd_skeleton": "Это скелетная команда.",
         "no_args": "ргументы не указаны...",
