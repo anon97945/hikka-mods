@@ -1,4 +1,4 @@
-__version__ = (0, 1, 10)
+__version__ = (0, 1, 11)
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
@@ -174,6 +174,8 @@ class ApodiktumAutoReactMod(loader.Module):
         if (
             chatid in self.config["delay_chats"]
             or userid in self.config["delay_chats"]
+            or chatid in self.config["random_delay_chats"]
+            or userid in self.config["random_delay_chats"]
         ):
             if (
                 chatid not in self.config["random_delay_chats"]
