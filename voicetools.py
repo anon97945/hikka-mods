@@ -1,4 +1,4 @@
-__version__ = (1, 0, 9)
+__version__ = (1, 0, 10)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -515,7 +515,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
+        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtanoncmd(self, message):
@@ -568,7 +568,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
+        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtpitchcmd(self, message):
@@ -621,7 +621,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
+        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtspeedcmd(self, message):
@@ -674,7 +674,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
+        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtgaincmd(self, message):
@@ -723,7 +723,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
+        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtenhcmd(self, message):
@@ -774,7 +774,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
+        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtnormcmd(self, message):
@@ -819,7 +819,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=SendAsVoice)
+        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtmp3cmd(self, message: Message):
@@ -849,8 +849,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file.seek(0)
         file.name = fn + fe
         inline_msg = await utils.answer(inline_msg, self.strings("uploading"))
-        # await message.client.send_file(utils.get_chat_id(message), await self.fast_upload(file), voice_note=False)
-        await message.client.send_file(chatid, await self.fast_upload(file, message_object=inline_msg), voice_note=False)
+        await message.client.send_file(chatid, file, voice_note=False)
         await inline_msg.delete()
 
     async def vtspeechcmd(self, message):
@@ -1136,6 +1135,6 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file.seek(0)
         file.name = fn + fe
         if reply:
-            await message.client.send_file(chatid, await self.fast_upload(file), voice_note=True, reply_to=reply)
+            await message.client.send_file(chatid, file, voice_note=True, reply_to=reply)
         else:
-            await message.client.send_file(chatid, await self.fast_upload(file), voice_note=True)
+            await message.client.send_file(chatid, file, voice_note=True)
