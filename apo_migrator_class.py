@@ -348,19 +348,19 @@ class MigratorClass():
             migrate = await self.check_new_migration()
             full_migrated = await self.full_migrated()
             if migrate:
-                await self._logger(f"Open migrations: {migrate}", self.debug)
+                await self._logger(f"Open migrations: {migrate}", self.debug, True)
                 if await self._migrator_func():
-                    await self._logger("Migration done.", self.debug)
+                    await self._logger("Migration done.", self.debug, True)
                     return True
             elif not full_migrated:
                 await self.force_set_hashs()
-                await self._logger(f"Open migrations: {migrate} | Forcehash done: {self.hashs}", self.debug)
+                await self._logger(f"Open migrations: {migrate} | Forcehash done: {self.hashs}", self.debug, True)
                 return False
             else:
-                await self._logger(f"Open migrations: {migrate} | Skip migration.", self.debug)
+                await self._logger(f"Open migrations: {migrate} | Skip migration.", self.debug, True)
                 return False
             return False
-        await self._logger("No changes in `changes` dictionary found.", self.debug)
+        await self._logger("No changes in `changes` dictionary found.", self.debug, True)
         return False
 
     async def auto_migrate_handler(self, auto_migrate: bool = False):
@@ -369,18 +369,18 @@ class MigratorClass():
             migrate = await self.check_new_migration()
             full_migrated = await self.full_migrated()
             if auto_migrate and migrate:
-                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate}", self.debug)
+                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate}", self.debug, True)
                 if await self._migrator_func():
-                    await self._logger("Migration done.", self.debug)
+                    await self._logger("Migration done.", self.debug, True)
                     return
             elif not auto_migrate and not full_migrated:
                 await self.force_set_hashs()
-                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate} | Forcehash done: {self.hashs}", self.debug)
+                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate} | Forcehash done: {self.hashs}", self.debug, True)
                 return
             else:
-                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate} | Skip migrate_handler.", self.debug)
+                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate} | Skip migrate_handler.", self.debug, True)
                 return
-        await self._logger("No changes in `changes` dictionary found.", self.debug)
+        await self._logger("No changes in `changes` dictionary found.", self.debug, True)
         return
 
     async def force_set_hashs(self):
@@ -388,20 +388,20 @@ class MigratorClass():
         return True
 
     async def check_new_migration(self):
-        chash = hashlib.md5(self._migrate_to.encode('utf-8')).hexdigest()
+        chash = hashlib.sha256(self._migrate_to.encode('utf-8')).hexdigest()
         return chash not in self.hashs
 
     async def full_migrated(self):
         full_migrated = True
         for migration in self.changes:
-            chash = hashlib.md5(migration.encode('utf-8')).hexdigest()
+            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
             if chash not in self.hashs:
                 full_migrated = False
         return full_migrated
 
     async def _migrator_func(self):
         for migration in self.changes:
-            chash = hashlib.md5(migration.encode('utf-8')).hexdigest()
+            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
             if chash not in self.hashs:
                 old_classname, new_classname, old_name, new_name = await self._get_names(migration)
                 for category in self.changes[migration]:
@@ -412,12 +412,12 @@ class MigratorClass():
     async def _copy_config_init(self, migration, old_classname, new_classname, old_name, new_name, category):
         if category == "classname":
             if self._classname != old_classname and (old_classname in self._db.keys() and self._db[old_classname] and old_classname is not None):
-                await self._logger(f"{migration} | {category} | old_value: {str(old_classname)} | new_value: {str(new_classname)}", self.debug)
+                await self._logger(f"{migration} | {category} | old_value: {str(old_classname)} | new_value: {str(new_classname)}", self.debug, True)
                 await self._copy_config(category, old_classname, new_classname, new_name)
             else:
                 await self._logger(self.strings["_log_doc_migrated_db_not_found"].format(category, old_classname, new_classname))
         elif category == "name":
-            await self._logger(f"{migration} | {category} | old_value: {str(old_name)} | new_value: {str(new_name)}", self.debug)
+            await self._logger(f"{migration} | {category} | old_value: {str(old_name)} | new_value: {str(new_name)}", self.debug, True)
             if self._name != old_name and (old_name in self._db.keys() and self._db[old_name] and old_name is not None):
                 await self._copy_config(category, old_name, new_name, new_classname)
             else:
@@ -455,7 +455,7 @@ class MigratorClass():
                 for cnfg_key in self.changes[migration][category]:
                     old_value, new_value = await self._get_changes(self.changes[migration][category][cnfg_key].items())
                     for key, value in configdb.items():
-                        await self._logger(f"{migration} | {category} | ({{old_value: {str(old_value)}}} `==` {{new_value: {str(value)}}}) `and` {{key: {key}}} `==` {{cnfg_key: {cnfg_key}}}", self.debug)
+                        await self._logger(f"{migration} | {category} | ({{old_value: {str(old_value)}}} `==` {{new_value: {str(value)}}}) `and` {{key: {key}}} `==` {{cnfg_key: {cnfg_key}}}", self.debug, True)
                         if value == old_value and key == cnfg_key:
                             dynamic = False
                             self._db[new_classname]["__config__"][cnfg_key] = new_value
@@ -522,11 +522,13 @@ class MigratorClass():
 
     async def _set_missing_hashs(self):
         for migration in self.changes:
-            chash = hashlib.md5(migration.encode('utf-8')).hexdigest()
+            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
             if chash not in self.hashs:
                 await self._set_hash(chash)
 
-    async def _logger(self, log_string, debug: bool = False):
-        if debug or self.log:
+    async def _logger(self, log_string, debug: bool = False, debug_msg: bool = False):
+        if not debug_msg and self.log:
+            return logger.info(log_string)
+        if debug and debug_msg:
             return logger.info(log_string)
         return logger.debug(log_string)
