@@ -205,7 +205,7 @@ class ApodiktumDonatorsMod(loader.Module):
             await utils.answer(message, self.strings("no_amount"))
 
     @staticmethod
-    async def _get_amounts(self, amounts_euro, amounts_usd, amounts_gbp, amounts_rub, itermsg):
+    async def _get_amounts(amounts_euro, amounts_usd, amounts_gbp, amounts_rub, itermsg):
         async for msg in itermsg:
             if (
                 msg
