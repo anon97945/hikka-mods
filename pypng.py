@@ -1,4 +1,4 @@
-__version__ = (0, 0, 10)
+__version__ = (0, 0, 11)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -91,5 +91,5 @@ class ApodiktumPyPNGMod(loader.Module):
         pygments.highlight(text, Python3Lexer(), ImageFormatter(font_name="DejaVu Sans Mono", line_numbers=True), pngfile)
         pngfile.name = f"{os.path.splitext(file.name)[0]}.png"
         pngfile.seek(0)
-        await message.client.send_file(message.to_id, await self.fast_upload(pngfile), force_document=True, reply_to=reply)
+        await message.client.send_file(message.to_id, pngfile, force_document=True, reply_to=reply)
         await message.delete()

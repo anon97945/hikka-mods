@@ -1,4 +1,4 @@
-__version__ = (0, 0, 22)
+__version__ = (0, 0, 23)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -165,4 +165,4 @@ class ApodiktumPMLogMod(loader.Module):
                 file = await self.get_media(message)
                 file.name = message.file.name or f"{message.file.media.id}{message.file.ext}"
                 file.seek(0)
-                await message.client.send_file(pmlog_group, await self.fast_upload(file), force_document=True, caption=caption)
+                await message.client.send_file(pmlog_group, file, force_document=True, caption=caption)
