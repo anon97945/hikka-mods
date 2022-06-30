@@ -1,4 +1,4 @@
-__version__ = (0, 1, 10)
+__version__ = (0, 1, 13)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -441,15 +441,12 @@ class ApodiktumDNDMod(loader.Module):
         """
         <reply> - Report the user to spam. Use only in PM.
         """
-        user = await utils.get_target(message)
-        user = await self._client.get_entity(user)
-        if not user:
-            await utils.answer(message, self.strings("no_reply"))
+        if not message.is_private:
+            await utils.answer(message, self.strings("no_pchat"))
             return
-        if message.is_reply and message.is_private:
-            await message.client(ReportSpamRequest(peer=user.id))
-        else:
-            await utils.answer(self.strings("no_pchat"))
+        chat_id = utils.get_chat_id(message)
+        user = await self._client.get_entity(chat_id)
+        await message.client(ReportSpamRequest(peer=user.id))
         await utils.answer(message, self.strings("pm_reported"))
 
     async def blockcmd(self, message: Message):
