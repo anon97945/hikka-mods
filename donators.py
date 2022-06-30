@@ -204,6 +204,7 @@ class ApodiktumDonatorsMod(loader.Module):
         else:
             await utils.answer(message, self.strings("no_amount"))
 
+    @staticmethod
     async def _get_amounts(self, amounts_euro, amounts_usd, amounts_gbp, amounts_rub, itermsg):
         async for msg in itermsg:
             if (
@@ -431,20 +432,20 @@ class MigratorClass():
         return True
 
     async def check_new_migration(self):
-        chash = hashlib.md5(self._migrate_to.encode('utf-8')).hexdigest()
+        chash = hashlib.sha256(self._migrate_to.encode('utf-8')).hexdigest()
         return chash not in self.hashs
 
     async def full_migrated(self):
         full_migrated = True
         for migration in self.changes:
-            chash = hashlib.md5(migration.encode('utf-8')).hexdigest()
+            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
             if chash not in self.hashs:
                 full_migrated = False
         return full_migrated
 
     async def _migrator_func(self):
         for migration in self.changes:
-            chash = hashlib.md5(migration.encode('utf-8')).hexdigest()
+            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
             if chash not in self.hashs:
                 old_classname, new_classname, old_name, new_name = await self._get_names(migration)
                 for category in self.changes[migration]:
@@ -565,7 +566,7 @@ class MigratorClass():
 
     async def _set_missing_hashs(self):
         for migration in self.changes:
-            chash = hashlib.md5(migration.encode('utf-8')).hexdigest()
+            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
             if chash not in self.hashs:
                 await self._set_hash(chash)
 
