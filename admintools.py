@@ -756,7 +756,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         user_tag = self._get_tag(user, False)
         link = (
             f"Chat: {chat_tag} | #ID_{chat.id}"
-            + f"\nUser: {user_tag} | #ID_{chat.id}"
+            + f"\nUser: {user_tag} | #ID_{user.id}"
         )
         try:
             await message.forward_to(logchan_id)
