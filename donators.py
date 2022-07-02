@@ -190,7 +190,54 @@ class ApodiktumDonatorsMod(loader.Module):
         else:
             await utils.answer(message, self.strings("no_amount"))
 
-    async def _get_amounts(self, message: Message, logchannel: int):
+    async def donsavecmd(self, message: Message):
+        """
+        Save donation. Reply to the user message!
+        Pattern:
+        .donsave <amount> <currency> <dtype> <rank> <code> | as reply!
+        Example:
+        .donsave 100 € amazon vip 123-123-123-123, 456-456-456-456 | as reply!
+        """
+        reply = await message.get_reply_message()
+        if not self.config["logchannel"]:
+            await utils.answer(message, self.strings("no_channel"))
+            return
+        if not reply:
+            await utils.answer(message, self.strings("no_reply"))
+            return
+        user = await self._client.get_entity(reply.sender_id)
+        if not user:
+            await utils.answer(message, self.strings("no_user"))
+            return
+        args = utils.get_args_raw(message).lower()
+        args = str(args).split()
+        if not args:
+            await utils.answer(message, self.strings("no_args"))
+            return
+        monthly_amount, today, uname, username, userid, amount, currency, dtype, rank, code = self._vars(user, args)
+
+        string_join, string_kick = self._strings(today, uname, username, userid, amount, currency, dtype, rank, code)
+
+        msg = await message.client.send_message(
+            int(self.config["logchannel"]),
+            string_join,
+        )
+
+        await message.client.send_message(
+            int(self.config["logchannel"]),
+            string_kick,
+            schedule=(date.today() + timedelta(days=(int(amount)/monthly_amount*30))),
+        )
+        if self.config["custom_message"]:
+            custom_msg = " ".join(self.config["custom_message"])
+            custom_msg = custom_msg.replace("<br>", "\n")
+            await utils.answer(message, custom_msg)
+        else:
+            await utils.answer(message, self.strings("donation_saved"))
+        await msg.react("👍")
+
+    @staticmethod
+    async def _get_amounts(message: Message, logchannel: int):
         amounts = ""
         amounts_euro = []
         amounts_usd = []
@@ -238,52 +285,6 @@ class ApodiktumDonatorsMod(loader.Module):
             amounts += f"<code>{sum(amounts_rub)}₽</code>\n"
         return amounts
 
-    async def donsavecmd(self, message: Message):
-        """
-        Save donation. Reply to the user message!
-        Pattern:
-        .donsave <amount> <currency> <dtype> <rank> <code> | as reply!
-        Example:
-        .donsave 100 € amazon vip 123-123-123-123, 456-456-456-456 | as reply!
-        """
-        reply = await message.get_reply_message()
-        if not self.config["logchannel"]:
-            await utils.answer(message, self.strings("no_channel"))
-            return
-        if not reply:
-            await utils.answer(message, self.strings("no_reply"))
-            return
-        user = await self._client.get_entity(reply.sender_id)
-        if not user:
-            await utils.answer(message, self.strings("no_user"))
-            return
-        args = utils.get_args_raw(message).lower()
-        args = str(args).split()
-        if not args:
-            await utils.answer(message, self.strings("no_args"))
-            return
-        monthly_amount, today, uname, username, userid, amount, currency, dtype, rank, code = self._vars(user, args)
-
-        string_join, string_kick = self._strings(today, uname, username, userid, amount, currency, dtype, rank, code)
-
-        msg = await message.client.send_message(
-            int(self.config["logchannel"]),
-            string_join,
-        )
-
-        await message.client.send_message(
-            int(self.config["logchannel"]),
-            string_kick,
-            schedule=(date.today() + timedelta(days=(int(amount)/monthly_amount*30))),
-        )
-        if self.config["custom_message"]:
-            custom_msg = " ".join(self.config["custom_message"])
-            custom_msg = custom_msg.replace("<br>", "\n")
-            await utils.answer(message, custom_msg)
-        else:
-            await utils.answer(message, self.strings("donation_saved"))
-        await msg.react("👍")
-
     def _vars(self, user, args):
         monthly_amount = self.config["monthly_amount"]
         today = date.today()
@@ -320,7 +321,7 @@ class ApodiktumDonatorsMod(loader.Module):
                        + f"#{self.strings('rank')} {rank}\n"
                        + f"#{self.strings('code')} {code}\n"
                        )
-        return string_join,string_kick
+        return string_join, string_kick
 
     async def watcher(self, message: Message):
         if not isinstance(message, Message) or not self.config["logchannel"]:
