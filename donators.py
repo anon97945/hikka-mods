@@ -298,7 +298,7 @@ class ApodiktumDonatorsMod(loader.Module):
         dtype = args[2].capitalize()
         rank = args[3].upper()
         code = str(args[4:]).upper()
-        return monthly_amount,today,uname,username,userid,amount,currency,dtype,rank,code
+        return monthly_amount, today, uname, username, userid, amount, currency, dtype, rank, code
 
     def _strings(self, today, uname, username, userid, amount, currency, dtype, rank, code):
         string_join = ("#Join\n"
