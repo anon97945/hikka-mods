@@ -1,4 +1,4 @@
-__version__ = (0, 0, 5)
+__version__ = (0, 0, 6)
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
@@ -85,7 +85,7 @@ class ApodiktumShowViewsMod(loader.Module):
 
     async def svcmd(self, message: Message):
         """
-        Send a message to get the current count of viewers.
+        <message/reply to msg> Send a message to get the current count of viewers with that message.
         """
         chat = message.chat
         args = utils.get_args_raw(message)
@@ -93,12 +93,16 @@ class ApodiktumShowViewsMod(loader.Module):
         if not self.config["channel"]:
             await utils.answer(message, self.strings("no_channel"))
             return
-        if not args:
+        if message.is_reply:
+            msg = await message.get_reply_message()
+        elif not args:
             await utils.answer(message, self.strings("no_args"))
             return
-
         await message.delete()
-        msg = await message.client.send_message(self.config["channel"], args)
+        if message.is_reply:
+            msg = await message.client.send_message(self.config["channel"], msg)
+        else:
+            msg = await message.client.send_message(self.config["channel"], args)
         await msg.forward_to(chat.id)
         if msg.out:
             await msg.delete()
