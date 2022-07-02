@@ -121,7 +121,7 @@ class ApodiktumLangReplierMod(loader.Module):
         alphabet_list = [each_string.lower() for each_string in list(detected_alphabet)]
         for found_alphabet in alphabet_list:
             if found_alphabet not in self.config["allowed_alphabets"]:
-                denied_alphabet += ", " + found_alphabet if denied_alphabet else found_alphabet
+                denied_alphabet += f", {found_alphabet}" if denied_alphabet else found_alphabet
         allowed_alphabet = not denied_alphabet
         return allowed_alphabet, denied_alphabet
 
