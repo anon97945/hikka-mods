@@ -1,5 +1,4 @@
-
-__version__ = (0, 1, 2)
+__version__ = (0, 1, 3)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -351,6 +350,10 @@ class MigratorClass():
         return
 
     async def _get_names(self, migration):
+        old_name = None
+        old_classname = None
+        new_name = None
+        new_classname = None
         for category in self.changes[migration]:
             if category == "classname":
                 old_classname, new_classname = await self._get_changes(self.changes[migration][category].items())

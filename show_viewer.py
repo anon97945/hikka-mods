@@ -1,11 +1,14 @@
-__version__ = (0, 0, 6)
+__version__ = (0, 0, 7)
+
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
 #              © Copyright 2022
 #
-#          https://t.me/hikariatama
+#             developed by @anon97945
+#
+#          https://t.me/apodiktum_modules
 #
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
@@ -33,14 +36,16 @@ class ApodiktumShowViewsMod(loader.Module):
     Send a message to get the current count of viewers.
     """
     strings = {
-        "name": "Apo ShowViews",
+        "name": "Apo-ShowViews",
         "developer": "@anon97945",
+        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
+        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
+        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_cst_channel": "The Channel ID to send the message from.",
         "no_args": "No message to send.",
+        "views": "Total <code>{}</code> views.",
         "no_channel": "No channel set.",
-        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
-        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
-        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
+        "no_reply": "You need to reply to a message.",
     }
 
     def __init__(self):
@@ -107,6 +112,20 @@ class ApodiktumShowViewsMod(loader.Module):
         if msg.out:
             await msg.delete()
 
+    async def gvcmd(self, message: Message):
+        """
+        <reply to msg> Get current views of the message.
+        """
+        chat = message.chat
+
+        if message.is_reply:
+            msg = await message.get_reply_message()
+        else:
+            await utils.answer(message, self.strings("no_reply"))
+            return
+        view_count = msg.views
+        await utils.answer(message, self.strings("views").format(view_count))
+
 
 class MigratorClass():
     """
@@ -131,6 +150,12 @@ class MigratorClass():
     }
 
     changes = {
+        "migration1": {
+            "name": {
+                "old": "Apo ShowViews",
+                "new": "Apo-ShowViews",
+            },
+        },
     }
 
     def __init__(self):
@@ -246,6 +271,10 @@ class MigratorClass():
         return
 
     async def _get_names(self, migration):
+        old_name = None
+        old_classname = None
+        new_name = None
+        new_classname = None
         for category in self.changes[migration]:
             if category == "classname":
                 old_classname, new_classname = await self._get_changes(self.changes[migration][category].items())
