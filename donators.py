@@ -242,7 +242,7 @@ class ApodiktumDonatorsMod(loader.Module):
             return
         monthly_amount, today, uname, username, userid, amount, currency, dtype, rank, code = self._vars(user, args)
 
-        string_join, string_kick = self._strings(today, uname, username, userid, amount, currency, dtype, rank, code)
+        string_join, string_kick = self._jk_strings(today, uname, username, userid, amount, currency, dtype, rank, code)
 
         msg = await message.client.send_message(
             int(self.config["logchannel"]),
@@ -328,7 +328,7 @@ class ApodiktumDonatorsMod(loader.Module):
         code = str(args[4:]).upper()
         return monthly_amount, today, uname, username, userid, amount, currency, dtype, rank, code
 
-    def _strings(self, today, uname, username, userid, amount, currency, dtype, rank, code):
+    def _jk_strings(self, today, uname, username, userid, amount, currency, dtype, rank, code):
         string_join = ("#Join\n"
                        + f"#{self.strings('date')} {today}\n"
                        + f"#{self.strings('uname')} {uname}\n"
