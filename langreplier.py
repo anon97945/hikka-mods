@@ -1,4 +1,4 @@
-__version__ = (0, 1, 0)
+__version__ = (0, 1, 1)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -123,7 +123,7 @@ class ApodiktumLangReplierMod(loader.Module):
             if found_alphabet not in self.config["allowed_alphabets"]:
                 denied_alphabet += f", {found_alphabet}" if denied_alphabet else found_alphabet
         allowed_alphabet = not denied_alphabet
-        return allowed_alphabet, denied_alphabet
+        return allowed_alphabet, denied_alphabet, detected_alphabet
 
     async def _check_lang(self, message):
         text = message.raw_text
@@ -158,10 +158,15 @@ class ApodiktumLangReplierMod(loader.Module):
             or (not self.config["whitelist"] and chat_id in self.config["chatlist"])
         ):
             return
-        allowed_alphabet, alphabet = self._is_alphabet(message)
+        allowed_alphabet, alphabet, detected_alphabet = self._is_alphabet(message)
         if not allowed_alphabet:
             respond = True
-        if self.config["check_language"] and len(message.raw_text.split()) >= 4 and alphabet:
+        if (
+            self.config["check_language"]
+            and len(message.raw_text.split()) >= 4
+            and len(message.raw_text) >= 12
+            and detected_alphabet
+        ):
             allowed_lang, full_lang = await self._check_lang(message)
             if not allowed_lang:
                 respond = True
