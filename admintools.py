@@ -560,7 +560,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         if args and args[0] == "clearall":
             self.set("bcu", [])
             self.set("bcu_sets", {})
-            return await utils.answer(message, self._strings("bcu_turned_off", message, utils.get_chat_id(message)))
+            return await utils.answer(message, self._strings("bcu_turned_off", utils.get_chat_id(message)))
 
         if args and args[0] == "db":
             return await utils.answer(message, self._strings("bcu_db_string", utils.get_chat_id(message)).format(str(bcu), str(sets)))

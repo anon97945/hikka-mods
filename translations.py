@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 class ApodiktumTranslationsMod(loader.Module):
     """
     This module handles the db for supported modules to force languages in chats.
-    
+
     For Devs:
     If you want to implement it into your modules or want to have more languages, you can ask me at @apodiktum_modules
     """
