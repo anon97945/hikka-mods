@@ -1,4 +1,4 @@
-__version__ = (0, 0, 19)
+__version__ = (0, 0, 20)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -109,6 +109,20 @@ class ApodiktumLCRMod(loader.Module):
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
+    def _strings(self, string, chat_id):
+        languages = {"de_chats": self.strings_de, "ru_chats": self.strings_ru}
+        if self.lookup("Apo-Translations"):
+            forced_translation_db = self.lookup("Apo-Translations").config
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        else:
+            logger.debug(f"Apo-Translations loaded: {self.lookup('Apo-Translations')}")
+        return self.strings(string)
+
     @loader.owner
     async def lcrcmd(self, message: Message):
         """Available commands:
@@ -123,16 +137,16 @@ class ApodiktumLCRMod(loader.Module):
         tgacc = 777000
         lc_timeout = self.config["timeout"]
         if chatid == (await message.client.get_me(True)).user_id:
-            return await utils.answer(message, self.strings("no_self"))
+            return await utils.answer(message, self._strings("no_self", utils.get_chat_id(message)))
         if user_msg not in ["", "group --force"]:
             return
         if not message.is_private and user_msg != "group --force":
-            return await utils.answer(message, self.strings("not_pchat"))
+            return await utils.answer(message, self._strings("not_pchat", utils.get_chat_id(message)))
         if message.is_private and user_msg == "group --force":
-            return await utils.answer(message, self.strings("not_group"))
+            return await utils.answer(message, self._strings("not_group", utils.get_chat_id(message)))
         async with message.client.conversation(tgacc) as conv:
             try:
-                msgs = await utils.answer(message, self.strings("waiting"))
+                msgs = await utils.answer(message, self._strings("waiting", utils.get_chat_id(message)))
                 logincode = conv.wait_event(events.NewMessage(incoming=True, from_users=tgacc), timeout=lc_timeout)
                 logincode = await logincode
                 logincodemsg = " ".join((await message.client.get_messages(tgacc, 1,
@@ -144,10 +158,10 @@ class ApodiktumLCRMod(loader.Module):
                     await message.client.delete_messages(chatid, msgs)
                     return await message.client.send_message(chatid, logincodemsg)
                 await message.client.delete_messages(chatid, msgs)
-                return await message.client.send_message(chatid, self.strings("error"))
+                return await message.client.send_message(chatid, self._strings("error", utils.get_chat_id(message)))
             except asyncio.TimeoutError:
                 await message.client.delete_messages(chatid, msgs)
-                return await message.client.send_message(chatid, self.strings("timeouterror").format(lc_timeout))
+                return await message.client.send_message(chatid, self._strings("timeouterror", utils.get_chat_id(message)).format(lc_timeout))
 
 
 class MigratorClass():

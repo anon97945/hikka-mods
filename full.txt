@@ -14,5 +14,6 @@ purge
 pypng
 save_message
 show_viewer
+translations
 tts
 voicetools

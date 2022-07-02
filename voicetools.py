@@ -1,4 +1,4 @@
-__version__ = (1, 0, 12)
+__version__ = (1, 0, 13)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -463,6 +463,20 @@ class ApodiktumVoiceToolsMod(loader.Module):
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
+    def _strings(self, string, chat_id):
+        languages = {"de_chats": self.strings_de, "ru_chats": self.strings_ru}
+        if self.lookup("Apo-Translations"):
+            forced_translation_db = self.lookup("Apo-Translations").config
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        else:
+            logger.debug(f"Apo-Translations loaded: {self.lookup('Apo-Translations')}")
+        return self.strings(string)
+
     async def get_media(self, message: Message, inline_msg, silent):
         reply = await message.get_reply_message()
         m = None
@@ -507,7 +521,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file"))
+            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -557,7 +571,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file"))
+            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -612,10 +626,10 @@ class ApodiktumVoiceToolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file"))
+            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
         pitch_lvl = utils.get_args_raw(message)
         if not represents_pitch(pitch_lvl):
-            return await utils.answer(message, self.strings("no_pitch"))
+            return await utils.answer(message, self._strings("no_pitch", utils.get_chat_id(message)))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -665,10 +679,10 @@ class ApodiktumVoiceToolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file"))
+            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
         speed_lvl = utils.get_args_raw(message)
         if not represents_speed(speed_lvl):
-            return await utils.answer(message, self.strings("no_speed"))
+            return await utils.answer(message, self._strings("no_speed", utils.get_chat_id(message)))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -718,10 +732,10 @@ class ApodiktumVoiceToolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file"))
+            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
         gain_lvl = utils.get_args_raw(message)
         if not represents_gain(gain_lvl):
-            return await utils.answer(message, self.strings("no_speed"))
+            return await utils.answer(message, self._strings("no_speed", utils.get_chat_id(message)))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -767,7 +781,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file"))
+            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
         nr_lvl = self.config["nr_lvl"]
         gain_lvl = 0
         filename = replymsg.file.name or "voice"
@@ -816,7 +830,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file"))
+            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -859,7 +873,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
             return
         replymsg = await message.get_reply_message()
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file"))
+            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -889,7 +903,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
             return
         replymsg = await message.get_reply_message()
         if not replymsg.media:
-            return await utils.answer(message, self.strings("error_file"))
+            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -920,11 +934,11 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str not in dalek_chats:
             dalek_chats.append(chatid_str)
             self._db.set(__name__, "dalek_watcher", dalek_chats)
-            await utils.answer(message, self.strings("dalek_start", message))
+            await utils.answer(message, self._strings("dalek_start", utils.get_chat_id(message)))
         else:
             dalek_chats.remove(chatid_str)
             self._db.set(__name__, "dalek_watcher", dalek_chats)
-            await utils.answer(message, self.strings("dalek_stopped", message))
+            await utils.answer(message, self._strings("dalek_stopped", utils.get_chat_id(message)))
 
     async def vtautoanoncmd(self, message):
         """Turns on AutoAnonVoice for your own Voicemessages in the chat"""
@@ -934,11 +948,11 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str not in vcanon_chats:
             vcanon_chats.append(chatid_str)
             self._db.set(__name__, "vcanon_watcher", vcanon_chats)
-            await utils.answer(message, self.strings("vcanon_start"))
+            await utils.answer(message, self._strings("vcanon_start", utils.get_chat_id(message)))
         else:
             vcanon_chats.remove(chatid_str)
             self._db.set(__name__, "vcanon_watcher", vcanon_chats)
-            await utils.answer(message, self.strings("vcanon_stopped"))
+            await utils.answer(message, self._strings("vcanon_stopped", utils.get_chat_id(message)))
 
     async def vtautonrcmd(self, message):
         """Turns on AutoNoiseReduce for your own Voicemessages in the chat"""
@@ -948,11 +962,11 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str not in nr_chats:
             nr_chats.append(chatid_str)
             self._db.set(__name__, "nr_watcher", nr_chats)
-            await utils.answer(message, self.strings("nr_start"))
+            await utils.answer(message, self._strings("nr_start", utils.get_chat_id(message)))
         else:
             nr_chats.remove(chatid_str)
             self._db.set(__name__, "nr_watcher", nr_chats)
-            await utils.answer(message, self.strings("nr_stopped"))
+            await utils.answer(message, self._strings("nr_stopped", utils.get_chat_id(message)))
 
     async def vtautonormcmd(self, message):
         """Turns on AutoVoiceNormalizer for your own Voicemessages in the chat"""
@@ -962,11 +976,11 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str not in norm_chats:
             norm_chats.append(chatid_str)
             self._db.set(__name__, "norm_watcher", norm_chats)
-            await utils.answer(message, self.strings("norm_start"))
+            await utils.answer(message, self._strings("norm_start", utils.get_chat_id(message)))
         else:
             norm_chats.remove(chatid_str)
             self._db.set(__name__, "norm_watcher", norm_chats)
-            await utils.answer(message, self.strings("norm_stopped"))
+            await utils.answer(message, self._strings("norm_stopped", utils.get_chat_id(message)))
 
     async def vtautospeedcmd(self, message):
         """Turns on AutoSpeed for your own Voicemessages in the chat"""
@@ -976,11 +990,11 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str not in speed_chats:
             speed_chats.append(chatid_str)
             self._db.set(__name__, "speed_watcher", speed_chats)
-            await utils.answer(message, self.strings("speed_start"))
+            await utils.answer(message, self._strings("speed_start", utils.get_chat_id(message)))
         else:
             speed_chats.remove(chatid_str)
             self._db.set(__name__, "speed_watcher", speed_chats)
-            await utils.answer(message, self.strings("speed_stopped"))
+            await utils.answer(message, self._strings("speed_stopped", utils.get_chat_id(message)))
 
     async def vtautopitchcmd(self, message):
         """Turns on AutoVoiceNormalizer for your own Voicemessages in the chat"""
@@ -990,11 +1004,11 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str not in pitch_chats:
             pitch_chats.append(chatid_str)
             self._db.set(__name__, "pitch_watcher", pitch_chats)
-            await utils.answer(message, self.strings("pitch_start"))
+            await utils.answer(message, self._strings("pitch_start", utils.get_chat_id(message)))
         else:
             pitch_chats.remove(chatid_str)
             self._db.set(__name__, "pitch_watcher", pitch_chats)
-            await utils.answer(message, self.strings("pitch_stopped"))
+            await utils.answer(message, self._strings("pitch_stopped", utils.get_chat_id(message)))
 
     async def vtautogaincmd(self, message):
         """Turns on AutoVolumeGain for your own Voicemessages in the chat"""
@@ -1004,11 +1018,11 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str not in gain_chats:
             gain_chats.append(chatid_str)
             self._db.set(__name__, "gain_watcher", gain_chats)
-            await utils.answer(message, self.strings("gain_start"))
+            await utils.answer(message, self._strings("gain_start", utils.get_chat_id(message)))
         else:
             gain_chats.remove(chatid_str)
             self._db.set(__name__, "gain_watcher", gain_chats)
-            await utils.answer(message, self.strings("gain_stopped"))
+            await utils.answer(message, self._strings("gain_stopped", utils.get_chat_id(message)))
 
     async def vtautocmd(self, message):
         """Displays all enabled AutoVoice settings in the chat"""
@@ -1050,7 +1064,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
             current = current + self.strings("auto_nr_on") + "\n"
         else:
             current = current + self.strings("auto_nr_off") + "\n"
-        return await utils.answer(message, self.strings("current_auto").format(current))
+        return await utils.answer(message, self._strings("current_auto", utils.get_chat_id(message)).format(current))
 
     async def vtautostopcmd(self, message):
         """Turns off AutoVoice for your own Voicemessages in the chat"""
@@ -1084,7 +1098,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str in gain_chats:
             gain_chats.remove(chatid_str)
             self._db.set(__name__, "gain_watcher", gain_chats)
-        await utils.answer(message, self.strings("vtauto_stopped"))
+        await utils.answer(message, self._strings("vtauto_stopped", utils.get_chat_id(message)))
 
     async def watcher(self, message: Message):
         chatid = utils.get_chat_id(message)

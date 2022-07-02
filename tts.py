@@ -1,4 +1,4 @@
-__version__ = (0, 1, 73)
+__version__ = (0, 1, 77)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -187,6 +187,20 @@ class ApodiktumTTSMod(loader.Module):
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
+    def _strings(self, string, chat_id):
+        languages = {"de_chats": self.strings_de, "ru_chats": self.strings_ru}
+        if self.lookup("Apo-Translations"):
+            forced_translation_db = self.lookup("Apo-Translations").config
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        else:
+            logger.debug(f"Apo-Translations loaded: {self.lookup('Apo-Translations')}")
+        return self.strings(string)
+
     async def cttscmd(self, message: Message):
         """
         This will open the config for the module.
@@ -204,8 +218,8 @@ class ApodiktumTTSMod(loader.Module):
             if message.is_reply:
                 text = (await message.get_reply_message()).message
             else:
-                return await utils.answer(message, self.strings("tts_needs_text"))
-        message = await utils.answer(message, self.strings("processing"))
+                return await utils.answer(message, self._strings("tts_needs_text", utils.get_chat_id(message)))
+        message = await utils.answer(message, self._strings("processing", utils.get_chat_id(message)))
         tts = await utils.run_sync(gTTS, text, lang=self.config["tts_lang"])
         voice = BytesIO()
         await utils.run_sync(tts.write_to_fp, voice)
@@ -229,16 +243,16 @@ class ApodiktumTTSMod(loader.Module):
         """Speed up voice by x"""
         speed = utils.get_args_raw(message)
         if not message.is_reply:
-            return await utils.answer(message, self.strings("no_reply"))
+            return await utils.answer(message, self._strings("no_reply", utils.get_chat_id(message)))
         replymsg = await message.get_reply_message()
         if not replymsg.voice:
-            message = await utils.answer(message, self.strings("needvoice"))
+            message = await utils.answer(message, self._strings("needvoice", utils.get_chat_id(message)))
             return
         if len(speed) == 0:
-            return await utils.answer(message, self.strings("needspeed"))
+            return await utils.answer(message, self._strings("needspeed", utils.get_chat_id(message)))
         if not represents_speed(speed):
-            return await utils.answer(message, self.strings("no_speed"))
-        message = await utils.answer(message, self.strings("processing"))
+            return await utils.answer(message, self._strings("no_speed", utils.get_chat_id(message)))
+        message = await utils.answer(message, self._strings("processing", utils.get_chat_id(message)))
         ext = replymsg.file.ext
         voice = BytesIO()
         voice.name = replymsg.file.name

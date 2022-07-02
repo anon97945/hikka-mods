@@ -1,4 +1,4 @@
-__version__ = (0, 0, 14)
+__version__ = (0, 0, 15)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -100,17 +100,31 @@ class ApodiktumSaveMessageMod(loader.Module):
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
+    def _strings(self, string, chat_id):
+        languages = {"de_chats": self.strings_de, "ru_chats": self.strings_ru}
+        if self.lookup("Apo-Translations"):
+            forced_translation_db = self.lookup("Apo-Translations").config
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        else:
+            logger.debug(f"Apo-Translations loaded: {self.lookup('Apo-Translations')}")
+        return self.strings(string)
+
     async def smcmd(self, message: Message):
         """<messagelink> to forward message/media to SavedMessages."""
         args = utils.get_args_raw(message).lower()
         if not args:
             return
         if not get_ids(args):
-            return await utils.answer(message, self.strings("invalid_link"))
+            return await utils.answer(message, self._strings("invalid_link", utils.get_chat_id(message)))
         channel_id, msg_id = get_ids(args)
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
         msgs = await message.client.send_message(self._id, message=msgs)
-        return await utils.answer(message, self.strings("done"))
+        return await utils.answer(message, self._strings("done", utils.get_chat_id(message)))
 
     async def smhcmd(self, message: Message):
         """<messagelink> to forward message/media to current chat."""
@@ -118,7 +132,7 @@ class ApodiktumSaveMessageMod(loader.Module):
         if not args:
             return
         if not get_ids(args):
-            return await utils.answer(message, self.strings("invalid_link"))
+            return await utils.answer(message, self._strings("invalid_link", utils.get_chat_id(message)))
         channel_id, msg_id = get_ids(args)
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
         msgs = await message.client.send_message(utils.get_chat_id(message), message=msgs)

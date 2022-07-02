@@ -1,4 +1,4 @@
-__version__ = (0, 0, 7)
+__version__ = (0, 0, 8)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -88,6 +88,20 @@ class ApodiktumShowViewsMod(loader.Module):
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
+    def _strings(self, string, chat_id):
+        languages = {}
+        if self.lookup("Apo-Translations"):
+            forced_translation_db = self.lookup("Apo-Translations").config
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        else:
+            logger.debug(f"Apo-Translations loaded: {self.lookup('Apo-Translations')}")
+        return self.strings(string)
+
     async def svcmd(self, message: Message):
         """
         <message/reply to msg> Send a message to get the current count of viewers with that message.
@@ -96,12 +110,12 @@ class ApodiktumShowViewsMod(loader.Module):
         args = utils.get_args_raw(message)
 
         if not self.config["channel"]:
-            await utils.answer(message, self.strings("no_channel"))
+            await utils.answer(message, self._strings("no_channel", utils.get_chat_id(message)))
             return
         if message.is_reply:
             msg = await message.get_reply_message()
         elif not args:
-            await utils.answer(message, self.strings("no_args"))
+            await utils.answer(message, self._strings("no_args", utils.get_chat_id(message)))
             return
         await message.delete()
         if message.is_reply:
@@ -121,10 +135,10 @@ class ApodiktumShowViewsMod(loader.Module):
         if message.is_reply:
             msg = await message.get_reply_message()
         else:
-            await utils.answer(message, self.strings("no_reply"))
+            await utils.answer(message, self._strings("no_reply", utils.get_chat_id(message)))
             return
         view_count = msg.views
-        await utils.answer(message, self.strings("views").format(view_count))
+        await utils.answer(message, self._strings("views", utils.get_chat_id(message)).format(view_count))
 
 
 class MigratorClass():

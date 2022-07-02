@@ -1,4 +1,4 @@
-__version__ = (0, 1, 3)
+__version__ = (0, 1, 4)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -122,6 +122,20 @@ class ApodiktumMigratorMod(loader.Module):
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
+    def _strings(self, string, chat_id):
+        languages = {}
+        if self.lookup("Apo-Translations"):
+            forced_translation_db = self.lookup("Apo-Translations").config
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        else:
+            logger.debug(f"Apo-Translations loaded: {self.lookup('Apo-Translations')}")
+        return self.strings(string)
+
     async def apomigratecmd(self, message: Message):
         """
         This will migrate all your old modules to new ones, including Config.
@@ -130,29 +144,29 @@ class ApodiktumMigratorMod(loader.Module):
 
         if self.get("hash") == "e1cc9d13bf96ec1aca7edd2fb67f0816":
             await self.inline.form(message=message,
-                                   text=self.strings("already_migrated"),
+                                   text=self._strings("already_migrated", utils.get_chat_id(message)),
                                    reply_markup=[
                                                     {
-                                                        "text": self.strings("_btn_force"),
+                                                        "text": self._strings("_btn_force", utils.get_chat_id(message)),
                                                         "callback": self._migrate,
                                                         "args": (chat_id,),
                                                     },
                                                     {
-                                                        "text": self.strings("_btn_close"),
+                                                        "text": self._strings("_btn_close", utils.get_chat_id(message)),
                                                         "callback": self._close
                                                     }
                                                 ])
             return
         await self.inline.form(message=message,
-                               text=self.strings("migrate_now"),
+                               text=self._strings("migrate_now", utils.get_chat_id(message)),
                                reply_markup=[
                                                 {
-                                                    "text": self.strings("_btn_yes"),
+                                                    "text": self._strings("_btn_yes", utils.get_chat_id(message)),
                                                     "callback": self._migrate,
                                                     "args": (chat_id,),
                                                 },
                                                 {
-                                                    "text": self.strings("_btn_no"),
+                                                    "text": self._strings("_btn_no", utils.get_chat_id(message)),
                                                     "callback": self._close,
                                                 },
                                                 ])

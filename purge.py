@@ -1,5 +1,4 @@
-import contextlib
-__version__ = (0, 1, 14)
+__version__ = (0, 1, 15)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -21,6 +20,7 @@ __version__ = (0, 1, 14)
 
 import asyncio
 import logging
+import contextlib
 
 import collections  # for MigratorClass
 import hashlib  # for MigratorClass
@@ -196,6 +196,20 @@ class ApodiktumPurgeMod(loader.Module):
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
+    def _strings(self, string, chat_id):
+        languages = {"de_chats": self.strings_de, "ru_chats": self.strings_ru}
+        if self.lookup("Apo-Translations"):
+            forced_translation_db = self.lookup("Apo-Translations").config
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        else:
+            logger.debug(f"Apo-Translations loaded: {self.lookup('Apo-Translations')}")
+        return self.strings(string)
+
     @staticmethod
     async def _purge_user_messages(chat, user_id, purge_count, message):
         msgs = []
@@ -272,10 +286,10 @@ class ApodiktumPurgeMod(loader.Module):
 
             msg_count = await self._purge_messages(chat, self._tg_id, can_delete, message)
         else:
-            await utils.answer(message, self.strings("err_purge_start"))
+            await utils.answer(message, self._strings("err_purge_start", utils.get_chat_id(message)))
             return
 
-        done = await message.client.send_message(chat.id, self.strings("purge_cmpl").format(str(msg_count)))
+        done = await message.client.send_message(chat.id, self._strings("purge_cmpl", utils.get_chat_id(message)).format(str(msg_count)))
         await asyncio.sleep(2)
         await done.delete()
         if self.config["log_purge"]:
@@ -300,7 +314,7 @@ class ApodiktumPurgeMod(loader.Module):
 
             msg_count = await self._purge_messages(chat, self._tg_id, can_delete, message)
         else:
-            await utils.answer(message, self.strings("err_purge_start"))
+            await utils.answer(message, self._strings("err_purge_start", utils.get_chat_id(message)))
             return
 
         if self.config["log_purge"]:
@@ -316,16 +330,16 @@ class ApodiktumPurgeMod(loader.Module):
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
         if not represents_int(args[0]) and "all" not in args:
-            await utils.answer(message, self.strings("no_int"))
+            await utils.answer(message, self._strings("no_int", utils.get_chat_id(message)))
             return
         if len(args) > 1:
-            await utils.answer(message, self.strings("err_cmd_wrong"))
+            await utils.answer(message, self._strings("err_cmd_wrong", utils.get_chat_id(message)))
             return
         purge_count = "all" if len(args) == 1 and "all" in args else int(args[0])
         user_id = self._tg_id
         await message.delete()
         msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
-        done = await message.client.send_message(chat.id, self.strings("purge_cmpl").format(str(msg_count)))
+        done = await message.client.send_message(chat.id, self._strings("purge_cmpl", utils.get_chat_id(message)).format(str(msg_count)))
         await asyncio.sleep(2)
         await done.delete()
         if self.config["log_purgeme"]:
@@ -341,10 +355,10 @@ class ApodiktumPurgeMod(loader.Module):
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
         if not represents_int(args[0]) and "all" not in args:
-            await utils.answer(message, self.strings("no_int"))
+            await utils.answer(message, self._strings("no_int", utils.get_chat_id(message)))
             return
         if len(args) > 1:
-            await utils.answer(message, self.strings("err_cmd_wrong"))
+            await utils.answer(message, self._strings("err_cmd_wrong", utils.get_chat_id(message)))
             return
         purge_count = "all" if len(args) == 1 and "all" in args else int(args[0])
         user_id = self._tg_id
@@ -361,7 +375,7 @@ class ApodiktumPurgeMod(loader.Module):
         """
         chat = message.chat
         if not message.is_reply:
-            return await utils.answer(message, self.strings("no_reply"))
+            return await utils.answer(message, self._strings("no_reply", utils.get_chat_id(message)))
         reply = await message.get_reply_message()
         user_id = reply.sender_id
         if (
@@ -370,11 +384,11 @@ class ApodiktumPurgeMod(loader.Module):
             or not chat.admin_rights
             and not chat.creator
         ):
-            return await utils.answer(message, self.strings("permerror"))
+            return await utils.answer(message, self._strings("permerror", utils.get_chat_id(message)))
         purge_count = "all"
         await message.delete()
         msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
-        done = await message.client.send_message(chat.id, self.strings("purge_cmpl").format(str(msg_count)))
+        done = await message.client.send_message(chat.id, self._strings("purge_cmpl", utils.get_chat_id(message)).format(str(msg_count)))
         await asyncio.sleep(2)
         await done.delete()
         if self.config["log_purgeme"]:
@@ -388,7 +402,7 @@ class ApodiktumPurgeMod(loader.Module):
         """
         chat = message.chat
         if not message.is_reply:
-            return await utils.answer(message, self.strings("no_reply"))
+            return await utils.answer(message, self._strings("no_reply", utils.get_chat_id(message)))
         reply = await message.get_reply_message()
         user_id = reply.sender_id
         if (
@@ -397,7 +411,7 @@ class ApodiktumPurgeMod(loader.Module):
             or not chat.admin_rights
             and not chat.creator
         ):
-            return await utils.answer(message, self.strings("permerror"))
+            return await utils.answer(message, self._strings("permerror", utils.get_chat_id(message)))
         purge_count = "all"
         await message.delete()
         msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
@@ -424,7 +438,7 @@ class ApodiktumPurgeMod(loader.Module):
         chat = message.chat
         args = utils.get_args_raw(message)
         if not args:
-            await utils.answer(message, self.strings("err_cmd_wrong"))
+            await utils.answer(message, self._strings("err_cmd_wrong", utils.get_chat_id(message)))
             return
         i = 1
         async for msg in message.client.iter_messages(chat):
@@ -448,12 +462,12 @@ class ApodiktumPurgeMod(loader.Module):
         args = utils.get_args_raw(message)
         args = str(args).split()
         if len(args) < 2:
-            await utils.answer(message, self.strings("err_cmd_wrong"))
+            await utils.answer(message, self._strings("err_cmd_wrong", utils.get_chat_id(message)))
             return
         counter = int(" ".join(args[:1]))
         text = " ".join(args[1:])
         if (not counter or not text) and not represents_int(counter):
-            await utils.answer(message, self.strings("err_cmd_wrong"))
+            await utils.answer(message, self._strings("err_cmd_wrong", utils.get_chat_id(message)))
             return
         msg = await utils.answer(message, text)
         await asyncio.sleep(counter)

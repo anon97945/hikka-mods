@@ -1,4 +1,4 @@
-__version__ = (0, 0, 8)
+__version__ = (0, 0, 9)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -166,6 +166,20 @@ class ApodiktumDonatorsMod(loader.Module):
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
+    def _strings(self, string, chat_id):
+        languages = {"de_chats": self.strings_de}
+        if self.lookup("Apo-Translations"):
+            forced_translation_db = self.lookup("Apo-Translations").config
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        else:
+            logger.debug(f"Apo-Translations loaded: {self.lookup('Apo-Translations')}")
+        return self.strings(string)
+
     @staticmethod
     async def _is_member(
         chat: Union[Chat, int],
@@ -194,13 +208,13 @@ class ApodiktumDonatorsMod(loader.Module):
         Calculate the amount of donations.
         """
         if not self.config["logchannel"]:
-            await utils.answer(message, self.strings("no_channel"))
+            await utils.answer(message, self._strings("no_channel", utils.get_chat_id(message)))
             return
         amounts = await self._get_amounts(message, self.config["logchannel"])
         if amounts:
-            await utils.answer(message, self.strings("total_amount").format(amounts))
+            await utils.answer(message, self._strings("total_amount", utils.get_chat_id(message)).format(amounts))
         else:
-            await utils.answer(message, self.strings("no_amount"))
+            await utils.answer(message, self._strings("no_amount", utils.get_chat_id(message)))
 
     async def donsavecmd(self, message: Message):
         """
@@ -212,19 +226,19 @@ class ApodiktumDonatorsMod(loader.Module):
         """
         reply = await message.get_reply_message()
         if not self.config["logchannel"]:
-            await utils.answer(message, self.strings("no_channel"))
+            await utils.answer(message, self._strings("no_channel", utils.get_chat_id(message)))
             return
         if not reply:
-            await utils.answer(message, self.strings("no_reply"))
+            await utils.answer(message, self._strings("no_reply", utils.get_chat_id(message)))
             return
         user = await self._client.get_entity(reply.sender_id)
         if not user:
-            await utils.answer(message, self.strings("no_user"))
+            await utils.answer(message, self._strings("no_user", utils.get_chat_id(message)))
             return
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
         if not args:
-            await utils.answer(message, self.strings("no_args"))
+            await utils.answer(message, self._strings("no_args", utils.get_chat_id(message)))
             return
         monthly_amount, today, uname, username, userid, amount, currency, dtype, rank, code = self._vars(user, args)
 
@@ -247,7 +261,7 @@ class ApodiktumDonatorsMod(loader.Module):
             custom_msg = custom_msg.replace("<br>", "\n")
             await utils.answer(message, custom_msg)
         else:
-            await utils.answer(message, self.strings("donation_saved"))
+            await utils.answer(message, self._strings("donation_saved", utils.get_chat_id(message)))
         await msg.react("👍")
 
     @staticmethod
