@@ -1,4 +1,4 @@
-__version__ = (0, 0, 55)
+__version__ = (0, 0, 56)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -53,6 +53,12 @@ class ApodiktumGTranslateMod(loader.Module):
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
+    }
+
+    strings_en = {
+        "invalid_text": "Invalid text to translate",
+        "split_error": "Python split() error, if there is -> in the text, it must split!",
+        "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
     }
 
     strings_de = {
@@ -119,6 +125,18 @@ class ApodiktumGTranslateMod(loader.Module):
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
+    def _strings(self, string: str, chat_id: int = None):
+        if self.lookup("Apo-Translations") and chat_id:
+            forced_translation_db = self.lookup("Apo-Translations").config
+            languages = {"en_chats": self.strings_en, "de_chats": self.strings_de, "ru_chats": self.strings_ru}
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        return self.strings(string)
+
     async def cgtranslatecmd(self, message: Message):
         """
         This will open the config for the module.
@@ -142,20 +160,20 @@ class ApodiktumGTranslateMod(loader.Module):
         if not text and message.is_reply:
             text = (await message.get_reply_message()).message
         if len(text) == 0:
-            await message.edit(self.strings["invalid_text"])
+            await utils.answer(message, self._strings("invalid_text", utils.get_chat_id(message)))
             return
         if args[0] == "":
             args[0] = (await utils.run_sync(self.tr.detect, text)).lang
         if len(args) == 3:
             del args[1]
         if len(args) == 1:
-            logging.error(self.strings["split_error"])
+            logging.error(self.strings("split_error"))
             raise RuntimeError()
         if args[1] == "":
             args[1] = self.config["DEFAULT_LANG"]
         args[0] = args[0].lower()
         translated = (await utils.run_sync(self.tr.translate, text, dest=args[1], src=args[0])).text
-        ret = self.strings["translated"]
+        ret = self._strings("translated", utils.get_chat_id(message))
         if self.config["vodka_easteregg"]:
             args = list(map(lambda x: x.replace("ru", "vodka"), args))
         ret = ret.format(text=utils.escape_html(text), frlang=utils.escape_html(args[0]),

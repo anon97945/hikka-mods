@@ -1,4 +1,4 @@
-__version__ = (1, 0, 6)
+__version__ = (1, 0, 7)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -102,6 +102,39 @@ class ApodiktumAdminToolsMod(loader.Module):
     strings = {
         "name": "Apo AdminTools",
         "developer": "@anon97945",
+        "bcu_db_string": ("<b>[BlockChannelUser]</b> Current Database:\n\nWatcher:\n{}"
+                          "\n\nChatsettings:\n{}"),
+        "bcu_settings": ("<b>[BlockChannelUser]</b> Current settings in this "
+                         "chat are:\n{}"),
+        "bcu_start": "<b>[BlockChannelUser]</b> Activated in this chat.</b>",
+        "bcu_stopped": "<b>[BlockChannelUser]</b> Deactivated in this chat.</b>",
+        "bcu_triggered": "{}, you can't write as a channel here.",
+        "bcu_turned_off": "<b>[BlockChannelUser]</b> The module is now turned off in all chats.</b>",
+        "bnd_db_string": ("<b>[BlockNonDiscussion]</b> Current Database:\n\nWatcher:\n{}"
+                          "\n\nChatsettings:\n{}"),
+        "bnd_settings": ("<b>[BlockNonDiscussion]</b> Current settings in this "
+                         "chat are:\n{}"),
+        "bnd_start": "<b>[BlockNonDiscussion]</b> Activated in this chat.</b>",
+        "bnd_stopped": "<b>[BlockNonDiscussion]</b> Deactivated in this chat.</b>",
+        "bnd_triggered": ("{}, the comments are limited to discussiongroup members, "
+                          "please join our discussiongroup first."
+                          "\n\n👉🏻 {}\n\nRespectfully, the admins."),
+        "bnd_turned_off": "<b>[BlockNonDiscussion]</b> The module is now turned off in all chats.</b>",
+        "error": "<b>Your command was wrong.</b>",
+        "gl_db_string": ("<b>[Grouplogger]</b> Current Database:\n\nWatcher:\n{}"
+                         "\n\nChatsettings:\n{}"),
+        "gl_settings": ("<b>[Grouplogger]</b> Current settings in this "
+                        "chat are:\n{}"),
+        "gl_start": "<b>[Grouplogger]</b> Activated for the given chat.</b>",
+        "gl_stopped": "<b>[Grouplogger]</b> Deactivated in this chat.</b>",
+        "gl_turned_off": "<b>[Grouplogger]</b> The module is now turned off in all chats.</b>",
+        "no_id": "<b>Your input was no TG ID.</b>",
+        "no_int": "<b>Your input was no Integer.</b>",
+        "not_dc": "<b>This is no Groupchat.</b>",
+        "permerror": "<b>You have no delete permissions in this chat.</b>",
+    }
+
+    strings_en = {
         "bcu_db_string": ("<b>[BlockChannelUser]</b> Current Database:\n\nWatcher:\n{}"
                           "\n\nChatsettings:\n{}"),
         "bcu_settings": ("<b>[BlockChannelUser]</b> Current settings in this "
@@ -283,6 +316,18 @@ class ApodiktumAdminToolsMod(loader.Module):
     async def on_unload(self):
         self._pt_task.cancel()
         return
+
+    def _strings(self, string: str, chat_id: int = None):
+        if self.lookup("Apo-Translations") and chat_id:
+            forced_translation_db = self.lookup("Apo-Translations").config
+            languages = {"en_chats": self.strings_en, "de_chats": self.strings_de, "ru_chats": self.strings_ru}
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        return self.strings(string)
 
     async def _mute(
         self,
@@ -466,13 +511,13 @@ class ApodiktumAdminToolsMod(loader.Module):
         if args and args[0] == "clearall":
             self.set("bnd", [])
             self.set("bnd_sets", {})
-            return await utils.answer(message, self.strings("bnd_turned_off"))
+            return await utils.answer(message, self._strings("bnd_turned_off", utils.get_chat_id(message)))
 
         if args and args[0] == "db":
-            return await utils.answer(message, self.strings("bnd_db_string").format(str(bnd), str(sets)))
+            return await utils.answer(message, self._strings("bnd_db_string", utils.get_chat_id(message)).format(str(bnd), str(sets)))
 
         if message.is_private:
-            await utils.answer(message, self.strings("not_dc"))
+            await utils.answer(message, self._strings("not_dc"))
             return
 
         if (
@@ -481,7 +526,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             or not chat.admin_rights
             and not chat.creator
         ):
-            return await utils.answer(message, self.strings("permerror"))
+            return await utils.answer(message, self._strings("permerror", utils.get_chat_id(message)))
 
         if not args:
             if chatid_str not in bnd:
@@ -492,31 +537,31 @@ class ApodiktumAdminToolsMod(loader.Module):
                 sets[chatid_str].setdefault("deltimer", 60)
                 self.set("bnd", bnd)
                 self.set("bnd_sets", sets)
-                return await utils.answer(message, self.strings("bnd_start"))
+                return await utils.answer(message, self._strings("bnd_start", utils.get_chat_id(message)))
             bnd.remove(chatid_str)
             sets.pop(chatid_str)
             self.set("bnd", bnd)
             self.set("bnd_sets", sets)
-            return await utils.answer(message, self.strings("bnd_stopped"))
+            return await utils.answer(message, self._strings("bnd_stopped", utils.get_chat_id(message)))
 
         if chatid_str in bnd:
             if args[0] == "notify" and args[1] is not None:
                 if not isinstance(to_bool(args[1]), bool):
-                    return await utils.answer(message, self.strings("error"))
+                    return await utils.answer(message, self._strings("error", utils.get_chat_id(message)))
                 sets[chatid_str].update({"notify": to_bool(args[1])})
             elif args[0] == "mute" and args[1] is not None and chatid_str in bnd:
                 if not represents_int(args[1]):
-                    return await utils.answer(message, self.strings("no_int"))
+                    return await utils.answer(message, self._strings("no_int", utils.get_chat_id(message)))
                 sets[chatid_str].update({"mute": args[1].capitalize()})
             elif args[0] == "deltimer" and args[1] is not None and chatid_str in bnd:
                 if not represents_int(args[1]):
-                    return await utils.answer(message, self.strings("no_int"))
+                    return await utils.answer(message, self._strings("no_int", utils.get_chat_id(message)))
                 sets[chatid_str].update({"deltimer": args[1]})
             elif args[0] != "settings" and chatid_str in bnd:
                 return
             self.set("bnd", bnd)
             self.set("bnd_sets", sets)
-            return await utils.answer(message, self.strings("bnd_settings").format(str(sets[chatid_str])))
+            return await utils.answer(message, self._strings("bnd_settings", utils.get_chat_id(message)).format(str(sets[chatid_str])))
 
     async def bcucmd(self, message: Message):
         """
@@ -546,13 +591,13 @@ class ApodiktumAdminToolsMod(loader.Module):
         if args and args[0] == "clearall":
             self.set("bcu", [])
             self.set("bcu_sets", {})
-            return await utils.answer(message, self.strings("bcu_turned_off", message))
+            return await utils.answer(message, self._strings("bcu_turned_off", utils.get_chat_id(message)))
 
         if args and args[0] == "db":
-            return await utils.answer(message, self.strings("bcu_db_string").format(str(bcu), str(sets)))
+            return await utils.answer(message, self._strings("bcu_db_string", utils.get_chat_id(message)).format(str(bcu), str(sets)))
 
         if message.is_private:
-            await utils.answer(message, self.strings("not_dc", message))
+            await utils.answer(message, self._strings("not_dc", utils.get_chat_id(message)))
             return
 
         if (
@@ -561,7 +606,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             or not chat.admin_rights
             and not chat.creator
         ):
-            return await utils.answer(message, self.strings("permerror", message))
+            return await utils.answer(message, self._strings("permerror", utils.get_chat_id(message)))
 
         if not args:
             if chatid_str not in bcu:
@@ -572,31 +617,31 @@ class ApodiktumAdminToolsMod(loader.Module):
                 sets[chatid_str].setdefault("deltimer", 60)
                 self.set("bcu", bcu)
                 self.set("bcu_sets", sets)
-                return await utils.answer(message, self.strings("bcu_start", message))
+                return await utils.answer(message, self._strings("bcu_start", utils.get_chat_id(message)))
             bcu.remove(chatid_str)
             sets.pop(chatid_str)
             self.set("bcu", bcu)
             self.set("bcu_sets", sets)
-            return await utils.answer(message, self.strings("bcu_stopped", message))
+            return await utils.answer(message, self._strings("bcu_stopped", utils.get_chat_id(message)))
 
         if chatid_str in bcu:
             if args[0] == "notify" and args[1] is not None:
                 if not isinstance(to_bool(args[1]), bool):
-                    return await utils.answer(message, self.strings("error", message))
+                    return await utils.answer(message, self._strings("error", utils.get_chat_id(message)))
                 sets[chatid_str].update({"notify": to_bool(args[1])})
             elif args[0] == "ban" and args[1] is not None and chatid_str in bcu:
                 if not isinstance(to_bool(args[1]), bool):
-                    return await utils.answer(message, self.strings("no_int", message))
+                    return await utils.answer(message, self._strings("no_int", utils.get_chat_id(message)))
                 sets[chatid_str].update({"ban": to_bool(args[1])})
             elif args[0] == "deltimer" and args[1] is not None and chatid_str in bcu:
                 if not represents_int(args[1]):
-                    return await utils.answer(message, self.strings("no_int", message))
+                    return await utils.answer(message, self._strings("no_int", utils.get_chat_id(message)))
                 sets[chatid_str].update({"deltimer": args[1]})
             elif args[0] != "settings" and chatid_str in bcu:
                 return
             self.set("bcu", bcu)
             self.set("bcu_sets", sets)
-            return await utils.answer(message, self.strings("bcu_settings").format(str(sets[chatid_str])))
+            return await utils.answer(message, self._strings("bcu_settings", utils.get_chat_id(message)).format(str(sets[chatid_str])))
 
     async def glcmd(self, message: Message):
         """
@@ -620,14 +665,14 @@ class ApodiktumAdminToolsMod(loader.Module):
         chatid_str = str(chatid)
 
         if not args:
-            return await utils.answer(message, self.strings("error"))
+            return await utils.answer(message, self._strings("error", utils.get_chat_id(message)))
 
         if args[0] == "clearall":
             self.set("gl", [])
             self.set("gl_sets", {})
-            return await utils.answer(message, self.strings("gl_turned_off", message))
+            return await utils.answer(message, self._strings("gl_turned_off", utils.get_chat_id(message)))
         if args[0] == "db":
-            return await utils.answer(message, self.strings("gl_db_string").format(str(gl), str(sets)))
+            return await utils.answer(message, self._strings("gl_db_string", utils.get_chat_id(message)).format(str(gl), str(sets)))
         if args[0] is not None and represents_tgid(args[0]):
             chatid = args[0]
             chatid_str = str(chatid)
@@ -635,39 +680,39 @@ class ApodiktumAdminToolsMod(loader.Module):
             chatid = args[1]
             chatid_str = str(chatid)
         elif args[0] == "db":
-            return await utils.answer(message, self.strings("gl_db_string").format(str(sets)))
+            return await utils.answer(message, self._strings("gl_db_string", utils.get_chat_id(message)).format(str(sets)))
         elif args[0] not in ["clearall", "settings"]:
-            return await utils.answer(message, self.strings("error"))
+            return await utils.answer(message, self._strings("error", utils.get_chat_id(message)))
         elif not args:
-            return await utils.answer(message, self.strings("error"))
+            return await utils.answer(message, self._strings("error", utils.get_chat_id(message)))
         if args[0] == "rem" and represents_tgid(args[1]) and chatid_str in gl:
             gl.remove(chatid_str)
             sets.pop(chatid_str)
             self.set("gl", gl)
             self.set("gl_sets", sets)
-            return await utils.answer(message, self.strings("gl_stopped"))
+            return await utils.answer(message, self._strings("gl_stopped", utils.get_chat_id(message)))
         if args[0] == "rem" and (represents_tgid(args[1]) or chatid_str not in gl):
-            return await utils.answer(message, self.strings("error"))
+            return await utils.answer(message, self._strings("error", utils.get_chat_id(message)))
         if not represents_tgid(chatid_str):
-            return await utils.answer(message, self.strings("error"))
+            return await utils.answer(message, self._strings("error", utils.get_chat_id(message)))
         if chatid_str not in gl:
             if not represents_tgid(args[0]) or not represents_tgid(args[1]):
-                return await utils.answer(message, self.strings("no_id"))
+                return await utils.answer(message, self._strings("no_id", utils.get_chat_id(message)))
             gl.append(chatid_str)
             sets.setdefault(chatid_str, {})
             sets[chatid_str].setdefault("logchannel", args[1])
             self.set("gl", gl)
             self.set("gl_sets", sets)
-            return await utils.answer(message, self.strings("gl_start"))
+            return await utils.answer(message, self._strings("gl_start", utils.get_chat_id(message)))
         if len(args) == 2:
             if not represents_tgid(args[0]) or not represents_tgid(args[1]):
-                return await utils.answer(message, self.strings("no_id"))
+                return await utils.answer(message, self._strings("no_id", utils.get_chat_id(message)))
             sets[chatid_str].update({"logchannel": args[1]})
         elif args[0] != "settings" and chatid_str in gl:
             return
         self.set("gl", gl)
         self.set("gl_sets", sets)
-        return await utils.answer(message, self.strings("gl_settings").format(str(sets[chatid_str])))
+        return await utils.answer(message, self._strings("gl_settings", utils.get_chat_id(message)).format(str(sets[chatid_str])))
 
     async def p__bcu(
         self,
@@ -695,7 +740,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         if bcu_sets[chatid_str].get("ban") is True:
             await self._ban(chat, user, message, UseBot)
         if bcu_sets[chatid_str].get("notify") is True:
-            msgs = await utils.answer(message, self.strings("bcu_triggered", message).format(usertag))
+            msgs = await utils.answer(message, self._strings("bcu_triggered", utils.get_chat_id(message)).format(usertag))
             if bcu_sets[chatid_str].get("deltimer") != "0":
                 DELTIMER = int(bcu_sets[chatid_str].get("deltimer"))
                 await asyncio.sleep(DELTIMER)
@@ -733,7 +778,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 MUTETIMER = bnd_sets[chatid_str].get("mute")
                 await self._mute(chat, user, message, MUTETIMER, UseBot)
             if bnd_sets[chatid_str].get("notify") is True:
-                msgs = await utils.answer(message, self.strings("bnd_triggered").format(usertag, link))
+                msgs = await utils.answer(message, self._strings("bnd_triggered", utils.get_chat_id(message)).format(usertag, link))
                 if bnd_sets[chatid_str].get("deltimer") != "0":
                     DELTIMER = int(bnd_sets[chatid_str].get("deltimer"))
                     await asyncio.sleep(DELTIMER)

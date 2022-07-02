@@ -1,4 +1,4 @@
-__version__ = (0, 1, 15)
+__version__ = (0, 1, 16)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -109,6 +109,35 @@ class ApodiktumDNDMod(loader.Module):
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
+    }
+
+    strings_en = {
+        "afk_message_gone": "{}\n\n<b><u>Gone since:</u></b>\n<code>{}h</code>",
+        "afk_message_nogone": "{}",
+        "approved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> approved in pm.</b>',
+        "args_pmban": "ℹ️ <b>Example usage: </b><code>.pmbanlast 5</code>",
+        "available_statuses": "<b>🦊 Available statuses:</b>\n\n",
+        "banned": ("😊 <b>Hey there •ᴗ•</b>\n<b>i am Unit «SIGMA»<b>, the <b>guardian</b> of this account. You are <b>not approved</b>! "
+                   "You can contact my owner <b>in a groupchat</b>, if you need help.\n<b>I need to ban you in terms of security.</b>"),
+        "banned_log": ('👮 <b>I banned <a href="tg://user?id={}">{}</a>.</b>\n\n<b>{} Contact</b>\n<b>{} Started by you</b>\n<b>{} '
+                       'Active conversation</b>\n\n<b>✊ Actions</b>\n\n<b>{} Reported spam</b>\n<b>{} Deleted dialog</b>\n<b>{} Banned</b>\n\n<b>ℹ️ Message</b>\n<code>{}</code>'),
+        "blocked": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> blocked.</b>',
+        "hello": "🔏 <b>Unit «SIGMA»</b> protects your personal messages from intrusions. It will block everyone, who's trying to invade you.\n\nUse <code>.pmbanlast</code> if you've already been pm-raided.",
+        "no_pchat": "<b>This command is only available in private chats.</b>",
+        "no_reply": "ℹ️ <b>Reply to a message to block the user.</b>",
+        "no_status": "<b>🚫 No status is active.</b>",
+        "pm_reported": "⚠️ <b>You just got reported to spam !</b>",
+        "pzd_with_args": "<b>🚫 Args are incorrect.</b>",
+        "removed": "😶‍🌫️ <b>Removed {} last dialogs!</b>",
+        "removing": "😶‍🌫️ <b>Removing {} last dialogs...</b>",
+        "status_created": "<b>✅ Status {} created.</b>\n<code>{}</code>\nNotify: {}",
+        "status_not_found": "<b>🚫 Status not found.</b>",
+        "status_removed": "<b>✅ Status {} deleted.</b>",
+        "status_set": "<b>✅ Status set\n</b><code>{}</code>\nNotify: {}",
+        "status_unset": "<b>✅ Status removed.</b>",
+        "unapproved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> unapproved in pm.</b>',
+        "unblocked": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> unblocked.</b>',
+        "user_not_specified": "🚫 <b>You haven't specified user.</b>",
     }
 
     strings_ru = {
@@ -281,6 +310,18 @@ class ApodiktumDNDMod(loader.Module):
         self._pt_task.cancel()
         return
 
+    def _strings(self, string: str, chat_id: int = None):
+        if self.lookup("Apo-Translations") and chat_id:
+            forced_translation_db = self.lookup("Apo-Translations").config
+            languages = {"en_chats": self.strings_en, "ru_chats": self.strings_ru}
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        return self.strings(string)
+
     def _approve(self, user: int, reason: str = "unknown"):
         self._whitelist += [user]
         self._whitelist = list(set(self._whitelist))
@@ -370,12 +411,12 @@ class ApodiktumDNDMod(loader.Module):
         """
         n = utils.get_args_raw(message)
         if not n or not n.isdigit():
-            await utils.answer(message, self.strings("args_pmban"))
+            await utils.answer(message, self._strings("args_pmban", utils.get_chat_id(message)))
             return
 
         n = int(n)
 
-        await utils.answer(message, self.strings("removing").format(n))
+        await utils.answer(message, self._strings("removing", utils.get_chat_id(message)).format(n))
 
         dialogs = []
         async for dialog in self._client.iter_dialogs(ignore_pinned=True):
@@ -408,7 +449,7 @@ class ApodiktumDNDMod(loader.Module):
 
             await self._client(DeleteHistoryRequest(peer=d, just_clear=True, max_id=0))
 
-        await utils.answer(message, self.strings("removed").format(n))
+        await utils.answer(message, self._strings("removed", utils.get_chat_id(message)).format(n))
 
     async def allowpmcmd(self, message: Message):
         """
@@ -428,7 +469,7 @@ class ApodiktumDNDMod(loader.Module):
         if not user:
             chat = await message.get_chat()
             if not isinstance(chat, User):
-                await utils.answer(message, self.strings("user_not_specified"))
+                await utils.answer(message, self._strings("user_not_specified", utils.get_chat_id(message)))
                 return
 
             user = chat
@@ -456,7 +497,7 @@ class ApodiktumDNDMod(loader.Module):
         if not user:
             chat = await message.get_chat()
             if not isinstance(chat, User):
-                await utils.answer(message, self.strings("user_not_specified"))
+                await utils.answer(message, self._strings("user_not_specified", utils.get_chat_id(message)))
                 return
 
             user = chat
@@ -471,12 +512,12 @@ class ApodiktumDNDMod(loader.Module):
         <reply> - Report the user to spam. Use only in PM.
         """
         if not message.is_private:
-            await utils.answer(message, self.strings("no_pchat"))
+            await utils.answer(message, self._strings("no_pchat", utils.get_chat_id(message)))
             return
         chat_id = utils.get_chat_id(message)
         user = await self._client.get_entity(chat_id)
         await message.client(ReportSpamRequest(peer=user.id))
-        await utils.answer(message, self.strings("pm_reported"))
+        await utils.answer(message, self._strings("pm_reported", utils.get_chat_id(message)))
 
     async def blockcmd(self, message: Message):
         """
@@ -485,10 +526,10 @@ class ApodiktumDNDMod(loader.Module):
         user = await utils.get_target(message)
         user = await self._client.get_entity(user)
         if not user:
-            await utils.answer(message, self.strings("no_reply"))
+            await utils.answer(message, self._strings("no_reply", utils.get_chat_id(message)))
             return
         await message.client(BlockRequest(user.id))
-        await utils.answer(message, self.strings("blocked").format(user.id, get_display_name(user)))
+        await utils.answer(message, self._strings("blocked", utils.get_chat_id(message)).format(user.id, get_display_name(user)))
 
     async def unblockcmd(self, message: Message):
         """
@@ -497,10 +538,10 @@ class ApodiktumDNDMod(loader.Module):
         user = await utils.get_target(message)
         user = await self._client.get_entity(user)
         if not user:
-            await utils.answer(message, self.strings("no_reply"))
+            await utils.answer(message, self._strings("no_reply", utils.get_chat_id(message)))
             return
         await message.client(UnblockRequest(user.id))
-        await utils.answer(message, self.strings("unblocked").format(user.id, get_display_name(user)))
+        await utils.answer(message, self._strings("unblocked", utils.get_chat_id(message)).format(user.id, get_display_name(user)))
 
     async def statuscmd(self, message: Message):
         """
@@ -508,7 +549,7 @@ class ApodiktumDNDMod(loader.Module):
         """
         args = utils.get_args_raw(message)
         if args not in self.get("texts", {}):
-            await utils.answer(message, self.strings("status_not_found"))
+            await utils.answer(message, self._strings("status_not_found", utils.get_chat_id(message)))
             await asyncio.sleep(3)
             await message.delete()
             return
@@ -532,7 +573,7 @@ class ApodiktumDNDMod(loader.Module):
         args = utils.get_args_raw(message)
         args = args.split(" ", 2)
         if len(args) < 3:
-            await utils.answer(message, self.strings("pzd_with_args"))
+            await utils.answer(message, self._strings("pzd_with_args", utils.get_chat_id(message)))
             await asyncio.sleep(3)
             await message.delete()
             return
@@ -560,7 +601,7 @@ class ApodiktumDNDMod(loader.Module):
         """
         args = utils.get_args_raw(message)
         if args not in self.get("texts", {}):
-            await utils.answer(message, self.strings("status_not_found"))
+            await utils.answer(message, self._strings("status_not_found", utils.get_chat_id(message)))
             await asyncio.sleep(3)
             await message.delete()
             return
@@ -582,7 +623,7 @@ class ApodiktumDNDMod(loader.Module):
         Remove status.
         """
         if not self.get("status", False):
-            await utils.answer(message, self.strings("no_status"))
+            await utils.answer(message, self._strings("no_status", utils.get_chat_id(message)))
             await asyncio.sleep(3)
             await message.delete()
             return
@@ -599,7 +640,7 @@ class ApodiktumDNDMod(loader.Module):
 
         self._sent_messages = []
 
-        await utils.answer(message, self.strings("status_unset"))
+        await utils.answer(message, self._strings("status_unset", utils.get_chat_id(message)))
 
     async def statusescmd(self, message: Message):
         """

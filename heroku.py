@@ -1,4 +1,4 @@
-__version__ = (0, 0, 18)
+__version__ = (0, 0, 20)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -76,6 +76,37 @@ class ApodiktumHerokuManagerMod(loader.Module):
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
+    }
+
+    strings_en = {
+        "args_error": "<b>[🦸🏼‍♂️ Hero!ku]</b> Too many args are given.",
+        "dyno_usage": ("<b><i><u>Dyno Usage</u></i></b>:\n"
+                       "\nDyno usage for <code>Hikka Userbot</code>:\n"
+                       "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]\n"
+                       "Dyno hours quota remaining this month:\n"
+                       "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]"),
+        "get_usage": "<b>[🦸🏼‍♂️ Hero!ku]</b> Getting Dyno usage...</b>",
+        "get_var": "<b>[🦸🏼‍♂️ Hero!ku]</b> Getting variable...</b>",
+        "no_args": "<b>[🦸🏼‍♂️ Hero!ku]</b> No args are given...</b>",
+        "no_force": "<b>[🦸🏼‍♂️ Hero!ku]</b> You must use '--force' but this will leak credentials!</b>",
+        "restarted": "<b>[🦸🏼‍♂️ Hero!ku]</b> Restart finished.",
+        "set_var": "<b>[🦸🏼‍♂️ Hero!ku]</b> Setting variable...</b>",
+        "usage_error": ("<b>Error:</b> An error occured.\n"
+                        "<code>{}</code>"),
+        "var_added": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Variable successfully added:\n"
+                      "<code>{}</code> = <code>{}</code>\n\n"
+                      "<b>The Heroku Dyno will now be restarted.</b>"),
+        "var_changed": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Variable successfully changed to:\n"
+                        "<code>{}</code> = <code>{}</code>\n\n"
+                        "<b>The Heroku Dyno will now be restarted.</b>"),
+        "var_deleted": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Variable successfully deleted:\n"
+                        "<code>{}</code>\n\n"
+                        "<b>The Heroku Dyno will now be restarted.</b>"),
+        "var_not_exists": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Variable does not exist:\n"
+                           "<code>{}</code>"),
+        "var_settings": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Current Config:\n"
+                         "<code>{}</code> = <code>{}</code>"),
+        "wrong_platform": "[🦸🏼‍♂️ Hero!ku] This module only works on Heroku. {} is not supported.",
     }
 
     strings_ru = {
@@ -162,12 +193,24 @@ class ApodiktumHerokuManagerMod(loader.Module):
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
+    def _strings(self, string: str, chat_id: int = None):
+        if self.lookup("Apo-Translations") and chat_id:
+            forced_translation_db = self.lookup("Apo-Translations").config
+            languages = {"en_chats": self.strings_en, "ru_chats": self.strings_ru}
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        return self.strings(string)
+
     async def herousagecmd(self, message: Message):
         """
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Get Heroku Dyno Usage.
         """
-        msg = await utils.answer(message, self.strings("get_usage"))
+        msg = await utils.answer(message, self._strings("get_usage", utils.get_chat_id(message)))
         useragent = ("Mozilla/5.0 (Linux; Android 10; SM-G975F)"
                      "AppleWebKit/537.36 (KHTML, like Gecko)"
                      "Chrome/80.0.3987.149 Mobile Safari/537.36"
@@ -180,13 +223,14 @@ class ApodiktumHerokuManagerMod(loader.Module):
         path = f"/accounts/{self._herokuid}/actions/get-quota"
         r = requests.get(self._heroku_api + path, headers=headers)
         if r.status_code != 200:
-            return await utils.answer(message, self.strings("usage_error").format(str(r.reason)))
+            return await utils.answer(message, self._strings("usage_error", utils.get_chat_id(message)).format(str(r.reason)))
         result = r.json()
         quota = result["account_quota"]
         quota_used = result["quota_used"]
 
         # Used
         remaining_quota = quota - quota_used
+        app_quota_used = 0
         percentage = math.floor(remaining_quota / quota * 100)
         minutes_remaining = remaining_quota / 60
         hours = math.floor(minutes_remaining / 60)
@@ -222,7 +266,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             heroku_var = self._heroku_app.config()
-            msg = await utils.answer(message, self.strings("set_var"))
+            msg = await utils.answer(message, self._strings("set_var", utils.get_chat_id(message)))
             await asyncio.sleep(1.5)
             if args[0] in heroku_var:
                 msg = await utils.answer(msg, self.strings("var_changed").format(args[0], " ".join(args[1:])))
@@ -230,7 +274,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
                 msg = await utils.answer(msg, self.strings("var_added").format(args[0], " ".join(args[1:])))
             heroku_var[args[0]] = " ".join(args[1:])
             return
-        return await utils.answer(message, self.strings("no_var"))
+        return await utils.answer(message, self._strings("no_var", utils.get_chat_id(message)))
 
     @loader.owner
     async def herogetcmd(self, message: Message):
@@ -242,14 +286,14 @@ class ApodiktumHerokuManagerMod(loader.Module):
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             if len(args) > 1:
-                return await utils.answer(message, self.strings("args_error"))
+                return await utils.answer(message, self._strings("args_error", utils.get_chat_id(message)))
             heroku_var = self._heroku_app.config()
-            msg = await utils.answer(message, self.strings("get_var"))
+            msg = await utils.answer(message, self._strings("get_var", utils.get_chat_id(message)))
             await asyncio.sleep(1.5)
             if args[0] in heroku_var:
                 return await utils.answer(msg, self.strings("var_settings").format(args[0], heroku_var[args[0]]))
             return await utils.answer(msg, self.strings("var_not_exists").format(args[0]))
-        return await utils.answer(message, self.strings("no_var"))
+        return await utils.answer(message, self._strings("no_var", utils.get_chat_id(message)))
 
     @loader.owner
     async def herogetallcmd(self, message: Message):
@@ -262,9 +306,9 @@ class ApodiktumHerokuManagerMod(loader.Module):
         args = str(args).split()
         if args and args[0] == "--force":
             if len(args) > 1:
-                return await utils.answer(message, self.strings("args_error"))
+                return await utils.answer(message, self._strings("args_error", utils.get_chat_id(message)))
             heroku_var = self._heroku_app.config()
-            msg = await utils.answer(message, self.strings("get_var"))
+            msg = await utils.answer(message, self._strings("get_var", utils.get_chat_id(message)))
             await asyncio.sleep(1.5)
             cmpl_cnfg = ""
             for x in heroku_var.to_dict():
@@ -275,7 +319,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
                     + "</code>\n\n"
                 )
             return await utils.answer(msg, cmpl_cnfg)
-        return await utils.answer(message, self.strings("no_force"))
+        return await utils.answer(message, self._strings("no_force", utils.get_chat_id(message)))
 
     @loader.owner
     async def herodelcmd(self, message: Message):
@@ -287,16 +331,16 @@ class ApodiktumHerokuManagerMod(loader.Module):
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             if len(args) > 1:
-                return await utils.answer(message, self.strings("args_error"))
+                return await utils.answer(message, self._strings("args_error", utils.get_chat_id(message)))
             heroku_var = self._heroku_app.config()
-            msg = await utils.answer(message, self.strings("get_var"))
+            msg = await utils.answer(message, self._strings("get_var", utils.get_chat_id(message)))
             await asyncio.sleep(1.5)
             if args[0] in heroku_var:
                 msg = await utils.answer(msg, self.strings("var_deleted").format(args[0]))
                 del heroku_var[args[0]]
                 return
-            return await utils.answer(message, self.strings("var_not_exists").format(args[0]))
-        return await utils.answer(message, self.strings("no_var"))
+            return await utils.answer(message, self._strings("var_not_exists", utils.get_chat_id(message)).format(args[0]))
+        return await utils.answer(message, self._strings("no_var", utils.get_chat_id(message)))
 
 
 class MigratorClass():

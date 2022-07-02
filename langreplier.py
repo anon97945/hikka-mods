@@ -1,4 +1,4 @@
-__version__ = (0, 1, 1)
+__version__ = (0, 1, 2)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -182,9 +182,9 @@ class ApodiktumLangReplierMod(loader.Module):
             self._fw_protect[user_id] = []
         self._fw_protect[user_id] += [time.time() + 5 * 60]
         if self.config["check_language"] and full_lang:
-            msg = await utils.answer(message, self.config["custom_message"].format(full_lang))
+            msg = await message.reply(self.config["custom_message"].format(full_lang))
         else:
-            msg = await utils.answer(message, self.config["custom_message"].format(alphabet))
+            msg = await message.reply(self.config["custom_message"].format(alphabet))
         await asyncio.sleep(15)
         await msg.delete()
         return

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 14)
+__version__ = (0, 0, 15)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -58,6 +58,11 @@ class ApodiktumSaveMessageMod(loader.Module):
         "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
     }
 
+    strings_en = {
+        "done": "<b>Forward to saved complete.</b>",
+        "invalid_link": "<b>Invalid link.</b>",
+    }
+
     strings_de = {
         "done": "<b>Weiterleitung zu gespeicherten Daten abgeschlossen.</b>",
         "invalid_link": "<b>Ungültiger Link.</b>",
@@ -100,17 +105,29 @@ class ApodiktumSaveMessageMod(loader.Module):
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
+    def _strings(self, string: str, chat_id: int = None):
+        if self.lookup("Apo-Translations") and chat_id:
+            forced_translation_db = self.lookup("Apo-Translations").config
+            languages = {"en_chats": self.strings_en, "de_chats": self.strings_de, "ru_chats": self.strings_ru}
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        return self.strings(string)
+
     async def smcmd(self, message: Message):
         """<messagelink> to forward message/media to SavedMessages."""
         args = utils.get_args_raw(message).lower()
         if not args:
             return
         if not get_ids(args):
-            return await utils.answer(message, self.strings("invalid_link"))
+            return await utils.answer(message, self._strings("invalid_link", utils.get_chat_id(message)))
         channel_id, msg_id = get_ids(args)
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
         msgs = await message.client.send_message(self._id, message=msgs)
-        return await utils.answer(message, self.strings("done"))
+        return await utils.answer(message, self._strings("done", utils.get_chat_id(message)))
 
     async def smhcmd(self, message: Message):
         """<messagelink> to forward message/media to current chat."""
@@ -118,7 +135,7 @@ class ApodiktumSaveMessageMod(loader.Module):
         if not args:
             return
         if not get_ids(args):
-            return await utils.answer(message, self.strings("invalid_link"))
+            return await utils.answer(message, self._strings("invalid_link", utils.get_chat_id(message)))
         channel_id, msg_id = get_ids(args)
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
         msgs = await message.client.send_message(utils.get_chat_id(message), message=msgs)

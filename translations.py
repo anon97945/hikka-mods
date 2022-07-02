@@ -1,4 +1,4 @@
-__version__ = (0, 0, 14)
+__version__ = (0, 1, 0)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,57 +17,75 @@ __version__ = (0, 0, 14)
 
 # scope: hikka_only
 # scope: hikka_min 1.1.28
-# requires: pygments requests
 
 import logging
-import pygments
-import os
 
 import collections  # for MigratorClass
 import hashlib  # for MigratorClass
 import copy     # for MigratorClass
 
-from .. import loader, utils
 from telethon.tl.types import Message
-from io import BytesIO
-from requests import get
-from pygments.lexers import Python3Lexer
-from pygments.formatters import ImageFormatter
 
+from .. import loader, utils
 
 logger = logging.getLogger(__name__)
 
 
-async def _filefromurl(message):
-    urll = message.raw_text.split()
-    for url in urll:
-        if "://" in url:
-            text = get(url).text
-            file = BytesIO(bytes(text, "utf-8"))
-            file.name = url.split("/")[-1]
-            return file, file.name
-    return False
-
-
 @loader.tds
-class ApodiktumPyPNGMod(loader.Module):
+class ApodiktumTranslationsMod(loader.Module):
     """
-    Converts link/file from Py to PNG.
+    This module handles the db for supported modules to force languages in chats.
+
+    For Devs:
+    If you want to implement it into your modules or want to have more languages, you can ask me at @apodiktum_modules
     """
+
     strings = {
-        "name": "Apo PyPNG",
+        "name": "Apo-Translations",
         "developer": "@anon97945",
-        "no_file": "<b>Reply to file.py or url</b>",
-        "no_url": "<b>No url in reply found.</b>",
-        "py2png": "<b>Converting Py to PNG</b>",
-        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
-        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
-        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
+        "_cfg_translation_chats": "Define Chats where the translation is forced.",
+    }
+
+    strings_de = {
+        "_cfg_translation_chats": "Definiere Chats, wo die Übersetzung erzwungen wird.",
+        "_cls_doc": ("Dieses Modul verwaltet die Datenbank für unterstützte Module, um Sprachen in Chats zu erzwingen."
+                     "Für Entwickler:"
+                     "Wenn ihr es in eure Module implementieren wollt oder mehr Sprachen haben wollt, könnt ihr mich unter @apodiktum_modules fragen."),
+        "_cmd_doc_ctranslations": "Dadurch wird die Konfiguration für das Modul geöffnet.",
+    }
+
+    strings_ru = {
+        "_cfg_translation_chats": "Задать чаты, где применяется перевод.",
+        "_cls_doc": ("Этот модуль обрабатывает db для поддерживаемых модулей для принудительного использования языков в чатах."
+                     "Для разработчиков:"
+                     "Если вы хотите внедрить его в свои модули или хотите иметь больше языков, вы можете спросить меня в @apodiktum_modules"),
+        "_cmd_doc_ctranslations": "Это откроет конфиг для модуля.",
     }
 
     def __init__(self):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
+            loader.ConfigValue(
+                "de_chats",
+                doc=lambda: self.strings("_cfg_translation_chats"),
+                validator=loader.validators.Series(
+                    loader.validators.TelegramID(),
+                ),
+            ),  # for TranslatorStrings
+            loader.ConfigValue(
+                "en_chats",
+                doc=lambda: self.strings("_cfg_translation_chats"),
+                validator=loader.validators.Series(
+                    loader.validators.TelegramID(),
+                ),
+            ),  # for TranslatorStrings
+            loader.ConfigValue(
+                "ru_chats",
+                doc=lambda: self.strings("_cfg_translation_chats"),
+                validator=loader.validators.Series(
+                    loader.validators.TelegramID(),
+                ),
+            ),  # for TranslatorStrings
             loader.ConfigValue(
                 "auto_migrate",
                 True,
@@ -89,57 +107,22 @@ class ApodiktumPyPNGMod(loader.Module):
         )
 
     async def client_ready(self, client, db):
-        self.client = client
+        self._db = db
+        self._client = client
         # MigratorClass
         self._migrator = MigratorClass()  # MigratorClass define
         await self._migrator.init(client, db, self, self.__class__.__name__, self.strings("name"), self.config["auto_migrate_log"], self.config["auto_migrate_debug"])  # MigratorClass Initiate
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
-    def _strings(self, string: str, chat_id: int = None):
-        if self.lookup("Apo-Translations") and chat_id:
-            forced_translation_db = self.lookup("Apo-Translations").config
-            languages = {}
-            for lang, strings in languages.items():
-                if chat_id in forced_translation_db[lang]:
-                    if string in strings:
-                        return strings[string]
-                    logger.debug(f"String: {string} not found in\n{strings}")
-                    break
-        return self.strings(string)
-
-    async def get_media(self, message: Message):
-        file = (
-            BytesIO((await self.fast_download(message.media)).getvalue())
+    async def ctranslationscmd(self, message: Message):
+        """
+        This will open the config for the module.
+        """
+        name = self.strings("name")
+        await self.allmodules.commands["config"](
+            await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
-        file.seek(0)
-        return file
-
-    async def pypngcmd(self, message: Message):
-        """
-        reply to url or py file
-        """
-        await utils.answer(message, self._strings("py2png", utils.get_chat_id(message)))
-        reply = await message.get_reply_message()
-        file = BytesIO()
-        pngfile = BytesIO()
-        if not reply:
-            return await utils.answer(message, self._strings("no_file", utils.get_chat_id(message)))
-        if reply.file:
-            file = await self.get_media(reply)
-            file.name = reply.file.name
-        elif res := await _filefromurl(reply):
-            file, file.name = res
-        else:
-            return await utils.answer(message, self._strings("no_url", utils.get_chat_id(message)))
-        file.seek(0)
-        byte_str = file.read()
-        text = byte_str.decode("utf-8")
-        pygments.highlight(text, Python3Lexer(), ImageFormatter(font_name="DejaVu Sans Mono", line_numbers=True), pngfile)
-        pngfile.name = f"{os.path.splitext(file.name)[0]}.png"
-        pngfile.seek(0)
-        await message.client.send_file(message.to_id, pngfile, force_document=True, reply_to=reply)
-        await message.delete()
 
 
 class MigratorClass():

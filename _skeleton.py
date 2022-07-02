@@ -1,4 +1,4 @@
-__version__ = (0, 0, 2)
+__version__ = (0, 0, 5)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -40,7 +40,7 @@ def represents_int(s: str) -> bool:
 
 
 @loader.tds
-class ApodiktumSkeletonMod(loader.Module):
+class ApodiktumTranslatorHandlerMod(loader.Module):
     """
     This is a skeleton module.
     """
@@ -54,6 +54,7 @@ class ApodiktumSkeletonMod(loader.Module):
         "_cfg_skel_bool": "This is a skeleton boolean config.",
         "_cfg_skel_series": "This is a skeleton series config.",
         "_cfg_skel_union": "This is a skeleton union config.",
+        "_cfg_translation_chats": "Define Chats where the translation is forced.",
         "_cmd_skeleton": "This is a skeleton command.",
         "no_args": "No args are given...",
         "no_int": "Your input was no Integer.",
@@ -61,17 +62,39 @@ class ApodiktumSkeletonMod(loader.Module):
         "skeleton_msg": "This is a skeleton message.",
     }
 
+    strings_en = {
+        "no_args": "No args are given...",
+        "no_int": "Your input was no Integer.",
+        "skeleton_argmsg": "This is a skeleton message with args.\n{}",
+        "skeleton_msg": "This is a skeleton message.",
+    }
+
+    strings_de = {
+        "_cfg_skel_bool": "Dies ist ein Skeleton Boolean Config.",
+        "_cfg_skel_series": "Dies ist ein Skeleton Series Config.",
+        "_cfg_skel_union": "Dies ist ein Skeleton Union Config.",
+        "_cfg_translation_chats": "Definiere Chats, wo die Übersetzung erzwungen wird.",
+        "_cmd_doc_cskeleton": "Dadurch wird die Konfiguration für das Modul geöffnet.",
+        "_cmd_doc_skeleton": "Dies ist ein Skeleton Command.",
+        "_cmd_doc_skeletonargs": "Dies ist ein Skeleton Command mit Argumenten.",
+        "no_args": "Keine Argumente angegeben...",
+        "no_int": "Dein Eingabe war keine Integer.",
+        "skeleton_argmsg": "Dies ist ein Skeleton Nachricht mit Argumenten.\n{}",
+        "skeleton_msg": "Dies ist ein Skeleton Nachricht.",
+    }
+
     strings_ru = {
         "_cfg_skel_bool": "Это скелетная булевая конфигурация.",
         "_cfg_skel_series": "Это скелетная конфигурация с сериями.",
         "_cfg_skel_union": "Это скелетная конфигурация с объединением.",
+        "_cfg_translation_chats": "Задать чаты, где применяется перевод.",
         "_cls_doc": "Это скелетный модуль.",
-        "_cmd_doc_skeleton": "Это откроет конфиг для модуля.",
-        "_cmd_skeletoargs": "Это команда с аргументами.\n{}",
-        "_cmd_skeleton": "Это скелетная команда.",
+        "_cmd_doc_cskeleton": "Это откроет конфиг для модуля.",
+        "_cmd_doc_skeleton": "Это скелетная команда.",
+        "_cmd_doc_skeletonargs": "Это скелетное сообщение с аргументами.",
         "no_args": "ргументы не указаны...",
         "no_int": "Ваш ввод не является целочисленным типом (int)",
-        "skeleton_argmsg": "Это скелетное сообщение с аргументами.",
+        "skeleton_argmsg": "Это команда с аргументами.\n{}",
         "skeleton_msg": "Это скелетное сообщение.",
     }
 
@@ -136,6 +159,18 @@ class ApodiktumSkeletonMod(loader.Module):
     async def on_dlmod(self, client, _):
         return
 
+    def _strings(self, string: str, chat_id: int = None):
+        if self.lookup("Apo-Translations") and chat_id:
+            forced_translation_db = self.lookup("Apo-Translations").config
+            languages = {"en_chats": self.strings_en, "de_chats": self.strings_de, "ru_chats": self.strings_ru}
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        return self.strings(string)
+
     async def cskeletoncmd(self, message: Message):
         """
         This will open the config for the module.
@@ -149,7 +184,7 @@ class ApodiktumSkeletonMod(loader.Module):
         """
         This is a skeleton command.
         """
-        await utils.answer(message, self.strings("skeleton_msg"))
+        await utils.answer(message, self._strings("skeleton_msg", utils.get_chat_id(message)))
         return
 
     async def skeletoargscmd(self, message):
@@ -158,12 +193,12 @@ class ApodiktumSkeletonMod(loader.Module):
         """
         args = utils.get_args_raw(message)
         if not args:
-            await utils.answer(message, self.strings("no_args"))
+            await utils.answer(message, self._strings("no_args", utils.get_chat_id(message)))
             return
         if not represents_int(args[0]):
-            await utils.answer(message, self.strings("no_int"))
+            await utils.answer(message, self._strings("no_int", utils.get_chat_id(message)))
             return
-        await utils.answer(message, self.strings("skeleton_argmsg").format(args))
+        await utils.answer(message, self._strings("skeleton_argmsg", utils.get_chat_id(message)).format(args))
 
     async def watcher(self, message):
         """

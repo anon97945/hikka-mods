@@ -1,4 +1,4 @@
-__version__ = (0, 1, 73)
+__version__ = (0, 1, 77)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -120,6 +120,15 @@ class ApodiktumTTSMod(loader.Module):
         "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
     }
 
+    strings_en = {
+        "needspeed": "You need to provide a speed value between 0.25 and 3.0.",
+        "needvoice": "<b>[TTS]</b> This command needs a voicemessage.",
+        "no_reply": "<b>[TTS]</b> You need to reply to a voicemessage.",
+        "no_speed": "<b>[TTS]</b> Your input was an unsupported speed value.",
+        "processing": "<b>[TTS]</b> Message is being processed ...",
+        "tts_needs_text": "<b>[TTS]</b> I need text to convert to speech!",
+    }
+
     strings_de = {
         "_cfg_tts_lang": "Stellen Sie hier Ihren Sprachcode für TTS ein.",
         "_cfg_tts_speed": "Stellen Sie die gewünschte Sprechgeschwindigkeit ein.",
@@ -187,6 +196,18 @@ class ApodiktumTTSMod(loader.Module):
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
+    def _strings(self, string: str, chat_id: int = None):
+        if self.lookup("Apo-Translations") and chat_id:
+            forced_translation_db = self.lookup("Apo-Translations").config
+            languages = {"en_chats": self.strings_en, "de_chats": self.strings_de, "ru_chats": self.strings_ru}
+            for lang, strings in languages.items():
+                if chat_id in forced_translation_db[lang]:
+                    if string in strings:
+                        return strings[string]
+                    logger.debug(f"String: {string} not found in\n{strings}")
+                    break
+        return self.strings(string)
+
     async def cttscmd(self, message: Message):
         """
         This will open the config for the module.
@@ -204,8 +225,8 @@ class ApodiktumTTSMod(loader.Module):
             if message.is_reply:
                 text = (await message.get_reply_message()).message
             else:
-                return await utils.answer(message, self.strings("tts_needs_text"))
-        message = await utils.answer(message, self.strings("processing"))
+                return await utils.answer(message, self._strings("tts_needs_text", utils.get_chat_id(message)))
+        message = await utils.answer(message, self._strings("processing", utils.get_chat_id(message)))
         tts = await utils.run_sync(gTTS, text, lang=self.config["tts_lang"])
         voice = BytesIO()
         await utils.run_sync(tts.write_to_fp, voice)
@@ -229,16 +250,16 @@ class ApodiktumTTSMod(loader.Module):
         """Speed up voice by x"""
         speed = utils.get_args_raw(message)
         if not message.is_reply:
-            return await utils.answer(message, self.strings("no_reply"))
+            return await utils.answer(message, self._strings("no_reply", utils.get_chat_id(message)))
         replymsg = await message.get_reply_message()
         if not replymsg.voice:
-            message = await utils.answer(message, self.strings("needvoice"))
+            message = await utils.answer(message, self._strings("needvoice", utils.get_chat_id(message)))
             return
         if len(speed) == 0:
-            return await utils.answer(message, self.strings("needspeed"))
+            return await utils.answer(message, self._strings("needspeed", utils.get_chat_id(message)))
         if not represents_speed(speed):
-            return await utils.answer(message, self.strings("no_speed"))
-        message = await utils.answer(message, self.strings("processing"))
+            return await utils.answer(message, self._strings("no_speed", utils.get_chat_id(message)))
+        message = await utils.answer(message, self._strings("processing", utils.get_chat_id(message)))
         ext = replymsg.file.ext
         voice = BytesIO()
         voice.name = replymsg.file.name
