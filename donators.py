@@ -1,4 +1,4 @@
-__version__ = (0, 0, 6)
+__version__ = (0, 0, 7)
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
@@ -39,13 +39,16 @@ class ApodiktumDonatorsMod(loader.Module):
     strings = {
         "name": "Apo Donators",
         "developer": "@anon97945",
+        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
+        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
+        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_cst_channel": "The Channel ID where the donations should be saved.",
         "_cfg_cst_custom_message": "The message send to the user after the subscription is added. Use <br> for new line.",
-        "_cfg_cst_kickchannel": "The channel ids to kick the user from after the subscription",
+        "_cfg_cst_kickchannel": "The channel ids to kick the user from after the subscription.",
         "_cfg_cst_monthlyamount": "The monthly cost of the subscription.",
+        "_cfg_cst_subscription_gift": "The gift to send to the user after the subscription. Will be attached to custom_message. Use <br> for new line.",
         "_cfg_doc_log_kick": "Logs successful kicks from the chats.",
         "_log_doc_kicked": "Kicked {} from {}.",
-        "total_amount": "<b><u>Total amount of donations:</u></b>\n{}",
         "amount": "Amount",
         "code": "Code",
         "date": "Date",
@@ -56,12 +59,10 @@ class ApodiktumDonatorsMod(loader.Module):
         "no_channel": "No logchannel set.",
         "no_reply": "You didn't reply to a message.",
         "rank": "Rank",
+        "total_amount": "<b><u>Total amount of donations:</u></b>\n{}",
         "uname": "Name",
         "userid": "UserID",
         "username": "Username",
-        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
-        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
-        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
     }
 
     strings_de = {
@@ -69,9 +70,9 @@ class ApodiktumDonatorsMod(loader.Module):
         "_cfg_cst_custom_message": "Die Nachricht, die an den Benutzer gesendet wird, nachdem das Abonnement hinzugefügt wurde. Benutze <br> für einen Zeilenumbruch.",
         "_cfg_cst_kickchannel": "Die Kanal-IDs, aus denen der Benutzer nach dem Abonnement gekickt werden soll.",
         "_cfg_cst_monthlyamount": "Die monatlichen Kosten des Abonnements.",
+        "_cfg_cst_subscription_gift": "Das Geschenk, das an den Benutzer gesendet wird, nachdem das Abonnement hinzugefügt wurde. Wird an custom_message angehängt. Benutze <br> für einen Zeilenumbruch.",
         "_log_doc_kicked": "{} von {} gekickt.",
         "_log_doc_log_kicks": "Protokolliert die erfolgreichen Kicks aus den Chats.",
-        "total_amount": "<b><u>Gesamtbetrag der Spenden:</u></b>\n{}",
         "amount": "Betrag",
         "code": "Code",
         "date": "Datum",
@@ -82,6 +83,7 @@ class ApodiktumDonatorsMod(loader.Module):
         "no_channel": "Kein Protokollkanal gesetzt.",
         "no_reply": "Du hast nicht auf eine Nachricht geantwortet.",
         "rank": "Rang",
+        "total_amount": "<b><u>Gesamtbetrag der Spenden:</u></b>\n{}",
         "uname": "Name",
         "userid": "BenutzerID",
         "username": "Benutzername",
@@ -99,19 +101,6 @@ class ApodiktumDonatorsMod(loader.Module):
                 ),
             ),
             loader.ConfigValue(
-                "kick_channel",
-                doc=lambda: self.strings("_cfg_cst_kickchannel"),
-                validator=loader.validators.Series(
-                    validator=loader.validators.TelegramID()
-                ),
-            ),
-            loader.ConfigValue(
-                "monthly_amount",
-                10,
-                doc=lambda: self.strings("_cfg_cst_monthlyamount"),
-                validator=loader.validators.Integer(minimum=1)
-            ),
-            loader.ConfigValue(
                 "custom_message",
                 ["Thank you very much for your donation! 🎉"],
                 doc=lambda: self.strings("_cfg_cst_custom_message"),
@@ -120,10 +109,32 @@ class ApodiktumDonatorsMod(loader.Module):
                 ),
             ),
             loader.ConfigValue(
+                "kick_channel",
+                doc=lambda: self.strings("_cfg_cst_kickchannel"),
+                validator=loader.validators.Series(
+                    validator=loader.validators.TelegramID()
+                ),
+            ),
+            loader.ConfigValue(
                 "log_kicks",
                 True,
                 doc=lambda: self.strings("_cfg_doc_log_kick"),
                 validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
+                "monthly_amount",
+                10,
+                doc=lambda: self.strings("_cfg_cst_monthlyamount"),
+                validator=loader.validators.Integer(minimum=1)
+            ),
+            loader.ConfigValue(
+                "subscription_gift",
+                doc=lambda: self.strings("_cfg_cst_subscription_gift"),
+                validator=loader.validators.Hidden(
+                    validator=loader.validators.Series(
+                        validator=loader.validators.String()
+                    ),
+                ),
             ),
             loader.ConfigValue(
                 "auto_migrate",
@@ -230,6 +241,8 @@ class ApodiktumDonatorsMod(loader.Module):
         )
         if self.config["custom_message"]:
             custom_msg = " ".join(self.config["custom_message"])
+            if self.config["subscription_gift"]:
+                custom_msg += " ".join(self.config["subscription_gift"])
             custom_msg = custom_msg.replace("<br>", "\n")
             await utils.answer(message, custom_msg)
         else:
