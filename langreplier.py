@@ -1,4 +1,4 @@
-__version__ = (0, 1, 2)
+__version__ = (0, 1, 3)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -128,7 +128,10 @@ class ApodiktumLangReplierMod(loader.Module):
     async def _check_lang(self, message):
         text = message.raw_text
         lang_code = (await utils.run_sync(self._tr.detect, text)).lang
-        full_lang = googletrans.LANGUAGES[lang_code]
+        if lang_code in googletrans.LANGUAGES:
+            full_lang = googletrans.LANGUAGES[lang_code]
+        else:
+            full_lang = lang_code
         return (True, None) if lang_code in self.config["lang_codes"] else (False, full_lang)
 
     async def clangrepliercmd(self, message: Message):
@@ -141,7 +144,6 @@ class ApodiktumLangReplierMod(loader.Module):
         )
 
     async def watcher(self, message):
-        respond = False
         full_lang = ""
         if (
             not isinstance(message, Message)
@@ -159,13 +161,13 @@ class ApodiktumLangReplierMod(loader.Module):
         ):
             return
         allowed_alphabet, alphabet, detected_alphabet = self._is_alphabet(message)
-        if not allowed_alphabet:
-            respond = True
+        respond = not allowed_alphabet
         if (
             self.config["check_language"]
             and len(message.raw_text.split()) >= 4
             and len(message.raw_text) >= 12
             and detected_alphabet
+            and not respond
         ):
             allowed_lang, full_lang = await self._check_lang(message)
             if not allowed_lang:
