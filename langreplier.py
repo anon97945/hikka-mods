@@ -221,6 +221,7 @@ class ApodiktumLangReplierMod(loader.Module):
         await msg.delete()
         return
 
+
 class MigratorClass():
     """
     # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀

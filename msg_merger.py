@@ -19,7 +19,7 @@ __version__ = (0, 0, 5)
 # scope: hikka_min 1.1.28
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 import collections  # for MigratorClass
 import hashlib  # for MigratorClass
