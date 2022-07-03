@@ -1,4 +1,4 @@
-__version__ = (0, 0, 56)
+__version__ = (0, 0, 57)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -45,20 +45,22 @@ class ApodiktumGTranslateMod(loader.Module):
     strings = {
         "name": "Apo GoogleTranslator",
         "developer": "@anon97945",
+        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
+        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
+        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_lang_msg": "Language to translate to by default.",
         "_cfg_vodkatr_msg": "If `RU` should be displayed as `Vodka`.",
         "invalid_text": "Invalid text to translate",
         "split_error": "Python split() error, if there is -> in the text, it must split!",
         "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
-        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
-        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
-        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
+        "translating": "Translating...",
     }
 
     strings_en = {
         "invalid_text": "Invalid text to translate",
         "split_error": "Python split() error, if there is -> in the text, it must split!",
         "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
+        "translating": "Translating...",
     }
 
     strings_de = {
@@ -68,6 +70,7 @@ class ApodiktumGTranslateMod(loader.Module):
         "invalid_text": "Ungültiger Text zum Übersetzen.",
         "split_error": "Python split() error, wenn -> im Text steht, muss es gesplittet werden!",
         "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
+        "translating": "Übersetze...",
     }
 
     strings_ru = {
@@ -77,6 +80,7 @@ class ApodiktumGTranslateMod(loader.Module):
         "invalid_text": "Неправильный текст для перевода",
         "split_error": "Ошибка в функции Python – split(). Если в тексте есть ->, то это должно быть разделено.",
         "translated": "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code> ]</b>\n<code>{output}</code>",
+        "translating": "Переводим...",
     }
 
     def __init__(self):
@@ -172,6 +176,7 @@ class ApodiktumGTranslateMod(loader.Module):
         if args[1] == "":
             args[1] = self.config["DEFAULT_LANG"]
         args[0] = args[0].lower()
+        await utils.answer(message, self._strings("translating", utils.get_chat_id(message)))
         translated = (await utils.run_sync(self.tr.translate, text, dest=args[1], src=args[0])).text
         ret = self._strings("translated", utils.get_chat_id(message))
         if self.config["vodka_easteregg"]:
