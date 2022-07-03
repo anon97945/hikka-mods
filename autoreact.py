@@ -1,4 +1,4 @@
-__version__ = (0, 1, 13)
+__version__ = (0, 1, 14)
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
@@ -44,7 +44,7 @@ class ApodiktumAutoReactMod(loader.Module):
         "name": "Apo AutoReact",
         "developer": "@anon97945",
         "_cfg_doc_raise_error": "Raise an error if the emoji is not valid.",
-        "_cfg_doc_shuffle": "Shuffles the list of given emojis.",
+        "_cfg_doc_shuffle_chats": "A list of chats where the emoji list is shuffled.",
         "_cfg_doc_delay": "The delay between reactions are send in seconds.",
         "_cfg_doc_delay_chats": "List of delay chats.\nIf the chat is in the list, the delay is used.",
         "_cfg_doc_random_delay_chats": "List of random delay chats.\nIf the chat is in the list, a random delay is used.",
@@ -62,7 +62,7 @@ class ApodiktumAutoReactMod(loader.Module):
 
     strings_ru = {
         "_cfg_doc_raise_error": "Вызывает ошибку, если эмодзи не является действительным.",
-        "_cfg_doc_shuffle": "Перемешивает список заданных эмодзи.",
+        "_cfg_doc_shuffle_chats": "Список чатов, в которых перемешивается список эмодзи.",
         "_cfg_doc_delay": "Задержка между реакциями передается в секундах",
         "_cfg_doc_delay_chats": "Список чатов с задержкой.\nЕсли чат находится в списке, то используется задержка.",
         "_cfg_doc_random_delay_chats": "Список чатов со случайной задержкой.\nЕсли чат находится в списке, используется случайная задержка.",
@@ -131,9 +131,10 @@ class ApodiktumAutoReactMod(loader.Module):
             ),
             loader.ConfigValue(
                 "shuffle_reactions",
-                True,
-                doc=lambda: self.strings("_cfg_doc_shuffle"),
-                validator=loader.validators.Boolean(),
+                doc=lambda: self.strings("_cfg_doc_shuffle_chats"),
+                validator=loader.validators.Series(
+                    loader.validators.TelegramID(),
+                ),
             ),
             loader.ConfigValue(
                 "auto_migrate",
@@ -191,7 +192,7 @@ class ApodiktumAutoReactMod(loader.Module):
             ):
                 if not await self._reactions_chance(reactions_chance, message):
                     return
-                if self.config["shuffle_reactions"]:
+                if utils.get_chat_id(message) in self.config["shuffle_reactions"]:
                     emojis = random.sample(emojis, len(emojis))
                 await self._delay(chatid, userid)
                 for emoji in emojis:
