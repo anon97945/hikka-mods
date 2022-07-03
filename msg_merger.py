@@ -1,4 +1,4 @@
-__version__ = (0, 0, 5)
+__version__ = (0, 0, 11)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -47,6 +47,9 @@ class ApodiktumMsgMergerMod(loader.Module):
         "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
         "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_edit_timeout": "The maximum time in minuted to edit the message. 0 for no limit.",
+        "_cfg_new_lines": "The number of new lines to add to the message.",
+        "_cfg_skip_length": "The length of the message to skip the merging.",
+        "_cfg_skip_prefix": "The prefix to skip the merging.",
         "_cfg_whitelist": "Whether the chatlist includes(True) or excludes(False) the chat.",
     }
 
@@ -76,12 +79,6 @@ class ApodiktumMsgMergerMod(loader.Module):
                 ),
             ),
             loader.ConfigValue(
-                "whitelist",
-                True,
-                doc=lambda: self.strings("_cfg_whitelist"),
-                validator=loader.validators.Boolean(),
-            ),
-            loader.ConfigValue(
                 "edit_timeout",
                 2,
                 doc=lambda: self.strings("_cfg_edit_timeout"),
@@ -89,6 +86,44 @@ class ApodiktumMsgMergerMod(loader.Module):
                     loader.validators.Integer(minimum=1),
                     loader.validators.NoneType(),
                 ),
+            ),
+            loader.ConfigValue(
+                "new_lines",
+                1,
+                doc=lambda: self.strings("_cfg_new_lines"),
+                validator=loader.validators.Integer(minimum=1, maximum=2),
+            ),
+            loader.ConfigValue(
+                "new_line_pref",
+                ">",
+                doc=lambda: self.strings("_cfg_new_line_prefix"),
+                validator=loader.validators.Union(
+                    loader.validators.String(length=1),
+                    loader.validators.NoneType(),
+                ),
+            ),
+            loader.ConfigValue(
+                "skip_length",
+                doc=lambda: self.strings("_cfg_skip_length"),
+                validator=loader.validators.Union(
+                    loader.validators.Integer(minimum=0),
+                    loader.validators.NoneType(),
+                ),
+            ),
+            loader.ConfigValue(
+                "skip_prefix",
+                ">",
+                doc=lambda: self.strings("_cfg_skip_prefix"),
+                validator=loader.validators.Union(
+                    loader.validators.String(length=1),
+                    loader.validators.NoneType(),
+                ),
+            ),
+            loader.ConfigValue(
+                "whitelist",
+                True,
+                doc=lambda: self.strings("_cfg_whitelist"),
+                validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
                 "auto_migrate",
@@ -133,7 +168,6 @@ class ApodiktumMsgMergerMod(loader.Module):
             not self.config["active"]
             or not isinstance(message, Message)
             or message.sender_id != self._tg_id
-            or utils.get_chat_id(message) not in self.config["chatlist"]
             or message.media
             or message.via_bot
             or message.fwd_from
@@ -141,6 +175,21 @@ class ApodiktumMsgMergerMod(loader.Module):
         ):
             return
         chatid = utils.get_chat_id(message)
+        if (
+            (self.config["whitelist"] and chatid not in self.config["chatlist"])
+            or (not self.config["whitelist"] and chatid in self.config["chatlist"])
+        ):
+            return
+        skip_prefix_len = len(utils.escape_html(self.config["skip_prefix"]))
+        if (
+            self.config["skip_prefix"]
+            and utils.remove_html(message.text)[:skip_prefix_len] == utils.escape_html(self.config["skip_prefix"])
+        ):
+            text = message.text.replace(utils.escape_html(self.config["skip_prefix"]), "")
+            await message.edit(text)
+            return
+        if self.config["skip_length"] and len(utils.remove_html(message.text)) >= self.config["skip_length"]:
+            return
         last_msg = (await self._client.get_messages(chatid, limit=2))[-1]
         if(
             last_msg.sender_id != self._tg_id
@@ -154,7 +203,16 @@ class ApodiktumMsgMergerMod(loader.Module):
         last_msg_date = last_msg.edit_date or last_msg.date
         if self.config["edit_timeout"] and (datetime.now(timezone.utc) - last_msg_date).total_seconds() > self.config["edit_timeout"] * 60:
             return
-        text = f"{last_msg.text}\n{message.text}"
+
+        text = ""
+        text += last_msg.text
+        text += "\n" * self.config["new_lines"]
+        if self.config["new_line_pref"]:
+            text += self.config["new_line_pref"]
+        text += message.text
+
+        if last_msg.is_reply and message.is_reply:
+            return
         if message.is_reply:
             message, last_msg = last_msg, message
         try:
