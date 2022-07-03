@@ -1,4 +1,4 @@
-__version__ = (0, 1, 77)
+__version__ = (0, 1, 78)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -225,8 +225,9 @@ class ApodiktumTTSMod(loader.Module):
             if message.is_reply:
                 text = (await message.get_reply_message()).message
             else:
-                return await utils.answer(message, self._strings("tts_needs_text", utils.get_chat_id(message)))
-        message = await utils.answer(message, self._strings("processing", utils.get_chat_id(message)))
+                await utils.answer(message, self._strings("tts_needs_text", utils.get_chat_id(message)))
+                return
+        msg = await utils.answer(message, self._strings("processing", utils.get_chat_id(message)))
         tts = await utils.run_sync(gTTS, text, lang=self.config["tts_lang"])
         voice = BytesIO()
         await utils.run_sync(tts.write_to_fp, voice)
@@ -242,24 +243,27 @@ class ApodiktumTTSMod(loader.Module):
         voice, fn, fe = await makewaves(voice, fn, fe)
         voice.seek(0)
         voice.name = fn + fe
-        await utils.answer(message, voice, voice_note=True)
-        if message.out:
-            await message.delete()
+        await utils.answer(msg, voice, voice_note=True)
+        if msg.out:
+            await msg.delete()
 
     async def speedvccmd(self, message: Message):
         """Speed up voice by x"""
         speed = utils.get_args_raw(message)
         if not message.is_reply:
-            return await utils.answer(message, self._strings("no_reply", utils.get_chat_id(message)))
+            await utils.answer(message, self._strings("no_reply", utils.get_chat_id(message)))
+            return
         replymsg = await message.get_reply_message()
         if not replymsg.voice:
-            message = await utils.answer(message, self._strings("needvoice", utils.get_chat_id(message)))
+            await utils.answer(message, self._strings("needvoice", utils.get_chat_id(message)))
             return
         if len(speed) == 0:
-            return await utils.answer(message, self._strings("needspeed", utils.get_chat_id(message)))
+            await utils.answer(message, self._strings("needspeed", utils.get_chat_id(message)))
+            return
         if not represents_speed(speed):
-            return await utils.answer(message, self._strings("no_speed", utils.get_chat_id(message)))
-        message = await utils.answer(message, self._strings("processing", utils.get_chat_id(message)))
+            await utils.answer(message, self._strings("no_speed", utils.get_chat_id(message)))
+            return
+        msg = await utils.answer(message, self._strings("processing", utils.get_chat_id(message)))
         ext = replymsg.file.ext
         voice = BytesIO()
         voice.name = replymsg.file.name
@@ -276,9 +280,9 @@ class ApodiktumTTSMod(loader.Module):
         voice, fn, fe = await makewaves(voice, fn, fe)
         voice.seek(0)
         voice.name = fn + fe
-        await utils.answer(message, voice, voice_note=True)
-        if message.out:
-            await message.delete()
+        await utils.answer(msg, voice, voice_note=True)
+        if msg.out:
+            await msg.delete()
 
 
 class MigratorClass():
