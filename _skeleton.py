@@ -1,4 +1,4 @@
-__version__ = (0, 0, 5)
+__version__ = (0, 0, 6)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -40,7 +40,7 @@ def represents_int(s: str) -> bool:
 
 
 @loader.tds
-class ApodiktumTranslatorHandlerMod(loader.Module):
+class ApodiktumSkeletonMod(loader.Module):
     """
     This is a skeleton module.
     """
