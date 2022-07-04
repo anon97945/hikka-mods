@@ -1,4 +1,4 @@
-__version__ = (0, 0, 11)
+__version__ = (0, 0, 12)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -188,7 +188,7 @@ class ApodiktumMsgMergerMod(loader.Module):
             text = message.text.replace(utils.escape_html(self.config["skip_prefix"]), "")
             await message.edit(text)
             return
-        if self.config["skip_length"] and len(utils.remove_html(message.text)) >= self.config["skip_length"]:
+        if (self.config["skip_length"] and len(utils.remove_html(message.text)) >= self.config["skip_length"]):
             return
         last_msg = (await self._client.get_messages(chatid, limit=2))[-1]
         if(
@@ -207,11 +207,14 @@ class ApodiktumMsgMergerMod(loader.Module):
         text = ""
         text += last_msg.text
         text += "\n" * self.config["new_lines"]
+
         if self.config["new_line_pref"]:
             text += self.config["new_line_pref"]
         text += message.text
 
-        if last_msg.is_reply and message.is_reply:
+        if ((last_msg.is_reply and message.is_reply)
+            and (last_msg.reply_to_msg_id != message.reply_to_msg_id)
+        ):
             return
         if message.is_reply:
             message, last_msg = last_msg, message
