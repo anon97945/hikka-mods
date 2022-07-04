@@ -1,4 +1,4 @@
-__version__ = (0, 0, 11)
+__version__ = (0, 0, 12)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -25,6 +25,7 @@ import collections  # for MigratorClass
 import hashlib  # for MigratorClass
 import copy     # for MigratorClass
 
+from emoji import UNICODE_EMOJI
 from telethon.tl.types import Message
 
 from .. import loader, utils
@@ -48,8 +49,10 @@ class ApodiktumMsgMergerMod(loader.Module):
         "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_edit_timeout": "The maximum time in minuted to edit the message. 0 for no limit.",
         "_cfg_new_lines": "The number of new lines to add to the message.",
+        "_cfg_skip_emoji": "Whether to skip the merging of messages with single emoji.",
         "_cfg_skip_length": "The length of the message to skip the merging.",
         "_cfg_skip_prefix": "The prefix to skip the merging.",
+        "_cfg_skip_reply": "Whether to skip the merging of messages with reply.",
         "_cfg_whitelist": "Whether the chatlist includes(True) or excludes(False) the chat.",
     }
 
@@ -88,12 +91,6 @@ class ApodiktumMsgMergerMod(loader.Module):
                 ),
             ),
             loader.ConfigValue(
-                "new_lines",
-                1,
-                doc=lambda: self.strings("_cfg_new_lines"),
-                validator=loader.validators.Integer(minimum=1, maximum=2),
-            ),
-            loader.ConfigValue(
                 "new_line_pref",
                 ">",
                 doc=lambda: self.strings("_cfg_new_line_prefix"),
@@ -101,6 +98,18 @@ class ApodiktumMsgMergerMod(loader.Module):
                     loader.validators.String(length=1),
                     loader.validators.NoneType(),
                 ),
+            ),
+            loader.ConfigValue(
+                "new_lines",
+                1,
+                doc=lambda: self.strings("_cfg_new_lines"),
+                validator=loader.validators.Integer(minimum=1, maximum=2),
+            ),
+            loader.ConfigValue(
+                "skip_emoji",
+                True,
+                doc=lambda: self.strings("_cfg_skip_emoji"),
+                validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
                 "skip_length",
@@ -118,6 +127,12 @@ class ApodiktumMsgMergerMod(loader.Module):
                     loader.validators.String(length=1),
                     loader.validators.NoneType(),
                 ),
+            ),
+            loader.ConfigValue(
+                "skip_reply",
+                False,
+                doc=lambda: self.strings("_cfg_skip_reply"),
+                validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
                 "whitelist",
@@ -154,6 +169,15 @@ class ApodiktumMsgMergerMod(loader.Module):
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
+    def is_emoji(self, text):
+        count = 0
+        for lang in UNICODE_EMOJI:
+            for emoji in UNICODE_EMOJI[lang]:
+                if emoji in text:
+                    count += 1
+                    break
+        return(bool(count))
+
     async def cmsgmergercmd(self, message: Message):
         """
         This will open the config for the module.
@@ -174,12 +198,21 @@ class ApodiktumMsgMergerMod(loader.Module):
             or utils.remove_html(message.text)[0] == self.get_prefix()
         ):
             return
+
         chatid = utils.get_chat_id(message)
+
         if (
-            (self.config["whitelist"] and chatid not in self.config["chatlist"])
-            or (not self.config["whitelist"] and chatid in self.config["chatlist"])
+            (
+                self.config["whitelist"]
+                and chatid not in self.config["chatlist"]
+            )
+            or (
+                not self.config["whitelist"]
+                and chatid in self.config["chatlist"]
+            )
         ):
             return
+
         skip_prefix_len = len(utils.escape_html(self.config["skip_prefix"]))
         if (
             self.config["skip_prefix"]
@@ -188,9 +221,40 @@ class ApodiktumMsgMergerMod(loader.Module):
             text = message.text.replace(utils.escape_html(self.config["skip_prefix"]), "")
             await message.edit(text)
             return
-        if self.config["skip_length"] and len(utils.remove_html(message.text)) >= self.config["skip_length"]:
+
+        if (
+            self.config["skip_length"]
+            and len(utils.remove_html(message.text)) >= self.config["skip_length"]
+        ):
             return
+
         last_msg = (await self._client.get_messages(chatid, limit=2))[-1]
+
+        if (
+            (
+                self.config["skip_emoji"]
+                and (
+                    self.is_emoji(message.text)
+                    or self.is_emoji(last_msg.text)
+                )
+                and (
+                    len(message.text) == 1
+                    or len(last_msg.text) == 1
+                )
+            )
+            or (
+                self.config["skip_reply"]
+                and (
+                    message.is_reply
+                    or last_msg.is_reply
+                )
+            )
+            or (
+                last_msg.is_reply and message.is_reply
+            )
+        ):
+            return
+
         if(
             last_msg.sender_id != self._tg_id
             or not isinstance(last_msg, Message)
@@ -200,19 +264,17 @@ class ApodiktumMsgMergerMod(loader.Module):
             or utils.remove_html(last_msg.text)[0] == self.get_prefix()
         ):
             return
+
         last_msg_date = last_msg.edit_date or last_msg.date
         if self.config["edit_timeout"] and (datetime.now(timezone.utc) - last_msg_date).total_seconds() > self.config["edit_timeout"] * 60:
             return
 
-        text = ""
-        text += last_msg.text
+        text = last_msg.text
         text += "\n" * self.config["new_lines"]
         if self.config["new_line_pref"]:
             text += self.config["new_line_pref"]
         text += message.text
 
-        if last_msg.is_reply and message.is_reply:
-            return
         if message.is_reply:
             message, last_msg = last_msg, message
         try:
