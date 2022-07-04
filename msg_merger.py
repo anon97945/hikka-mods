@@ -271,6 +271,7 @@ class ApodiktumMsgMergerMod(loader.Module):
 
         text = last_msg.text
         text += "\n" * self.config["new_lines"]
+
         if self.config["new_line_pref"]:
             text += self.config["new_line_pref"]
         text += message.text
