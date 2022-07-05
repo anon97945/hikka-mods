@@ -1,4 +1,4 @@
-__version__ = (0, 0, 13)
+__version__ = (0, 0, 14)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -54,6 +54,8 @@ class ApodiktumMsgMergerMod(loader.Module):
         "_cfg_skip_prefix": "The prefix to skip the merging.",
         "_cfg_skip_reply": "Whether to skip the merging of messages with reply.",
         "_cfg_whitelist": "Whether the chatlist includes(True) or excludes(False) the chat.",
+        "_cfg_merge_own_reply": "Whether to merge any message from own reply.",
+        "_cfg_merge_own_reply_msg": "The message which will stay if the message is merged from own reply. ",
     }
 
     strings_en = {
@@ -91,6 +93,12 @@ class ApodiktumMsgMergerMod(loader.Module):
                 ),
             ),
             loader.ConfigValue(
+                "merge_own_reply",
+                False,
+                doc=lambda: self.strings("_cfg_merge_own_reply"),
+                validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
                 "new_line_pref",
                 ">",
                 doc=lambda: self.strings("_cfg_new_line_prefix"),
@@ -104,6 +112,15 @@ class ApodiktumMsgMergerMod(loader.Module):
                 1,
                 doc=lambda: self.strings("_cfg_new_lines"),
                 validator=loader.validators.Integer(minimum=1, maximum=2),
+            ),
+            loader.ConfigValue(
+                "own_reply_msg",
+                "<code>☝️</code>",
+                doc=lambda: self.strings("_cfg_merge_own_reply_msg"),
+                validator=loader.validators.Union(
+                    loader.validators.String(),
+                    loader.validators.NoneType(),
+                ),
             ),
             loader.ConfigValue(
                 "skip_emoji",
@@ -233,6 +250,9 @@ class ApodiktumMsgMergerMod(loader.Module):
             if last_msg.id != message.id:
                 break
 
+        if self.config["merge_own_reply"] and message.is_reply:
+            last_msg = await message.get_reply_message()
+
         if (
             (
                 self.config["skip_emoji"]
@@ -247,13 +267,14 @@ class ApodiktumMsgMergerMod(loader.Module):
             )
             or (
                 self.config["skip_reply"]
+                and not self.config["merge_own_reply"]
                 and (
                     message.is_reply
                     or last_msg.is_reply
                 )
             )
             or (
-                last_msg.is_reply and message.is_reply
+                last_msg.is_reply and message.is_reply and not self.config["merge_own_reply"]
             )
         ):
             return
@@ -268,8 +289,11 @@ class ApodiktumMsgMergerMod(loader.Module):
         ):
             return
 
-        last_msg_date = last_msg.edit_date or last_msg.date
-        if self.config["edit_timeout"] and (datetime.now(timezone.utc) - last_msg_date).total_seconds() > self.config["edit_timeout"] * 60:
+        if (
+            self.config["edit_timeout"]
+            and (datetime.now(timezone.utc) - (last_msg.edit_date or last_msg.date)).total_seconds() > self.config["edit_timeout"] * 60
+            and not self.config["merge_own_reply"]
+        ):
             return
 
         text = last_msg.text
@@ -279,12 +303,16 @@ class ApodiktumMsgMergerMod(loader.Module):
             text += self.config["new_line_pref"]
         text += message.text
 
-        if message.is_reply:
+        if message.is_reply and not self.config["merge_own_reply"]:
             message, last_msg = last_msg, message
         try:
             msg = await last_msg.edit(text)
             if msg.out:
+                if self.config["merge_own_reply"] and self.config["own_reply_msg"] and message.is_reply:
+                    await message.edit(self.config["own_reply_msg"])
+                    return
                 await message.delete()
+                return
         except Exception as e:
             logger.debug(f"Edit last_msg:\n{str(e)}")
             return
