@@ -1,4 +1,4 @@
-__version__ = (0, 1, 16)
+__version__ = (0, 1, 18)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -299,16 +299,11 @@ class ApodiktumDNDMod(loader.Module):
                 parse_mode="HTML",
             )
             self.set("ignore_hello", True)
-        self._pt_task = asyncio.ensure_future(self._global_queue_handler())
         # MigratorClass
         self._migrator = MigratorClass()  # MigratorClass define
         await self._migrator.init(client, db, self, self.__class__.__name__, self.strings("name"), self.config["auto_migrate_log"], self.config["auto_migrate_debug"])  # MigratorClass Initiate
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
-
-    async def on_unload(self):
-        self._pt_task.cancel()
-        return
 
     def _strings(self, string: str, chat_id: int = None):
         if self.lookup("Apo-Translations") and chat_id:
@@ -326,7 +321,8 @@ class ApodiktumDNDMod(loader.Module):
         self._whitelist += [user]
         self._whitelist = list(set(self._whitelist))
         self.set("whitelist", self._whitelist)
-        logger.info(self.strings("_log_msg_approved").format(user, reason))
+        if reason != "banned":
+            logger.info(self.strings("_log_msg_approved").format(user, reason))
 
     def _unapprove(self, user: int):
         self._whitelist = list(set(self._whitelist))
@@ -653,66 +649,31 @@ class ApodiktumDNDMod(loader.Module):
         await utils.answer(message, res)
 
     async def watcher(self, message: Message):
-        self._global_queue += [message]
-
-    async def _global_queue_handler(self):
-        while True:
-            while self._global_queue:
-                try:
-                    await self._global_queue_handler_process(self._global_queue.pop(0))
-                except Exception as e:
-                    logger.debug(f"global_queue_handler_process error:\n{str(e)}")
-            await asyncio.sleep(0)
-
-    async def _global_queue_handler_process(self, message: Message):
         is_pmbl = False
-        if not isinstance(message, Message):
-            return
         chat_id = utils.get_chat_id(message)
-        try:
-            user_id = (
-                getattr(message, "sender_id", False)
-                or message.action_message.action.users[0]
-            )
-        except Exception:
-            try:
-                user_id = message.action_message.action.from_id.user_id
-            except Exception:
-                try:
-                    user_id = message.from_id.user_id
-                except Exception:
-                    try:
-                        user_id = message.action_message.from_id.user_id
-                    except Exception:
-                        try:
-                            user_id = message.action.from_user.id
-                        except Exception:
-                            try:
-                                user_id = (await message.get_user()).id
-                            except Exception:
-                                logger.debug(f"Can't extract entity from event {type(message)}")
-                                return
-        user_id = (
-            int(str(user_id)[4:]) if str(user_id).startswith("-100") else int(user_id)
-        )
         if (
-            not getattr(message, "out", False)
-            and isinstance(message, Message)
-            and isinstance(message.peer_id, PeerUser)
-            and self.config["PMBL_Active"]
-            and chat_id
-            not in {
+            not isinstance(message, Message)
+            and getattr(message, "out", False)
+            and chat_id in {
                 1271266957,  # @replies
                 777000,  # Telegram Notifications
                 self._tg_id,  # Self
             }
         ):
+            return
+        if (
+            self.config["PMBL_Active"]
+            and message.is_private
+        ):
+            user_id = message.sender_id
             chat = await self._client.get_entity(chat_id)
             user = await self._client.get_entity(user_id)
             is_pmbl = await self.p__pmbl(chat, user, message)
         if not is_pmbl:
-            chat = await self._client.get_entity(chat_id)
-            user = await self._client.get_entity(user_id)
+            if not chat:
+                chat = await self._client.get_entity(chat_id)
+            if not user:
+                user = await self._client.get_entity(user_id)
             await self.p__afk(chat, user, message)
         return
 
