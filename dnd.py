@@ -1,4 +1,4 @@
-__version__ = (0, 1, 21)
+__version__ = (0, 1, 23)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -330,11 +330,11 @@ class ApodiktumDNDMod(loader.Module):
         self.set("whitelist", self._whitelist)
         logger.info(self.strings("_log_msg_unapproved").format(user))
 
-    async def _send_pmbl_message(self, message, contact, started_by_you, active_peer, self_id):
+    async def _send_pmbl_message(self, message, peer, contact, started_by_you, active_peer, self_id):
         if len(self._ratelimit_pmbl) < self._ratelimit_pmbl_threshold:
             try:
                 await self._client.send_file(
-                    message.peer_id,
+                    peer,
                     self.config["photo"],
                     caption=self.config["custom_message"] or self.strings("banned"),
                 )
@@ -347,10 +347,10 @@ class ApodiktumDNDMod(loader.Module):
             self._ratelimit_pmbl += [round(time.time())]
 
             try:
-                peer = await self._client.get_entity(message.peer_id)
+                peer = await self._client.get_entity(peer)
             except ValueError:
                 await asyncio.sleep(1)
-                peer = await self._client.get_entity(message.peer_id)
+                peer = await self._client.get_entity(peer)
 
             await self.inline.bot.send_message(
                 self_id,
@@ -369,11 +369,11 @@ class ApodiktumDNDMod(loader.Module):
                 disable_web_page_preview=True,
             )
 
-    async def _active_peer(self, message, cid):
+    async def _active_peer(self, cid, peer):
         if self.config["ignore_active"]:
             q = 0
 
-            async for msg in self._client.iter_messages(message.peer_id, limit=200):
+            async for msg in self._client.iter_messages(peer, limit=200):
                 if msg.sender_id == self._tg_id:
                     q += 1
 
@@ -666,11 +666,14 @@ class ApodiktumDNDMod(loader.Module):
                 self.config["PMBL_Active"]
                 and message.is_private
                 and not isinstance(message, Channel)
+                and isinstance(message.peer_id, PeerUser)
             ):
-                user_id = message.sender_id
+                peer = (
+                    getattr(getattr(message, "sender", None), "username", None)
+                    or message.peer_id
+                )
                 chat = await self._client.get_entity(chat_id)
-                user = await self._client.get_entity(user_id)
-                is_pmbl = await self.p__pmbl(chat, user, message)
+                is_pmbl = await self.p__pmbl(chat, peer, message)
 
             if not is_pmbl:
                 user_id = message.sender_id
@@ -684,7 +687,7 @@ class ApodiktumDNDMod(loader.Module):
     async def p__pmbl(
         self,
         chat: Union[Chat, int],
-        user: Union[User, int],
+        peer,
         message: Union[None, Message] = None,
     ) -> bool:
         cid = chat.id
@@ -694,17 +697,18 @@ class ApodiktumDNDMod(loader.Module):
         contact, started_by_you, active_peer = None, None, None
 
         with contextlib.suppress(ValueError):
-            if user.bot:
+            entity = await self._client.get_entity(peer)
+            if entity.bot:
                 return self._approve(cid, "bot")
 
             if self.config["ignore_contacts"]:
-                if user.contact:
+                if entity.contact:
                     return self._approve(cid, "ignore_contacts")
                 contact = False
 
         first_message = (
             await self._client.get_messages(
-                message.peer_id,
+                peer,
                 limit=1,
                 reverse=True,
             )
@@ -717,7 +721,7 @@ class ApodiktumDNDMod(loader.Module):
             return self._approve(cid, "started_by_you")
         started_by_you = False
 
-        active_peer = await self._active_peer(message, cid)
+        active_peer = await self._active_peer(cid, peer)
         if active_peer:
             return
 
@@ -728,7 +732,7 @@ class ApodiktumDNDMod(loader.Module):
             )
         )
 
-        await self._send_pmbl_message(message, contact, started_by_you, active_peer, self._tg_id)
+        await self._send_pmbl_message(message, peer, contact, started_by_you, active_peer, self._tg_id)
         await self._punish_handler(cid)
 
         self._approve(cid, "banned")
