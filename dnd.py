@@ -1,4 +1,4 @@
-__version__ = (0, 1, 19)
+__version__ = (0, 1, 21)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -40,7 +40,7 @@ from typing import Union
 
 from telethon.tl.functions.contacts import BlockRequest, UnblockRequest
 from telethon.tl.functions.messages import DeleteHistoryRequest, ReportSpamRequest
-from telethon.tl.types import Message, PeerUser, User, Chat
+from telethon.tl.types import Message, PeerUser, User, Chat, Channel
 from telethon.utils import get_display_name, get_peer_id
 
 from .. import loader, utils
@@ -653,29 +653,33 @@ class ApodiktumDNDMod(loader.Module):
         chat_id = utils.get_chat_id(message)
         if (
             not isinstance(message, Message)
-            and getattr(message, "out", False)
-            and chat_id in {
+            or getattr(message, "out", False)
+            or chat_id in {
                 1271266957,  # @replies
                 777000,  # Telegram Notifications
                 self._tg_id,  # Self
             }
         ):
             return
-        if (
-            self.config["PMBL_Active"]
-            and message.is_private
-        ):
-            user_id = message.sender_id
-            chat = await self._client.get_entity(chat_id)
-            user = await self._client.get_entity(user_id)
-            is_pmbl = await self.p__pmbl(chat, user, message)
-        if not is_pmbl:
-            if not chat:
+        try:
+            if (
+                self.config["PMBL_Active"]
+                and message.is_private
+                and not isinstance(message, Channel)
+            ):
+                user_id = message.sender_id
                 chat = await self._client.get_entity(chat_id)
-            if not user:
                 user = await self._client.get_entity(user_id)
-            await self.p__afk(chat, user, message)
-        return
+                is_pmbl = await self.p__pmbl(chat, user, message)
+
+            if not is_pmbl:
+                user_id = message.sender_id
+                chat = await self._client.get_entity(chat_id)
+                user = await self._client.get_entity(user_id)
+                await self.p__afk(chat, user, message)
+            return
+        except ValueError as e:
+            logger.debug(e)
 
     async def p__pmbl(
         self,
