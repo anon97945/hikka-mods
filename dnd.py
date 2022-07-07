@@ -1,4 +1,4 @@
-__version__ = (0, 1, 23)
+__version__ = (0, 1, 24)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -676,7 +676,29 @@ class ApodiktumDNDMod(loader.Module):
                 is_pmbl = await self.p__pmbl(chat, peer, message)
 
             if not is_pmbl:
-                user_id = message.sender_id
+                try:
+                    user_id = (
+                        getattr(message, "sender_id", False)
+                        or message.action_message.action.users[0]
+                    )
+                except Exception:
+                    try:
+                        user_id = message.action_message.action.from_id.user_id
+                    except Exception:
+                        try:
+                            user_id = message.from_id.user_id
+                        except Exception:
+                            try:
+                                user_id = message.action_message.from_id.user_id
+                            except Exception:
+                                try:
+                                    user_id = message.action.from_user.id
+                                except Exception:
+                                    try:
+                                        user_id = (await message.get_user()).id
+                                    except Exception:
+                                        logger.debug(f"Can't extract entity from event {type(message)}")
+                                        return
                 chat = await self._client.get_entity(chat_id)
                 user = await self._client.get_entity(user_id)
                 await self.p__afk(chat, user, message)
