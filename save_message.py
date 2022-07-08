@@ -1,4 +1,4 @@
-__version__ = (0, 0, 15)
+__version__ = (0, 0, 16)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -194,7 +194,6 @@ class MigratorClass():
     async def migrate(self, log: bool = False, debug: bool = False):
         self.log = log
         self.debug = debug
-        logger.error(f"Log: {self.log} | Debug: {self.debug}")
         if self._migrate_to is not None:
             self.hashs = self._db.get(self._classname, "hashs", [])
 
@@ -347,7 +346,7 @@ class MigratorClass():
         for k, v2 in dct2.items():
             if k in merged:
                 v1 = merged[k]
-                if isinstance(v1, dict) and isinstance(v2, collections.Mapping):
+                if isinstance(v1, dict) and isinstance(v2, collections.abc.Mapping):
                     merged[k] = await self._deep_dict_merge(v1, v2, override)
                 elif isinstance(v1, list) and isinstance(v2, list):
                     merged[k] = v1 + v2
