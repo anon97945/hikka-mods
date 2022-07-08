@@ -186,14 +186,15 @@ class ApodiktumMsgMergerMod(loader.Module):
         await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
         # MigratorClass
 
-    def is_emoji(self, text):
+    @staticmethod
+    def is_emoji(text):
         count = 0
         for lang in UNICODE_EMOJI:
             for emoji in UNICODE_EMOJI[lang]:
                 if emoji in text:
                     count += 1
                     break
-        return(bool(count))
+        return bool(count)
 
     async def cmsgmergercmd(self, message: Message):
         """
