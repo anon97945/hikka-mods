@@ -1,4 +1,4 @@
-__version__ = (0, 1, 5)
+__version__ = (0, 1, 6)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,7 +17,7 @@ __version__ = (0, 1, 5)
 
 # scope: hikka_only
 # scope: hikka_min 1.1.28
-# requires: alphabet-detector
+# requires: alphabet_detector
 
 import logging
 import asyncio

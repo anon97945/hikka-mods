@@ -1,4 +1,4 @@
-__version__ = (0, 0, 58)
+__version__ = (0, 0, 59)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -122,6 +122,7 @@ class ApodiktumGTranslateMod(loader.Module):
         self._db = db
         self._client = client
         self._me = await client.get_me()
+        self.base_strings = self.strings._base_strings
         self.tr = googletrans.Translator()
         # MigratorClass
         self._migrator = MigratorClass()  # MigratorClass define
@@ -132,7 +133,14 @@ class ApodiktumGTranslateMod(loader.Module):
     def _strings(self, string: str, chat_id: int = None):
         if self.lookup("Apo-Translations") and chat_id:
             forced_translation_db = self.lookup("Apo-Translations").config
-            languages = {"en_chats": self.strings_en, "de_chats": self.strings_de, "ru_chats": self.strings_ru}
+            strings_en = self.strings_en if getattr(self, "strings_en", False) else {}
+            strings_de = self.strings_de if getattr(self, "strings_de", False) else {}
+            strings_ru = self.strings_ru if getattr(self, "strings_ru", False) else {}
+            languages = {
+                "en_chats": {**self.base_strings, **strings_en},
+                "de_chats": {**self.base_strings, **strings_de},
+                "ru_chats": {**self.base_strings, **strings_ru},
+            }
             for lang, strings in languages.items():
                 if chat_id in forced_translation_db[lang]:
                     if string in strings:

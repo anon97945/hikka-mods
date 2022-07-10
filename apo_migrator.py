@@ -1,4 +1,4 @@
-__version__ = (0, 1, 5)
+__version__ = (0, 1, 6)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -116,6 +116,7 @@ class ApodiktumMigratorMod(loader.Module):
     async def client_ready(self, client, db):
         self._db = db
         self._client = client
+        self.base_strings = self.strings._base_strings
         # MigratorClass
         self._migrator = MigratorClass()  # MigratorClass define
         await self._migrator.init(client, db, self, self.__class__.__name__, self.strings("name"), self.config["auto_migrate_log"], self.config["auto_migrate_debug"])  # MigratorClass Initiate
@@ -125,7 +126,14 @@ class ApodiktumMigratorMod(loader.Module):
     def _strings(self, string: str, chat_id: int = None):
         if self.lookup("Apo-Translations") and chat_id:
             forced_translation_db = self.lookup("Apo-Translations").config
-            languages = {}
+            strings_en = self.strings_en if getattr(self, "strings_en", False) else {}
+            strings_de = self.strings_de if getattr(self, "strings_de", False) else {}
+            strings_ru = self.strings_ru if getattr(self, "strings_ru", False) else {}
+            languages = {
+                "en_chats": {**self.base_strings, **strings_en},
+                "de_chats": {**self.base_strings, **strings_de},
+                "ru_chats": {**self.base_strings, **strings_ru},
+            }
             for lang, strings in languages.items():
                 if chat_id in forced_translation_db[lang]:
                     if string in strings:

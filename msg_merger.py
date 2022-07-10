@@ -1,4 +1,4 @@
-__version__ = (0, 0, 15)
+__version__ = (0, 0, 16)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,15 +17,16 @@ __version__ = (0, 0, 15)
 
 # scope: hikka_only
 # scope: hikka_min 1.1.28
+# requires: alphabet_detector
 
 import logging
-from datetime import datetime, timezone
 
 import collections  # for MigratorClass
 import hashlib  # for MigratorClass
 import copy     # for MigratorClass
 
-from emoji import UNICODE_EMOJI
+from alphabet_detector import AlphabetDetector
+from datetime import datetime, timezone
 from telethon.tl.types import Message
 
 from .. import loader, utils
@@ -48,14 +49,15 @@ class ApodiktumMsgMergerMod(loader.Module):
         "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
         "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_edit_timeout": "The maximum time in minuted to edit the message. 0 for no limit.",
+        "_cfg_merge_own_reply": "Whether to merge any message from own reply.",
+        "_cfg_merge_own_reply_msg": "The message which will stay if the message is merged from own reply.",
         "_cfg_new_lines": "The number of new lines to add to the message.",
+        "_cfg_reverse_merge": "Whether to merge into the new(True) or old(False) message.",
         "_cfg_skip_emoji": "Whether to skip the merging of messages with single emoji.",
         "_cfg_skip_length": "The length of the message to skip the merging.",
         "_cfg_skip_prefix": "The prefix to skip the merging.",
         "_cfg_skip_reply": "Whether to skip the merging of messages with reply.",
         "_cfg_whitelist": "Whether the chatlist includes(True) or excludes(False) the chat.",
-        "_cfg_merge_own_reply": "Whether to merge any message from own reply.",
-        "_cfg_merge_own_reply_msg": "The message which will stay if the message is merged from own reply. ",
     }
 
     strings_en = {
@@ -123,6 +125,12 @@ class ApodiktumMsgMergerMod(loader.Module):
                 ),
             ),
             loader.ConfigValue(
+                "reverse_merge",
+                True,
+                doc=lambda: self.strings("_cfg_reverse_merge"),
+                validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
                 "skip_emoji",
                 True,
                 doc=lambda: self.strings("_cfg_skip_emoji"),
@@ -187,14 +195,12 @@ class ApodiktumMsgMergerMod(loader.Module):
         # MigratorClass
 
     @staticmethod
-    def is_emoji(text):
-        count = 0
-        for lang in UNICODE_EMOJI:
-            for emoji in UNICODE_EMOJI[lang]:
-                if emoji in text:
-                    count += 1
-                    break
-        return bool(count)
+    def is_emoji(message):
+        text = message.raw_text
+        text.encode("utf-8")
+        detected_alphabet = AlphabetDetector().detect_alphabet(text)
+        alphabet_list = [each_string.lower() for each_string in list(detected_alphabet)]
+        return not alphabet_list
 
     async def cmsgmergercmd(self, message: Message):
         """
@@ -247,23 +253,23 @@ class ApodiktumMsgMergerMod(loader.Module):
             return
 
         for i in range(-4, -1):
-            last_msg = (await self._client.get_messages(chatid, limit=5))[i]
-            if last_msg.id != message.id:
+            last_msg_iter = (await self._client.get_messages(chatid, limit=5))[i]
+            if last_msg_iter.id != message.id:
+                last_msg = last_msg_iter
                 break
 
         if self.config["merge_own_reply"] and message.is_reply:
-            last_msg = await message.get_reply_message()
+            last_msg_reply = await message.get_reply_message()
+            last_msg = last_msg_reply
+        else:
+            last_msg_reply = None
 
         if (
             (
                 self.config["skip_emoji"]
                 and (
-                    self.is_emoji(message.text)
-                    or self.is_emoji(last_msg.text)
-                )
-                and (
-                    len(message.text) == 1
-                    or len(last_msg.text) == 1
+                    self.is_emoji(message)
+                    or self.is_emoji(last_msg)
                 )
             )
             or (
@@ -291,9 +297,13 @@ class ApodiktumMsgMergerMod(loader.Module):
             return
 
         if (
-            self.config["edit_timeout"]
-            and (datetime.now(timezone.utc) - (last_msg.edit_date or last_msg.date)).total_seconds() > self.config["edit_timeout"] * 60
-            and not self.config["merge_own_reply"]
+            (
+                self.config["edit_timeout"]
+                and (datetime.now(timezone.utc) - (last_msg.edit_date or last_msg.date)).total_seconds() > self.config["edit_timeout"] * 60
+            )
+            and (
+                self.config["merge_own_reply"] and not message.is_reply
+            )
         ):
             return
 
@@ -304,12 +314,46 @@ class ApodiktumMsgMergerMod(loader.Module):
             text += self.config["new_line_pref"]
         text += message.text
 
-        if message.is_reply and not self.config["merge_own_reply"]:
+        if (
+            (
+                message.is_reply
+                or self.config["reverse_merge"]
+            )
+            and
+            (
+                not self.config["merge_own_reply"]
+                or not message.is_reply
+            )
+        ):
             message, last_msg = last_msg, message
+
         try:
-            msg = await last_msg.edit(text)
+            if (
+                self.config["reverse_merge"]
+                and (
+                    self.config["merge_own_reply"]
+                    and (
+                        last_msg.is_reply
+                        or message.is_reply
+                        )
+                    )
+            ):
+                if last_msg.is_reply:
+                    reply = await last_msg.get_reply_message()
+                else:
+                    reply = await message.get_reply_message()
+                await last_msg.delete()
+                msg = await last_msg.client.send_message(chatid, text, reply_to=reply)
+            else:
+                msg = await last_msg.edit(text)
+
             if msg.out:
-                if self.config["merge_own_reply"] and self.config["own_reply_msg"] and message.is_reply:
+                if (
+                    self.config["merge_own_reply"]
+                    and self.config["own_reply_msg"]
+                    and not self.config["reverse_merge"]
+                    and message.is_reply
+                ):
                     await message.edit(self.config["own_reply_msg"])
                     return
                 await message.delete()

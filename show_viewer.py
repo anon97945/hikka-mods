@@ -1,4 +1,4 @@
-__version__ = (0, 0, 9)
+__version__ = (0, 0, 11)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -82,6 +82,7 @@ class ApodiktumShowViewsMod(loader.Module):
     async def client_ready(self, client, db):
         self._db = db
         self._client = client
+        self.base_strings = self.strings._base_strings
         # MigratorClass
         self._migrator = MigratorClass()  # MigratorClass define
         await self._migrator.init(client, db, self, self.__class__.__name__, self.strings("name"), self.config["auto_migrate_log"], self.config["auto_migrate_debug"])  # MigratorClass Initiate
@@ -91,7 +92,14 @@ class ApodiktumShowViewsMod(loader.Module):
     def _strings(self, string: str, chat_id: int = None):
         if self.lookup("Apo-Translations") and chat_id:
             forced_translation_db = self.lookup("Apo-Translations").config
-            languages = {}
+            strings_en = self.strings_en if getattr(self, "strings_en", False) else {}
+            strings_de = self.strings_de if getattr(self, "strings_de", False) else {}
+            strings_ru = self.strings_ru if getattr(self, "strings_ru", False) else {}
+            languages = {
+                "en_chats": {**self.base_strings, **strings_en},
+                "de_chats": {**self.base_strings, **strings_de},
+                "ru_chats": {**self.base_strings, **strings_ru},
+            }
             for lang, strings in languages.items():
                 if chat_id in forced_translation_db[lang]:
                     if string in strings:
@@ -117,7 +125,9 @@ class ApodiktumShowViewsMod(loader.Module):
             return
         await message.delete()
         if message.is_reply:
-            msg = await message.client.send_message(self.config["channel"], msg)
+            if msg.sender_id == self._tg_id:
+                await msg.delete()
+                msg = await message.client.send_message(self.config["channel"], msg)
         else:
             msg = await message.client.send_message(self.config["channel"], args)
         await msg.forward_to(chat.id)
