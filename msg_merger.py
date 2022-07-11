@@ -1,4 +1,4 @@
-__version__ = (0, 0, 20)
+__version__ = (0, 0, 21)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -400,7 +400,6 @@ class ApodiktumMsgMergerMod(loader.Module):
         except Exception as e:
             logger.debug(f"Edit last_msg:\n{str(e)}")
             return
-
 
 
 class MigratorClass():
