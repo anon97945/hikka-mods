@@ -1,4 +1,4 @@
-__version__ = (0, 0, 18)
+__version__ = (0, 0, 20)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -26,7 +26,7 @@ import hashlib  # for MigratorClass
 import copy     # for MigratorClass
 
 from datetime import datetime, timezone
-from telethon.tl.types import Message
+from telethon.tl.types import Message, MessageEntityUrl
 
 from .. import loader, utils
 
@@ -48,8 +48,11 @@ class ApodiktumMsgMergerMod(loader.Module):
         "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
         "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_edit_timeout": "The maximum time in minuted to edit the message. 0 for no limit.",
+        "_cfg_link_preview": ("Whether to send webpage previews."
+                              "\nLeave empty to use automatically decide based on the messages to merge."),
         "_cfg_merge_own_reply": "Whether to merge any message from own reply.",
         "_cfg_merge_own_reply_msg": "The message which will stay if the message is merged from own reply.",
+        "_cfg_merge_urls": "Whether to merge messages with URLs.",
         "_cfg_new_lines": "The number of new lines to add to the message.",
         "_cfg_reverse_merge": "Whether to merge into the new(True) or old(False) message.",
         "_cfg_skip_emoji": "Whether to skip the merging of messages with single emoji.",
@@ -85,9 +88,23 @@ class ApodiktumMsgMergerMod(loader.Module):
                 ),
             ),
             loader.ConfigValue(
+                "link_preview",
+                doc=lambda: self.strings("_cfg_link_preview"),
+                validator=loader.validators.Union(
+                    loader.validators.Boolean(),
+                    loader.validators.NoneType(),
+                ),
+            ),
+            loader.ConfigValue(
                 "merge_own_reply",
                 False,
                 doc=lambda: self.strings("_cfg_merge_own_reply"),
+                validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
+                "merge_urls",
+                True,
+                doc=lambda: self.strings("_cfg_merge_urls"),
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
@@ -190,6 +207,12 @@ class ApodiktumMsgMergerMod(loader.Module):
         clean_text = emoji.replace_emoji(text, replace='')
         return not clean_text
 
+    @staticmethod
+    def _get_url(message):
+        for (ent, url) in message.get_entities_text():
+            url = isinstance(ent, MessageEntityUrl)
+            return url
+        return False
 
     async def cmsgmergercmd(self, message: Message):
         """
@@ -205,10 +228,19 @@ class ApodiktumMsgMergerMod(loader.Module):
             not self.config["active"]
             or not isinstance(message, Message)
             or message.sender_id != self._tg_id
-            or message.media
             or message.via_bot
             or message.fwd_from
             or utils.remove_html(message.text)[0] == self.get_prefix()
+        ):
+            return
+
+        if (
+            message.media
+            and not getattr(message.media, "webpage", False)
+            or (
+                not self.config["merge_urls"]
+                and self._get_url(message)
+            )
         ):
             return
 
@@ -278,10 +310,19 @@ class ApodiktumMsgMergerMod(loader.Module):
         if(
             last_msg.sender_id != self._tg_id
             or not isinstance(last_msg, Message)
-            or last_msg.media
             or last_msg.via_bot
             or last_msg.fwd_from
             or utils.remove_html(last_msg.text)[0] == self.get_prefix()
+        ):
+            return
+
+        if (
+            last_msg.media
+            and not getattr(last_msg.media, "webpage", False)
+            or (
+                not self.config["merge_urls"]
+                and self._get_url(last_msg)
+            )
         ):
             return
 
@@ -319,6 +360,11 @@ class ApodiktumMsgMergerMod(loader.Module):
         ):
             message, last_msg = last_msg, message
 
+        if self.config["link_preview"] is None:
+            link_preview = getattr(message.media, "webpage", False) or getattr(last_msg.media, "webpage", False)
+        else:
+            link_preview = bool(self.config["link_preview"])
+
         try:
             if (
                 self.config["reverse_merge"]
@@ -335,9 +381,9 @@ class ApodiktumMsgMergerMod(loader.Module):
                 else:
                     reply = await message.get_reply_message()
                 await last_msg.delete()
-                msg = await last_msg.client.send_message(chatid, text, reply_to=reply)
+                msg = await last_msg.client.send_message(chatid, text, reply_to=reply, link_preview=link_preview)
             else:
-                msg = await last_msg.edit(text)
+                msg = await last_msg.edit(text, link_preview=link_preview)
 
             if msg.out:
                 if (
@@ -346,13 +392,15 @@ class ApodiktumMsgMergerMod(loader.Module):
                     and not self.config["reverse_merge"]
                     and message.is_reply
                 ):
-                    await message.edit(self.config["own_reply_msg"])
+                    logger.error("ping3")
+                    await message.edit(self.config["own_reply_msg"], link_preview=link_preview)
                     return
                 await message.delete()
                 return
         except Exception as e:
             logger.debug(f"Edit last_msg:\n{str(e)}")
             return
+
 
 
 class MigratorClass():
