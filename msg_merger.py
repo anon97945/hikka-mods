@@ -1,4 +1,4 @@
-__version__ = (0, 0, 21)
+__version__ = (0, 0, 22)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -230,17 +230,15 @@ class ApodiktumMsgMergerMod(loader.Module):
             or message.sender_id != self._tg_id
             or message.via_bot
             or message.fwd_from
-            or utils.remove_html(message.text)[0] == self.get_prefix()
-        ):
-            return
-
-        if (
-            message.media
-            and not getattr(message.media, "webpage", False)
             or (
-                not self.config["merge_urls"]
-                and self._get_url(message)
+                message.media
+                and not getattr(message.media, "webpage", False)
+                or (
+                    not self.config["merge_urls"]
+                    and self._get_url(message)
+                )
             )
+            or utils.remove_html(message.text)[0] == self.get_prefix()
         ):
             return
 
@@ -312,17 +310,15 @@ class ApodiktumMsgMergerMod(loader.Module):
             or not isinstance(last_msg, Message)
             or last_msg.via_bot
             or last_msg.fwd_from
-            or utils.remove_html(last_msg.text)[0] == self.get_prefix()
-        ):
-            return
-
-        if (
-            last_msg.media
-            and not getattr(last_msg.media, "webpage", False)
             or (
-                not self.config["merge_urls"]
-                and self._get_url(last_msg)
+                last_msg.media
+                and not getattr(last_msg.media, "webpage", False)
+                or (
+                    not self.config["merge_urls"]
+                    and self._get_url(last_msg)
+                )
             )
+            or utils.remove_html(last_msg.text)[0] == self.get_prefix()
         ):
             return
 
