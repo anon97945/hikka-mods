@@ -1,4 +1,4 @@
-__version__ = (0, 0, 11)
+__version__ = (0, 0, 13)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -43,9 +43,9 @@ class ApodiktumShowViewsMod(loader.Module):
         "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_cst_channel": "The Channel ID to send the message from.",
         "no_args": "No message to send.",
-        "views": "Total <code>{}</code> views.",
         "no_channel": "No channel set.",
         "no_reply": "You need to reply to a message.",
+        "views": "Total <code>{}</code> views.",
     }
 
     def __init__(self):
@@ -112,7 +112,7 @@ class ApodiktumShowViewsMod(loader.Module):
         """
         <message/reply to msg> Send a message to get the current count of viewers with that message.
         """
-        chat = message.chat
+        chat_id = utils.get_chat_id(message)
         args = utils.get_args_raw(message)
 
         if not self.config["channel"]:
@@ -124,13 +124,10 @@ class ApodiktumShowViewsMod(loader.Module):
             await utils.answer(message, self._strings("no_args", utils.get_chat_id(message)))
             return
         await message.delete()
-        if message.is_reply:
-            if msg.sender_id == self._tg_id:
-                await msg.delete()
-                msg = await message.client.send_message(self.config["channel"], msg)
-        else:
-            msg = await message.client.send_message(self.config["channel"], args)
-        await msg.forward_to(chat.id)
+        if message.is_reply and msg.sender_id == self._tg_id:
+            await msg.delete()
+        msg = await message.client.send_message(self.config["channel"], msg)
+        await msg.forward_to(chat_id)
         if msg.out:
             await msg.delete()
 
