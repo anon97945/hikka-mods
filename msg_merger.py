@@ -1,4 +1,4 @@
-__version__ = (0, 0, 16)
+__version__ = (0, 0, 18)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,15 +17,14 @@ __version__ = (0, 0, 16)
 
 # scope: hikka_only
 # scope: hikka_min 1.1.28
-# requires: alphabet_detector
 
 import logging
+import emoji
 
 import collections  # for MigratorClass
 import hashlib  # for MigratorClass
 import copy     # for MigratorClass
 
-from alphabet_detector import AlphabetDetector
 from datetime import datetime, timezone
 from telethon.tl.types import Message
 
@@ -58,15 +57,6 @@ class ApodiktumMsgMergerMod(loader.Module):
         "_cfg_skip_prefix": "The prefix to skip the merging.",
         "_cfg_skip_reply": "Whether to skip the merging of messages with reply.",
         "_cfg_whitelist": "Whether the chatlist includes(True) or excludes(False) the chat.",
-    }
-
-    strings_en = {
-    }
-
-    strings_de = {
-    }
-
-    strings_ru = {
     }
 
     def __init__(self):
@@ -197,10 +187,9 @@ class ApodiktumMsgMergerMod(loader.Module):
     @staticmethod
     def is_emoji(message):
         text = message.raw_text
-        text.encode("utf-8")
-        detected_alphabet = AlphabetDetector().detect_alphabet(text)
-        alphabet_list = [each_string.lower() for each_string in list(detected_alphabet)]
-        return not alphabet_list
+        clean_text = emoji.replace_emoji(text, replace='')
+        return not clean_text
+
 
     async def cmsgmergercmd(self, message: Message):
         """
@@ -302,7 +291,10 @@ class ApodiktumMsgMergerMod(loader.Module):
                 and (datetime.now(timezone.utc) - (last_msg.edit_date or last_msg.date)).total_seconds() > self.config["edit_timeout"] * 60
             )
             and (
-                self.config["merge_own_reply"] and not message.is_reply
+                (
+                    self.config["merge_own_reply"] and not message.is_reply
+                )
+                or not self.config["merge_own_reply"]
             )
         ):
             return
