@@ -1,4 +1,4 @@
-__version__ = (0, 1, 7)
+__version__ = (0, 1, 9)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,12 +17,13 @@ __version__ = (0, 1, 7)
 
 # scope: hikka_only
 # scope: hikka_min 1.1.28
-# requires: alphabet_detector
+# requires: alphabet-detector
 
 import logging
 import asyncio
 import time
 import googletrans
+import emoji
 
 import collections  # for MigratorClass
 import hashlib  # for MigratorClass
@@ -150,6 +151,12 @@ class ApodiktumLangReplierMod(loader.Module):
         self._ad = AlphabetDetector()
         self._tr = googletrans.Translator()
 
+    @staticmethod
+    def is_emoji(message):
+        text = message.raw_text
+        clean_text = emoji.replace_emoji(text, replace='')
+        return not clean_text
+
     def _is_alphabet(self, message):
         text = message.raw_text
         denied_alphabet = ""
@@ -157,7 +164,7 @@ class ApodiktumLangReplierMod(loader.Module):
         detected_alphabet = self._ad.detect_alphabet(text)
         alphabet_list = [each_string.lower() for each_string in list(detected_alphabet)]
         for found_alphabet in alphabet_list:
-            if found_alphabet not in self.config["allowed_alphabets"]:
+            if found_alphabet not in self.config["allowed_alphabets"] and found_alphabet != "mathematical":
                 denied_alphabet += f", {found_alphabet}" if denied_alphabet else found_alphabet
         allowed_alphabet = not denied_alphabet
         return allowed_alphabet, denied_alphabet, detected_alphabet
@@ -199,6 +206,8 @@ class ApodiktumLangReplierMod(loader.Module):
             return
         allowed_alphabet, alphabet, detected_alphabet = self._is_alphabet(message)
         respond = not allowed_alphabet
+        if self.is_emoji(message):
+            return
         if (
             self.config["check_language"]
             and len(message.raw_text.split()) >= 4
