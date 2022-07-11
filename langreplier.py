@@ -1,4 +1,4 @@
-__version__ = (0, 1, 6)
+__version__ = (0, 1, 7)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -55,6 +55,7 @@ class ApodiktumLangReplierMod(loader.Module):
         "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_custom_message": "The custom message that will be sent.",
         "_cfg_lang_codes": "The list of language codes that the module will ignore.",
+        "_cfg_vodka_mode": "Whether the module will replace `cyrillic` in reply message with `vodka`.",
         "_cfg_whitelist": "Whether the chatlist includes(True) or excludes(False) the chat.",
     }
 
@@ -103,6 +104,12 @@ class ApodiktumLangReplierMod(loader.Module):
                 validator=loader.validators.Series(
                     loader.validators.String(length=2)
                 ),
+            ),
+            loader.ConfigValue(
+                "vodka_mode",
+                False,
+                doc=lambda: self.strings("_cfg_vodka_mode"),
+                validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
                 "whitelist",
@@ -216,6 +223,8 @@ class ApodiktumLangReplierMod(loader.Module):
         if self.config["check_language"] and full_lang:
             msg = await message.reply(self.config["custom_message"].format(full_lang))
         else:
+            if self.config["vodka_mode"] and "cyrillic" in alphabet:
+                alphabet = alphabet.replace("cyrillic", "vodka")
             msg = await message.reply(self.config["custom_message"].format(alphabet))
         await asyncio.sleep(15)
         await msg.delete()
