@@ -1,4 +1,4 @@
-__version__ = (0, 0, 13)
+__version__ = (0, 0, 14)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -114,7 +114,7 @@ class ApodiktumShowViewsMod(loader.Module):
         """
         chat_id = utils.get_chat_id(message)
         args = utils.get_args_raw(message)
-
+        msg = None
         if not self.config["channel"]:
             await utils.answer(message, self._strings("no_channel", utils.get_chat_id(message)))
             return
@@ -126,7 +126,10 @@ class ApodiktumShowViewsMod(loader.Module):
         await message.delete()
         if message.is_reply and msg.sender_id == self._tg_id:
             await msg.delete()
-        msg = await message.client.send_message(self.config["channel"], msg)
+        if msg:
+            msg = await message.client.send_message(self.config["channel"], msg)
+        else:
+            msg = await message.client.send_message(self.config["channel"], args)
         await msg.forward_to(chat_id)
         if msg.out:
             await msg.delete()
