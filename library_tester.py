@@ -150,4 +150,3 @@ class ApodiktumTestModuleMod(loader.Module):
         logger.error(self.apo_lib)
         self.apo_lib = self.lookup("Apo-Library")
         await utils.answer(message, "Refreshed ApodiktumLibrary.")
-    
