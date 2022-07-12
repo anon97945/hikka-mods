@@ -1,4 +1,4 @@
-__version__ = (0, 0, 22)
+__version__ = (0, 0, 23)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -245,7 +245,6 @@ class ApodiktumHerokuManagerMod(loader.Module):
         minutes = math.floor(minutes_remaining % 60)
 
         # Current
-        logger.error(result)
         App = result["apps"]
         try:
             for app in App:
