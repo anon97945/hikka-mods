@@ -88,24 +88,24 @@ class ApodiktumLibMod(loader.Module):
             await utils.answer(message, f"{self.get_prefix()}config {self._name}")
         )
 
-    def _strings(self, string: str, all_strings: dict, message):
 
+    def _strings(self, string: str, all_strings: dict, message):
         chat_id = utils.get_chat_id(message)
         if chat_id:
             languages = {}
             languages.clear()
-            if all_strings["strings_en"]:
-                languages["en_chats"] = all_strings["strings_en"]
-            if all_strings["strings_de"]:
-                languages["de_chats"] = all_strings["strings_de"]
-            if all_strings["strings_ru"]:
-                languages["ru_chats"] = all_strings["strings_ru"]
+            for lang, strings in all_strings.items():
+                if len(lang.split("_")) == 1:
+                    base_strings = lang
+                    languages[lang] = all_strings[lang]
+                if len(lang.split("_", 1)) == 2:
+                    languages[f"{lang.split('_', 1)[1]}_chats"] = {**all_strings[base_strings], **all_strings[lang]}
             for lang, strings in languages.items():
-                if chat_id in self.config[lang]:
+                if self.config[lang] and chat_id in self.config[lang]:
                     if string in strings:
-                        return strings[string]
+                        return strings[string].replace("<br>", "\n")
                     break
-        return all_strings["strings"][string]
+        return all_strings[base_strings][string].replace("<br>", "\n")
 
     async def _logger(self, log_string: str, name: str, log_channel: bool = True, error: bool = True, debug_mode: bool = False, debug_msg: bool = False):
         apo_logger = logging.getLogger(name)

@@ -38,8 +38,8 @@ class ApodiktumTestModuleMod(loader.Module):
     strings = {
         "name": "Apo-LibTester",
         "developer": "@anon97945",
-        "skeleton_msg": "This is a skeleton message.",
-        "skeleton2_msg": "This is a skeleton 2 message.",
+        "skeleton_msg": "Base Skeleton String msg.",
+        "skeleton2_msg": "Base Skeleton2 String msg.",
     }
 
     strings_en = {
@@ -58,7 +58,7 @@ class ApodiktumTestModuleMod(loader.Module):
     }
 
     all_strings = {
-        "strings": {**strings, **strings_en},
+        "strings": strings,
         "strings_en": strings_en,
         "strings_de": strings_de,
         "strings_ru": strings_ru,
@@ -84,7 +84,7 @@ class ApodiktumTestModuleMod(loader.Module):
 
     async def apodiktum_lib_loader(self, retries: int, delay: int):
         apodiktum_lib_name = "Apo-Library"
-        apodiktum_lib_link = "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_lib.py"
+        apodiktum_lib_link = "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py"
         link_valid = requests.head(apodiktum_lib_link).status_code < 400
         load_msg = None
         while True:
@@ -121,14 +121,14 @@ class ApodiktumTestModuleMod(loader.Module):
         """
         This is a skeleton command.
         """
-        await utils.answer(message, self.apo_lib._strings("skeleton_msg", self.all_strings, utils.get_chat_id(message)))
+        await utils.answer(message, self.apo_lib._strings("skeleton_msg", self.all_strings, message))
         return
 
     async def skeleton2cmd(self, message):
         """
         This is a skeleton command.
         """
-        await utils.answer(message, self.apo_lib._strings("skeleton2_msg", self.all_strings, utils.get_chat_id(message)))
+        await utils.answer(message, self.apo_lib._strings("skeleton2_msg", self.all_strings, message))
         return
 
     async def capotestcmd(self, message: Message):
