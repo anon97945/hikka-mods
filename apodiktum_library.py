@@ -36,6 +36,9 @@ class ApodiktumLibMod(loader.Module):
         "name": "Apo-Library",
         "developer": "@anon97945",
         "_cfg_translation_chats": "Define Chats where the translation is forced.",
+        "incorrect_language": "🚫 <b>Incorrect language specified.</b>",
+        "lang_saved": "{} <b>forced language saved!</b>",
+        "forced_lang": "<b>Forced language {}!</b>",
     }
 
     strings_de = {
@@ -79,6 +82,7 @@ class ApodiktumLibMod(loader.Module):
         self._db = db
         self._client = client
         self._name = self.strings("name")
+        self._classname = self.__class__.__name__
 
     async def capolibcmd(self, message: Message):
         """
@@ -88,10 +92,47 @@ class ApodiktumLibMod(loader.Module):
             await utils.answer(message, f"{self.get_prefix()}config {self._name}")
         )
 
+    async def fclcmd(self, message: Message):
+        """
+        force language of modules in this chat.
+        """
+        args = utils.get_args_raw(message)
+        chat_id = utils.get_chat_id(message)
+        chatid_str = str(chat_id)
+        lib_db = self._db[self._classname]
+        chats_db = lib_db.setdefault("chats", {})
+        chatid_db = chats_db.setdefault(chatid_str, {})
+
+        if not args:
+            if len(args) != 2 and len(args) != 0:
+                await utils.answer(message, self.strings("incorrect_language"))
+                return
+            await utils.answer(
+                message,
+                self.strings("forced_lang").format(
+                    utils.get_lang_flag(chatid_db.get("forced_lang").lower() if chatid_db.get("forced_lang").lower() != "en" else "gb")
+                ),
+            )
+            return
+
+        chatid_db.update({"forced_lang": args.lower()})
+        self._db.set(self._classname, "chats", chats_db)
+
+        await utils.answer(
+            message,
+            self.strings("lang_saved").format(
+                utils.get_lang_flag(args.lower() if args.lower() != "en" else "gb")
+            ),
+        )
 
     def _strings(self, string: str, all_strings: dict, message):
         chat_id = utils.get_chat_id(message)
         if chat_id:
+            chatid_str = str(chat_id)
+            lib_db = self._db[self._classname]
+            chats_db = lib_db.setdefault("chats", {})
+            chatid_db = chats_db.setdefault(chatid_str, {})
+            forced_lang = chatid_db.get("forced_lang")
             languages = {}
             languages.clear()
             for lang, strings in all_strings.items():
@@ -99,9 +140,9 @@ class ApodiktumLibMod(loader.Module):
                     base_strings = lang
                     languages[lang] = all_strings[lang]
                 if len(lang.split("_", 1)) == 2:
-                    languages[f"{lang.split('_', 1)[1]}_chats"] = {**all_strings[base_strings], **all_strings[lang]}
+                    languages[lang.split('_', 1)[1]] = {**all_strings[base_strings], **all_strings[lang]}
             for lang, strings in languages.items():
-                if self.config[lang] and chat_id in self.config[lang]:
+                if lang and forced_lang == lang:
                     if string in strings:
                         return strings[string].replace("<br>", "\n")
                     break
