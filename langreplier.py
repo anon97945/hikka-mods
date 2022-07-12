@@ -1,4 +1,4 @@
-__version__ = (0, 1, 9)
+__version__ = (0, 1, 10)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -58,6 +58,7 @@ class ApodiktumLangReplierMod(loader.Module):
         "_cfg_lang_codes": "The list of language codes that the module will ignore.",
         "_cfg_vodka_mode": "Whether the module will replace `cyrillic` in reply message with `vodka`.",
         "_cfg_whitelist": "Whether the chatlist includes(True) or excludes(False) the chat.",
+        "_cfg_auto_translate": "Whether the module will auto translate the message(or not).",
     }
 
     def __init__(self):
@@ -73,6 +74,15 @@ class ApodiktumLangReplierMod(loader.Module):
                 False,
                 doc=lambda: self.strings("_cfg_check_lang"),
                 validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
+                "auto_translate",
+                "en",
+                doc=lambda: self.strings("_cfg_auto_translate"),
+                validator=loader.validators.Union(
+                    loader.validators.String(length=2),
+                    loader.validators.NoneType(),
+                ),
             ),
             loader.ConfigValue(
                 "allowed_alphabets",
@@ -91,12 +101,15 @@ class ApodiktumLangReplierMod(loader.Module):
             ),
             loader.ConfigValue(
                 "custom_message",
-                "<b>[🤖 Automatic]</b> <u>I don't understand {}.</u>\n<b>Sorry.</b> 😉",
+                "<b>[🤖 Automatic]</b> <u>I don't understand {}.</u><br><b>Sorry.</b> 😉{}",
                 doc=lambda: self.strings("_cfg_custom_message"),
-                validator=loader.validators.Union(
-                    loader.validators.String(),
-                    loader.validators.NoneType(),
-                ),
+                validator=loader.validators.String(),
+            ),
+            loader.ConfigValue(
+                "custom_transl_msg",
+                "<br><br>Translation <code>{}</code>-><code>{}</code><br><code>{}</code>",
+                doc=lambda: self.strings("_cfg_custom_message"),
+                validator=loader.validators.String(),
             ),
             loader.ConfigValue(
                 "lang_codes",
@@ -176,7 +189,7 @@ class ApodiktumLangReplierMod(loader.Module):
             full_lang = googletrans.LANGUAGES[lang_code]
         else:
             full_lang = lang_code
-        return (True, None) if lang_code in self.config["lang_codes"] else (False, full_lang)
+        return (True, None, None) if lang_code in self.config["lang_codes"] else (False, full_lang, lang_code)
 
     async def clangrepliercmd(self, message: Message):
         """
@@ -189,6 +202,7 @@ class ApodiktumLangReplierMod(loader.Module):
 
     async def watcher(self, message):
         full_lang = ""
+        delay = 15
         if (
             not isinstance(message, Message)
             or not self.config["active"]
@@ -209,13 +223,18 @@ class ApodiktumLangReplierMod(loader.Module):
         if self.is_emoji(message):
             return
         if (
-            self.config["check_language"]
-            and len(message.raw_text.split()) >= 4
-            and len(message.raw_text) >= 12
-            and detected_alphabet
-            and not respond
+            (
+                self.config["check_language"]
+                and len(message.raw_text.split()) >= 4
+                and len(message.raw_text) >= 12
+                and detected_alphabet
+                and not respond
+            )
+            or (
+                self.config["auto_translate"]
+            )
         ):
-            allowed_lang, full_lang = await self._check_lang(message)
+            allowed_lang, full_lang, lang_code = await self._check_lang(message)
             if not allowed_lang:
                 respond = True
         if not respond:
@@ -229,13 +248,24 @@ class ApodiktumLangReplierMod(loader.Module):
         if user_id not in self._fw_protect:
             self._fw_protect[user_id] = []
         self._fw_protect[user_id] += [time.time() + 5 * 60]
+        if self.config["auto_translate"]:
+            text = message.raw_text.lower()
+            to_lang = self.config["auto_translate"]
+            translated = (await utils.run_sync(self._tr.translate, text, dest=to_lang, src=lang_code)).text
+            delay = 30
         if self.config["check_language"] and full_lang:
-            msg = await message.reply(self.config["custom_message"].format(full_lang))
+            if self.config["auto_translate"]:
+                msg = await message.reply(self.config["custom_message"].format(full_lang, self.config["custom_transl_msg"].format(lang_code, to_lang, translated)).replace("<br>", "\n"))
+            else:
+                msg = await message.reply(self.config["custom_message"].format(full_lang).replace("<br>", "\n"))
         else:
             if self.config["vodka_mode"] and "cyrillic" in alphabet:
                 alphabet = alphabet.replace("cyrillic", "vodka")
-            msg = await message.reply(self.config["custom_message"].format(alphabet))
-        await asyncio.sleep(15)
+            if self.config["auto_translate"]:
+                msg = await message.reply(self.config["custom_message"].format(alphabet, self.config["custom_transl_msg"].format(lang_code, to_lang, translated)).replace("<br>", "\n"))
+            else:
+                msg = await message.reply(self.config["custom_message"].format(alphabet).replace("<br>", "\n"))
+        await asyncio.sleep(delay)
         await msg.delete()
         return
 
