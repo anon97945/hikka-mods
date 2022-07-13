@@ -1,4 +1,4 @@
-__version__ = (0, 0, 7)
+__version__ = (0, 0, 8)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -75,8 +75,7 @@ class ApodiktumTestModuleMod(loader.Module):
 
     def __getattribute__(self, name):
         if name == "apo_lib":
-            apo_lib = self.lookup("Apo-Library")
-            if apo_lib:
+            if apo_lib := self.lookup("Apo-Library"):
                 return apo_lib
             logger.error("Apo-Library is not loaded. Inititiating installation.")
             return asyncio.ensure_future(self.apodiktum_lib_loader(retries=60, delay=1))
@@ -106,8 +105,8 @@ class ApodiktumTestModuleMod(loader.Module):
                 load_msg = await self._client.send_message("me", f"{self.get_prefix()}dlmod {apodiktum_lib_link}")
                 await self.allmodules.commands["dlmod"](load_msg)
             else:
-                async for msgs in self._client.iter_messages(entity=-1001792410946):
-                    if "#ApoLibModuleInstaller" in msg.text:
+                async for msgs in self._client.iter_messages(entity=-1001757846320):
+                    if "#ApoLibModuleInstaller" in msgs.text:
                         msg = await self._client.send_message("me", message=msgs)
                         break
                 if not msg:
@@ -121,14 +120,14 @@ class ApodiktumTestModuleMod(loader.Module):
         """
         This is a skeleton command.
         """
-        await utils.answer(message, self.apo_lib._strings("skeleton_msg", self.all_strings, message))
+        await utils.answer(message, self.apo_lib.get_str("skeleton_msg", self.all_strings, message))
         return
 
     async def skeleton2cmd(self, message):
         """
         This is a skeleton command.
         """
-        await utils.answer(message, self.apo_lib._strings("skeleton2_msg", self.all_strings, message))
+        await utils.answer(message, self.apo_lib.get_str("skeleton2_msg", self.all_strings, message))
         return
 
     async def capotestcmd(self, message: Message):

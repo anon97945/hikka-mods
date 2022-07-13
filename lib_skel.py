@@ -1,4 +1,22 @@
+__version__ = (0, 0, 9)
+
+
+# ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
+# █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
+#
+#              © Copyright 2022
+#
+#             developed by @secondtimeusername
+#
+#          https://t.me/apodiktum_modules
+#
+# 🔒 Licensed under the GNU GPLv3
+# 🌐 https://www.gnu.org/licenses/gpl-3.0.html
+
+# meta developer: @apodiktum_modules
+
 # scope: hikka_only
+# scope: hikka_min 1.1.28
 
 import asyncio
 import logging
@@ -17,17 +35,18 @@ class ApoModule:
     client: telethon.TelegramClient
 
     async def _wait_load(self):
-        retries = 500
+        retries = 5
         delay = 5
         while retries:
             if maybe_apo := self.lookup("Apo-Library"):
                 return maybe_apo
             retries -= 1
+            logger.error("ApoLib not found, retrying in %s seconds", delay)
             await asyncio.sleep(delay)
 
     async def _load_github(self):
         link = (
-            "https://pastebin.com/raw/rifYtTiE"  # Swap this out to the actual lib link!
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py"  # Swap this out to the actual lib link!
         )
         async with aiohttp.ClientSession() as session:
             async with session.head(link) as response:
@@ -36,12 +55,24 @@ class ApoModule:
         link_message = await self.client.send_message(
             "me", f"{self.get_prefix()}dlmod {link}"
         )
-
         await self.allmodules.commands["dlmod"](link_message)
-        return await self._wait_load()
+        maybe_apo = await self._wait_load()
+        await link_message.delete()
+        return maybe_apo
 
     async def _load_telegram(self):
-        return None
+        msg = None
+        async for msgs in self.client.iter_messages(entity=-1001757846320):
+            if msgs.text and "#ApoLibModuleInstaller" in msgs.text:
+                msg = await self.client.send_message("me", message=msgs)
+                break
+        if not msg:
+            logger.error("Could not find ApoLib in telegram.")
+            return False
+        await self.allmodules.commands["loadmod"](await msg.edit(f"{self.get_prefix()}loadmod"))
+        maybe_apo = await self._wait_load()
+        await msg.delete()
+        return maybe_apo
 
     async def ensure_apo(self):
         if not self._apo_refresh():
@@ -58,13 +89,21 @@ class ApoModule:
         return None
 
     def _apo_refresh(self):
-        if maybe_apo := self.lookup("Apo-Library"):
+        if maybe_apo :=self.lookup("Apo-Library"):
+            self._apo_found = True
+            logger.error("ApoLib found!")
             return maybe_apo
+        else:
+            self._apo_found = False
+            logger.error("ApoLib not found!")
+            return None
+
 
     def _handle_uninit(self, cmd_func: Callable):
         async def handling(message: Message):
             if not getattr(cmd_func.__self__, "_apo_found", True):
-                await utils.answer(message, "Could not find ApoLib")
+                logger.error("Could not find ApoLib for module %s", __class__.__name__)
+                await self.ensure_apo()
                 return
             await cmd_func(message)
 
@@ -81,12 +120,15 @@ class ApoModule:
 
 
 @loader.tds
-class SkeletonMod(ApoModule, loader.Module):
+class SkeletonMod(loader.Module, ApoModule):
     """
     This is a skeleton module.
     """
 
-    strings = {"name": "Skeleton"}
+    strings = {
+        "name": "SkeletonMod",
+        "greet": "BaseString Hello!",
+    }
 
     strings_en = {"greet": "Hello!"}
 
@@ -95,7 +137,7 @@ class SkeletonMod(ApoModule, loader.Module):
     strings_de = {"greet": "Hallo!"}
 
     all_strings = {
-        "strings": {**strings, **strings_en},  # Python 3.8 is sad
+        "strings": strings,
         "strings_en": strings_en,
         "strings_de": strings_de,
         "strings_ru": strings_ru,
@@ -106,7 +148,7 @@ class SkeletonMod(ApoModule, loader.Module):
         self.db = db
         await self.ensure_apo()  # Has to be present whether you use apo in client_ready or not
         if self.apo:
-            self.apo.log("Hello from client_ready!")
+            self.apo._logger("Hello from client_ready!", name=__class__.__name__, log_channel=True, error=True, debug_mode=False, debug_msg=False)
 
     # Port these commands to the actual lib!
 
@@ -116,5 +158,5 @@ class SkeletonMod(ApoModule, loader.Module):
         )
 
     async def watcher(self, message: Message):
-        if message.message == "Skel":
+        if isinstance(message, Message) and message.message == "ApoSkelWatcher":
             await utils.answer(message, "Skeleton")

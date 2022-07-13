@@ -1,4 +1,22 @@
+__version__ = (0, 0, 3)
+
+
+# ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
+# █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
+#
+#              © Copyright 2022
+#
+#             developed by @secondtimeusername
+#
+#          https://t.me/apodiktum_modules
+#
+# 🔒 Licensed under the GNU GPLv3
+# 🌐 https://www.gnu.org/licenses/gpl-3.0.html
+
+# meta developer: @apodiktum_modules
+
 # scope: hikka_only
+# scope: hikka_min 1.1.28
 
 import logging
 
