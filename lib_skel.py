@@ -20,8 +20,7 @@ class ApoModule:
         retries = 500
         delay = 5
         while retries:
-            maybe_apo = self.lookup("Apo-Library")
-            if maybe_apo:
+            if maybe_apo := self.lookup("Apo-Library"):
                 return maybe_apo
             retries -= 1
             await asyncio.sleep(delay)
@@ -35,8 +34,9 @@ class ApoModule:
                 if response.status >= 300:
                     return None
         link_message = await self.client.send_message(
-            "me", self.get_prefix() + "dlmod " + link
+            "me", f"{self.get_prefix()}dlmod {link}"
         )
+
         await self.allmodules.commands["dlmod"](link_message)
         return await self._wait_load()
 
@@ -58,8 +58,7 @@ class ApoModule:
         return None
 
     def _apo_refresh(self):
-        maybe_apo = self.lookup("Apo-Library")
-        if maybe_apo:
+        if maybe_apo := self.lookup("Apo-Library"):
             return maybe_apo
 
     def _handle_uninit(self, cmd_func: Callable):

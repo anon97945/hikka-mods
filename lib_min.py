@@ -60,7 +60,7 @@ class ApodiktumLibMod(loader.Module):
         This will open the config for the module.
         """
         await self.allmodules.commands["config"](
-            await utils.answer(message, self.get_prefix() + "config " + self._name)
+            await utils.answer(message, f"{self.get_prefix()}config {self._name}")
         )
 
     ### APO ROUTINES
@@ -71,10 +71,10 @@ class ApodiktumLibMod(loader.Module):
         chat_langs = [
             lang
             for lang in avail_langs
-            if (
-                self.config[lang + "_chats"] and chat_id in self.config[lang + "_chats"]
-            )
+            if self.config[f"{lang}_chats"]
+            and chat_id in self.config[f"{lang}_chats"]
         ]
+
         if len(chat_langs) != 1 or (
             len(chat_langs) == 1 and not all_strings[chat_langs[0]].get(string)
         ):
@@ -86,7 +86,7 @@ class ApodiktumLibMod(loader.Module):
                 important=False,
             )
         else:
-            ent = "strings_" + chat_langs[0]
+            ent = f"strings_{chat_langs[0]}"
         try:
             return all_strings[ent][string]
         except KeyError:
