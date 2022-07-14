@@ -51,9 +51,7 @@ class ApodiktumLibraryFunctions:
         apo_logger = logging.getLogger(name)
         if (not debug_msg and log_channel and not error) or (debug_mode and debug_msg):
             return apo_logger.info(log_string)
-        if error:
-            return apo_logger.error(log_string)
-        return apo_logger.debug(log_string)
+        return apo_logger.error(log_string) if error else apo_logger.debug(log_string)
 
 
 @loader.tds
