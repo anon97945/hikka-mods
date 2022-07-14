@@ -1,4 +1,4 @@
-__version__ = (0, 0, 5)
+__version__ = (0, 0, 8)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -16,14 +16,71 @@ __version__ = (0, 0, 5)
 # meta developer: @apodiktum_modules
 
 
+import asyncio
 import logging
-import telethon
+from typing import Callable
 
+import aiohttp
+import telethon
 from telethon.tl.types import Message
 
 from .. import loader, utils
 
 logger = logging.getLogger(__name__)
+
+
+class ControllerLoader():
+    client: telethon.TelegramClient
+
+    async def ensure_controller(self):
+        while True:
+            if not self._controller_refresh():
+                await self._init_controller()
+            await asyncio.sleep(5)
+
+    async def _init_controller(self):
+        logger.error("ApoLibController not found, attempting to load...")
+        load_github = await self._load_github()
+        if load_github:
+            return load_github
+        self._controller_found = False
+        return None
+
+    def _controller_refresh(self):
+        if maybe_controller :=self.modules.lookup("Apo-LibController"):
+            self._controller_found = True
+            logger.error("ApoLibController found!")
+            return maybe_controller
+        else:
+            self._controller_found = False
+            logger.error("ApoLibController not found!")
+            return False
+
+    async def _load_github(self):
+        link = (
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apolib_controller.py"  # Swap this out to the actual libcontroller link!
+        )
+        async with aiohttp.ClientSession() as session:
+            async with session.head(link) as response:
+                if response.status >= 300:
+                    return None
+        link_message = await self.client.send_message(
+            "me", f"{self.get_prefix()}dlmod {link}"
+        )
+        await self.allmodules.commands["dlmod"](link_message)
+        maybe_controller = await self._wait_load()
+        await link_message.delete()
+        return maybe_controller
+
+    async def _wait_load(self):
+        retries = 50
+        delay = 5
+        while retries:
+            if maybe_controller := self.modules.lookup("Apo-LibController"):
+                return maybe_controller
+            retries -= 1
+            logger.error("ApoLibController not found, retrying in %s seconds", delay)
+            await asyncio.sleep(delay)
 
 
 class ApodiktumLibraryFunctions:
@@ -54,10 +111,12 @@ class ApodiktumLibraryFunctions:
         return apo_logger.debug(log_string)
 
 
-class ApodiktumLib(ApodiktumLibraryFunctions, loader.Library):
+class ApodiktumLib(ControllerLoader, ApodiktumLibraryFunctions, loader.Library):
     developer = "@apodiktum_modules"
 
     async def init(self):
         self._classname = self.__class__.__name__
         self._lib_db = self._db[self._classname]
         self._chats_db = self._lib_db.setdefault("chats", {})
+        # return asyncio.ensure_future(self.ensure_controller()) #  Lookup does not work with libs(?)
+        logger.info("Apodiktum Library v%s.%s.%s successfully loaded!", *__version__)
