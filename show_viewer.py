@@ -1,4 +1,4 @@
-__version__ = (0, 0, 9)
+__version__ = (0, 0, 15)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -16,7 +16,7 @@ __version__ = (0, 0, 9)
 # meta developer: @apodiktum_modules
 
 # scope: hikka_only
-# scope: hikka_min 1.1.28
+# scope: hikka_min 1.2.10
 
 from .. import loader, utils
 from telethon.tl.types import Message
@@ -43,9 +43,9 @@ class ApodiktumShowViewsMod(loader.Module):
         "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_cst_channel": "The Channel ID to send the message from.",
         "no_args": "No message to send.",
-        "views": "Total <code>{}</code> views.",
         "no_channel": "No channel set.",
         "no_reply": "You need to reply to a message.",
+        "views": "Total <code>{}</code> views.",
     }
 
     def __init__(self):
@@ -82,6 +82,7 @@ class ApodiktumShowViewsMod(loader.Module):
     async def client_ready(self, client, db):
         self._db = db
         self._client = client
+        self.base_strings = self.strings._base_strings
         # MigratorClass
         self._migrator = MigratorClass()  # MigratorClass define
         await self._migrator.init(client, db, self, self.__class__.__name__, self.strings("name"), self.config["auto_migrate_log"], self.config["auto_migrate_debug"])  # MigratorClass Initiate
@@ -91,7 +92,14 @@ class ApodiktumShowViewsMod(loader.Module):
     def _strings(self, string: str, chat_id: int = None):
         if self.lookup("Apo-Translations") and chat_id:
             forced_translation_db = self.lookup("Apo-Translations").config
-            languages = {}
+            strings_en = self.strings_en if getattr(self, "strings_en", False) else {}
+            strings_de = self.strings_de if getattr(self, "strings_de", False) else {}
+            strings_ru = self.strings_ru if getattr(self, "strings_ru", False) else {}
+            languages = {
+                "en_chats": {**self.base_strings, **strings_en},
+                "de_chats": {**self.base_strings, **strings_de},
+                "ru_chats": {**self.base_strings, **strings_ru},
+            }
             for lang, strings in languages.items():
                 if chat_id in forced_translation_db[lang]:
                     if string in strings:
@@ -104,9 +112,9 @@ class ApodiktumShowViewsMod(loader.Module):
         """
         <message/reply to msg> Send a message to get the current count of viewers with that message.
         """
-        chat = message.chat
+        chat_id = utils.get_chat_id(message)
         args = utils.get_args_raw(message)
-
+        msg = None
         if not self.config["channel"]:
             await utils.answer(message, self._strings("no_channel", utils.get_chat_id(message)))
             return
@@ -116,11 +124,13 @@ class ApodiktumShowViewsMod(loader.Module):
             await utils.answer(message, self._strings("no_args", utils.get_chat_id(message)))
             return
         await message.delete()
-        if message.is_reply:
+        if message.is_reply and msg.sender_id == self._tg_id:
+            await msg.delete()
+        if msg:
             msg = await message.client.send_message(self.config["channel"], msg)
         else:
             msg = await message.client.send_message(self.config["channel"], args)
-        await msg.forward_to(chat.id)
+        await msg.forward_to(chat_id)
         if msg.out:
             await msg.delete()
 

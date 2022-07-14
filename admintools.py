@@ -1,4 +1,4 @@
-__version__ = (1, 0, 8)
+__version__ = (1, 0, 10)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -16,7 +16,7 @@ __version__ = (1, 0, 8)
 # meta developer: @apodiktum_modules
 
 # scope: hikka_only
-# scope: hikka_min 1.1.28
+# scope: hikka_min 1.2.10
 
 import asyncio
 import logging
@@ -306,6 +306,7 @@ class ApodiktumAdminToolsMod(loader.Module):
     async def client_ready(self, client, db):
         self._db = db
         self._client = client
+        self.base_strings = self.strings._base_strings
         self._pt_task = asyncio.ensure_future(self._global_queue_handler())
         # MigratorClass
         self._migrator = MigratorClass()  # MigratorClass define
@@ -320,7 +321,14 @@ class ApodiktumAdminToolsMod(loader.Module):
     def _strings(self, string: str, chat_id: int = None):
         if self.lookup("Apo-Translations") and chat_id:
             forced_translation_db = self.lookup("Apo-Translations").config
-            languages = {"en_chats": self.strings_en, "de_chats": self.strings_de, "ru_chats": self.strings_ru}
+            strings_en = self.strings_en if getattr(self, "strings_en", False) else {}
+            strings_de = self.strings_de if getattr(self, "strings_de", False) else {}
+            strings_ru = self.strings_ru if getattr(self, "strings_ru", False) else {}
+            languages = {
+                "en_chats": {**self.base_strings, **strings_en},
+                "de_chats": {**self.base_strings, **strings_de},
+                "ru_chats": {**self.base_strings, **strings_ru},
+            }
             for lang, strings in languages.items():
                 if chat_id in forced_translation_db[lang]:
                     if string in strings:

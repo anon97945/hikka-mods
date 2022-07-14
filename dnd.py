@@ -1,4 +1,4 @@
-__version__ = (0, 1, 25)
+__version__ = (0, 1, 29)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -13,10 +13,10 @@ __version__ = (0, 1, 25)
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
 
-
 # meta developer: @apodiktum_modules
+
 # scope: hikka_only
-# scope: hikka_min 1.1.28
+# scope: hikka_min 1.2.10
 
 # █ █ ▀ █▄▀ ▄▀█ █▀█ ▀    ▄▀█ ▀█▀ ▄▀█ █▀▄▀█ ▄▀█
 # █▀█ █ █ █ █▀█ █▀▄ █ ▄  █▀█  █  █▀█ █ ▀ █ █▀█
@@ -31,6 +31,7 @@ import contextlib
 import datetime
 import logging
 import time
+import re
 
 import collections  # for MigratorClass
 import hashlib  # for MigratorClass
@@ -69,26 +70,31 @@ class ApodiktumDNDMod(loader.Module):
         "developer": "@anon97945",
         "_cfg_active_threshold": "What number of your messages is required to trust peer.",
         "_cfg_afk_no_grp": "If set to true, AFK will not reply in groups.",
+        "_cfg_afk_show_length": "If set to true, AFK message will include the the automatic removal time.",
+        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
+        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
+        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_custom_msg": "Custom message to notify untrusted peers. Leave empty for default one.",
         "_cfg_delete_dialog": "If set to true, dialog will be deleted after banning.",
+        "_cfg_gone": "If set to true, the AFK message will include the time you were gone.",
         "_cfg_ignore_active": "If set to true, ignore peers, where you participated.",
         "_cfg_ignore_contacts": "If set to true, ignore contacts.",
-        "_cfg_gone": "If set to true, the AFK message will include the time you were gone.",
         "_cfg_photo": "Photo, which is sent along with banned notification.",
         "_cfg_pmbl": "If set to true, PMBL is active.",
         "_cfg_report_spam": "If set to true, user will be reported after banning.",
         "_log_msg_approved": "User approved in pm {}, filter: {}",
         "_log_msg_punished": "Intruder punished: {}",
         "_log_msg_unapproved": "User unapproved in pm {}.",
-        "afk_message_gone": "{}\n\n<b><u>Gone since:</u></b>\n<code>{}h</code>",
-        "afk_message_nogone": "{}",
+        "afk_message": "{}",
+        "afk_message_gone": "\n\n<b><u>Gone since:</u></b>\n<code>{}h</code>",
+        "afk_message_length": "\n<b><u>AFK for:</u></b>\n<code>{}h</code>",
         "approved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> approved in pm.</b>',
         "args_pmban": "ℹ️ <b>Example usage: </b><code>.pmbanlast 5</code>",
         "available_statuses": "<b>🦊 Available statuses:</b>\n\n",
         "banned": ("😊 <b>Hey there •ᴗ•</b>\n<b>i am Unit «SIGMA»<b>, the <b>guardian</b> of this account. You are <b>not approved</b>! "
                    "You can contact my owner <b>in a groupchat</b>, if you need help.\n<b>I need to ban you in terms of security.</b>"),
         "banned_log": ('👮 <b>I banned <a href="tg://user?id={}">{}</a>.</b>\n\n<b>{} Contact</b>\n<b>{} Started by you</b>\n<b>{} '
-                       'Active conversation</b>\n\n<b>✊ Actions</b>\n\n<b>{} Reported spam</b>\n<b>{} Deleted dialog</b>\n<b>{} Banned</b>\n\n<b>ℹ️ Message</b>\n<code>{}</code>'),
+                       'Active conversation</b>\n\n<b>✊ Actions</b>\n\n<b>{} Reported spam</b>\n<b>{} Deleted dialog</b>\n<b>{} Blocked</b>\n\n<b>ℹ️ Message</b>\n<code>{}</code>'),
         "blocked": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> blocked.</b>',
         "hello": "🔏 <b>Unit «SIGMA»</b> protects your personal messages from intrusions. It will block everyone, who's trying to invade you.\n\nUse <code>.pmbanlast</code> if you've already been pm-raided.",
         "no_pchat": "<b>This command is only available in private chats.</b>",
@@ -101,39 +107,7 @@ class ApodiktumDNDMod(loader.Module):
         "status_created": "<b>✅ Status {} created.</b>\n<code>{}</code>\nNotify: {}",
         "status_not_found": "<b>🚫 Status not found.</b>",
         "status_removed": "<b>✅ Status {} deleted.</b>",
-        "status_set": "<b>✅ Status set\n</b><code>{}</code>\nNotify: {}",
-        "status_unset": "<b>✅ Status removed.</b>",
-        "unapproved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> unapproved in pm.</b>',
-        "unblocked": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> unblocked.</b>',
-        "user_not_specified": "🚫 <b>You haven't specified user.</b>",
-        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
-        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
-        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
-    }
-
-    strings_en = {
-        "afk_message_gone": "{}\n\n<b><u>Gone since:</u></b>\n<code>{}h</code>",
-        "afk_message_nogone": "{}",
-        "approved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> approved in pm.</b>',
-        "args_pmban": "ℹ️ <b>Example usage: </b><code>.pmbanlast 5</code>",
-        "available_statuses": "<b>🦊 Available statuses:</b>\n\n",
-        "banned": ("😊 <b>Hey there •ᴗ•</b>\n<b>i am Unit «SIGMA»<b>, the <b>guardian</b> of this account. You are <b>not approved</b>! "
-                   "You can contact my owner <b>in a groupchat</b>, if you need help.\n<b>I need to ban you in terms of security.</b>"),
-        "banned_log": ('👮 <b>I banned <a href="tg://user?id={}">{}</a>.</b>\n\n<b>{} Contact</b>\n<b>{} Started by you</b>\n<b>{} '
-                       'Active conversation</b>\n\n<b>✊ Actions</b>\n\n<b>{} Reported spam</b>\n<b>{} Deleted dialog</b>\n<b>{} Banned</b>\n\n<b>ℹ️ Message</b>\n<code>{}</code>'),
-        "blocked": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> blocked.</b>',
-        "hello": "🔏 <b>Unit «SIGMA»</b> protects your personal messages from intrusions. It will block everyone, who's trying to invade you.\n\nUse <code>.pmbanlast</code> if you've already been pm-raided.",
-        "no_pchat": "<b>This command is only available in private chats.</b>",
-        "no_reply": "ℹ️ <b>Reply to a message to block the user.</b>",
-        "no_status": "<b>🚫 No status is active.</b>",
-        "pm_reported": "⚠️ <b>You just got reported to spam !</b>",
-        "pzd_with_args": "<b>🚫 Args are incorrect.</b>",
-        "removed": "😶‍🌫️ <b>Removed {} last dialogs!</b>",
-        "removing": "😶‍🌫️ <b>Removing {} last dialogs...</b>",
-        "status_created": "<b>✅ Status {} created.</b>\n<code>{}</code>\nNotify: {}",
-        "status_not_found": "<b>🚫 Status not found.</b>",
-        "status_removed": "<b>✅ Status {} deleted.</b>",
-        "status_set": "<b>✅ Status set\n</b><code>{}</code>\nNotify: {}",
+        "status_set": "<b>✅ Status set\n</b><code>{}</code>\nNotify: {}\nLength: {}h",
         "status_unset": "<b>✅ Status removed.</b>",
         "unapproved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> unapproved in pm.</b>',
         "unblocked": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> unblocked.</b>',
@@ -150,30 +124,32 @@ class ApodiktumDNDMod(loader.Module):
         "_cmd_doc_denypm": "<ответ или username> - Запрещает пользователю писать вам в ЛС.",
         "_cmd_doc_report": "<ответ> - Отправляет жалобу на пользователя на СПАМ. Использовать только в ЛС.",
         "_cmd_doc_block": "<ответ> - Блокирует этого пользователя без предупреждения.",
-        "_cmd_doc_unblock": "<ответ> - Разблокировать этого пользователя.",
+        "_cmd_doc_unblock": "<ответ> - Рsoазблокировать этого пользователя.",
         "_cmd_doc_delstatus": "<короткое_название> - Удаляет статус.",
         "_cmd_doc_newstatus": ("<короткое_название> <notif|0/1> <text>\n"
                                " - Новый статус\n"
                                " - Пример: .newstatus test 1 Привет!"),
+        "_cfg_active_threshold": "Какое количество Ваших сообщений необходимо, чтобы доверять пользователю.",
+        "_cfg_afk_no_grp": "Если установлено True, AFK не будет отвечать в группах.",
+        "_cfg_afk_show_length": "Если True, AFK-сообщение будет указывать время автоматического самоудаления",
+        "_cfg_custom_msg": "Кастомное оповещение неодобренных пользователей. Оставьте пустым, чтобы оставить по умолчанию.",
+        "_cfg_delete_dialog": "Если установлено true, диалог будет удалён после блокировки.",
+        "_cfg_gone": "Если установлено true, AFK сообщение будет включать время, когда вы ушли.",
+        "_cfg_ignore_active": "Если установлено true, игнорирует диалоги, где вы участвовали.",
+        "_cfg_ignore_contacts": "Если установлено true, игнорирует контакты.",
+        "_cfg_photo": "Фото, которое отправляется вместе с уведомлением о блокировке",
+        "_cfg_pmbl": "Если установлено true, PMBL активирован.",
+        "_cfg_report_spam": "Если установлено true, после блокировки на пользователя будет отправлена жалоба.",
         "_cmd_doc_pmbanlast": "<число> - Блокирует и удаляет диалоги с большим кол-вом новых пользователей.",
         "_cmd_doc_status": "<короткое_название> - Устанавливает статус.",
         "_cmd_doc_statuses": " - Показывает доступные статусы.",
         "_cmd_doc_unstatus": " - Удаляет статус.",
-        "_cfg_active_threshold": "Какое количество Ваших сообщений необходимо, чтобы доверять пользователю.",
-        "_cfg_afk_no_grp": "Если установлено True, AFK не будет отвечать в группах.",
-        "_cfg_custom_msg": "Кастомное оповещение неодобренных пользователей. Оставьте пустым, чтобы оставить по умолчанию.",
-        "_cfg_delete_dialog": "Если установлено true, диалог будет удалён после блокировки.",
-        "_cfg_ignore_active": "Если установлено true, игнорирует диалоги, где вы участвовали.",
-        "_cfg_ignore_contacts": "Если установлено true, игнорирует контакты.",
-        "_cfg_gone": "Если установлено true, AFK сообщение будет включать время, когда вы ушли.",
-        "_cfg_photo": "Фото, которое отправляется вместе с уведомлением о блокировке",
-        "_cfg_pmbl": "Если установлено true, PMBL активирован.",
-        "_cfg_report_spam": "Если установлено true, после блокировки на пользователя будет отправлена жалоба.",
         "_log_msg_approved": "Пользователь {} допущен в ЛС, фильтр: {}",
         "_log_msg_punished": "Нарушитель наказан: {}",
         "_log_msg_unapproved": "Пользователь {} не допущен к ЛС.",
-        "afk_message_gone": "{}\n\n<b><u>Ушёл уже как:</u></b>\n<code>{}h</code>",
-        "afk_message_nogone": "{}",
+        "afk_message": "{}",
+        "afk_message_gone": "\n\n<b><u>Не в сети с:</u></b>\n<code>{}h</code>",
+        "afk_message_length": "\n<b><u>Буду AFK:</u></b>\n<code>{}h</code>",
         "approved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> допущен к ЛС.</b>',
         "args_pmban": "ℹ️ <b>Пример использования: </b><code>.pmbanlast 5</code>",
         "available_statuses": "<b>🦊 Доступные статусы:</b>\n\n",
@@ -193,7 +169,7 @@ class ApodiktumDNDMod(loader.Module):
         "status_created": "<b>✅ Статус {} установлен.</b>\n<code>{}</code>\nNotify: {}",
         "status_not_found": "<b>🚫 Статус не найден.</b>",
         "status_removed": "<b>✅ Статус {} удалён.</b>",
-        "status_set": "<b>✅ Статус установлен\n</b><code>{}</code>\nОповещение: {}",
+        "status_set": "<b>✅ Статус установлен\n</b><code>{}</code>\nУведомления: {}\nПродолжительность: {}ч",
         "status_unset": "<b>✅ Статус удалён.</b>",
         "unapproved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> не допущен к ЛС.</b>',
         "unblocked": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> разблокирован.</b>',
@@ -263,6 +239,12 @@ class ApodiktumDNDMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
+                "afk_show_length",
+                True,
+                doc=lambda: self.strings("_cfg_afk_show_length"),
+                validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
                 "auto_migrate",
                 True,
                 doc=lambda: self.strings("_cfg_cst_auto_migrate"),
@@ -291,6 +273,7 @@ class ApodiktumDNDMod(loader.Module):
         self._ratelimit_pmbl_timeout = 5 * 60
         self._sent_messages = []
         self._whitelist = self.get("whitelist", [])
+        self.base_strings = self.strings._base_strings
         if not self.get("ignore_hello", False):
             await self.inline.bot.send_photo(
                 self._tg_id,
@@ -308,7 +291,14 @@ class ApodiktumDNDMod(loader.Module):
     def _strings(self, string: str, chat_id: int = None):
         if self.lookup("Apo-Translations") and chat_id:
             forced_translation_db = self.lookup("Apo-Translations").config
-            languages = {"en_chats": self.strings_en, "ru_chats": self.strings_ru}
+            strings_en = self.strings_en if getattr(self, "strings_en", False) else {}
+            strings_de = self.strings_de if getattr(self, "strings_de", False) else {}
+            strings_ru = self.strings_ru if getattr(self, "strings_ru", False) else {}
+            languages = {
+                "en_chats": {**self.base_strings, **strings_en},
+                "de_chats": {**self.base_strings, **strings_de},
+                "ru_chats": {**self.base_strings, **strings_ru},
+            }
             for lang, strings in languages.items():
                 if chat_id in forced_translation_db[lang]:
                     if string in strings:
@@ -317,11 +307,38 @@ class ApodiktumDNDMod(loader.Module):
                     break
         return self.strings(string)
 
+    @staticmethod
+    def convert_time(t) -> int:
+        """
+        Tries to export time from text
+        """
+        try:
+            if not str(t)[:-1].isdigit():
+                return 0
+
+            if "d" in str(t):
+                t = int(t[:-1]) * 60 * 60 * 24
+
+            if "h" in str(t):
+                t = int(t[:-1]) * 60 * 60
+
+            if "m" in str(t):
+                t = int(t[:-1]) * 60
+
+            if "s" in str(t):
+                t = int(t[:-1])
+
+            t = int(re.sub(r"[^0-9]", "", str(t)))
+        except ValueError:
+            return 0
+
+        return t
+
     def _approve(self, user: int, reason: str = "unknown"):
         self._whitelist += [user]
         self._whitelist = list(set(self._whitelist))
         self.set("whitelist", self._whitelist)
-        if reason != "banned":
+        if reason != "blocked":
             logger.info(self.strings("_log_msg_approved").format(user, reason))
 
     def _unapprove(self, user: int):
@@ -336,12 +353,12 @@ class ApodiktumDNDMod(loader.Module):
                 await self._client.send_file(
                     peer,
                     self.config["photo"],
-                    caption=self.config["custom_message"] or self.strings("banned"),
+                    caption=self.config["custom_message"] or self._strings("banned", utils.get_chat_id(message)),
                 )
             except Exception:
                 await utils.answer(
                     message,
-                    self.config["custom_message"] or self.strings("banned"),
+                    self.config["custom_message"] or self._strings("banned", utils.get_chat_id(message)),
                 )
 
             self._ratelimit_pmbl += [round(time.time())]
@@ -354,7 +371,7 @@ class ApodiktumDNDMod(loader.Module):
 
             await self.inline.bot.send_message(
                 self_id,
-                self.strings("banned_log").format(
+                self._strings("banned_log", utils.get_chat_id(message)).format(
                     peer.id,
                     utils.escape_html(peer.first_name),
                     format_(contact),
@@ -391,6 +408,20 @@ class ApodiktumDNDMod(loader.Module):
             await self._client(
                 DeleteHistoryRequest(peer=cid, just_clear=True, max_id=0)
             )
+
+    async def _unstatus_func(self):
+        self.set("status", False)
+        self.set("status_length", "")
+        self.set("gone", "")
+        self._ratelimit_afk = []
+
+        for m in self._sent_messages:
+            try:
+                await m.delete()
+            except Exception:
+                logger.exception("Message not deleted due to")
+
+        self._sent_messages = []
 
     async def cdndcmd(self, message: Message):
         """
@@ -472,7 +503,7 @@ class ApodiktumDNDMod(loader.Module):
 
         self._approve(user.id, "manual_approve")
         await utils.answer(
-            message, self.strings("approved").format(user.id, get_display_name(user))
+            message, self._strings("approved", utils.get_chat_id(message)).format(user.id, get_display_name(user))
         )
 
     async def denypmcmd(self, message: Message):
@@ -541,25 +572,50 @@ class ApodiktumDNDMod(loader.Module):
 
     async def statuscmd(self, message: Message):
         """
-        <short_name> - Set status.
+        <short_name> <optional length|1s/m/h/d> - Set status.
         """
+        status_length = ""
         args = utils.get_args_raw(message)
+        t = ([_ for _ in args.split() if self.convert_time(_)] or ["0"])[0]
+        args = args.split()[0]
+        t = self.convert_time(t)
         if args not in self.get("texts", {}):
             await utils.answer(message, self._strings("status_not_found", utils.get_chat_id(message)))
             await asyncio.sleep(3)
             await message.delete()
             return
-
         self.set("status", args)
         self.set("gone", time.time())
         self._ratelimit_afk = []
-        await utils.answer(
+        if t:
+            self.set("status_length", time.time() + t)
+        status_length = (datetime.datetime.fromtimestamp(self.get("status_length")).replace(microsecond=0) -
+                         datetime.datetime.now().replace(microsecond=0))
+        msg = await utils.answer(
             message,
-            self.strings("status_set").format(
+            self._strings("status_set", utils.get_chat_id(message)).format(
                 utils.escape_html(self.get("texts", {})[args]),
                 str(self.get("notif")[args]),
+                status_length
             ),
         )
+        self._sent_messages += [msg]
+
+    async def unstatuscmd(self, message: Message):
+        """
+        Remove status.
+        """
+        if not self.get("status", False):
+            await utils.answer(message, self._strings("no_status", utils.get_chat_id(message)))
+            await asyncio.sleep(3)
+            await message.delete()
+            return
+
+        await self._unstatus_func()
+
+        msg = await utils.answer(message, self._strings("status_unset", utils.get_chat_id(message)))
+        await asyncio.sleep(10)
+        await msg.delete()
 
     async def newstatuscmd(self, message: Message):
         """
@@ -584,7 +640,7 @@ class ApodiktumDNDMod(loader.Module):
         self.set("notif", notif)
         await utils.answer(
             message,
-            self.strings("status_created").format(
+            self._strings("status_created").format(
                 utils.escape_html(args[0]),
                 utils.escape_html(args[2]),
                 args[1],
@@ -611,38 +667,15 @@ class ApodiktumDNDMod(loader.Module):
         self.set("notif", notif)
         await utils.answer(
             message,
-            self.strings("status_removed").format(utils.escape_html(args)),
+            self._strings("status_removed", utils.get_chat_id(message)).format(utils.escape_html(args)),
         )
-
-    async def unstatuscmd(self, message: Message):
-        """
-        Remove status.
-        """
-        if not self.get("status", False):
-            await utils.answer(message, self._strings("no_status", utils.get_chat_id(message)))
-            await asyncio.sleep(3)
-            await message.delete()
-            return
-
-        self.set("status", False)
-        self.set("gone", "")
-        self._ratelimit_afk = []
-
-        for m in self._sent_messages:
-            try:
-                await m.delete()
-            except Exception:
-                logger.exception("Message not deleted due to")
-
-        self._sent_messages = []
-
-        await utils.answer(message, self._strings("status_unset", utils.get_chat_id(message)))
 
     async def statusescmd(self, message: Message):
         """
         Show available statuses.
         """
-        res = self.strings("available_statuses")
+        res = self._strings("available_statuses", utils.get_chat_id(message))
+        logger.error(self.get("texts", {}).items())
         for short_name, status in self.get("texts", {}).items():
             res += f"<b><u>{short_name}</u></b> | Notify: <b>{self._db.get('Statuses', 'notif', {})[short_name]}</b>\n{status}\n➖➖➖➖➖➖➖➖➖\n"
 
@@ -757,8 +790,8 @@ class ApodiktumDNDMod(loader.Module):
         await self._send_pmbl_message(message, peer, contact, started_by_you, active_peer, self._tg_id)
         await self._punish_handler(cid)
 
-        self._approve(cid, "banned")
-        logger.warning(self.strings("_log_msg_punished").format(cid))
+        self._approve(cid, "blocked")
+        logger.warning(self._strings("_log_msg_punished", utils.get_chat_id(message)).format(cid))
         return True
 
     async def p__afk(
@@ -778,19 +811,25 @@ class ApodiktumDNDMod(loader.Module):
             return
         now = datetime.datetime.now().replace(microsecond=0)
         gone = datetime.datetime.fromtimestamp(self.get("gone")).replace(microsecond=0)
+        status_length = datetime.datetime.fromtimestamp(self.get("status_length")).replace(microsecond=0)
         diff = now - gone
-
+        if now > status_length:
+            await self._unstatus_func()
         if message.is_private or not self.config["afk_no_group"]:
+            afk_string = (
+                self._strings("afk_message", utils.get_chat_id(message)).format(self.get("texts", {"": ""})[self.get("status", "")])
+            )
             if self.config["afk_gone_time"]:
-                m = await utils.answer(
-                    message,
-                    self.strings("afk_message_gone").format(self.get("texts", {"": ""})[self.get("status", "")], diff),
-                )
-            else:
-                m = await utils.answer(
-                    message,
-                    self.strings("afk_message_nogone").format(self.get("texts", {"": ""})[self.get("status", "")]),
-                )
+                afk_string += f"{self._strings('afk_message_gone', utils.get_chat_id(message)).format(diff)}"
+            if not self.config["afk_gone_time"] and self.config["afk_show_length"]:
+                afk_string += "\n"
+            if self.config["afk_show_length"]:
+                afk_string += f"{self._strings('afk_message_length', utils.get_chat_id(message)).format(status_length - gone)}"
+
+            m = await utils.answer(
+                message,
+                afk_string,
+            )
 
             self._sent_messages += [m]
 
