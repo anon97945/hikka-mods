@@ -1,4 +1,4 @@
-__version__ = (0, 0, 24)
+__version__ = (0, 0, 25)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -130,7 +130,7 @@ class ApodiktumLCRMod(loader.Module):
         logincode = False
         tgacc = 777000
         lc_timeout = self.config["timeout"]
-        if chatid == (await message.client.get_me(True)).user_id:
+        if chatid == self._tg_id:
             return await utils.answer(message, self.apo_lib.get_str("no_self", self.all_strings, message))
         if user_msg not in ["", "group --force"]:
             return
@@ -143,9 +143,8 @@ class ApodiktumLCRMod(loader.Module):
                 msgs = await utils.answer(message, self.apo_lib.get_str("waiting", self.all_strings, message))
                 logincode = conv.wait_event(events.NewMessage(incoming=True, from_users=tgacc), timeout=lc_timeout)
                 logincode = await logincode
-                logincodemsg = " ".join((await message.client.get_messages(tgacc, 1,
-                                                                           search="Login code:"))[0].message)
-                if logincodemsg is not None and "Login code:" in logincodemsg.lower():
+                logincodemsg = " ".join((await message.client.get_messages(tgacc, 1))[0].message)
+                if logincodemsg is not None and sum(bool(s.isnumeric()) for s in logincodemsg) == 5:
                     logincode = True
                 if logincode:
                     await message.client.send_read_acknowledge(tgacc, clear_mentions=True)
