@@ -56,6 +56,7 @@ class SkeletonMod(loader.Module):
         self.db = db
         self.apo_lib = await self.import_lib(
             "https://pastebin.com/raw/buyVSRC3",
+            suspend_on_error=True,
         )
 
     # Port these commands to the actual lib!
