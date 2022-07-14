@@ -143,9 +143,8 @@ class ApodiktumLCRMod(loader.Module):
                 msgs = await utils.answer(message, self.apo_lib.utils.get_str("waiting", self.all_strings, message))
                 logincode = conv.wait_event(events.NewMessage(incoming=True, from_users=tgacc), timeout=lc_timeout)
                 logincode = await logincode
-                logincodemsg = " ".join((await message.client.get_messages(tgacc, 1,
-                                                                           search="Login code:"))[0].message)
-                if logincodemsg is not None and "Login code:" in logincodemsg.lower():
+                logincodemsg = " ".join((await message.client.get_messages(tgacc, 1))[0].message)
+                if logincodemsg is not None and sum(bool(s.isnumeric()) for s in logincodemsg) == 5:
                     logincode = True
                 if logincode:
                     await message.client.send_read_acknowledge(tgacc, clear_mentions=True)

@@ -1,4 +1,4 @@
-__version__ = (0, 1, 17)
+__version__ = (0, 1, 21)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,7 +17,7 @@ __version__ = (0, 1, 17)
 
 # scope: inline
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.2.10
 
 import logging
 
@@ -44,7 +44,7 @@ class ApodiktumInfoMod(loader.Module):
         "_cfg_cst_bnr": "Custom Banner.",
         "_cfg_cst_btn": "Custom button. Leave empty to remove button.",
         "_cfg_cst_frmt": "Custom fileformat for Banner.",
-        "_cfg_cst_msg": "Custom message for info. May contain {me}, {version}, {build}, {prefix}, {platform}, {upd} keywords.",
+        "_cfg_cst_msg": "Custom message for info. May contain {me}, {version}, {build}, {prefix}, {platform}, {upd}, {uptime} keywords.",
         "_cfg_inline_banner": "Set `True` in order to disable an inline media banner.",
         "build": "Build",
         "description": "ℹ This will not compromise any sensitive info.",
@@ -52,7 +52,8 @@ class ApodiktumInfoMod(loader.Module):
         "prefix": "Prefix",
         "send_info": "Send userbot info.",
         "up-to-date": "😌 Up-to-date.",
-        "update_required": "😕 Update required </b><code>.update</code><b>",
+        "update_required": "😕 Update required </b><code>{}update</code><b>",
+        "uptime": "Uptime",
         "version": "Version",
     }
 
@@ -61,10 +62,13 @@ class ApodiktumInfoMod(loader.Module):
 
     strings_de = {
         "_cfg_banner": "Setzen Sie `True`, um das Media Banner zu deaktivieren.",
+        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
+        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
+        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_cst_bnr": "Benutzerdefiniertes Banner.",
         "_cfg_cst_btn": "Benutzerdefinierte Schaltfläche für Informationen. Leer lassen, um die Schaltfläche zu entfernen.",
         "_cfg_cst_frmt": "Benutzerdefiniertes Dateiformat für das Banner.",
-        "_cfg_cst_msg": "Benutzerdefinierte Nachricht für Info. Kann die Schlüsselwörter {me}, {version}, {build}, {prefix}, {platform}, {upd} enthalten.",
+        "_cfg_cst_msg": "Benutzerdefinierte Nachricht für Info. Kann die Schlüsselwörter {me}, {version}, {build}, {prefix}, {platform}, {upd}, {uptime} enthalten.",
         "_cfg_inline_banner": "Setzen Sie `True`, um das Inline Media Banner zu deaktivieren.",
         "_cmd_doc_capoinfo": "Dadurch wird die Konfiguration für das Modul geöffnet.",
         "_ihandle_doc_info": "Отправить информацию о юзерботе",
@@ -74,11 +78,9 @@ class ApodiktumInfoMod(loader.Module):
         "prefix": "Prefix",
         "send_info": "Benutzerbot-Informationen senden.",
         "up-to-date": "😌 Up-to-date",
-        "update_required": "😕 Aktualisierung erforderlich </b><code>.update</code><b>",
+        "update_required": "😕 Aktualisierung erforderlich </b><code>{}update</code><b>",
+        "uptime": "Betriebszeit",
         "version": "Version",
-        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
-        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
-        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
     }
 
     strings_ru = {
@@ -86,7 +88,7 @@ class ApodiktumInfoMod(loader.Module):
         "_cfg_cst_bnr": "Кастомный баннер.",
         "_cfg_cst_btn": "Кастомная кнопка в сообщении в info. Оставь пустым, чтобы убрать кнопку.",
         "_cfg_cst_frmt": "Кастомный формат файла для баннера.",
-        "_cfg_cst_msg": "Кастомный текст сообщения в info. Может содержать ключевые слова {me}, {version}, {build}, {prefix}, {platform}, {upd}.",
+        "_cfg_cst_msg": "Кастомный текст сообщения в info. Может содержать ключевые слова {me}, {version}, {build}, {prefix}, {platform}, {upd}, {uptime}.",
         "_cfg_inline_banner": "Установите `True`, чтобы отключить встроенный медиа-баннер",
         "_cmd_doc_capoinfo": "Это откроет конфиг для модуля.",
         "_ihandle_doc_info": "Отправить информацию о юзерботе.",
@@ -96,7 +98,8 @@ class ApodiktumInfoMod(loader.Module):
         "prefix": "Префикс",
         "send_info": "Отправить информацию о юзерботе.",
         "up-to-date": "😌 Актуальная версия.",
-        "update_required": "😕 Требуется обновление </b><code>.update</code><b>",
+        "update_required": "😕 Требуется обновление </b><code>{}update</code><b>",
+        "uptime": "Аптайм",
         "version": "Версия",
     }
 
@@ -280,7 +283,7 @@ class ApodiktumInfoMod(loader.Module):
             repo = git.Repo()
             diff = repo.git.log(["HEAD..origin/master", "--oneline"])
             upd = (
-                self.strings("update_required") if diff else self.strings("up-to-date")
+                self.strings("update_required").format({utils.escape_html(self.get_prefix())}) if diff else self.strings("up-to-date")
             )
         except Exception:
             upd = ""
@@ -290,6 +293,7 @@ class ApodiktumInfoMod(loader.Module):
         build = f'<a href="https://github.com/hikariatama/Hikka/commit/{ver}">#{ver[:8]}</a>'  # fmt: skip
         prefix = f"«<code>{utils.escape_html(self.get_prefix())}</code>»"
         platform = utils.get_named_platform()
+        uptime = utils.formatted_uptime()
 
         return (
             self.config["custom_message"].format(
@@ -298,12 +302,14 @@ class ApodiktumInfoMod(loader.Module):
                 build=build,
                 prefix=prefix,
                 platform=platform,
-                upd=upd
+                upd=upd,
+                uptime=uptime,
             )
             if self.config["custom_message"] and self.config["custom_message"] != "no"
             else (
                 "<b>🌚 Apodiktum Hikka Info</b>\n"
                 f"<b>🤴 {self.strings('owner')}: </b>{me}\n\n"
+                f"<b>🕰 {self.strings('uptime')}: </b><code>{uptime}</code>\n"
                 f"<b>🔮 {self.strings('version')}: </b>{version} {build}\n"
                 f"<b>{upd}</b>\n\n"
                 f"<b>📼 {self.strings('prefix')}: </b>{prefix}\n"
