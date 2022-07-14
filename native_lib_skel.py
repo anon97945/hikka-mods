@@ -18,12 +18,8 @@ __version__ = (0, 0, 1)
 # scope: hikka_only
 # scope: hikka_min 1.2.10
 
-import asyncio
 import logging
-from typing import Callable
 
-import aiohttp
-import telethon
 from telethon.tl.types import Message
 
 from .. import loader, utils
@@ -59,8 +55,7 @@ class SkeletonMod(loader.Module):
         self.client = client
         self.db = db
         self.apo_lib = await self.import_lib(
-            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py",
-            suspend_on_error=True,
+            "https://pastebin.com/raw/buyVSRC3",
         )
 
     # Port these commands to the actual lib!

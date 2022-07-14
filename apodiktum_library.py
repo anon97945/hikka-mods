@@ -1,4 +1,4 @@
-__version__ = (0, 0, 3)
+__version__ = (0, 0, 5)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -54,22 +54,10 @@ class ApodiktumLibraryFunctions:
         return apo_logger.debug(log_string)
 
 
-@loader.tds
 class ApodiktumLib(ApodiktumLibraryFunctions, loader.Library):
     developer = "@apodiktum_modules"
 
-    strings = {
-        "developer": "@anon97945",
-    }
-
     async def init(self):
-        logger.info("%s v%s by %s is init.", self._name, __version__, self.developer)
-
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
-        self._name = self.strings("name")
         self._classname = self.__class__.__name__
         self._lib_db = self._db[self._classname]
         self._chats_db = self._lib_db.setdefault("chats", {})
-        logger.info("%s v%s by %s is client_ready.", self._name, __version__, self.developer)
