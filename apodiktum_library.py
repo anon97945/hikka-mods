@@ -18,7 +18,6 @@ __version__ = (0, 0, 8)
 
 import asyncio
 import logging
-from typing import Callable
 
 import aiohttp
 import telethon

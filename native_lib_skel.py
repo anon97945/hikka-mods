@@ -1,4 +1,4 @@
-__version__ = (0, 0, 1)
+__version__ = (0, 0, 2)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -38,22 +38,28 @@ class SkeletonMod(loader.Module):
         "greet": "BaseString Hello!",
     }
 
-    strings_en = {"greet": "Hello!"}
+    strings_en = {
+        "greet": "Hello!",
+    }
 
-    strings_ru = {"greet": "Привет!"}
+    strings_ru = {
+        "greet": "Привет!",
+    }
 
-    strings_de = {"greet": "Hallo!"}
+    strings_de = {
+        "greet": "Hallo!",
+    }
 
     all_strings = {
         "strings": strings,
-        "strings_en": strings_en,
+        "strings_en": strings,
         "strings_de": strings_de,
         "strings_ru": strings_ru,
     }
 
     async def client_ready(self, client, db):
-        self.client = client
         self.db = db
+        self.client = client
         self.apo_lib = await self.import_lib(
             "https://pastebin.com/raw/buyVSRC3",
             suspend_on_error=True,

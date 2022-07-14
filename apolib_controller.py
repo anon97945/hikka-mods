@@ -1,4 +1,4 @@
-__version__ = (0, 0, 4)
+__version__ = (0, 0, 5)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -38,8 +38,11 @@ class ApodiktumLibControllerMod(loader.Module):
         "name": "Apo-LibController",
         "developer": "@anon97945",
         "incorrect_language": "🚫 <b>Incorrect language specified.</b>",
-        "lang_saved": "{} <b>forced language saved!</b>",
+        "lang_saved": "{} <b>forced chat language saved!</b>",
         "forced_lang": "<b>Forced language {}!</b>",
+    }
+
+    strings_en = {
     }
 
     strings_de = {
@@ -52,6 +55,13 @@ class ApodiktumLibControllerMod(loader.Module):
         "_cmd_doc_capolib": "Это откроет конфиг для модуля.",
     }
 
+    all_strings = {
+        "strings": strings,
+        "strings_en": strings,
+        "strings_de": strings_de,
+        "strings_ru": strings_ru,
+    }
+
     def __init__(self):
         self.ratelimit = []
 
@@ -59,7 +69,7 @@ class ApodiktumLibControllerMod(loader.Module):
         self._db = db
         self._client = client
         self.apo_lib = await self.import_lib(
-            "https://pastebin.com/raw/buyVSRC3",
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py",
             suspend_on_error=True,
         )
         self._lib_classname = "ApodiktumLib"
@@ -76,7 +86,7 @@ class ApodiktumLibControllerMod(loader.Module):
 
     async def fclcmd(self, message: Message):
         """
-        force language of modules in this chat.
+        force language of supported modules in this chat.
         """
         args = utils.get_args_raw(message)
         chat_id = utils.get_chat_id(message)

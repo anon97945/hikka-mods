@@ -1,4 +1,4 @@
-__version__ = (0, 0, 10)
+__version__ = (0, 0, 11)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -18,11 +18,11 @@ __version__ = (0, 0, 10)
 # scope: hikka_only
 # scope: hikka_min 1.2.10
 
-import logging
-
 import collections  # for MigratorClass
+import copy  # for MigratorClass
 import hashlib  # for MigratorClass
-import copy     # for MigratorClass
+
+import logging
 
 from telethon.tl.types import Message
 
@@ -43,6 +43,15 @@ class ApoAutoMigratorMod(loader.Module):
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
+    }
+
+    strings_en = {
+    }
+
+    strings_de = {
+    }
+
+    strings_ru = {
     }
 
     db_classnames = {
@@ -83,10 +92,20 @@ class ApoAutoMigratorMod(loader.Module):
             ),  # for MigratorClass
         )
 
+    all_strings = {
+        "strings": strings,
+        "strings_en": strings,
+        "strings_de": strings_de,
+        "strings_ru": strings_ru,
+    }
+
     async def client_ready(self, client, db):
         self._db = db
         self._client = client
-
+        self.apo_lib = await self.import_lib(
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py",
+            suspend_on_error=True,
+        )
         # MigratorClass
         self._migrator = MigratorClass()  # MigratorClass define
         await self._migrator.init(client, db, self, self.__class__.__name__, self.strings("name"), self.config["auto_migrate_log"], self.config["auto_migrate_debug"])  # MigratorClass Initiate

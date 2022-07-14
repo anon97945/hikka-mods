@@ -1,4 +1,4 @@
-__version__ = (1, 0, 17)
+__version__ = (1, 0, 18)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -20,21 +20,18 @@ __version__ = (1, 0, 17)
 # requires: numpy scipy noisereduce soundfile pyrubberband
 
 import logging
-import numpy as np
-import scipy.io.wavfile as wavfile
 import os
 import subprocess
-import noisereduce as nr
-import soundfile
-import pyrubberband
-
-import collections  # for MigratorClass
-import hashlib  # for MigratorClass
-import copy     # for MigratorClass
-
-from telethon.tl.types import Message
 from io import BytesIO
+
+import noisereduce as nr
+import numpy as np
+import pyrubberband
+import scipy.io.wavfile as wavfile
+import soundfile
 from pydub import AudioSegment, effects
+from telethon.tl.types import Message
+
 from .. import loader, utils
 
 logger = logging.getLogger(__name__)
@@ -302,51 +299,6 @@ class ApodiktumVoiceToolsMod(loader.Module):
     }
 
     strings_en = {
-        "audiodenoiser_txt": "<b>[VoiceTools] Background noise is being removed.</b>",
-        "audiohandler_txt": "<b>[VoiceTools] Audio is being transcoded.</b>",
-        "audiovolume_txt": "<b>[VoiceTools] Audiovolume is being changed.</b>",
-        "auto_anon_off": "<b>❌ Anon Voice.</b>",
-        "auto_anon_on": "<b>✅ Anon Voice.</b>",
-        "auto_dalek_off": "<b>❌ Dalek Voice.</b>",
-        "auto_dalek_on": "<b>✅ Dalek Voice.</b>",
-        "auto_gain_off": "<b>❌ Volumegain.</b>",
-        "auto_gain_on": "<b>✅ Volumegain.</b>",
-        "auto_norm_off": "<b>❌ Normalize.</b>",
-        "auto_norm_on": "<b>✅ Normalize.</b>",
-        "auto_nr_off": "<b>❌ NoiseReduction.</b>",
-        "auto_nr_on": "<b>✅ NoiseReduction.</b>",
-        "auto_pitch_off": "<b>❌ Pitching.</b>",
-        "auto_pitch_on": "<b>✅ Pitching.</b>",
-        "auto_speed_off": "<b>❌ Speed.</b>",
-        "auto_speed_on": "<b>✅ Speed.</b>",
-        "current_auto": "<b>[VoiceTools]</b> Current AutoVoiceTools in this Chat are:\n\n{}",
-        "dalek_start": "<b>[VoiceTools]</b> Auto DalekVoice activated.",
-        "dalek_stopped": "<b>[VoiceTools]</b> Auto DalekVoice deactivated.",
-        "dalekvoice_txt": "<b>[VoiceTools] Dalek Voice is being applied.</b>",
-        "downloading": "<b>[VoiceTools] Message is being downloaded...</b>",
-        "error_file": "<b>[VoiceTools]</b> No file in the reply detected.",
-        "gain_start": "<b>[VoiceTools]</b> Auto VolumeGain activated.",
-        "gain_stopped": "<b>[VoiceTools]</b> Auto VolumeGain deactivated.",
-        "makewaves_txt": "<b>[VoiceTools] Speech waves are being applied.</b>",
-        "no_nr": "<b>[VoiceTools]</b> Your input was an unsupported noise reduction level.",
-        "no_pitch": "<b>[VoiceTools]</b> Your input was an unsupported pitch level.",
-        "no_speed": "<b>[VoiceTools]</b> Your input was an unsupported speed level.",
-        "norm_start": "<b>[VoiceTools]</b> Auto VoiceNormalizer activated.",
-        "norm_stopped": "<b>[VoiceTools]</b> Auto VoiceNormalizer deactivated.",
-        "nr_level": "<b>[VoiceTools]</b> Noise reduction level set to {}.",
-        "nr_start": "<b>[VoiceTools]</b> Auto VoiceEnhancer activated.",
-        "nr_stopped": "<b>[VoiceTools]</b> Auto VoiceEnhancer deactivated.",
-        "pitch_level": "<b>[VoiceTools]</b> Pitch level set to {}.",
-        "pitch_start": "<b>[VoiceTools]</b> Auto VoicePitch activated.",
-        "pitch_stopped": "<b>[VoiceTools]</b> Auto VoicePitch deactivated.",
-        "pitch_txt": "<b>[VoiceTools] Pitch is being applied.</b>",
-        "speed_start": "<b>[VoiceTools]</b> Auto VoiceSpeed activated.",
-        "speed_stopped": "<b>[VoiceTools]</b> Auto VoiceSpeed deactivated.",
-        "speed_txt": "<b>[VoiceTools] Speed is being applied.</b>",
-        "uploading": "<b>[VoiceTools] File is uploading.</b>",
-        "vcanon_start": "<b>[VoiceTools]</b> Auto AnonVoice activated.",
-        "vcanon_stopped": "<b>[VoiceTools]</b> Auto AnonVoice deactivated.",
-        "vtauto_stopped": "<b>[VoiceTools]</b> Auto Voice Tools deactivated.",
     }
 
     strings_de = {
@@ -455,6 +407,13 @@ class ApodiktumVoiceToolsMod(loader.Module):
         "vtauto_stopped": "<b>[VoiceTools]</b> Деактивированы все автоматические инструменты для работы с голосом.",
     }
 
+    all_strings = {
+        "strings": strings,
+        "strings_en": strings,
+        "strings_de": strings_de,
+        "strings_ru": strings_ru,
+    }
+
     def __init__(self):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
@@ -504,32 +463,12 @@ class ApodiktumVoiceToolsMod(loader.Module):
 
     async def client_ready(self, client, db):
         self._db = db
+        self._client = client
+        self.apo_lib = await self.import_lib(
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py",
+            suspend_on_error=True,
+        )
         self._id = (await client.get_me(True)).user_id
-        self.base_strings = self.strings._base_strings
-        # MigratorClass
-        self._migrator = MigratorClass()  # MigratorClass define
-        await self._migrator.init(client, db, self, self.__class__.__name__, self.strings("name"), self.config["auto_migrate_log"], self.config["auto_migrate_debug"])  # MigratorClass Initiate
-        await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
-        # MigratorClass
-
-    def _strings(self, string: str, chat_id: int = None):
-        if self.lookup("Apo-Translations") and chat_id:
-            forced_translation_db = self.lookup("Apo-Translations").config
-            strings_en = self.strings_en if getattr(self, "strings_en", False) else {}
-            strings_de = self.strings_de if getattr(self, "strings_de", False) else {}
-            strings_ru = self.strings_ru if getattr(self, "strings_ru", False) else {}
-            languages = {
-                "en_chats": {**self.base_strings, **strings_en},
-                "de_chats": {**self.base_strings, **strings_de},
-                "ru_chats": {**self.base_strings, **strings_ru},
-            }
-            for lang, strings in languages.items():
-                if chat_id in forced_translation_db[lang]:
-                    if string in strings:
-                        return strings[string]
-                    logger.debug(f"String: {string} not found in\n{strings}")
-                    break
-        return self.strings(string)
 
     async def get_media(self, message: Message, inline_msg, silent):
         reply = await message.get_reply_message()
@@ -575,7 +514,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.get_str("error_file", self.all_strings, message))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -587,32 +526,32 @@ class ApodiktumVoiceToolsMod(loader.Module):
         nr_lvl = self.config["nr_lvl"]
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.apo_lib.get_str("downloading", self.all_strings, message), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
         file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiodenoiser_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiodenoiser_txt", self.all_strings, message))
         file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiovolume_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiovolume_txt", self.all_strings, message))
         file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("dalekvoice_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("dalekvoice_txt", self.all_strings, message))
         file, fn, fe = await dalekvoice(file, fn, fe)
         file.seek(0)
         if SendAsVoice:
-            inline_msg = await utils.answer(inline_msg, self._strings("makewaves_txt", utils.get_chat_id(message)))
+            inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("makewaves_txt", self.all_strings, message))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
         else:
-            inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+            inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
             file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
         file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self._strings("uploading", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("uploading", self.all_strings, message))
         await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
@@ -625,7 +564,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.get_str("error_file", self.all_strings, message))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -638,34 +577,34 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file.name = replymsg.file.name
         nr_lvl = 0.8
         pitch_lvl = -4.5
-        inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.apo_lib.get_str("downloading", self.all_strings, message), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
         file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiodenoiser_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiodenoiser_txt", self.all_strings, message))
         file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiovolume_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiovolume_txt", self.all_strings, message))
         file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("dalekvoice_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("dalekvoice_txt", self.all_strings, message))
         file, fn, fe = await dalekvoice(file, fn, fe)
         file.seek(0)
         file, fn, fe = await audiopitcher(file, fn, fe, pitch_lvl)
         file.seek(0)
         if SendAsVoice:
-            inline_msg = await utils.answer(inline_msg, self._strings("makewaves_txt", utils.get_chat_id(message)))
+            inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("makewaves_txt", self.all_strings, message))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
         else:
-            inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+            inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
             file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
         file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self._strings("uploading", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("uploading", self.all_strings, message))
         await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
@@ -680,10 +619,10 @@ class ApodiktumVoiceToolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.get_str("error_file", self.all_strings, message))
         pitch_lvl = utils.get_args_raw(message)
         if not represents_pitch(pitch_lvl):
-            return await utils.answer(message, self._strings("no_pitch", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.get_str("no_pitch", self.all_strings, message))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -694,31 +633,31 @@ class ApodiktumVoiceToolsMod(loader.Module):
         gain_lvl = 0
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.apo_lib.get_str("downloading", self.all_strings, message), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
         file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
         file.seek(0)
         file, fn, fe = await audiohandler(file, fn, fe, ".flac", "1", "flac")
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("pitch_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("pitch_txt", self.all_strings, message))
         file, fn, fe = await audiopitcher(file, fn, fe, float(pitch_lvl))
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiovolume_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiovolume_txt", self.all_strings, message))
         file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
         file.seek(0)
         if SendAsVoice:
-            inline_msg = await utils.answer(inline_msg, self._strings("makewaves_txt", utils.get_chat_id(message)))
+            inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("makewaves_txt", self.all_strings, message))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
         else:
-            inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+            inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
             file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
         file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self._strings("uploading", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("uploading", self.all_strings, message))
         await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
@@ -733,10 +672,10 @@ class ApodiktumVoiceToolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.get_str("error_file", self.all_strings, message))
         speed_lvl = utils.get_args_raw(message)
         if not represents_speed(speed_lvl):
-            return await utils.answer(message, self._strings("no_speed", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.get_str("no_speed", self.all_strings, message))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -747,31 +686,31 @@ class ApodiktumVoiceToolsMod(loader.Module):
         gain_lvl = 0
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.apo_lib.get_str("downloading", self.all_strings, message), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
         file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
         file.seek(0)
         file, fn, fe = await audiohandler(file, fn, fe, ".flac", "1", "flac")
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("speed_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("speed_txt", self.all_strings, message))
         file, fn, fe = await audiospeedup(file, fn, fe, float(speed_lvl))
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiovolume_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiovolume_txt", self.all_strings, message))
         file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
         file.seek(0)
         if SendAsVoice:
-            inline_msg = await utils.answer(inline_msg, self._strings("makewaves_txt", utils.get_chat_id(message)))
+            inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("makewaves_txt", self.all_strings, message))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
         else:
-            inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+            inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
             file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
         file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self._strings("uploading", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("uploading", self.all_strings, message))
         await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
@@ -786,10 +725,10 @@ class ApodiktumVoiceToolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.get_str("error_file", self.all_strings, message))
         gain_lvl = utils.get_args_raw(message)
         if not represents_gain(gain_lvl):
-            return await utils.answer(message, self._strings("no_speed", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.get_str("no_speed", self.all_strings, message))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -799,28 +738,28 @@ class ApodiktumVoiceToolsMod(loader.Module):
             filename_new = filename.replace(ext, "")
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.apo_lib.get_str("downloading", self.all_strings, message), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
         file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
         file.seek(0)
         file, fn, fe = await audiohandler(file, fn, fe, ".flac", "1", "flac")
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiovolume_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiovolume_txt", self.all_strings, message))
         file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
         file.seek(0)
         if SendAsVoice:
-            inline_msg = await utils.answer(inline_msg, self._strings("makewaves_txt", utils.get_chat_id(message)))
+            inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("makewaves_txt", self.all_strings, message))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
         else:
-            inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+            inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
             file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
         file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self._strings("uploading", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("uploading", self.all_strings, message))
         await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
@@ -835,7 +774,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.get_str("error_file", self.all_strings, message))
         nr_lvl = self.config["nr_lvl"]
         gain_lvl = 0
         filename = replymsg.file.name or "voice"
@@ -847,31 +786,31 @@ class ApodiktumVoiceToolsMod(loader.Module):
             filename_new = filename.replace(ext, "")
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.apo_lib.get_str("downloading", self.all_strings, message), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
         file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
         file.seek(0)
         file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiodenoiser_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiodenoiser_txt", self.all_strings, message))
         file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiovolume_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiovolume_txt", self.all_strings, message))
         file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
         file.seek(0)
         if SendAsVoice:
-            inline_msg = await utils.answer(inline_msg, self._strings("makewaves_txt", utils.get_chat_id(message)))
+            inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("makewaves_txt", self.all_strings, message))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
         else:
-            inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+            inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
             file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
         file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self._strings("uploading", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("uploading", self.all_strings, message))
         await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
@@ -884,7 +823,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         replymsg = await message.get_reply_message()
         SendAsVoice = bool(replymsg.voice)
         if not replymsg.media:
-            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.get_str("error_file", self.all_strings, message))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -895,28 +834,28 @@ class ApodiktumVoiceToolsMod(loader.Module):
         gain_lvl = 0
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.apo_lib.get_str("downloading", self.all_strings, message), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
         file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
         file.seek(0)
         file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiovolume_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiovolume_txt", self.all_strings, message))
         file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
         file.seek(0)
         if SendAsVoice:
-            inline_msg = await utils.answer(inline_msg, self._strings("makewaves_txt", utils.get_chat_id(message)))
+            inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("makewaves_txt", self.all_strings, message))
             file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
         else:
-            inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+            inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
             file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
         file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self._strings("uploading", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("uploading", self.all_strings, message))
         await message.client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
@@ -927,7 +866,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
             return
         replymsg = await message.get_reply_message()
         if not replymsg.media:
-            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.get_str("error_file", self.all_strings, message))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -937,16 +876,16 @@ class ApodiktumVoiceToolsMod(loader.Module):
             filename_new = filename.replace(ext, "")
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.apo_lib.get_str("downloading", self.all_strings, message), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("audiohandler_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("audiohandler_txt", self.all_strings, message))
         file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
         file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self._strings("uploading", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("uploading", self.all_strings, message))
         await message.client.send_file(chatid, file, voice_note=False)
         await inline_msg.delete()
 
@@ -957,7 +896,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
             return
         replymsg = await message.get_reply_message()
         if not replymsg.media:
-            return await utils.answer(message, self._strings("error_file", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.get_str("error_file", self.all_strings, message))
         filename = replymsg.file.name or "voice"
         ext = replymsg.file.ext
         if ext == ".oga":
@@ -967,16 +906,16 @@ class ApodiktumVoiceToolsMod(loader.Module):
             filename_new = filename.replace(ext, "")
         file = BytesIO()
         file.name = replymsg.file.name
-        inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
+        inline_msg = await self.inline.form(message=message, text=self.apo_lib.get_str("downloading", self.all_strings, message), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
         file = await self.get_media(replymsg, inline_msg, False)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
-        inline_msg = await utils.answer(inline_msg, self._strings("makewaves_txt", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("makewaves_txt", self.all_strings, message))
         file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
         file.seek(0)
         file.name = fn + fe
-        inline_msg = await utils.answer(inline_msg, self._strings("uploading", utils.get_chat_id(message)))
+        inline_msg = await utils.answer(inline_msg, self.apo_lib.get_str("uploading", self.all_strings, message))
         await message.client.send_file(chatid, file, voice_note=True)
         await inline_msg.delete()
 
@@ -988,11 +927,11 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str not in dalek_chats:
             dalek_chats.append(chatid_str)
             self._db.set(__name__, "dalek_watcher", dalek_chats)
-            await utils.answer(message, self._strings("dalek_start", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.get_str("dalek_start", self.all_strings, message))
         else:
             dalek_chats.remove(chatid_str)
             self._db.set(__name__, "dalek_watcher", dalek_chats)
-            await utils.answer(message, self._strings("dalek_stopped", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.get_str("dalek_stopped", self.all_strings, message))
 
     async def vtautoanoncmd(self, message):
         """Turns on AutoAnonVoice for your own Voicemessages in the chat"""
@@ -1002,11 +941,11 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str not in vcanon_chats:
             vcanon_chats.append(chatid_str)
             self._db.set(__name__, "vcanon_watcher", vcanon_chats)
-            await utils.answer(message, self._strings("vcanon_start", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.get_str("vcanon_start", self.all_strings, message))
         else:
             vcanon_chats.remove(chatid_str)
             self._db.set(__name__, "vcanon_watcher", vcanon_chats)
-            await utils.answer(message, self._strings("vcanon_stopped", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.get_str("vcanon_stopped", self.all_strings, message))
 
     async def vtautonrcmd(self, message):
         """Turns on AutoNoiseReduce for your own Voicemessages in the chat"""
@@ -1016,11 +955,11 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str not in nr_chats:
             nr_chats.append(chatid_str)
             self._db.set(__name__, "nr_watcher", nr_chats)
-            await utils.answer(message, self._strings("nr_start", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.get_str("nr_start", self.all_strings, message))
         else:
             nr_chats.remove(chatid_str)
             self._db.set(__name__, "nr_watcher", nr_chats)
-            await utils.answer(message, self._strings("nr_stopped", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.get_str("nr_stopped", self.all_strings, message))
 
     async def vtautonormcmd(self, message):
         """Turns on AutoVoiceNormalizer for your own Voicemessages in the chat"""
@@ -1030,11 +969,11 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str not in norm_chats:
             norm_chats.append(chatid_str)
             self._db.set(__name__, "norm_watcher", norm_chats)
-            await utils.answer(message, self._strings("norm_start", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.get_str("norm_start", self.all_strings, message))
         else:
             norm_chats.remove(chatid_str)
             self._db.set(__name__, "norm_watcher", norm_chats)
-            await utils.answer(message, self._strings("norm_stopped", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.get_str("norm_stopped", self.all_strings, message))
 
     async def vtautospeedcmd(self, message):
         """Turns on AutoSpeed for your own Voicemessages in the chat"""
@@ -1044,11 +983,11 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str not in speed_chats:
             speed_chats.append(chatid_str)
             self._db.set(__name__, "speed_watcher", speed_chats)
-            await utils.answer(message, self._strings("speed_start", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.get_str("speed_start", self.all_strings, message))
         else:
             speed_chats.remove(chatid_str)
             self._db.set(__name__, "speed_watcher", speed_chats)
-            await utils.answer(message, self._strings("speed_stopped", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.get_str("speed_stopped", self.all_strings, message))
 
     async def vtautopitchcmd(self, message):
         """Turns on AutoVoiceNormalizer for your own Voicemessages in the chat"""
@@ -1058,11 +997,11 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str not in pitch_chats:
             pitch_chats.append(chatid_str)
             self._db.set(__name__, "pitch_watcher", pitch_chats)
-            await utils.answer(message, self._strings("pitch_start", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.get_str("pitch_start", self.all_strings, message))
         else:
             pitch_chats.remove(chatid_str)
             self._db.set(__name__, "pitch_watcher", pitch_chats)
-            await utils.answer(message, self._strings("pitch_stopped", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.get_str("pitch_stopped", self.all_strings, message))
 
     async def vtautogaincmd(self, message):
         """Turns on AutoVolumeGain for your own Voicemessages in the chat"""
@@ -1072,11 +1011,11 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str not in gain_chats:
             gain_chats.append(chatid_str)
             self._db.set(__name__, "gain_watcher", gain_chats)
-            await utils.answer(message, self._strings("gain_start", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.get_str("gain_start", self.all_strings, message))
         else:
             gain_chats.remove(chatid_str)
             self._db.set(__name__, "gain_watcher", gain_chats)
-            await utils.answer(message, self._strings("gain_stopped", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.get_str("gain_stopped", self.all_strings, message))
 
     async def vtautocmd(self, message):
         """Displays all enabled AutoVoice settings in the chat"""
@@ -1091,34 +1030,34 @@ class ApodiktumVoiceToolsMod(loader.Module):
         chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str in vcanon_chats:
-            current = current + self._strings("auto_anon_on", utils.get_chat_id(message)) + "\n"
+            current = current + self.apo_lib.get_str("auto_anon_on", self.all_strings, message) + "\n"
         else:
-            current = current + self._strings("auto_anon_off", utils.get_chat_id(message)) + "\n"
+            current = current + self.apo_lib.get_str("auto_anon_off", self.all_strings, message) + "\n"
         if chatid_str in dalek_chats:
-            current = current + self._strings("auto_dalek_on", utils.get_chat_id(message)) + "\n"
+            current = current + self.apo_lib.get_str("auto_dalek_on", self.all_strings, message) + "\n"
         else:
-            current = current + self._strings("auto_dalek_off", utils.get_chat_id(message)) + "\n"
+            current = current + self.apo_lib.get_str("auto_dalek_off", self.all_strings, message) + "\n"
         if chatid_str in pitch_chats:
-            current = current + self._strings("auto_pitch_on", utils.get_chat_id(message)) + "\n"
+            current = current + self.apo_lib.get_str("auto_pitch_on", self.all_strings, message) + "\n"
         else:
-            current = current + self._strings("auto_pitch_off", utils.get_chat_id(message)) + "\n"
+            current = current + self.apo_lib.get_str("auto_pitch_off", self.all_strings, message) + "\n"
         if chatid_str in speed_chats:
-            current = current + self._strings("auto_speed_on", utils.get_chat_id(message)) + "\n"
+            current = current + self.apo_lib.get_str("auto_speed_on", self.all_strings, message) + "\n"
         else:
-            current = current + self._strings("auto_speed_off", utils.get_chat_id(message)) + "\n"
+            current = current + self.apo_lib.get_str("auto_speed_off", self.all_strings, message) + "\n"
         if chatid_str in norm_chats:
-            current = current + self._strings("auto_norm_on", utils.get_chat_id(message)) + "\n"
+            current = current + self.apo_lib.get_str("auto_norm_on", self.all_strings, message) + "\n"
         else:
-            current = current + self._strings("auto_norm_off", utils.get_chat_id(message)) + "\n"
+            current = current + self.apo_lib.get_str("auto_norm_off", self.all_strings, message) + "\n"
         if chatid_str in gain_chats:
-            current = current + self._strings("auto_gain_on", utils.get_chat_id(message)) + "\n"
+            current = current + self.apo_lib.get_str("auto_gain_on", self.all_strings, message) + "\n"
         else:
-            current = current + self._strings("auto_gain_off", utils.get_chat_id(message)) + "\n"
+            current = current + self.apo_lib.get_str("auto_gain_off", self.all_strings, message) + "\n"
         if chatid_str in nr_chats:
-            current = current + self._strings("auto_nr_on", utils.get_chat_id(message)) + "\n"
+            current = current + self.apo_lib.get_str("auto_nr_on", self.all_strings, message) + "\n"
         else:
-            current = current + self._strings("auto_nr_off", utils.get_chat_id(message)) + "\n"
-        return await utils.answer(message, self._strings("current_auto", utils.get_chat_id(message)).format(current))
+            current = current + self.apo_lib.get_str("auto_nr_off", self.all_strings, message) + "\n"
+        return await utils.answer(message, self.apo_lib.get_str("current_auto", self.all_strings, message).format(current))
 
     async def vtautostopcmd(self, message):
         """Turns off AutoVoice for your own Voicemessages in the chat"""
@@ -1152,7 +1091,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str in gain_chats:
             gain_chats.remove(chatid_str)
             self._db.set(__name__, "gain_watcher", gain_chats)
-        await utils.answer(message, self._strings("vtauto_stopped", utils.get_chat_id(message)))
+        await utils.answer(message, self.apo_lib.get_str("vtauto_stopped", self.all_strings, message))
 
     async def watcher(self, message: Message):
         chatid = utils.get_chat_id(message)
@@ -1236,251 +1175,3 @@ class ApodiktumVoiceToolsMod(loader.Module):
             await message.client.send_file(chatid, file, voice_note=True, reply_to=reply)
         else:
             await message.client.send_file(chatid, file, voice_note=True)
-
-
-class MigratorClass():
-    """
-    # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
-    # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
-    #
-    #              © Copyright 2022
-    #
-    #             developed by @anon97945
-    #
-    #          https://t.me/apodiktum_modules
-    #
-    # 🔒 Licensed under the GNU GPLv3
-    # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
-    """
-
-    strings = {
-        "_log_doc_migrated_db": "Migrated {} database of {} -> {}:\n{}",
-        "_log_doc_migrated_cfgv_val": "[Dynamic={}] Migrated default config value:\n{} -> {}",
-        "_log_doc_no_dynamic_migration": "No module config found. Did not dynamic migrate:\n{{{}: {}}}",
-        "_log_doc_migrated_db_not_found": "`{}` database not found. Did not migrate {} -> {}",
-    }
-
-    changes = {
-    }
-
-    def __init__(self):
-        self._ratelimit = []
-
-    async def init(
-        self,
-        client: "TelegramClient",  # type: ignore
-        db: "Database",  # type: ignore
-        modules: str,  # type: ignore
-        classname: str,  # type: ignore
-        name: str,  # type: ignore
-        log: bool = False,  # type: ignore
-        debug: bool = False,  # type: ignore
-    ):
-        self._client = client
-        self._db = db
-        self._classname = classname
-        self._name = name
-        self.modules = modules
-        self.log = log
-        self.debug = debug
-        self.hashs = []
-        self.hashs = self._db.get(self._classname, "hashs", [])
-        self._migrate_to = list(self.changes)[-1] if self.changes else None
-
-    async def migrate(self, log: bool = False, debug: bool = False):
-        self.log = log
-        self.debug = debug
-        if self._migrate_to is not None:
-            self.hashs = self._db.get(self._classname, "hashs", [])
-
-            migrate = await self.check_new_migration()
-            full_migrated = await self.full_migrated()
-            if migrate:
-                await self._logger(f"Open migrations: {migrate}", self.debug, True)
-                if await self._migrator_func():
-                    await self._logger("Migration done.", self.debug, True)
-                    return True
-            elif not full_migrated:
-                await self.force_set_hashs()
-                await self._logger(f"Open migrations: {migrate} | Forcehash done: {self.hashs}", self.debug, True)
-                return False
-            else:
-                await self._logger(f"Open migrations: {migrate} | Skip migration.", self.debug, True)
-                return False
-            return False
-        await self._logger("No changes in `changes` dictionary found.", self.debug, True)
-        return False
-
-    async def auto_migrate_handler(self, auto_migrate: bool = False):
-        if self._migrate_to is not None:
-            self.hashs = self._db.get(self._classname, "hashs", [])
-            migrate = await self.check_new_migration()
-            full_migrated = await self.full_migrated()
-            if auto_migrate and migrate:
-                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate}", self.debug, True)
-                if await self._migrator_func():
-                    await self._logger("Migration done.", self.debug, True)
-                    return
-            elif not auto_migrate and not full_migrated:
-                await self.force_set_hashs()
-                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate} | Forcehash done: {self.hashs}", self.debug, True)
-                return
-            else:
-                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate} | Skip migrate_handler.", self.debug, True)
-                return
-        await self._logger("No changes in `changes` dictionary found.", self.debug, True)
-        return
-
-    async def force_set_hashs(self):
-        await self._set_missing_hashs()
-        return True
-
-    async def check_new_migration(self):
-        chash = hashlib.sha256(self._migrate_to.encode('utf-8')).hexdigest()
-        return chash not in self.hashs
-
-    async def full_migrated(self):
-        full_migrated = True
-        for migration in self.changes:
-            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
-            if chash not in self.hashs:
-                full_migrated = False
-        return full_migrated
-
-    async def _migrator_func(self):
-        for migration in self.changes:
-            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
-            if chash not in self.hashs:
-                old_classname, new_classname, old_name, new_name = await self._get_names(migration)
-                for category in self.changes[migration]:
-                    await self._copy_config_init(migration, old_classname, new_classname, old_name, new_name, category)
-                await self._set_hash(chash)
-        return True
-
-    async def _copy_config_init(self, migration, old_classname, new_classname, old_name, new_name, category):
-        if category == "classname":
-            if self._classname != old_classname and (old_classname in self._db.keys() and self._db[old_classname] and old_classname is not None):
-                await self._logger(f"{migration} | {category} | old_value: {str(old_classname)} | new_value: {str(new_classname)}", self.debug, True)
-                await self._copy_config(category, old_classname, new_classname, new_name)
-            else:
-                await self._logger(self.strings["_log_doc_migrated_db_not_found"].format(category, old_classname, new_classname))
-        elif category == "name":
-            await self._logger(f"{migration} | {category} | old_value: {str(old_name)} | new_value: {str(new_name)}", self.debug, True)
-            if self._name != old_name and (old_name in self._db.keys() and self._db[old_name] and old_name is not None):
-                await self._copy_config(category, old_name, new_name, new_classname)
-            else:
-                await self._logger(self.strings["_log_doc_migrated_db_not_found"].format(category, old_name, new_name))
-        elif category == "config":
-            await self._migrate_cfg_values(migration, category, new_name, new_classname)
-        return
-
-    async def _get_names(self, migration):
-        old_name = None
-        old_classname = None
-        new_name = None
-        new_classname = None
-        for category in self.changes[migration]:
-            if category == "classname":
-                old_classname, new_classname = await self._get_changes(self.changes[migration][category].items())
-            elif category == "name":
-                old_name, new_name = await self._get_changes(self.changes[migration][category].items())
-        if not new_name:
-            new_name = self._name
-        if not new_classname:
-            new_classname = self._classname
-        return old_classname, new_classname, old_name, new_name
-
-    @staticmethod
-    async def _get_changes(changes):
-        old_value = None
-        new_value = None
-        for state, value in changes:
-            if state == "old":
-                old_value = value
-            elif state == "new":
-                new_value = value
-        return old_value, new_value
-
-    async def _migrate_cfg_values(self, migration, category, new_name, new_classname):
-        if new_classname in self._db.keys() and "__config__" in self._db[new_classname]:
-            if configdb := self._db[new_classname]["__config__"]:
-                for cnfg_key in self.changes[migration][category]:
-                    old_value, new_value = await self._get_changes(self.changes[migration][category][cnfg_key].items())
-                    for key, value in configdb.items():
-                        await self._logger(f"{migration} | {category} | ({{old_value: {str(old_value)}}} `==` {{new_value: {str(value)}}}) `and` {{key: {key}}} `==` {{cnfg_key: {cnfg_key}}}", self.debug, True)
-                        if value == old_value and key == cnfg_key:
-                            dynamic = False
-                            self._db[new_classname]["__config__"][cnfg_key] = new_value
-                            if (
-                                self.modules.lookup(new_name)
-                                and self.modules.lookup(new_name).config
-                                and key in self.modules.lookup(new_name).config
-                            ):
-                                self.modules.lookup(new_name).config[cnfg_key] = new_value
-                                dynamic = True
-                            await self._logger(self.strings["_log_doc_migrated_cfgv_val"].format(dynamic, value, new_value))
-        return
-
-    async def _copy_config(self, category, old_name, new_name, name):
-        if self._db[new_name]:
-            temp_db = {new_name: copy.deepcopy(self._db[new_name])}
-            self._db[new_name].clear()
-            self._db[new_name] = await self._deep_dict_merge(temp_db[new_name], self._db[old_name])
-            temp_db.pop(new_name)
-        else:
-            self._db[new_name] = copy.deepcopy(self._db[old_name])
-        self._db.pop(old_name)
-        await self._logger(self.strings["_log_doc_migrated_db"].format(category, old_name, new_name, self._db[new_name]))
-        if category == "classname":
-            await self._make_dynamic_config(name, new_name)
-        if category == "name":
-            await self._make_dynamic_config(new_name, name)
-        return
-
-    async def _deep_dict_merge(self, dct1, dct2, override=True) -> dict:
-        merged = copy.deepcopy(dct1)
-        for k, v2 in dct2.items():
-            if k in merged:
-                v1 = merged[k]
-                if isinstance(v1, dict) and isinstance(v2, collections.abc.Mapping):
-                    merged[k] = await self._deep_dict_merge(v1, v2, override)
-                elif isinstance(v1, list) and isinstance(v2, list):
-                    merged[k] = v1 + v2
-                elif override:
-                    merged[k] = copy.deepcopy(v2)
-            else:
-                merged[k] = copy.deepcopy(v2)
-        return merged
-
-    async def _make_dynamic_config(self, new_name, new_classname=None):
-        if new_classname is None:
-            return
-        if "__config__" in self._db[new_classname].keys():
-            for key, value in self._db[new_classname]["__config__"].items():
-                if (
-                    self.modules.lookup(new_name)
-                    and self.modules.lookup(new_name).config
-                    and key in self.modules.lookup(new_name).config
-                ):
-                    self.modules.lookup(new_name).config[key] = value
-                else:
-                    await self._logger(self.strings["_log_doc_no_dynamic_migration"].format(key, value))
-        return
-
-    async def _set_hash(self, chash):
-        self.hashs.append(chash)
-        self._db.set(self._classname, "hashs", self.hashs)
-        return
-
-    async def _set_missing_hashs(self):
-        for migration in self.changes:
-            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
-            if chash not in self.hashs:
-                await self._set_hash(chash)
-
-    async def _logger(self, log_string, debug: bool = False, debug_msg: bool = False):
-        if not debug_msg and self.log:
-            return logger.info(log_string)
-        if debug and debug_msg:
-            return logger.info(log_string)
-        return logger.debug(log_string)
