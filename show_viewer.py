@@ -1,4 +1,4 @@
-__version__ = (0, 0, 14)
+__version__ = (0, 0, 15)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -16,7 +16,7 @@ __version__ = (0, 0, 14)
 # meta developer: @apodiktum_modules
 
 # scope: hikka_only
-# scope: hikka_min 1.1.28
+# scope: hikka_min 1.2.10
 
 from .. import loader, utils
 from telethon.tl.types import Message

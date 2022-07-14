@@ -1,4 +1,4 @@
-__version__ = (0, 1, 6)
+__version__ = (0, 1, 7)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -16,7 +16,7 @@ __version__ = (0, 1, 6)
 # meta developer: @apodiktum_modules
 
 # scope: hikka_only
-# scope: hikka_min 1.1.28
+# scope: hikka_min 1.2.10
 
 import logging
 

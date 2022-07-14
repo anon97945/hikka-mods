@@ -1,4 +1,4 @@
-__version__ = (0, 0, 22)
+__version__ = (0, 0, 23)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -14,8 +14,9 @@ __version__ = (0, 0, 22)
 # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
 
 # meta developer: @apodiktum_modules
+
 # scope: hikka_only
-# scope: hikka_min 1.1.28
+# scope: hikka_min 1.2.10
 
 import asyncio
 import logging
