@@ -1,4 +1,4 @@
-__version__ = (0, 0, 61)
+__version__ = (0, 0, 62)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -16,7 +16,7 @@ __version__ = (0, 0, 61)
 # meta developer: @apodiktum_modules
 
 # scope: hikka_only
-# scope: hikka_min 1.2.10
+# scope: hikka_min 1.2.11
 # requires: googletrans==4.0.0-rc1
 
 import logging

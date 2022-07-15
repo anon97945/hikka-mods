@@ -1,4 +1,4 @@
-__version__ = (0, 1, 82)
+__version__ = (0, 1, 83)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,7 +17,7 @@ __version__ = (0, 1, 82)
 
 # scope: libsndfile1 gcc ffmpeg rubberband-cli
 # scope: hikka_only
-# scope: hikka_min 1.2.10
+# scope: hikka_min 1.2.11
 
 # requires: gtts pydub soundfile pyrubberband numpy AudioSegment wave
 
