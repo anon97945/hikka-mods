@@ -1,4 +1,4 @@
-__version__ = (0, 0, 7)
+__version__ = (0, 0, 14)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -41,6 +41,7 @@ class ApodiktumLibControllerMod(loader.Module):
         "incorrect_language": "🚫 <b>Incorrect language specified.</b>",
         "lang_removed": "<b>Forced chat language removed!</b>",
         "lang_saved": "{} <b>forced chat language saved!</b>",
+        "no_lang": "No forced language in this chat."
     }
 
     strings_en = {
@@ -58,7 +59,7 @@ class ApodiktumLibControllerMod(loader.Module):
 
     all_strings = {
         "strings": strings,
-        "strings_en": strings,
+        "strings_en": strings_en,
         "strings_de": strings_de,
         "strings_ru": strings_ru,
     }
@@ -96,14 +97,17 @@ class ApodiktumLibControllerMod(loader.Module):
 
         if not args:
             if len(args) not in [0, 2]:
-                await utils.answer(message, self.apo_lib.get_str("incorrect_language"), self.all_strings, message)
+                await utils.answer(message, self.apo_lib.utils.get_str("incorrect_language"), self.all_strings, message)
                 return
-            await utils.answer(
-                message,
-                self.apo_lib.get_str("forced_lang", self.all_strings, message).format(
-                    utils.get_lang_flag(chatid_db.get("forced_lang").lower() if chatid_db.get("forced_lang").lower() != "en" else "gb")
-                ),
-            )
+            if "forced_lang" in chatid_db:
+                await utils.answer(
+                    message,
+                    self.apo_lib.utils.get_str("forced_lang", self.all_strings, message).format(
+                        utils.get_lang_flag(chatid_db.get("forced_lang").lower() if chatid_db.get("forced_lang").lower() != "en" else "gb")
+                    ),
+                )
+            else:
+                await utils.answer(message, self.apo_lib.utils.get_str("no_lang", self.all_strings, message))
             return
 
         chatid_db.update({"forced_lang": args.lower()})
@@ -111,7 +115,7 @@ class ApodiktumLibControllerMod(loader.Module):
 
         await utils.answer(
             message,
-            self.apo_lib.get_str("lang_saved", self.all_strings, message).format(
+            self.apo_lib.utils.get_str("lang_saved", self.all_strings, message).format(
                 utils.get_lang_flag(args.lower() if args.lower() != "en" else "gb")
             ),
         )
@@ -124,7 +128,8 @@ class ApodiktumLibControllerMod(loader.Module):
         chatid_str = str(chat_id)
         chatid_db = self._chats_db.setdefault(chatid_str, {})
 
-        chatid_db.pop("forced_lang")
+        if chatid_db.get("forced_lang"):
+            chatid_db.pop("forced_lang")
         self._db.set(self._lib_classname, "chats", self._chats_db)
 
-        await utils.answer(message, self.apo_lib.get_str("lang_removed", self.all_strings, message))
+        await utils.answer(message, self.apo_lib.utils.get_str("lang_removed", self.all_strings, message))

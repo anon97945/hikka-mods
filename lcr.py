@@ -1,4 +1,4 @@
-__version__ = (0, 0, 26)
+__version__ = (0, 0, 27)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -131,16 +131,16 @@ class ApodiktumLCRMod(loader.Module):
         tgacc = 777000
         lc_timeout = self.config["timeout"]
         if chatid == self._tg_id:
-            return await utils.answer(message, self.apo_lib.get_str("no_self", self.all_strings, message))
+            return await utils.answer(message, self.apo_lib.utils.get_str("no_self", self.all_strings, message))
         if user_msg not in ["", "group --force"]:
             return
         if not message.is_private and user_msg != "group --force":
-            return await utils.answer(message, self.apo_lib.get_str("not_pchat", self.all_strings, message))
+            return await utils.answer(message, self.apo_lib.utils.get_str("not_pchat", self.all_strings, message))
         if message.is_private and user_msg == "group --force":
-            return await utils.answer(message, self.apo_lib.get_str("not_group", self.all_strings, message))
+            return await utils.answer(message, self.apo_lib.utils.get_str("not_group", self.all_strings, message))
         async with message.client.conversation(tgacc) as conv:
             try:
-                msgs = await utils.answer(message, self.apo_lib.get_str("waiting", self.all_strings, message))
+                msgs = await utils.answer(message, self.apo_lib.utils.get_str("waiting", self.all_strings, message))
                 logincode = conv.wait_event(events.NewMessage(incoming=True, from_users=tgacc), timeout=lc_timeout)
                 logincode = await logincode
                 logincodemsg = " ".join((await message.client.get_messages(tgacc, 1))[0].message)
@@ -151,7 +151,7 @@ class ApodiktumLCRMod(loader.Module):
                     await message.client.delete_messages(chatid, msgs)
                     return await message.client.send_message(chatid, logincodemsg)
                 await message.client.delete_messages(chatid, msgs)
-                return await message.client.send_message(chatid, self.apo_lib.get_str("error", self.all_strings, message))
+                return await message.client.send_message(chatid, self.apo_lib.utils.get_str("error", self.all_strings, message))
             except asyncio.TimeoutError:
                 await message.client.delete_messages(chatid, msgs)
-                return await message.client.send_message(chatid, self.apo_lib.get_str("timeouterror", self.all_strings, message).format(lc_timeout))
+                return await message.client.send_message(chatid, self.apo_lib.utils.get_str("timeouterror", self.all_strings, message).format(lc_timeout))

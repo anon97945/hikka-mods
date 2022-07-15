@@ -1,4 +1,4 @@
-__version__ = (0, 0, 26)
+__version__ = (0, 0, 27)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -180,7 +180,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Get Heroku Dyno Usage.
         """
-        msg = await utils.answer(message, self.apo_lib.get_str("get_usage", self.all_strings, message))
+        msg = await utils.answer(message, self.apo_lib.utils.get_str("get_usage", self.all_strings, message))
         useragent = ("Mozilla/5.0 (Linux; Android 10; SM-G975F)"
                      "AppleWebKit/537.36 (KHTML, like Gecko)"
                      "Chrome/80.0.3987.149 Mobile Safari/537.36"
@@ -193,7 +193,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
         path = f"/accounts/{self._herokuid}/actions/get-quota"
         r = requests.get(self._heroku_api + path, headers=headers)
         if r.status_code != 200:
-            return await utils.answer(message, self.apo_lib.get_str("usage_error", self.all_strings, message).format(str(r.reason)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("usage_error", self.all_strings, message).format(str(r.reason)))
         result = r.json()
         quota = result["account_quota"]
         quota_used = result["quota_used"]
@@ -223,7 +223,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
         AppMinutes = math.floor(AppQuotaUsed % 60)
         # AppName = self._heroku_app_name
         await asyncio.sleep(1.5)
-        return await utils.answer(msg, self.apo_lib.get_str("dyno_usage", self.all_strings, message).format(AppHours, AppMinutes, AppPercentage, hours, minutes, percentage))
+        return await utils.answer(msg, self.apo_lib.utils.get_str("dyno_usage", self.all_strings, message).format(AppHours, AppMinutes, AppPercentage, hours, minutes, percentage))
 
     @loader.owner
     async def herosetcmd(self, message: Message):
@@ -235,15 +235,15 @@ class ApodiktumHerokuManagerMod(loader.Module):
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             heroku_var = self._heroku_app.config()
-            msg = await utils.answer(message, self.apo_lib.get_str("set_var", self.all_strings, message))
+            msg = await utils.answer(message, self.apo_lib.utils.get_str("set_var", self.all_strings, message))
             await asyncio.sleep(1.5)
             if args[0] in heroku_var:
-                msg = await utils.answer(msg, self.apo_lib.get_str("var_changed", self.all_strings, message).format(args[0], " ".join(args[1:])))
+                msg = await utils.answer(msg, self.apo_lib.utils.get_str("var_changed", self.all_strings, message).format(args[0], " ".join(args[1:])))
             else:
-                msg = await utils.answer(msg, self.apo_lib.get_str("var_added", self.all_strings, message).format(args[0], " ".join(args[1:])))
+                msg = await utils.answer(msg, self.apo_lib.utils.get_str("var_added", self.all_strings, message).format(args[0], " ".join(args[1:])))
             heroku_var[args[0]] = " ".join(args[1:])
             return
-        return await utils.answer(message, self.apo_lib.get_str("no_var", self.all_strings, message))
+        return await utils.answer(message, self.apo_lib.utils.get_str("no_var", self.all_strings, message))
 
     @loader.owner
     async def herogetcmd(self, message: Message):
@@ -255,14 +255,14 @@ class ApodiktumHerokuManagerMod(loader.Module):
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             if len(args) > 1:
-                return await utils.answer(message, self.apo_lib.get_str("args_error", self.all_strings, message))
+                return await utils.answer(message, self.apo_lib.utils.get_str("args_error", self.all_strings, message))
             heroku_var = self._heroku_app.config()
-            msg = await utils.answer(message, self.apo_lib.get_str("get_var", self.all_strings, message))
+            msg = await utils.answer(message, self.apo_lib.utils.get_str("get_var", self.all_strings, message))
             await asyncio.sleep(1.5)
             if args[0] in heroku_var:
-                return await utils.answer(msg, self.apo_lib.get_str("var_settings", self.all_strings, message).format(args[0], heroku_var[args[0]]))
-            return await utils.answer(msg, self.apo_lib.get_str("var_not_exists", self.all_strings, message).format(args[0]))
-        return await utils.answer(message, self.apo_lib.get_str("no_var", self.all_strings, message))
+                return await utils.answer(msg, self.apo_lib.utils.get_str("var_settings", self.all_strings, message).format(args[0], heroku_var[args[0]]))
+            return await utils.answer(msg, self.apo_lib.utils.get_str("var_not_exists", self.all_strings, message).format(args[0]))
+        return await utils.answer(message, self.apo_lib.utils.get_str("no_var", self.all_strings, message))
 
     @loader.owner
     async def herogetallcmd(self, message: Message):
@@ -275,9 +275,9 @@ class ApodiktumHerokuManagerMod(loader.Module):
         args = str(args).split()
         if args and args[0] == "--force":
             if len(args) > 1:
-                return await utils.answer(message, self.apo_lib.get_str("args_error", self.all_strings, message))
+                return await utils.answer(message, self.apo_lib.utils.get_str("args_error", self.all_strings, message))
             heroku_var = self._heroku_app.config()
-            msg = await utils.answer(message, self.apo_lib.get_str("get_var", self.all_strings, message))
+            msg = await utils.answer(message, self.apo_lib.utils.get_str("get_var", self.all_strings, message))
             await asyncio.sleep(1.5)
             cmpl_cnfg = ""
             for x in heroku_var.to_dict():
@@ -288,7 +288,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
                     + "</code>\n\n"
                 )
             return await utils.answer(msg, cmpl_cnfg)
-        return await utils.answer(message, self.apo_lib.get_str("no_force", self.all_strings, message))
+        return await utils.answer(message, self.apo_lib.utils.get_str("no_force", self.all_strings, message))
 
     @loader.owner
     async def herodelcmd(self, message: Message):
@@ -300,13 +300,13 @@ class ApodiktumHerokuManagerMod(loader.Module):
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             if len(args) > 1:
-                return await utils.answer(message, self.apo_lib.get_str("args_error", self.all_strings, message))
+                return await utils.answer(message, self.apo_lib.utils.get_str("args_error", self.all_strings, message))
             heroku_var = self._heroku_app.config()
-            msg = await utils.answer(message, self.apo_lib.get_str("get_var", self.all_strings, message))
+            msg = await utils.answer(message, self.apo_lib.utils.get_str("get_var", self.all_strings, message))
             await asyncio.sleep(1.5)
             if args[0] in heroku_var:
-                msg = await utils.answer(msg, self.apo_lib.get_str("var_deleted", self.all_strings, message).format(args[0]))
+                msg = await utils.answer(msg, self.apo_lib.utils.get_str("var_deleted", self.all_strings, message).format(args[0]))
                 del heroku_var[args[0]]
                 return
-            return await utils.answer(message, self.apo_lib.get_str("var_not_exists", self.all_strings, message).format(args[0]))
-        return await utils.answer(message, self.apo_lib.get_str("no_var", self.all_strings, message))
+            return await utils.answer(message, self.apo_lib.utils.get_str("var_not_exists", self.all_strings, message).format(args[0]))
+        return await utils.answer(message, self.apo_lib.utils.get_str("no_var", self.all_strings, message))
