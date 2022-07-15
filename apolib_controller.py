@@ -1,4 +1,4 @@
-__version__ = (0, 0, 6)
+__version__ = (0, 0, 7)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -37,9 +37,10 @@ class ApodiktumLibControllerMod(loader.Module):
     strings = {
         "name": "Apo-LibController",
         "developer": "@anon97945",
-        "incorrect_language": "🚫 <b>Incorrect language specified.</b>",
-        "lang_saved": "{} <b>forced chat language saved!</b>",
         "forced_lang": "<b>Forced language {}!</b>",
+        "incorrect_language": "🚫 <b>Incorrect language specified.</b>",
+        "lang_removed": "<b>Forced chat language removed!</b>",
+        "lang_saved": "{} <b>forced chat language saved!</b>",
     }
 
     strings_en = {
@@ -95,11 +96,11 @@ class ApodiktumLibControllerMod(loader.Module):
 
         if not args:
             if len(args) not in [0, 2]:
-                await utils.answer(message, self.strings("incorrect_language"))
+                await utils.answer(message, self.apo_lib.get_str("incorrect_language"), self.all_strings, message)
                 return
             await utils.answer(
                 message,
-                self.strings("forced_lang").format(
+                self.apo_lib.get_str("forced_lang", self.all_strings, message).format(
                     utils.get_lang_flag(chatid_db.get("forced_lang").lower() if chatid_db.get("forced_lang").lower() != "en" else "gb")
                 ),
             )
@@ -110,7 +111,20 @@ class ApodiktumLibControllerMod(loader.Module):
 
         await utils.answer(
             message,
-            self.strings("lang_saved").format(
+            self.apo_lib.get_str("lang_saved", self.all_strings, message).format(
                 utils.get_lang_flag(args.lower() if args.lower() != "en" else "gb")
             ),
         )
+
+    async def remfclcmd(self, message: Message):
+        """
+        remove force language of supported modules in this chat.
+        """
+        chat_id = utils.get_chat_id(message)
+        chatid_str = str(chat_id)
+        chatid_db = self._chats_db.setdefault(chatid_str, {})
+
+        chatid_db.pop("forced_lang")
+        self._db.set(self._lib_classname, "chats", self._chats_db)
+
+        await utils.answer(message, self.apo_lib.get_str("lang_removed", self.all_strings, message))
