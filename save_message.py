@@ -1,4 +1,4 @@
-__version__ = (0, 0, 20)
+__version__ = (0, 0, 21)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -113,11 +113,11 @@ class ApodiktumSaveMessageMod(loader.Module):
         if not args:
             return
         if not get_ids(args):
-            return await utils.answer(message, self.apo_lib.get_str("invalid_link", self.all_strings, message))
+            return await utils.answer(message, self.apo_lib.utils.get_str("invalid_link", self.all_strings, message))
         channel_id, msg_id = get_ids(args)
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
         msgs = await message.client.send_message(self._id, message=msgs)
-        return await utils.answer(message, self.apo_lib.get_str("done", self.all_strings, message))
+        return await utils.answer(message, self.apo_lib.utils.get_str("done", self.all_strings, message))
 
     async def smhcmd(self, message: Message):
         """<messagelink> to forward message/media to current chat."""
@@ -125,7 +125,7 @@ class ApodiktumSaveMessageMod(loader.Module):
         if not args:
             return
         if not get_ids(args):
-            return await utils.answer(message, self.apo_lib.get_str("invalid_link", self.all_strings, message))
+            return await utils.answer(message, self.apo_lib.utils.get_str("invalid_link", self.all_strings, message))
         channel_id, msg_id = get_ids(args)
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
         msgs = await message.client.send_message(utils.get_chat_id(message), message=msgs)

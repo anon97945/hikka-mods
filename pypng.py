@@ -1,4 +1,4 @@
-__version__ = (0, 0, 19)
+__version__ = (0, 0, 20)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -119,19 +119,19 @@ class ApodiktumPyPNGMod(loader.Module):
         """
         reply to url or py file
         """
-        await utils.answer(message, self.apo_lib.get_str("py2png", self.all_strings, message))
+        await utils.answer(message, self.apo_lib.utils.get_str("py2png", self.all_strings, message))
         reply = await message.get_reply_message()
         file = BytesIO()
         pngfile = BytesIO()
         if not reply:
-            return await utils.answer(message, self.apo_lib.get_str("no_file", self.all_strings, message))
+            return await utils.answer(message, self.apo_lib.utils.get_str("no_file", self.all_strings, message))
         if reply.file:
             file = await self.get_media(reply)
             file.name = reply.file.name
         elif res := await _filefromurl(reply):
             file, file.name = res
         else:
-            return await utils.answer(message, self.apo_lib.get_str("no_url", self.all_strings, message))
+            return await utils.answer(message, self.apo_lib.utils.get_str("no_url", self.all_strings, message))
         file.seek(0)
         byte_str = file.read()
         text = byte_str.decode("utf-8")

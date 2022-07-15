@@ -1,4 +1,4 @@
-__version__ = (0, 1, 9)
+__version__ = (0, 1, 10)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -142,29 +142,29 @@ class ApodiktumMigratorMod(loader.Module):
 
         if self.get("hash") == "e1cc9d13bf96ec1aca7edd2fb67f0816":
             await self.inline.form(message=message,
-                                   text=self.apo_lib.get_str("already_migrated", self.all_strings, message),
+                                   text=self.apo_lib.utils.get_str("already_migrated", self.all_strings, message),
                                    reply_markup=[
                                                     {
-                                                        "text": self.apo_lib.get_str("_btn_force", self.all_strings, message),
+                                                        "text": self.apo_lib.utils.get_str("_btn_force", self.all_strings, message),
                                                         "callback": self._migrate,
                                                         "args": (chat_id,),
                                                     },
                                                     {
-                                                        "text": self.apo_lib.get_str("_btn_close", self.all_strings, message),
+                                                        "text": self.apo_lib.utils.get_str("_btn_close", self.all_strings, message),
                                                         "callback": self._close
                                                     }
                                                 ])
             return
         await self.inline.form(message=message,
-                               text=self.apo_lib.get_str("migrate_now", self.all_strings, message),
+                               text=self.apo_lib.utils.get_str("migrate_now", self.all_strings, message),
                                reply_markup=[
                                                 {
-                                                    "text": self.apo_lib.get_str("_btn_yes", self.all_strings, message),
+                                                    "text": self.apo_lib.utils.get_str("_btn_yes", self.all_strings, message),
                                                     "callback": self._migrate,
                                                     "args": (chat_id,),
                                                 },
                                                 {
-                                                    "text": self.apo_lib.get_str("_btn_no", self.all_strings, message),
+                                                    "text": self.apo_lib.utils.get_str("_btn_no", self.all_strings, message),
                                                     "callback": self._close,
                                                 },
                                                 ])

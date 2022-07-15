@@ -1,4 +1,4 @@
-__version__ = (0, 0, 10)
+__version__ = (0, 0, 11)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -120,14 +120,14 @@ class ApodiktumTestModuleMod(loader.Module):
         """
         This is a skeleton command.
         """
-        await utils.answer(message, self.apo_lib.get_str("skeleton_msg", self.all_strings, message))
+        await utils.answer(message, self.apo_lib.utils.get_str("skeleton_msg", self.all_strings, message))
         return
 
     async def skeleton2cmd(self, message):
         """
         This is a skeleton command.
         """
-        await utils.answer(message, self.apo_lib.get_str("skeleton2_msg", self.all_strings, message))
+        await utils.answer(message, self.apo_lib.utils.get_str("skeleton2_msg", self.all_strings, message))
         return
 
     async def capotestcmd(self, message: Message):

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 4)
+__version__ = (0, 0, 9)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -52,7 +52,7 @@ class SkeletonMod(loader.Module):
 
     all_strings = {
         "strings": strings,
-        "strings_en": strings,
+        "strings_en": strings_en,
         "strings_de": strings_de,
         "strings_ru": strings_ru,
     }
@@ -62,16 +62,28 @@ class SkeletonMod(loader.Module):
         self.client = client
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py",
-            suspend_on_error=True,
+            #  suspend_on_error=True,
         )
-
-    # Port these commands to the actual lib!
 
     async def hellocmd(self, message: Message):
         await utils.answer(
-            message, self.apo_lib.get_str("greet", self.all_strings, message)
+            message, self.apo_lib.utils.get_str("greet", self.all_strings, message)
         )
 
-    async def watcher(self, message: Message):
-        if isinstance(message, Message) and message.message == "ApoSkelWatcher":
-            await utils.answer(message, "Skeleton")
+    async def lmsgcmd(self, message: Message):
+        """
+        This will log the message.
+        """
+        self.apo_lib.utils.log(logging.ERROR, __name__, "some error log")
+
+    async def ldebugcmd(self, message: Message):
+        """
+        This will log the message.
+        """
+        self.apo_lib.utils.log(logging.DEBUG, __name__, "some debug error")
+
+    async def ldebugmsgcmd(self, message: Message):
+        """
+        This will log the message.
+        """
+        self.apo_lib.utils.log(logging.DEBUG, __name__, "some debug message", debug_msg=True)

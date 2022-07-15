@@ -1,4 +1,4 @@
-__version__ = (0, 0, 11)
+__version__ = (0, 0, 12)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -170,7 +170,7 @@ class ApodiktumSkeletonMod(loader.Module):
         """
         This is a skeleton command.
         """
-        await utils.answer(message, self.apo_lib.get_str("skeleton_msg", self.all_strings, message))
+        await utils.answer(message, self.apo_lib.utils.get_str("skeleton_msg", self.all_strings, message))
         return
 
     async def skeletoargscmd(self, message):
@@ -179,12 +179,12 @@ class ApodiktumSkeletonMod(loader.Module):
         """
         args = utils.get_args_raw(message)
         if not args:
-            await utils.answer(message, self.apo_lib.get_str("no_args", self.all_strings, message))
+            await utils.answer(message, self.apo_lib.utils.get_str("no_args", self.all_strings, message))
             return
         if not represents_int(args[0]):
-            await utils.answer(message, self.apo_lib.get_str("no_int", self.all_strings, message))
+            await utils.answer(message, self.apo_lib.utils.get_str("no_int", self.all_strings, message))
             return
-        await utils.answer(message, self.apo_lib.get_str("skeleton_argmsg", self.all_strings, message).format(args))
+        await utils.answer(message, self.apo_lib.utils.get_str("skeleton_argmsg", self.all_strings, message).format(args))
 
     async def watcher(self, message):
         """

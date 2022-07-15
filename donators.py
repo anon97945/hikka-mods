@@ -1,4 +1,4 @@
-__version__ = (0, 0, 14)
+__version__ = (0, 0, 15)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -203,13 +203,13 @@ class ApodiktumDonatorsMod(loader.Module):
         Calculate the amount of donations.
         """
         if not self.config["logchannel"]:
-            await utils.answer(message, self.apo_lib.get_str("no_channel", self.all_strings, message))
+            await utils.answer(message, self.apo_lib.utils.get_str("no_channel", self.all_strings, message))
             return
         amounts = await self._get_amounts(message, self.config["logchannel"])
         if amounts:
-            await utils.answer(message, self.apo_lib.get_str("total_amount", self.all_strings, message).format(amounts))
+            await utils.answer(message, self.apo_lib.utils.get_str("total_amount", self.all_strings, message).format(amounts))
         else:
-            await utils.answer(message, self.apo_lib.get_str("no_amount", self.all_strings, message))
+            await utils.answer(message, self.apo_lib.utils.get_str("no_amount", self.all_strings, message))
 
     async def donsavecmd(self, message: Message):
         """
@@ -221,19 +221,19 @@ class ApodiktumDonatorsMod(loader.Module):
         """
         reply = await message.get_reply_message()
         if not self.config["logchannel"]:
-            await utils.answer(message, self.apo_lib.get_str("no_channel", self.all_strings, message))
+            await utils.answer(message, self.apo_lib.utils.get_str("no_channel", self.all_strings, message))
             return
         if not reply:
-            await utils.answer(message, self.apo_lib.get_str("no_reply", self.all_strings, message))
+            await utils.answer(message, self.apo_lib.utils.get_str("no_reply", self.all_strings, message))
             return
         user = await self._client.get_entity(reply.sender_id)
         if not user:
-            await utils.answer(message, self.apo_lib.get_str("no_user", self.all_strings, message))
+            await utils.answer(message, self.apo_lib.utils.get_str("no_user", self.all_strings, message))
             return
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
         if not args:
-            await utils.answer(message, self.apo_lib.get_str("no_args", self.all_strings, message))
+            await utils.answer(message, self.apo_lib.utils.get_str("no_args", self.all_strings, message))
             return
         monthly_amount, today, uname, username, userid, amount, currency, dtype, rank, code = self._vars(user, args)
 
@@ -256,7 +256,7 @@ class ApodiktumDonatorsMod(loader.Module):
             custom_msg = custom_msg.replace("<br>", "\n")
             await utils.answer(message, custom_msg)
         else:
-            await utils.answer(message, self.apo_lib.get_str("donation_saved", self.all_strings, message))
+            await utils.answer(message, self.apo_lib.utils.get_str("donation_saved", self.all_strings, message))
         await msg.react("👍")
 
     @staticmethod

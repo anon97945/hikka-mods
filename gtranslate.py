@@ -1,4 +1,4 @@
-__version__ = (0, 0, 62)
+__version__ = (0, 0, 63)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -152,7 +152,7 @@ class ApodiktumGTranslateMod(loader.Module):
         if not text and message.is_reply:
             text = (await message.get_reply_message()).message
         if len(text) == 0:
-            await utils.answer(message, self.apo_lib.get_str("invalid_text", self.all_strings, message))
+            await utils.answer(message, self.apo_lib.utils.get_str("invalid_text", self.all_strings, message))
             return
         if args[0] == "":
             args[0] = (await utils.run_sync(self.tr.detect, text)).lang
@@ -164,9 +164,9 @@ class ApodiktumGTranslateMod(loader.Module):
         if args[1] == "":
             args[1] = self.config["DEFAULT_LANG"]
         args[0] = args[0].lower()
-        await utils.answer(message, self.apo_lib.get_str("translating", self.all_strings, message))
+        await utils.answer(message, self.apo_lib.utils.get_str("translating", self.all_strings, message))
         translated = (await utils.run_sync(self.tr.translate, text, dest=args[1], src=args[0])).text
-        ret = self.apo_lib.get_str("translated", self.all_strings, message)
+        ret = self.apo_lib.utils.get_str("translated", self.all_strings, message)
         if self.config["vodka_easteregg"]:
             args = list(map(lambda x: x.replace("ru", "vodka"), args))
         ret = ret.format(text=utils.escape_html(text), frlang=utils.escape_html(args[0]),

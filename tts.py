@@ -1,4 +1,4 @@
-__version__ = (0, 1, 83)
+__version__ = (0, 1, 84)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -209,9 +209,9 @@ class ApodiktumTTSMod(loader.Module):
             if message.is_reply:
                 text = (await message.get_reply_message()).message
             else:
-                await utils.answer(message, self.apo_lib.get_str("tts_needs_text", self.all_strings, message))
+                await utils.answer(message, self.apo_lib.utils.get_str("tts_needs_text", self.all_strings, message))
                 return
-        msg = await utils.answer(message, self.apo_lib.get_str("processing", self.all_strings, message))
+        msg = await utils.answer(message, self.apo_lib.utils.get_str("processing", self.all_strings, message))
         tts = await utils.run_sync(gTTS, text, lang=self.config["tts_lang"])
         voice = BytesIO()
         await utils.run_sync(tts.write_to_fp, voice)
@@ -235,19 +235,19 @@ class ApodiktumTTSMod(loader.Module):
         """Speed up voice by x"""
         speed = utils.get_args_raw(message)
         if not message.is_reply:
-            await utils.answer(message, self.apo_lib.get_str("no_reply", self.all_strings, message))
+            await utils.answer(message, self.apo_lib.utils.get_str("no_reply", self.all_strings, message))
             return
         replymsg = await message.get_reply_message()
         if not replymsg.voice:
-            await utils.answer(message, self.apo_lib.get_str("needvoice", self.all_strings, message))
+            await utils.answer(message, self.apo_lib.utils.get_str("needvoice", self.all_strings, message))
             return
         if len(speed) == 0:
-            await utils.answer(message, self.apo_lib.get_str("needspeed", self.all_strings, message))
+            await utils.answer(message, self.apo_lib.utils.get_str("needspeed", self.all_strings, message))
             return
         if not represents_speed(speed):
-            await utils.answer(message, self.apo_lib.get_str("no_speed", self.all_strings, message))
+            await utils.answer(message, self.apo_lib.utils.get_str("no_speed", self.all_strings, message))
             return
-        msg = await utils.answer(message, self.apo_lib.get_str("processing", self.all_strings, message))
+        msg = await utils.answer(message, self.apo_lib.utils.get_str("processing", self.all_strings, message))
         ext = replymsg.file.ext
         voice = BytesIO()
         voice.name = replymsg.file.name
