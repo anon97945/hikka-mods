@@ -1,4 +1,4 @@
-__version__ = (0, 1, 16)
+__version__ = (0, 1, 17)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,7 +17,7 @@ __version__ = (0, 1, 16)
 
 # scope: inline
 # scope: hikka_only
-# scope: hikka_min 1.2.10
+# scope: hikka_min 1.2.11
 
 import logging
 

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 32)
+__version__ = (0, 0, 33)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -85,15 +85,17 @@ class ControllerLoader():
         await link_message.delete()
         return lib_controller
 
-    async def _wait_load(self, delay=5, retries=15):
+    async def _wait_load(self, delay, retries):
         while retries:
             if lib_controller := self._modules.lookup("Apo-LibController"):
                 logger.info("ApoLibController found!")
                 return lib_controller
-            if self._modules.lookup("Loader")._fully_loaded:
+            if not self._modules.lookup("Loader")._fully_loaded:
+                retries = 1
+            else:
                 retries -= 1
             logger.info("ApoLibController not found, retrying in %s seconds..."
-                        "\n Hikka fully loaded: %s", delay, self._modules.lookup("Loader")._fully_loaded)
+                        "\nHikka fully loaded: %s", delay, self._modules.lookup("Loader")._fully_loaded)
             await asyncio.sleep(delay)
 
 

@@ -1,4 +1,4 @@
-__version__ = (1, 0, 11)
+__version__ = (1, 0, 12)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -16,7 +16,7 @@ __version__ = (1, 0, 11)
 # meta developer: @apodiktum_modules
 
 # scope: hikka_only
-# scope: hikka_min 1.2.10
+# scope: hikka_min 1.2.11
 
 import asyncio
 import contextlib

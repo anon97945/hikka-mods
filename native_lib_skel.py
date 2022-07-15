@@ -1,4 +1,4 @@
-__version__ = (0, 0, 2)
+__version__ = (0, 0, 4)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -16,7 +16,7 @@ __version__ = (0, 0, 2)
 # meta developer: @apodiktum_modules
 
 # scope: hikka_only
-# scope: hikka_min 1.2.10
+# scope: hikka_min 1.2.11
 
 import logging
 
@@ -61,7 +61,7 @@ class SkeletonMod(loader.Module):
         self.db = db
         self.client = client
         self.apo_lib = await self.import_lib(
-            "https://pastebin.com/raw/buyVSRC3",
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py",
             suspend_on_error=True,
         )
 
