@@ -1,4 +1,4 @@
-__version__ = (0, 0, 28)
+__version__ = (0, 0, 29)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -287,11 +287,14 @@ class ApodiktumMsgMergerMod(loader.Module):
         ):
             return
 
-        for i in range(-4, -1):
-            last_msg_iter = (await self._client.get_messages(chatid, limit=5))[i]
-            if last_msg_iter.id != message.id:
-                last_msg = last_msg_iter
-                break
+        try:
+            for i in range(-4, -1):
+                last_msg_iter = (await self._client.get_messages(chatid, limit=5))[i]
+                if last_msg_iter.id != message.id:
+                    last_msg = last_msg_iter
+                    break
+        except IndexError:
+            return
 
         if self.config["merge_own_reply"] and message.is_reply:
             last_msg_reply = await message.get_reply_message()
