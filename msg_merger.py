@@ -1,4 +1,4 @@
-__version__ = (0, 0, 25)
+__version__ = (0, 0, 26)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -22,6 +22,7 @@ import logging
 from datetime import datetime, timezone
 
 import emoji
+from telethon.errors import MessageNotModifiedError
 from telethon.tl.types import Message, MessageEntityUrl
 
 from .. import loader, utils
@@ -165,11 +166,13 @@ class ApodiktumMsgMergerMod(loader.Module):
             ),
             loader.ConfigValue(
                 "skip_prefix",
-                ">",
+                [">"],
                 doc=lambda: self.strings("_cfg_skip_prefix"),
-                validator=loader.validators.Union(
-                    loader.validators.String(length=1),
-                    loader.validators.NoneType(),
+                validator=loader.validators.Series(
+                    loader.validators.Union(
+                        loader.validators.String(length=1),
+                        loader.validators.NoneType(),
+                    ),
                 ),
             ),
             loader.ConfigValue(
@@ -267,14 +270,16 @@ class ApodiktumMsgMergerMod(loader.Module):
         ):
             return
 
-        skip_prefix_len = len(utils.escape_html(self.config["skip_prefix"]))
-        if (
-            self.config["skip_prefix"]
-            and utils.remove_html(message.text)[:skip_prefix_len] == utils.escape_html(self.config["skip_prefix"])
-        ):
-            text = message.text.replace(utils.escape_html(self.config["skip_prefix"]), "")
-            await message.edit(text)
-            return
+        if self.config["skip_prefix"]:
+            for prefix in self.config["skip_prefix"]:
+                skip_prefix_len = len(utils.escape_html(prefix))
+                if utils.remove_html(message.text)[:skip_prefix_len] == utils.escape_html(prefix):
+                    text = message.text.replace(utils.escape_html(prefix), "", 1)
+                    try:
+                        await message.edit(text)
+                        return 
+                    except MessageNotModifiedError:
+                        return
 
         if (
             self.config["skip_length"]

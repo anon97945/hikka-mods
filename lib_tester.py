@@ -1,4 +1,4 @@
-__version__ = (0, 0, 9)
+__version__ = (0, 0, 10)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -62,7 +62,7 @@ class SkeletonMod(loader.Module):
         self.client = client
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py",
-            #  suspend_on_error=True,
+            suspend_on_error=True,
         )
 
     async def hellocmd(self, message: Message):
