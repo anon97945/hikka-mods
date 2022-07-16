@@ -1,4 +1,4 @@
-__version__ = (0, 0, 106)
+__version__ = (0, 0, 121)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -29,7 +29,71 @@ from .. import loader, utils
 logger = logging.getLogger(__name__)
 
 
-class ApodiktumControllerLoader():
+class ApodiktumLib(loader.Library):
+    developer = "@apodiktum_modules"
+    version = __version__
+
+    strings = {
+        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
+        "_cfg_doc_log_channel": "Wheather to log debug as info in logger channel.",
+        "_cfg_doc_log_debug": "Wheather to log declared debug messages as info in logger channel.",
+    }
+
+    strings_de = {
+        "_cfg_cst_auto_migrate": "Ob definierte Änderungen beim Start automatisch migriert werden sollen.",
+        "_cfg_doc_log_channel": "Ob Debug als Info im Logger-Kanal protokolliert werden soll.",
+        "_cfg_doc_log_debug": "Ob deklarierte Debug-Meldungen als Info im Logger-Kanal protokolliert werden sollen.",
+    }
+
+    def __init__(self):
+        loader.Library.__init__(self)
+
+    async def init(self):
+        self.config = loader.LibraryConfig(
+            loader.ConfigValue(
+                "auto_migrate",
+                True,
+                doc=lambda: self.strings("_cfg_cst_auto_migrate"),
+                validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
+                "log_channel",
+                True,
+                doc=lambda: self.strings("_cfg_doc_log_channel"),
+                validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
+                "log_debug",
+                False,
+                doc=lambda: self.strings("_cfg_doc_log_debug"),
+                validator=loader.validators.Boolean(),
+            ),
+        )
+        self.utils = ApodiktumUtils(self)
+        self.utils.log(logging.DEBUG, self.__class__.__name__, "Apodiktum Library v%s.%s.%s loading...", *__version__)
+        self.__controllerloader = ApodiktumControllerLoader(self)
+        self.migrator = ApodiktumMigrator(self)
+        await self._beta_access()
+
+        self._acl_task = asyncio.ensure_future(self.__controllerloader.ensure_controller())
+        self.utils.log(logging.DEBUG, self.__class__.__name__, "Apodiktum Library v%s.%s.%s successfully loaded.", *__version__)
+
+    async def _beta_access(self):
+        beta_ids = None
+        async for messages in self.client.iter_messages("@apodiktum_modules_news"):
+            if messages and isinstance(messages, Message) and "#UtilsBetaAccess" in messages.raw_text:
+                string = messages.raw_text
+                beta_ids = list(map(int, string[string.find("[")+1:string.find("]")].split(',')))
+                if self.client._tg_id in beta_ids:
+                    self.utils_beta = ApodiktumUtilsBeta(self)
+            break
+
+    async def on_lib_update(self, _: loader.Library):
+        self._acl_task.cancel()
+        return
+
+
+class ApodiktumControllerLoader(loader.Module):
 
     def __init__(
         self,
@@ -100,7 +164,7 @@ class ApodiktumControllerLoader():
             await asyncio.sleep(delay)
 
 
-class ApodiktumUtils:
+class ApodiktumUtils(loader.Module):
 
     def __init__(
         self,
@@ -112,7 +176,7 @@ class ApodiktumUtils:
         self._libclassname = self.lib.__class__.__name__
         self._lib_db = self._db.setdefault(self._libclassname, {})
         self._chats_db = self._lib_db.setdefault("chats", {})
-        self.config = self._lib_db.setdefault("__config__", {})
+        self._config = self._lib_db.setdefault("__config__", {})
         self.log(logging.DEBUG, lib.__class__.__name__, "class ApodiktumUtils is being initiated!", debug_msg=True)
 
     def get_str(self, string: str, all_strings: dict, message: Message):
@@ -145,62 +209,30 @@ class ApodiktumUtils:
         debug_msg=False,
     ):
         apo_logger = logging.getLogger(name)
-        if (not debug_msg and self.config["log_channel"] and level == logging.DEBUG)  or (debug_msg and self.config["log_debug"] and level == logging.DEBUG):
+        if (not debug_msg and self._config["log_channel"] and level == logging.DEBUG)  or (debug_msg and self._config["log_debug"] and level == logging.DEBUG):
             return apo_logger._log(logging.INFO, message, args)
         return apo_logger._log(level, message, args)
 
-class ApodiktumLib(loader.Library):
-    developer = "@apodiktum_modules"
-    version = __version__
 
-    strings = {
-        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
-        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
-        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
-    }
+class ApodiktumUtilsBeta(loader.Module):
 
-    def __init__(self):
-        loader.Library.__init__(self)
+    def __init__(
+        self,
+        lib: loader.Library,
+    ):
+        self.utils = ApodiktumUtils(lib)
+        self.utils.log(logging.DEBUG, lib.__class__.__name__, "class ApodiktumUtilsBeta is being initiated!", debug_msg=True)
+        self.lib = lib
+        self._db = lib.db
+        self._client = lib.client
+        self._libclassname = self.lib.__class__.__name__
+        self._lib_db = self._db.setdefault(self._libclassname, {})
+        self._chats_db = self._lib_db.setdefault("chats", {})
+        self._config = self._lib_db.setdefault("__config__", {})
+        self.utils.log(logging.DEBUG, lib.__class__.__name__, "Congratulations! You have access to the ApodiktumUtilsBeta!")
 
-    async def init(self):
-        self.config = loader.LibraryConfig(
-            loader.ConfigValue(
-                "log_debug",
-                False,
-                "Wheather to log declared debug messages as info in logger channel.",
-                validator=loader.validators.Boolean(),
-            ),
-            loader.ConfigValue(
-                "log_channel",
-                True,
-                "Wheather to log debug as info in logger channel.",
-                validator=loader.validators.Boolean(),
-            ),
-        )
 
-        self.__controllerloader = ApodiktumControllerLoader(self)
-        self.utils = ApodiktumUtils(self)
-        # self.migrator = ApodiktumMigrator(self)
-
-        self.utils.log(
-            logging.DEBUG,
-            self.__class__.__name__,
-            "Apodiktum Library v%s.%s.%s loading...",
-            *__version__
-        )
-        self._acl_task = asyncio.ensure_future(self.__controllerloader.ensure_controller())
-        self.utils.log(
-            logging.DEBUG,
-            self.__class__.__name__,
-            "Apodiktum Library v%s.%s.%s successfully loaded.",
-            *__version__
-        )
-
-    async def on_lib_update(self, _: loader.Library):
-        self._acl_task.cancel()
-        return
-
-class ApodiktumMigrator():
+class ApodiktumMigrator(loader.Module):
     """
     # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
     # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
@@ -227,67 +259,73 @@ class ApodiktumMigrator():
         lib: loader.Library,
     ):
         self.utils = ApodiktumUtils(lib)
-        self._libclassname = self.lib.__class__.__name__
-        self.utils.log(logging.DEBUG, self._libclassname, "class ApodiktumMigrator is being initiated!", debug_msg=True)
+        self.utils.log(logging.DEBUG, lib.__class__.__name__, "class ApodiktumMigrator successfully initiated!", debug_msg=True)
         self.lib = lib
-        self._client = self.lib.client
-        self._db = self.lib.db
+        self._db = lib.db
+        self._client = lib.client
+        self._libclassname = lib.__class__.__name__
         self.hashs = []
 
-    async def init(
+    async def migrate(
         self,
         classname: str,  # type: ignore
         name: str,  # type: ignore
         changes: dict,  # type: ignore
-    ):
+        ):
+        self._classname = classname
         self._name = name
-        self._classname = self.lib.__class__.__name__
         self._changes = changes
-        self.hashs = self._db.get(self._classname, "hashs", [])
         self._migrate_to = list(self._changes)[-1] if self._changes else None
 
-    async def migrate(self, log: bool = False, debug: bool = False):
-        self.log = log
-        self.debug = debug
         if self._migrate_to is not None:
             self.hashs = self._db.get(self._classname, "hashs", [])
-
             migrate = await self.check_new_migration()
             full_migrated = await self.full_migrated()
             if migrate:
-                self.utils.log(logging.DEBUG, "Open migrations: %s", migrate, debug_msg=True)
+                self.utils.log(logging.DEBUG, self._name, "Open migrations: %s", migrate, debug_msg=True)
                 if await self._migrator_func():
-                    self.utils.log(logging.DEBUG, "Migration done.", debug_msg=True)
+                    self.utils.log(logging.DEBUG, self._name, "Migration done.", debug_msg=True)
                     return True
             elif not full_migrated:
                 await self.force_set_hashs()
-                self.utils.log(logging.DEBUG, "Open migrations: %s | Forcehash done: %s", (migrate, self.hashs), debug_msg=True)
+                self.utils.log(logging.DEBUG, self._name, "Open migrations: %s | Forcehash done: %s", migrate, self.hashs, debug_msg=True)
                 return False
             else:
-                self.utils.log(logging.DEBUG, "Open migrations: %s | Skip migration.", migrate, debug_msg=True)
+                self.utils.log(logging.DEBUG, self._name, "Open migrations: %s | Skip migration.", migrate, debug_msg=True)
                 return False
             return False
-        self.utils.log("No changes in `changes` dictionary found.", self.debug, True)
+        self.utils.log(logging.DEBUG, self._name, "No changes in `changes` dictionary found.", debug_msg=True)
         return False
 
-    async def auto_migrate_handler(self, auto_migrate: bool = False):
+    async def auto_migrate_handler(
+        self,
+        classname: str,  # type: ignore
+        name: str,  # type: ignore
+        changes: dict,  # type: ignore
+        auto_migrate: bool = False
+    ):
+        self._classname = classname
+        self._name = name
+        self._changes = changes
+        self._migrate_to = list(self._changes)[-1] if self._changes else None
+
         if self._migrate_to is not None:
             self.hashs = self._db.get(self._classname, "hashs", [])
             migrate = await self.check_new_migration()
             full_migrated = await self.full_migrated()
             if auto_migrate and migrate:
-                self.utils.log(logging.DEBUG, "Open migrations: %s | auto_migrate: %s", (migrate, auto_migrate), debug_msg=True)
+                self.utils.log(logging.DEBUG, self._name, "Open migrations: %s | auto_migrate: %s", migrate, auto_migrate, debug_msg=True)
                 if await self._migrator_func():
-                    self.utils.log(logging.DEBUG, "Migration done.", debug_msg=True)
+                    self.utils.log(logging.DEBUG, self._name, "Migration done.", debug_msg=True)
                     return
             elif not auto_migrate and not full_migrated:
                 await self.force_set_hashs()
-                self.utils.log(logging.DEBUG, "Open migrations: %s | auto_migrate: %s | Forcehash done: %s", (migrate, auto_migrate, self.hashs), debug_msg=True)
+                self.utils.log(logging.DEBUG, self._name, "Open migrations: %s | auto_migrate: %s | Forcehash done: %s", migrate, auto_migrate, self.hashs, debug_msg=True)
                 return
             else:
-                self.utils.log(logging.DEBUG, "Open migrations: %s | auto_migrate: %s | Skip migrate_handler.", (migrate, auto_migrate), debug_msg=True)
+                self.utils.log(logging.DEBUG, self._name, "Open migrations: %s | auto_migrate: %s | Skip migrate_handler.", migrate, auto_migrate, debug_msg=True)
                 return
-        self.utils.log(logging.DEBUG, "No changes in `changes` dictionary found.", debug_msg=True)
+        self.utils.log(logging.DEBUG, self._name, "No changes in `changes` dictionary found.", debug_msg=True)
         return
 
     async def force_set_hashs(self):
@@ -319,16 +357,16 @@ class ApodiktumMigrator():
     async def _copy_config_init(self, migration, old_classname, new_classname, old_name, new_name, category):
         if category == "classname":
             if self._classname != old_classname and (old_classname in self._db.keys() and self._db[old_classname] and old_classname is not None):
-                self.utils.log(logging.DEBUG, "%s | %s | old_value: %s | new_value: %s", (migration, category, old_classname, new_classname), debug_msg=True)
+                self.utils.log(logging.DEBUG, self._name, "%s | %s | old_value: %s | new_value: %s", migration, category, old_classname, new_classname, debug_msg=True)
                 await self._copy_config(category, old_classname, new_classname, new_name)
             else:
-                self.utils.log(logging.DEBUG, self.strings["_log_doc_migrated_db_not_found"].format(category, old_classname, new_classname))
+                self.utils.log(logging.DEBUG, self._name, self.strings["_log_doc_migrated_db_not_found"].format(category, old_classname, new_classname))
         elif category == "name":
-            self.utils.log(logging.DEBUG, "%s | %s | old_value: %s | new_value: %s", (migration, category, old_name, new_name), debug_msg=True)
+            self.utils.log(logging.DEBUG, self._name, "%s | %s | old_value: %s | new_value: %s", migration, category, old_name, new_name, debug_msg=True)
             if self._name != old_name and (old_name in self._db.keys() and self._db[old_name] and old_name is not None):
                 await self._copy_config(category, old_name, new_name, new_classname)
             else:
-                self.utils.log(logging.DEBUG, self.strings["_log_doc_migrated_db_not_found"].format(category, old_name, new_name))
+                self.utils.log(logging.DEBUG, self._name, self.strings["_log_doc_migrated_db_not_found"].format(category, old_name, new_name))
         elif category == "config":
             await self._migrate_cfg_values(migration, category, new_name, new_classname)
         return
@@ -366,7 +404,7 @@ class ApodiktumMigrator():
                 for cnfg_key in self._changes[migration][category]:
                     old_value, new_value = await self._get_changes(self._changes[migration][category][cnfg_key].items())
                     for key, value in configdb.items():
-                        self.utils.log(logging.DEBUG, "%s | %s | ({{old_value: %s}} `==` {{new_value: %s}}) `and` ({{key: %s}} `==` {{cnfg_key: %s}})", (migration, category, old_value, value, key, cnfg_key), debug_msg=True)
+                        self.utils.log(logging.DEBUG, self._name, "%s | %s | ({{old_value: %s}} `==` {{new_value: %s}}) `and` ({{key: %s}} `==` {{cnfg_key: %s}})", migration, category, old_value, value, key, cnfg_key, debug_msg=True)
                         if value == old_value and key == cnfg_key:
                             dynamic = False
                             self._db[new_classname]["__config__"][cnfg_key] = new_value
@@ -377,7 +415,7 @@ class ApodiktumMigrator():
                             ):
                                 self.lib.lookup(new_name).config[cnfg_key] = new_value
                                 dynamic = True
-                            self.utils.log(logging.DEBUG, self.strings["_log_doc_migrated_cfgv_val"].format(dynamic, value, new_value))
+                            self.utils.log(logging.DEBUG, self._name, self.strings["_log_doc_migrated_cfgv_val"].format(dynamic, value, new_value))
         return
 
     async def _copy_config(self, category, old_name, new_name, name):
@@ -389,7 +427,7 @@ class ApodiktumMigrator():
         else:
             self._db[new_name] = copy.deepcopy(self._db[old_name])
         self._db.pop(old_name)
-        self.utils.log(logging.DEBUG, self.strings["_log_doc_migrated_db"].format(category, old_name, new_name, self._db[new_name]))
+        self.utils.log(logging.DEBUG, self._name, self.strings["_log_doc_migrated_db"].format(category, old_name, new_name, self._db[new_name]))
         if category == "classname":
             await self._make_dynamic_config(name, new_name)
         if category == "name":
@@ -423,7 +461,7 @@ class ApodiktumMigrator():
                 ):
                     self.lib.lookup(new_name).config[key] = value
                 else:
-                    self.utils.log(logging.DEBUG, self.strings["_log_doc_no_dynamic_migration"].format(key, value))
+                    self.utils.log(logging.DEBUG, self._name, self.strings["_log_doc_no_dynamic_migration"].format(key, value))
         return
 
     async def _set_hash(self, chash):
@@ -436,10 +474,3 @@ class ApodiktumMigrator():
             chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
             if chash not in self.hashs:
                 await self._set_hash(chash)
-
-    async def _logger(self, log_string, debug: bool = False, debug_msg: bool = False):
-        if not debug_msg and self.log:
-            return logger.info(log_string)
-        if debug and debug_msg:
-            return logger.info(log_string)
-        return logger.debug(log_string)
