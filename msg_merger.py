@@ -1,4 +1,4 @@
-__version__ = (0, 0, 22)
+__version__ = (0, 0, 26)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -18,14 +18,14 @@ __version__ = (0, 0, 22)
 # scope: hikka_only
 # scope: hikka_min 1.1.28
 
-import logging
-import emoji
-
 import collections  # for MigratorClass
+import copy  # for MigratorClass
 import hashlib  # for MigratorClass
-import copy     # for MigratorClass
-
+import logging
 from datetime import datetime, timezone
+
+import emoji
+from telethon.errors import MessageNotModifiedError
 from telethon.tl.types import Message, MessageEntityUrl
 
 from .. import loader, utils
@@ -60,6 +60,7 @@ class ApodiktumMsgMergerMod(loader.Module):
         "_cfg_skip_prefix": "The prefix to skip the merging.",
         "_cfg_skip_reply": "Whether to skip the merging of messages with reply.",
         "_cfg_whitelist": "Whether the chatlist includes(True) or excludes(False) the chat.",
+        "_cfg_ignore_prefix": "The prefix to ignore the merging fully.",
     }
 
     def __init__(self):
@@ -85,6 +86,17 @@ class ApodiktumMsgMergerMod(loader.Module):
                 validator=loader.validators.Union(
                     loader.validators.Integer(minimum=1),
                     loader.validators.NoneType(),
+                ),
+            ),
+            loader.ConfigValue(
+                "ignore_prefix",
+                ["+"],
+                doc=lambda: self.strings("_cfg_ignore_prefix"),
+                validator=loader.validators.Series(
+                    loader.validators.Union(
+                        loader.validators.String(length=1),
+                        loader.validators.NoneType(),
+                    ),
                 ),
             ),
             loader.ConfigValue(
@@ -153,11 +165,13 @@ class ApodiktumMsgMergerMod(loader.Module):
             ),
             loader.ConfigValue(
                 "skip_prefix",
-                ">",
+                [">"],
                 doc=lambda: self.strings("_cfg_skip_prefix"),
-                validator=loader.validators.Union(
-                    loader.validators.String(length=1),
-                    loader.validators.NoneType(),
+                validator=loader.validators.Series(
+                    loader.validators.Union(
+                        loader.validators.String(length=1),
+                        loader.validators.NoneType(),
+                    ),
                 ),
             ),
             loader.ConfigValue(
@@ -256,14 +270,22 @@ class ApodiktumMsgMergerMod(loader.Module):
         ):
             return
 
-        skip_prefix_len = len(utils.escape_html(self.config["skip_prefix"]))
-        if (
-            self.config["skip_prefix"]
-            and utils.remove_html(message.text)[:skip_prefix_len] == utils.escape_html(self.config["skip_prefix"])
-        ):
-            text = message.text.replace(utils.escape_html(self.config["skip_prefix"]), "")
-            await message.edit(text)
-            return
+        if self.config["ignore_prefix"]:
+            for prefix in self.config["ignore_prefix"]:
+                ignore_prefix_len = len(utils.escape_html(prefix))
+                if utils.remove_html(message.text)[:ignore_prefix_len] == utils.escape_html(prefix):
+                    return
+
+        if self.config["skip_prefix"]:
+            for prefix in self.config["skip_prefix"]:
+                skip_prefix_len = len(utils.escape_html(prefix))
+                if utils.remove_html(message.text)[:skip_prefix_len] == utils.escape_html(prefix):
+                    text = message.text.replace(utils.escape_html(prefix), "", 1)
+                    try:
+                        await message.edit(text)
+                        return 
+                    except MessageNotModifiedError:
+                        return
 
         if (
             self.config["skip_length"]
