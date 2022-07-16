@@ -1,4 +1,4 @@
-__version__ = (0, 0, 26)
+__version__ = (0, 0, 28)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -57,6 +57,7 @@ class ApodiktumMsgMergerMod(loader.Module):
         "_cfg_skip_prefix": "The prefix to skip the merging.",
         "_cfg_skip_reply": "Whether to skip the merging of messages with reply.",
         "_cfg_whitelist": "Whether the chatlist includes(True) or excludes(False) the chat.",
+        "_cfg_ignore_prefix": "The prefix to ignore the merging fully.",
     }
 
     strings_en = {
@@ -98,6 +99,17 @@ class ApodiktumMsgMergerMod(loader.Module):
                 validator=loader.validators.Union(
                     loader.validators.Integer(minimum=1),
                     loader.validators.NoneType(),
+                ),
+            ),
+            loader.ConfigValue(
+                "ignore_prefix",
+                ["+"],
+                doc=lambda: self.strings("_cfg_ignore_prefix"),
+                validator=loader.validators.Series(
+                    loader.validators.Union(
+                        loader.validators.String(length=1),
+                        loader.validators.NoneType(),
+                    ),
                 ),
             ),
             loader.ConfigValue(
@@ -187,24 +199,6 @@ class ApodiktumMsgMergerMod(loader.Module):
                 doc=lambda: self.strings("_cfg_whitelist"),
                 validator=loader.validators.Boolean(),
             ),
-            loader.ConfigValue(
-                "auto_migrate",
-                True,
-                doc=lambda: self.strings("_cfg_cst_auto_migrate"),
-                validator=loader.validators.Boolean(),
-            ),  # for MigratorClass
-            loader.ConfigValue(
-                "auto_migrate_log",
-                True,
-                doc=lambda: self.strings("_cfg_cst_auto_migrate_log"),
-                validator=loader.validators.Boolean(),
-            ),  # for MigratorClass
-            loader.ConfigValue(
-                "auto_migrate_debug",
-                False,
-                doc=lambda: self.strings("_cfg_cst_auto_migrate_debug"),
-                validator=loader.validators.Boolean(),
-            ),  # for MigratorClass
         )
 
     async def client_ready(self, client, db):
@@ -269,6 +263,12 @@ class ApodiktumMsgMergerMod(loader.Module):
             )
         ):
             return
+
+        if self.config["ignore_prefix"]:
+            for prefix in self.config["ignore_prefix"]:
+                ignore_prefix_len = len(utils.escape_html(prefix))
+                if utils.remove_html(message.text)[:ignore_prefix_len] == utils.escape_html(prefix):
+                    return
 
         if self.config["skip_prefix"]:
             for prefix in self.config["skip_prefix"]:
