@@ -1,4 +1,4 @@
-__version__ = (0, 0, 17)
+__version__ = (0, 0, 18)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -18,10 +18,8 @@ __version__ = (0, 0, 17)
 
 import logging
 from datetime import date, timedelta
-from typing import Union
 
-from telethon.errors import UserNotParticipantError
-from telethon.tl.types import Chat, Message, User
+from telethon.tl.types import Message
 
 from .. import loader, utils
 

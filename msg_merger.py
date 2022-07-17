@@ -1,4 +1,4 @@
-__version__ = (0, 0, 31)
+__version__ = (0, 0, 32)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -21,7 +21,6 @@ __version__ = (0, 0, 31)
 import logging
 from datetime import datetime, timezone
 
-import emoji
 from telethon.errors import MessageNotModifiedError
 from telethon.tl.types import Message, MessageEntityUrl
 

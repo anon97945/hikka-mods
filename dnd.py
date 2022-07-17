@@ -1,4 +1,4 @@
-__version__ = (0, 1, 33)
+__version__ = (0, 1, 34)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -30,7 +30,6 @@ import asyncio
 import contextlib
 import datetime
 import logging
-import re
 import time
 from typing import Union
 

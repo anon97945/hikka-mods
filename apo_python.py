@@ -1,4 +1,4 @@
-__version__ = (0, 0, 3)
+__version__ = (0, 0, 4)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -24,13 +24,10 @@ __version__ = (0, 0, 3)
 # scope: hikka_min 1.2.11
 
 import contextlib
-import itertools
 import logging
 import os
 from traceback import format_exc
-from types import ModuleType
 
-import telethon
 from meval import meval
 from telethon.errors.rpcerrorlist import MessageIdInvalidError
 from telethon.tl.types import Message
