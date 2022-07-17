@@ -277,7 +277,7 @@ class ApodiktumMsgMergerMod(loader.Module):
                     text = message.text.replace(utils.escape_html(prefix), "", 1)
                     try:
                         await message.edit(text)
-                        return 
+                        return
                     except MessageNotModifiedError:
                         return
 

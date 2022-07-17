@@ -1,3 +1,4 @@
+import contextlib
 __version__ = (0, 0, 2)
 
 
@@ -178,10 +179,8 @@ class ApodiktumPythonMod(loader.Module):
                 "StringSession(**************************)",
             )
 
-        try:
+        with contextlib.suppress(MessageIdInvalidError):
             await utils.answer(message, ret)
-        except MessageIdInvalidError:
-            pass
 
     async def getattrs(self, message):
         reply = await message.get_reply_message()

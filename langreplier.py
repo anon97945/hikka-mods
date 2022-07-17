@@ -72,7 +72,6 @@ class ApodiktumLangReplierMod(loader.Module):
         "strings_ru": strings_ru,
     }
 
-
     def __init__(self):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(

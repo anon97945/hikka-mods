@@ -1,4 +1,4 @@
-__version__ = (0, 0, 148)
+__version__ = (0, 0, 149)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -23,17 +23,9 @@ import logging
 from typing import Union
 
 import aiohttp
-from aiogram.types import ChatPermissions
-from aiogram.utils.exceptions import (BotKicked, ChatNotFound,
-                                      MessageCantBeDeleted,
-                                      MessageToDeleteNotFound)
 from telethon.errors import UserNotParticipantError
-from telethon.tl.functions.channels import (EditAdminRequest,
-                                            EditBannedRequest,
-                                            GetFullChannelRequest,
-                                            InviteToChannelRequest)
-from telethon.tl.types import (Channel, Chat, ChatAdminRights,
-                               ChatBannedRights, Message, User)
+from telethon.tl.functions.channels import GetFullChannelRequest
+from telethon.tl.types import Channel, Chat, Message, User
 
 from .. import loader, utils
 
@@ -88,7 +80,7 @@ class ApodiktumLib(loader.Library):
         self.__controllerloader = ApodiktumControllerLoader(self)
         self.__internal = ApodiktumInternal(self)
         self.migrator = ApodiktumMigrator(self)
-        beta_access = await self.__internal._beta_access()
+        beta_access = await self.__internal.beta_access()
         if beta_access:
             self.utils_beta = ApodiktumUtilsBeta(self)
 
@@ -157,10 +149,9 @@ class ApodiktumControllerLoader(loader.Module):
         link = (
             "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apolib_controller.py"  # Swap this out to the actual libcontroller link!
         )
-        async with aiohttp.ClientSession() as session:
-            async with session.head(link) as response:
-                if response.status >= 300:
-                    return None
+        async with aiohttp.ClientSession() as session, session.head(link) as response:
+            if response.status >= 300:
+                return None
         link_message = await self._client.send_message(
             "me", f"{self.lib.get_prefix()}dlmod {link}"
         )
@@ -240,7 +231,7 @@ class ApodiktumUtils(loader.Module):
         debug_msg=False,
     ):
         apo_logger = logging.getLogger(name)
-        if (not debug_msg and self._config["log_channel"] and level == logging.DEBUG)  or (debug_msg and self._config["log_debug"] and level == logging.DEBUG):
+        if (not debug_msg and self._config["log_channel"] and level == logging.DEBUG) or (debug_msg and self._config["log_debug"] and level == logging.DEBUG):
             return apo_logger._log(logging.INFO, message, args)
         return apo_logger._log(level, message, args)
 
@@ -321,7 +312,7 @@ class ApodiktumUtilsBeta(loader.Module):
 
 
 class ApodiktumInternal(loader.Module):
-    
+
     def __init__(
         self,
         lib: loader.Library,
@@ -343,7 +334,7 @@ class ApodiktumInternal(loader.Module):
         self.lib = lib
         self.utils = lib.utils
 
-    async def _beta_access(self):
+    async def beta_access(self):
         beta_ids = None
         beta_access = False
         async for messages in self._client.iter_messages("@apodiktum_modules_news"):
@@ -402,7 +393,7 @@ class ApodiktumMigrator(loader.Module):
         classname: str,  # type: ignore
         name: str,  # type: ignore
         changes: dict,  # type: ignore
-        ):
+    ):
         self._classname = classname
         self._name = name
         self._changes = changes

@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class ApodiktumLibControllerMod(loader.Module):
     """
     This is a Library Controller module required for Apodiktum Library Modules and also 3rd-party modules.
-    >>Do not unload this!<< 
+    >>Do not unload this!<<
     """
 
     strings = {

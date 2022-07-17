@@ -70,19 +70,19 @@ class SkeletonMod(loader.Module):
             message, self.apo_lib.utils.get_str("greet", self.all_strings, message)
         )
 
-    async def lmsgcmd(self, message: Message):
+    async def lmsgcmd(self):
         """
         This will log the message.
         """
         self.apo_lib.utils.log(logging.ERROR, __name__, "some error log")
 
-    async def ldebugcmd(self, message: Message):
+    async def ldebugcmd(self):
         """
         This will log the message.
         """
         self.apo_lib.utils.log(logging.DEBUG, __name__, "some debug error")
 
-    async def ldebugmsgcmd(self, message: Message):
+    async def ldebugmsgcmd(self):
         """
         This will log the message.
         """
