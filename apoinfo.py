@@ -1,4 +1,4 @@
-__version__ = (0, 1, 20)
+__version__ = (0, 1, 21)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -309,7 +309,7 @@ class ApodiktumInfoMod(loader.Module):
             else (
                 "<b>🌚 Apodiktum Hikka Info</b>\n"
                 f"<b>🤴 {self.strings('owner')}: </b>{me}\n\n"
-                f"<b>🕰 {self.strings('uptime')}: </b>{uptime}\n"
+                f"<b>🕰 {self.strings('uptime')}: </b><code>{uptime}</code>\n"
                 f"<b>🔮 {self.strings('version')}: </b>{version} {build}\n"
                 f"<b>{upd}</b>\n\n"
                 f"<b>📼 {self.strings('prefix')}: </b>{prefix}\n"
