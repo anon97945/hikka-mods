@@ -1,4 +1,4 @@
-__version__ = (0, 0, 16)
+__version__ = (0, 0, 17)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -174,20 +174,6 @@ class ApodiktumDonatorsMod(loader.Module):
             suspend_on_error=True,
         )
 
-    @staticmethod
-    async def _is_member(
-        chat: Union[Chat, int],
-        user: Union[User, int],
-        self_id: Union[None, int],
-        message: Union[None, Message] = None,
-    ):
-        if chat != self_id:
-            try:
-                await message.client.get_permissions(chat, user)
-                return True
-            except UserNotParticipantError:
-                return False
-
     async def cdonatorscmd(self, message: Message):
         """
         This will open the config for the module.
@@ -358,7 +344,7 @@ class ApodiktumDonatorsMod(loader.Module):
                 userid = int(text.replace("#ID_", ""))
         kchannels = self.config["kick_channel"]
         for kchannel in kchannels:
-            if await self._is_member(kchannel, userid, self.tg_id, message):
+            if await self.apo_lib.utils.is_member(kchannel, userid):
                 await message.client.kick_participant(
                     kchannel,
                     userid,

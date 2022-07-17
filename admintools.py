@@ -1,4 +1,4 @@
-__version__ = (1, 0, 14)
+__version__ = (1, 0, 15)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -31,7 +31,6 @@ from aiogram.utils.exceptions import (BotKicked, ChatNotFound,
 from telethon.errors import UserNotParticipantError
 from telethon.tl.functions.channels import (EditAdminRequest,
                                             EditBannedRequest,
-                                            GetFullChannelRequest,
                                             InviteToChannelRequest)
 from telethon.tl.types import (Channel, Chat, ChatAdminRights,
                                ChatBannedRights, Message, User)
@@ -39,18 +38,6 @@ from telethon.tl.types import (Channel, Chat, ChatAdminRights,
 from .. import loader, utils
 
 logger = logging.getLogger(__name__)
-
-
-async def is_linkedchannel(
-    user: Union[User, int],
-    chat: Union[Chat, int],
-    message: Union[None, Message] = None,
-):
-    if isinstance(user, User):
-        return False
-    full_chat = await message.client(GetFullChannelRequest(channel=user.id))
-    if full_chat.full_chat.linked_chat_id:
-        return chat.id == int(full_chat.full_chat.linked_chat_id)
 
 
 def represents_int(s: str) -> bool:
@@ -379,55 +366,6 @@ class ApodiktumAdminToolsMod(loader.Module):
             except UserNotParticipantError:
                 return bool(chat.admin_rights.add_admins and await self._promote_bot(chat_id))
 
-    @staticmethod
-    async def _is_member(
-        chat: Union[Chat, int],
-        user: Union[User, int],
-        self_id: Union[None, int],
-        message: Union[None, Message] = None,
-    ):
-        if chat != self_id:
-            try:
-                await message.client.get_permissions(chat, user)
-                return True
-            except UserNotParticipantError:
-                return False
-
-    @staticmethod
-    def _get_tag(
-        user: Union[User, int],
-        WithID: bool = False,
-    ):
-        if isinstance(user, Channel):
-            if WithID:
-                return (f"<a href=tg://resolve?domain={user.username}>{user.title}</a> (<code>{str(user.id)}</code>)"
-                        if user.username
-                        else f"{user.title}(<code>{str(user.id)}</code>)")
-            return (f"<a href=tg://resolve?domain={user.username}>{user.title}</a>"
-                    if user.username
-                    else f"{user.title}")
-        if WithID:
-            return (f"<a href=tg://resolve?domain={user.username}>{user.first_name}</a> (<code>{str(user.id)}</code>)"
-                    if user.username
-                    else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a> (<code>{str(user.id)}</code>)")
-        return (f"<a href=tg://resolve?domain={user.username}>{user.first_name}</a>"
-                if user.username
-                else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a>")
-
-    @staticmethod
-    async def _get_invite_link(
-        chat: Union[Chat, int],
-        message: Union[None, Message] = None,
-    ):
-        if chat.username:
-            link = f"https://t.me/{chat.username}"
-        elif chat.admin_rights.invite_users:
-            link = await message.client(GetFullChannelRequest(channel=chat.id))
-            link = link.full_chat.exported_invite.link
-        else:
-            link = ""
-        return link
-
     async def bndcmd(self, message: Message):
         """
          ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
@@ -677,9 +615,9 @@ class ApodiktumAdminToolsMod(loader.Module):
                  or not chat.admin_rights)
         ):
             return
-        usertag = self._get_tag(user, True)
+        usertag = self.apo_lib.utils.get_tag(user, True)
 
-        if await is_linkedchannel(user, chat, message):
+        if await self.apo_lib.utils.is_linkedchannel(chat.id, user.id, message):
             return
         await self._delete_message(chat, message, UseBot)
         if bcu_sets[chatid_str].get("ban") is True:
@@ -709,10 +647,10 @@ class ApodiktumAdminToolsMod(loader.Module):
                  or not chat.admin_rights)
         ):
             return
-        usertag = self._get_tag(user, True)
-        link = await self._get_invite_link(chat, message)
+        usertag = self.apo_lib.utils.get_tag(user, True)
+        link = await self.apo_lib.utils.get_invite_link(chat)
 
-        if not await self._is_member(chat.id, user.id, self.tg_id, message):
+        if not await self.apo_lib.utils.is_member(chat.id, user.id):
             UseBot = await self._check_inlinebot(chat, self.inline.bot_id, self.tg_id, message)
             await self._delete_message(chat, message, UseBot)
             if (
@@ -742,8 +680,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         if message.is_private or chatid_str not in gl:
             return
         logchan_id = int(gl_sets[chatid_str].get("logchannel"))
-        chat_tag = self._get_tag(chat, False)
-        user_tag = self._get_tag(user, False)
+        chat_tag = self.apo_lib.utils.get_tag(chat, True)
+        user_tag = self.apo_lib.utils.get_tag(user, True)
         link = (
             f"Chat: {chat_tag} | #ID_{chat.id}"
             + f"\nUser: {user_tag} | #ID_{user.id}"

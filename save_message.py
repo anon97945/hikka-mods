@@ -26,18 +26,6 @@ from telethon.tl.types import Message
 from .. import loader, utils
 
 logger = logging.getLogger(__name__)
-regex = re.compile(r"(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")
-
-
-def get_ids(link):
-    match = regex.match(link)
-    if not match:
-        return False
-    chat_id = match.group(4)
-    msg_id = int(match.group(5))
-    if chat_id.isnumeric():
-        chat_id = int(chat_id)
-    return chat_id, msg_id
 
 
 @loader.tds
@@ -112,9 +100,9 @@ class ApodiktumSaveMessageMod(loader.Module):
         args = utils.get_args_raw(message).lower()
         if not args:
             return
-        if not get_ids(args):
+        if not self.apo_lib.utils.get_ids_from_tglink(args):
             return await utils.answer(message, self.apo_lib.utils.get_str("invalid_link", self.all_strings, message))
-        channel_id, msg_id = get_ids(args)
+        channel_id, msg_id = self.apo_lib.utils.get_ids_from_tglink(args)
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
         msgs = await message.client.send_message(self._id, message=msgs)
         return await utils.answer(message, self.apo_lib.utils.get_str("done", self.all_strings, message))
@@ -124,9 +112,9 @@ class ApodiktumSaveMessageMod(loader.Module):
         args = utils.get_args_raw(message).lower()
         if not args:
             return
-        if not get_ids(args):
+        if not self.apo_lib.utils.get_ids_from_tglink(args):
             return await utils.answer(message, self.apo_lib.utils.get_str("invalid_link", self.all_strings, message))
-        channel_id, msg_id = get_ids(args)
+        channel_id, msg_id = self.apo_lib.utils.get_ids_from_tglink(args)
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
         msgs = await message.client.send_message(utils.get_chat_id(message), message=msgs)
         return await message.delete()
