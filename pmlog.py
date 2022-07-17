@@ -167,7 +167,7 @@ class ApodiktumPMLogMod(loader.Module):
             else:
                 name = chat.first_name
             user_id = str(chat.id)
-            user_url = self.apo_lib.utils.get_tag_link(chat)
+            user_url = await self.apo_lib.utils.get_tag_link(chat)
             link = "Chat: <a href='" + user_url + "'>" + name + "</a>\nID: " + user_id
             try:
                 await message.forward_to(pmlog_group)

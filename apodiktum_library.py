@@ -1,4 +1,4 @@
-__version__ = (0, 1, 15)
+__version__ = (0, 1, 21)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -14,6 +14,7 @@ __version__ = (0, 1, 15)
 # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
 
 # meta developer: @apodiktum_modules
+__scope__ = (1, 2, 11)
 
 import asyncio
 import collections
@@ -78,10 +79,17 @@ class ApodiktumLib(loader.Library):
                 validator=loader.validators.Boolean(),
             ),
         )
+        if main.__version__ < __scope__:
+            raise loader.SelfSuspend(
+                "You're running Hikka v{}.{}.{} but Apodiktum Library requires v{}.{}.{}+. Please update.".format(
+                    *main.__version__, *__scope__
+                )
+            )
         if self.config["log_channel"]:
             logging.getLogger(self.__class__.__name__).info("Apodiktum Library v%s.%s.%s loading...", *__version__)
         else:
             logging.getLogger(self.__class__.__name__).debug("Apodiktum Library v%s.%s.%s loading...", *__version__)
+
         self.utils = ApodiktumUtils(self)
         self.__controllerloader = ApodiktumControllerLoader(self)
         self.__internal = ApodiktumInternal(self)
@@ -260,7 +268,7 @@ class ApodiktumUtils(loader.Module):
 
     async def get_tag(
         self,
-        user: Union[User, int],
+        user: Union[Chat, int],
         WithID: bool = False,
     ):
         if isinstance(user, int):
@@ -281,8 +289,12 @@ class ApodiktumUtils(loader.Module):
                 if user.username
                 else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a>")
 
-    @staticmethod
-    def get_tag_link(user: Union[User, Channel]) -> str:
+    async def get_tag_link(
+        self,
+        user: Union[Chat, int]
+    ) -> str:
+        if isinstance(user, int):
+            user = await self._client.get_entity(user)
         if isinstance(user, User):
             return f"tg://user?id={user.id}"
         if isinstance(user, Channel) and getattr(user, "username", None):
