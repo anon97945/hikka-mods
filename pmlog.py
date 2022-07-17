@@ -22,7 +22,7 @@ import logging
 from io import BytesIO
 
 from telethon.errors import MessageIdInvalidError
-from telethon.tl.types import Channel, Message, User
+from telethon.tl.types import Message
 
 from .. import loader, utils
 

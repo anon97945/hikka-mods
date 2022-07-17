@@ -19,7 +19,6 @@ __version__ = (0, 0, 21)
 # scope: hikka_min 1.2.11
 
 import logging
-import re
 
 from telethon.tl.types import Message
 

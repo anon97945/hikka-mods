@@ -285,10 +285,9 @@ class ApodiktumUtils(loader.Module):
     def get_tag_link(user: Union[User, Channel]) -> str:
         if isinstance(user, User):
             return f"tg://user?id={user.id}"
-        elif isinstance(user, Channel) and getattr(user, "username", None):
+        if isinstance(user, Channel) and getattr(user, "username", None):
             return f"tg://resolve?domain={user.username}"
-        else:
-            return ""
+        return ""
 
     async def get_invite_link(
         self,
@@ -364,7 +363,7 @@ class ApodiktumUtils(loader.Module):
 
     @staticmethod
     def remove_emoji(text: str) -> str:
-       return emoji.replace_emoji(text, replace='')
+        return emoji.replace_emoji(text, replace='')
 
     @staticmethod
     def distinct_emoji_list(text: str) -> str:
@@ -393,7 +392,7 @@ class ApodiktumUtils(loader.Module):
         return {
             **{
                 "message": message,
-                "client": self.module._client,
+                "client": self.module.client,
                 "reply": reply,
                 "r": reply,
                 **self.get_sub(telethon.tl.types),
@@ -412,9 +411,9 @@ class ApodiktumUtils(loader.Module):
             },
             **(
                 {
-                    "db": self.module._db,
+                    "db": self.module.db,
                 }
-                if self.module._db.get(main.__name__, "enable_db_eval", False)
+                if self.module.db.get(main.__name__, "enable_db_eval", False)
                 else {
                     "db": fakedb,
                 }
@@ -452,6 +451,7 @@ class ApodiktumUtils(loader.Module):
                 )
             ),
         }
+
 
 class ApodiktumUtilsBeta(loader.Module):
 
