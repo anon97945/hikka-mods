@@ -1,4 +1,4 @@
-__version__ = (1, 0, 17)
+__version__ = (1, 0, 18)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -562,7 +562,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file = BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
-        await inline_msg.client.download_file(replymsg, file)
+        await message.client.download_file(replymsg, file)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
@@ -613,7 +613,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         nr_lvl = 0.8
         pitch_lvl = -4.5
         inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
-        await inline_msg.client.download_file(replymsg, file)
+        await message.client.download_file(replymsg, file)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
@@ -669,7 +669,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file = BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
-        await inline_msg.client.download_file(replymsg, file)
+        await message.client.download_file(replymsg, file)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
@@ -722,7 +722,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file = BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
-        await inline_msg.client.download_file(replymsg, file)
+        await message.client.download_file(replymsg, file)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
@@ -774,7 +774,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file = BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
-        await inline_msg.client.download_file(replymsg, file)
+        await message.client.download_file(replymsg, file)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
@@ -822,7 +822,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file = BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
-        await inline_msg.client.download_file(replymsg, file)
+        await message.client.download_file(replymsg, file)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
@@ -870,7 +870,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file = BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
-        await inline_msg.client.download_file(replymsg, file)
+        await message.client.download_file(replymsg, file)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
@@ -912,7 +912,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file = BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
-        await inline_msg.client.download_file(replymsg, file)
+        await message.client.download_file(replymsg, file)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
@@ -942,7 +942,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         file = BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(message=message, text=self._strings("downloading", utils.get_chat_id(message)), reply_markup={"text": "\u0020\u2800", "callback": "empty"})
-        await inline_msg.client.download_file(replymsg, file)
+        await message.client.download_file(replymsg, file)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)
@@ -1171,7 +1171,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         await message.client.delete_messages(chatid, message)
         file = BytesIO()
         file.name = msgs.file.name
-        await msgs.client.download_file(msgs, file)
+        await message.client.download_file(msgs, file)
         filename = msgs.file.name or "voice"
         ext = msgs.file.ext
         if ext == ".oga":
