@@ -1,4 +1,4 @@
-__version__ = (0, 0, 29)
+__version__ = (0, 0, 30)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -150,13 +150,6 @@ class ApodiktumPMLogMod(loader.Module):
         )
         self._id = (await client.get_me(True)).user_id
 
-    async def get_media(self, message: Message):
-        file = (
-            BytesIO((await self.fast_download(message.media)).getvalue())
-        )
-        file.seek(0)
-        return file
-
     async def cpmlogcmd(self, message: Message):
         """
         This will open the config for the module.
@@ -198,7 +191,7 @@ class ApodiktumPMLogMod(loader.Module):
                     return
                 file = BytesIO()
                 caption = message.text + "\n\n" + link
-                file = await self.get_media(message)
+                await message.client.download_file(message, file)
                 file.name = message.file.name or f"{message.file.media.id}{message.file.ext}"
                 file.seek(0)
                 await message.client.send_file(pmlog_group, file, force_document=True, caption=caption)
