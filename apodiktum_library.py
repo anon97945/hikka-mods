@@ -1,4 +1,4 @@
-__version__ = (0, 1, 2)
+__version__ = (0, 1, 3)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -362,18 +362,20 @@ class ApodiktumUtils(loader.Module):
 
     async def get_attrs(
         self,
+        module: loader.Module,
         message,
         fakedb
     ):
+        self.module = module
         reply = await message.get_reply_message()
         return {
             **{
                 "message": message,
-                "client": self._client,
+                "client": self.module._client,
                 "reply": reply,
                 "r": reply,
-                **self.get_sub(telethon.tl.types),
-                **self.get_sub(telethon.tl.functions),
+                **self.module.get_sub(telethon.tl.types),
+                **self.module.get_sub(telethon.tl.functions),
                 "event": message,
                 "chat": message.to_id,
                 "telethon": telethon,
@@ -383,14 +385,14 @@ class ApodiktumUtils(loader.Module):
                 "f": telethon.tl.functions,
                 "c": self._client,
                 "m": message,
-                "lookup": self.lib.lookup,
-                "self": self,
+                "lookup": self.module.lookup,
+                "self": self.module,
             },
             **(
                 {
-                    "db": self._db,
+                    "db": self.module._db,
                 }
-                if self._db.get(main.__name__, "enable_db_eval", False)
+                if self.module._db.get(main.__name__, "enable_db_eval", False)
                 else {
                     "db": fakedb,
                 }
