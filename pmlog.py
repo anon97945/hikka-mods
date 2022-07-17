@@ -1,4 +1,4 @@
-__version__ = (0, 0, 30)
+__version__ = (0, 0, 31)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -22,24 +22,11 @@ import logging
 from io import BytesIO
 
 from telethon.errors import MessageIdInvalidError
-from telethon.tl.types import Channel, Message, User
+from telethon.tl.types import Message
 
 from .. import loader, utils
 
 logger = logging.getLogger(__name__)
-
-
-def get_link(user: User or Channel) -> str:
-    """Get link to object (User or Channel)"""
-    return (
-        f"tg://user?id={user.id}"
-        if isinstance(user, User)
-        else (
-            f"tg://resolve?domain={user.username}"
-            if getattr(user, "username", None)
-            else ""
-        )
-    )
 
 
 @loader.tds
@@ -180,7 +167,7 @@ class ApodiktumPMLogMod(loader.Module):
             else:
                 name = chat.first_name
             user_id = str(chat.id)
-            user_url = get_link(chat.id)
+            user_url = self.apo_lib.utils.get_tag_link(chat)
             link = "Chat: <a href='" + user_url + "'>" + name + "</a>\nID: " + user_id
             try:
                 await message.forward_to(pmlog_group)

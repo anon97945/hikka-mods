@@ -1,4 +1,4 @@
-__version__ = (0, 1, 0)
+__version__ = (0, 1, 15)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,15 +19,21 @@ import asyncio
 import collections
 import copy
 import hashlib
+import html
+import itertools
 import logging
+import re
+from types import ModuleType
 from typing import Union
 
 import aiohttp
+import emoji
+import telethon
 from telethon.errors import UserNotParticipantError
 from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import Channel, Chat, Message, User
 
-from .. import loader, utils
+from .. import loader, main, utils
 
 logger = logging.getLogger(__name__)
 
@@ -165,7 +171,7 @@ class ApodiktumControllerLoader(loader.Module):
             if lib_controller := self.lib.lookup("Apo-LibController"):
                 self.utils.log(logging.DEBUG, self._libclassname, "ApoLibController found!")
                 return lib_controller
-            if not getattr(self.lookup("Loader"), "_fully_loaded", False):
+            if not getattr(self.lib.lookup("Loader"), "_fully_loaded", False):
                 retries = 1
             else:
                 retries -= 1
@@ -173,7 +179,7 @@ class ApodiktumControllerLoader(loader.Module):
                 logging.DEBUG,
                 self._libclassname,
                 "ApoLibController not found, retrying in %s seconds..."
-                "\nHikka fully loaded: %s", delay, getattr(self.lookup("Loader"), "_fully_loaded", False)
+                "\nHikka fully loaded: %s", delay, getattr(self.lib.lookup("Loader"), "_fully_loaded", False)
             )
 
             await asyncio.sleep(delay)
@@ -240,31 +246,6 @@ class ApodiktumUtils(loader.Module):
             return apo_logger.log(logging.INFO, message, *args, **kwargs)
         return apo_logger.log(level, message, *args, **kwargs)
 
-
-class ApodiktumUtilsBeta(loader.Module):
-
-    def __init__(
-        self,
-        lib: loader.Library,
-    ):
-        self.utils = lib.utils
-        self.utils.log(logging.DEBUG, lib.__class__.__name__, "class ApodiktumUtilsBeta is being initiated!", debug_msg=True)
-        self.lib = lib
-        self._db = lib.db
-        self._client = lib.client
-        self._libclassname = self.lib.__class__.__name__
-        self._lib_db = self._db.setdefault(self._libclassname, {})
-        self._chats_db = self._lib_db.setdefault("chats", {})
-        self._config = self._lib_db.setdefault("__config__", {})
-        self.utils.log(logging.DEBUG, lib.__class__.__name__, "Congratulations! You have access to the ApodiktumUtilsBeta!")
-
-    async def refresh_lib(
-        self,
-        lib: loader.Library,
-    ):
-        self.lib = lib
-        self.utils = lib.utils
-
     async def is_member(
         self,
         chat_id: int,
@@ -300,6 +281,14 @@ class ApodiktumUtilsBeta(loader.Module):
                 if user.username
                 else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a>")
 
+    @staticmethod
+    def get_tag_link(user: Union[User, Channel]) -> str:
+        if isinstance(user, User):
+            return f"tg://user?id={user.id}"
+        if isinstance(user, Channel) and getattr(user, "username", None):
+            return f"tg://resolve?domain={user.username}"
+        return ""
+
     async def get_invite_link(
         self,
         chat: Union[Chat, int],
@@ -314,6 +303,179 @@ class ApodiktumUtilsBeta(loader.Module):
         else:
             link = ""
         return link
+
+    async def is_linkedchannel(
+        self,
+        chat_id: int,
+        user_id: int,
+    ):
+        user = await self._client.get_entity(user_id)
+        if not isinstance(user, Channel):
+            return False
+        full_chat = await self._client(GetFullChannelRequest(channel=user_id))
+        if full_chat.full_chat.linked_chat_id:
+            return chat_id == int(full_chat.full_chat.linked_chat_id)
+
+    @staticmethod
+    def convert_time(t) -> int:
+        """
+        Tries to export time from text
+        """
+        try:
+            if not str(t)[:-1].isdigit():
+                return 0
+
+            if "w" in str(t):
+                t = int(t[:-1]) * 60 * 60 * 24 * 7
+
+            if "d" in str(t):
+                t = int(t[:-1]) * 60 * 60 * 24
+
+            if "h" in str(t):
+                t = int(t[:-1]) * 60 * 60
+
+            if "m" in str(t):
+                t = int(t[:-1]) * 60
+
+            if "s" in str(t):
+                t = int(t[:-1])
+
+            t = int(re.sub(r"[^0-9]", "", str(t)))
+        except ValueError:
+            return 0
+        return t
+
+    @staticmethod
+    def get_ids_from_tglink(link):
+        regex = re.compile(r"(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")
+        match = regex.match(link)
+        if not match:
+            return False
+        chat_id = match[4]
+        msg_id = int(match[5])
+        if chat_id.isnumeric():
+            chat_id = int(chat_id)
+        return chat_id, msg_id
+
+    @staticmethod
+    def is_emoji(text: str) -> str:
+        return not emoji.replace_emoji(text, replace='') if text else False
+
+    @staticmethod
+    def remove_emoji(text: str) -> str:
+        return emoji.replace_emoji(text, replace='')
+
+    @staticmethod
+    def distinct_emoji_list(text: str) -> str:
+        return emoji.distinct_emoji_list(text)
+
+    @staticmethod
+    def emoji_list(text: str) -> str:
+        return emoji.emoji_list(text)
+
+    @staticmethod
+    def unescape_html(text: str) -> str:
+        return html.unescape(text)
+
+    @staticmethod
+    def escape_html(text: str) -> str:
+        return html.escape(text)
+
+    async def get_attrs(
+        self,
+        module: loader.Module,
+        message,
+        fakedb
+    ):
+        self.module = module
+        reply = await message.get_reply_message()
+        return {
+            **{
+                "message": message,
+                "client": self.module.client,
+                "reply": reply,
+                "r": reply,
+                **self.get_sub(telethon.tl.types),
+                **self.get_sub(telethon.tl.functions),
+                "event": message,
+                "chat": message.to_id,
+                "telethon": telethon,
+                "utils": utils,
+                "main": main,
+                "loader": loader,
+                "f": telethon.tl.functions,
+                "c": self._client,
+                "m": message,
+                "lookup": self.module.lookup,
+                "self": self.module,
+            },
+            **(
+                {
+                    "db": self.module.db,
+                }
+                if self.module.db.get(main.__name__, "enable_db_eval", False)
+                else {
+                    "db": fakedb,
+                }
+            ),
+        }
+
+    def get_sub(
+        self,
+        it,
+        _depth: int = 1
+    ) -> dict:
+        """Get all callable capitalised objects in an object recursively, ignoring _*"""
+        return {
+            **dict(
+                filter(
+                    lambda x: x[0][0] != "_"
+                    and x[0][0].upper() == x[0][0]
+                    and callable(x[1]),
+                    it.__dict__.items(),
+                )
+            ),
+            **dict(
+                itertools.chain.from_iterable(
+                    [
+                        self.get_sub(y[1], _depth + 1).items()
+                        for y in filter(
+                            lambda x: x[0][0] != "_"
+                            and isinstance(x[1], ModuleType)
+                            and x[1] != it
+                            and x[1].__package__.rsplit(".", _depth)[0]
+                            == "telethon.tl",
+                            it.__dict__.items(),
+                        )
+                    ]
+                )
+            ),
+        }
+
+
+class ApodiktumUtilsBeta(loader.Module):
+
+    def __init__(
+        self,
+        lib: loader.Library,
+    ):
+        self.utils = lib.utils
+        self.utils.log(logging.DEBUG, lib.__class__.__name__, "class ApodiktumUtilsBeta is being initiated!", debug_msg=True)
+        self.lib = lib
+        self._db = lib.db
+        self._client = lib.client
+        self._libclassname = self.lib.__class__.__name__
+        self._lib_db = self._db.setdefault(self._libclassname, {})
+        self._chats_db = self._lib_db.setdefault("chats", {})
+        self._config = self._lib_db.setdefault("__config__", {})
+        self.utils.log(logging.DEBUG, lib.__class__.__name__, "Congratulations! You have access to the ApodiktumUtilsBeta!")
+
+    async def refresh_lib(
+        self,
+        lib: loader.Library,
+    ):
+        self.lib = lib
+        self.utils = lib.utils
 
 
 class ApodiktumInternal(loader.Module):

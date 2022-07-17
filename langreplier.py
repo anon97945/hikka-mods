@@ -1,4 +1,4 @@
-__version__ = (0, 1, 14)
+__version__ = (0, 1, 15)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -23,7 +23,6 @@ import asyncio
 import logging
 import time
 
-import emoji
 import googletrans
 from alphabet_detector import AlphabetDetector
 from telethon.tl.types import Message
@@ -174,12 +173,6 @@ class ApodiktumLangReplierMod(loader.Module):
         self._ad = AlphabetDetector()
         self._tr = googletrans.Translator()
 
-    @staticmethod
-    def is_emoji(message):
-        text = message.raw_text
-        clean_text = emoji.replace_emoji(text, replace='')
-        return not clean_text
-
     def _is_alphabet(self, message):
         text = message.raw_text
         denied_alphabet = ""
@@ -230,7 +223,7 @@ class ApodiktumLangReplierMod(loader.Module):
             return
         allowed_alphabet, alphabet, detected_alphabet = self._is_alphabet(message)
         respond = not allowed_alphabet
-        if self.is_emoji(message):
+        if self.apo_lib.utils.is_emoji(message.raw_text):
             return
         if (
             (

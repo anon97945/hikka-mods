@@ -1,5 +1,4 @@
-import contextlib
-__version__ = (0, 0, 2)
+__version__ = (0, 0, 4)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -24,13 +23,11 @@ __version__ = (0, 0, 2)
 # scope: hikka_only
 # scope: hikka_min 1.2.11
 
-import itertools
+import contextlib
 import logging
-from traceback import format_exc
-from types import ModuleType
 import os
+from traceback import format_exc
 
-import telethon
 from meval import meval
 from telethon.errors.rpcerrorlist import MessageIdInvalidError
 from telethon.tl.types import Message
@@ -112,7 +109,7 @@ class ApodiktumPythonMod(loader.Module):
             it = await meval(
                 utils.get_args_raw(message),
                 globals(),
-                **await self.getattrs(message),
+                **await self.apo_lib.utils.get_attrs(self, message, FakeDb()),
             )
         except FakeDbException:
             await self.inline.form(
@@ -181,64 +178,3 @@ class ApodiktumPythonMod(loader.Module):
 
         with contextlib.suppress(MessageIdInvalidError):
             await utils.answer(message, ret)
-
-    async def getattrs(self, message):
-        reply = await message.get_reply_message()
-        return {
-            **{
-                "message": message,
-                "client": self._client,
-                "reply": reply,
-                "r": reply,
-                **self.get_sub(telethon.tl.types),
-                **self.get_sub(telethon.tl.functions),
-                "event": message,
-                "chat": message.to_id,
-                "telethon": telethon,
-                "utils": utils,
-                "main": main,
-                "loader": loader,
-                "f": telethon.tl.functions,
-                "c": self._client,
-                "m": message,
-                "lookup": self.lookup,
-                "self": self,
-            },
-            **(
-                {
-                    "db": self._db,
-                }
-                if self._db.get(main.__name__, "enable_db_eval", False)
-                else {
-                    "db": FakeDb(),
-                }
-            ),
-        }
-
-    def get_sub(self, it, _depth: int = 1) -> dict:
-        """Get all callable capitalised objects in an object recursively, ignoring _*"""
-        return {
-            **dict(
-                filter(
-                    lambda x: x[0][0] != "_"
-                    and x[0][0].upper() == x[0][0]
-                    and callable(x[1]),
-                    it.__dict__.items(),
-                )
-            ),
-            **dict(
-                itertools.chain.from_iterable(
-                    [
-                        self.get_sub(y[1], _depth + 1).items()
-                        for y in filter(
-                            lambda x: x[0][0] != "_"
-                            and isinstance(x[1], ModuleType)
-                            and x[1] != it
-                            and x[1].__package__.rsplit(".", _depth)[0]
-                            == "telethon.tl",
-                            it.__dict__.items(),
-                        )
-                    ]
-                )
-            ),
-        }

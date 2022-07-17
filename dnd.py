@@ -1,4 +1,4 @@
-__version__ = (0, 1, 33)
+__version__ = (0, 1, 34)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -30,7 +30,6 @@ import asyncio
 import contextlib
 import datetime
 import logging
-import re
 import time
 from typing import Union
 
@@ -295,33 +294,6 @@ class ApodiktumDNDMod(loader.Module):
             )
             self.set("ignore_hello", True)
 
-    @staticmethod
-    def convert_time(t) -> int:
-        """
-        Tries to export time from text
-        """
-        try:
-            if not str(t)[:-1].isdigit():
-                return 0
-
-            if "d" in str(t):
-                t = int(t[:-1]) * 60 * 60 * 24
-
-            if "h" in str(t):
-                t = int(t[:-1]) * 60 * 60
-
-            if "m" in str(t):
-                t = int(t[:-1]) * 60
-
-            if "s" in str(t):
-                t = int(t[:-1])
-
-            t = int(re.sub(r"[^0-9]", "", str(t)))
-        except ValueError:
-            return 0
-
-        return t
-
     def _approve(self, user: int, reason: str = "unknown"):
         self._whitelist += [user]
         self._whitelist = list(set(self._whitelist))
@@ -564,9 +536,9 @@ class ApodiktumDNDMod(loader.Module):
         """
         status_length = ""
         args = utils.get_args_raw(message)
-        t = ([_ for _ in args.split() if self.convert_time(_)] or ["0"])[0]
+        t = ([_ for _ in args.split() if self.apo_lib.utils.convert_time(_)] or ["0"])[0]
         args = args.split()[0]
-        t = self.convert_time(t)
+        t = self.apo_lib.utils.convert_time(t)
         if args not in self.get("texts", {}):
             await utils.answer(message, self.apo_lib.utils.get_str("status_not_found", self.all_strings, message))
             await asyncio.sleep(3)

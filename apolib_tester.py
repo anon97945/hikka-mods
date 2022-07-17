@@ -28,13 +28,13 @@ logger = logging.getLogger(__name__)
 
 
 @loader.tds
-class SkeletonMod(loader.Module):
+class ApoLibTesterMod(loader.Module):
     """
     This is a skeleton module.
     """
 
     strings = {
-        "name": "SkeletonMod",
+        "name": "Apo-LibTester",
         "greet": "BaseString Hello!",
     }
 

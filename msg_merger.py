@@ -1,4 +1,4 @@
-__version__ = (0, 0, 30)
+__version__ = (0, 0, 32)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -21,7 +21,6 @@ __version__ = (0, 0, 30)
 import logging
 from datetime import datetime, timezone
 
-import emoji
 from telethon.errors import MessageNotModifiedError
 from telethon.tl.types import Message, MessageEntityUrl
 
@@ -210,12 +209,6 @@ class ApodiktumMsgMergerMod(loader.Module):
         )
 
     @staticmethod
-    def is_emoji(message):
-        text = message.raw_text
-        clean_text = emoji.replace_emoji(text, replace='')
-        return not clean_text
-
-    @staticmethod
     def _get_url(message):
         for (ent, url) in message.get_entities_text():
             url = isinstance(ent, MessageEntityUrl)
@@ -306,8 +299,8 @@ class ApodiktumMsgMergerMod(loader.Module):
             (
                 self.config["skip_emoji"]
                 and (
-                    self.is_emoji(message)
-                    or self.is_emoji(last_msg)
+                    self.apo_lib.utils.is_emoji(message.raw_text)
+                    or self.apo_lib.utils.is_emoji(last_msg.raw_text)
                 )
             )
             or (
