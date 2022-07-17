@@ -1,4 +1,4 @@
-__version__ = (0, 1, 5)
+__version__ = (0, 1, 6)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -312,6 +312,9 @@ class ApodiktumUtils(loader.Module):
         chat_id: int,
         user_id: int,
     ):
+        user = await self._client.get_entity(user_id)
+        if not isinstance(user, Channel):
+            return False
         full_chat = await self._client(GetFullChannelRequest(channel=user_id))
         if full_chat.full_chat.linked_chat_id:
             return chat_id == int(full_chat.full_chat.linked_chat_id)
