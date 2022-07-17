@@ -1,4 +1,4 @@
-__version__ = (0, 1, 14)
+__version__ = (0, 1, 15)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -23,7 +23,6 @@ import html
 import itertools
 import logging
 import re
-from gettext import textdomain
 from types import ModuleType
 from typing import Union
 
@@ -361,7 +360,7 @@ class ApodiktumUtils(loader.Module):
 
     @staticmethod
     def is_emoji(text: str) -> str:
-        return not emoji.replace_emoji(text, replace='')
+        return not emoji.replace_emoji(text, replace='') if text else False
 
     @staticmethod
     def remove_emoji(text: str) -> str:
