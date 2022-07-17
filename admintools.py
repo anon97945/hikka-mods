@@ -72,9 +72,7 @@ def represents_tgid(s: str) -> bool:
 def to_bool(value: str) -> bool:
     try:
         loader.validators.Boolean().validate(value)
-        if value.lower() in "true":
-            return True
-        return False
+        return value.lower() in "true"
     except loader.validators.ValidationError:
         return None
 
@@ -377,9 +375,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 bot_perms = await message.client.get_permissions(chat_id, inline_bot_id)
                 if bot_perms.is_admin and bot_perms.ban_users and bot_perms.delete_messages:
                     return True
-                if await self._promote_bot(chat_id):
-                    return True
-                return False
+                return bool(await self._promote_bot(chat_id))
             except UserNotParticipantError:
                 return bool(chat.admin_rights.add_admins and await self._promote_bot(chat_id))
 
