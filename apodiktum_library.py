@@ -1,4 +1,4 @@
-__version__ = (0, 1, 13)
+__version__ = (0, 1, 14)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -360,34 +360,28 @@ class ApodiktumUtils(loader.Module):
         return chat_id, msg_id
 
     @staticmethod
-    def is_emoji(message):
-        if message.media and not getattr(message.media, "webpage", False):
-            return False
-        text = message.raw_text
-        clean_text = emoji.replace_emoji(text, replace='')
-        return not clean_text
+    def is_emoji(text: str) -> str:
+        return not emoji.replace_emoji(text, replace='')
 
     @staticmethod
     def remove_emoji(text: str) -> str:
        return emoji.replace_emoji(text, replace='')
 
     @staticmethod
-    def distinct_emoji_list(message):
-        if message.raw_text:
-            text = message.raw_text
-            return emoji.distinct_emoji_list(text)
-        return False
+    def distinct_emoji_list(text: str) -> str:
+        return emoji.distinct_emoji_list(text)
 
     @staticmethod
-    def emoji_list(message):
-        if message.raw_text:
-            text = message.raw_text
-            return emoji.emoji_list(text)
-        return False
+    def emoji_list(text: str) -> str:
+        return emoji.emoji_list(text)
 
     @staticmethod
-    def unescape_html(text):
+    def unescape_html(text: str) -> str:
         return html.unescape(text)
+
+    @staticmethod
+    def escape_html(text: str) -> str:
+        return html.escape(text)
 
     async def get_attrs(
         self,
