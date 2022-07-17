@@ -1,4 +1,4 @@
-__version__ = (0, 1, 4)
+__version__ = (0, 1, 5)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -356,6 +356,8 @@ class ApodiktumUtils(loader.Module):
 
     @staticmethod
     def is_emoji(message):
+        if message.media and not getattr(message.media, "webpage", False):
+            return False
         text = message.raw_text
         clean_text = emoji.replace_emoji(text, replace='')
         return not clean_text
