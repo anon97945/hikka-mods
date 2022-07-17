@@ -165,7 +165,7 @@ class ApodiktumControllerLoader(loader.Module):
             if lib_controller := self.lib.lookup("Apo-LibController"):
                 self.utils.log(logging.DEBUG, self._libclassname, "ApoLibController found!")
                 return lib_controller
-            if not self.lib.lookup("Loader")._fully_loaded:
+            if not getattr(self.lookup("Loader"), "_fully_loaded", False):
                 retries = 1
             else:
                 retries -= 1
@@ -173,7 +173,7 @@ class ApodiktumControllerLoader(loader.Module):
                 logging.DEBUG,
                 self._libclassname,
                 "ApoLibController not found, retrying in %s seconds..."
-                "\nHikka fully loaded: %s", delay, self.lib.lookup("Loader")._fully_loaded
+                "\nHikka fully loaded: %s", delay, getattr(self.lookup("Loader"), "_fully_loaded", False)
             )
 
             await asyncio.sleep(delay)
