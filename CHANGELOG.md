@@ -7,6 +7,7 @@
 - deepsource fixes
 
 ### 📦 apodiktum_library:
+#### General:
 - added beta_id list
 - added migrator, not testet and not working!
 - added translation strings
@@ -21,6 +22,22 @@
 - new internal class
 - scoped to 1.2.11
 - using different classes
+
+#### Utils:
+* library utils | added convert_time
+* library utils | added distinct_emoji_list
+* library utils | added emoji_list
+* library utils | added get_attrs
+* library utils | added get_ids_from_tglink
+* library utils | added get_invite_link
+* library utils | added get_sub
+* library utils | added get_tag
+* library utils | added get_tag_link
+* library utils | added is_emoji
+* library utils | added is_linkedchannel
+* library utils | added is_member 
+* library utils | added remove_emoji
+* library utils | added unescape_html
 
 ### 📕 new modules:
 - apo_python.py
@@ -53,5 +70,4 @@
 - msg_merger | some bug fixes in msg_merger#
 - msg_merger | try / except get_messages
 - show_viewer | fix .sv args
-- show_viewer | fix send as reply 
-
+- show_viewer | fix send as reply
