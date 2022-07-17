@@ -1,4 +1,4 @@
-__version__ = (0, 1, 7)
+__version__ = (0, 1, 8)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -282,15 +282,13 @@ class ApodiktumUtils(loader.Module):
 
     @staticmethod
     def get_tag_link(user: Union[User, Channel]) -> str:
-        return (
-            f"tg://user?id={user.id}"
-            if isinstance(user, User)
-            else (
-                f"tg://resolve?domain={user.username}"
-                if getattr(user, "username", None)
-                else ""
-            )
-        )
+        if isinstance(user, User):
+            tag_link = f"tg://user?id={user.id}"
+        elif isinstance(user, Channel) and getattr(user, "username", None):
+            tag_link = f"tg://resolve?domain={user.username}"
+        else:
+            tag_link = ""
+        return tag_link
 
     async def get_invite_link(
         self,
