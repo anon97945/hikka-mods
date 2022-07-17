@@ -1,4 +1,4 @@
-__version__ = (0, 0, 4)
+__version__ = (0, 0, 150)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -54,8 +54,118 @@ class ApodiktumLibraryFunctions:
         return apo_logger.error(log_string) if error else apo_logger.debug(log_string)
 
 
-@loader.tds
-class ApodiktumLibMod(ApodiktumLibraryFunctions, loader.Module):
+class ApodiktumUtilsBeta(loader.Module):
+
+    def __init__(
+        self,
+        lib: loader.Library,
+    ):
+        self.utils = lib.utils
+        self.utils.log(logging.DEBUG, lib.__class__.__name__, "class ApodiktumUtilsBeta is being initiated!", debug_msg=True)
+        self.lib = lib
+        self._db = lib.db
+        self._client = lib.client
+        self._libclassname = self.lib.__class__.__name__
+        self._lib_db = self._db.setdefault(self._libclassname, {})
+        self._chats_db = self._lib_db.setdefault("chats", {})
+        self._config = self._lib_db.setdefault("__config__", {})
+        self.utils.log(logging.DEBUG, lib.__class__.__name__, "Congratulations! You have access to the ApodiktumUtilsBeta!")
+
+    async def refresh_lib(
+        self,
+        lib: loader.Library,
+    ):
+        self.lib = lib
+        self.utils = lib.utils
+
+    async def is_member(
+        self,
+        chat_id: int,
+        user_id: int,
+    ):
+        if chat_id != self._client.tg_id:
+            try:
+                await self._client.get_permissions(chat_id, user_id)
+                return True
+            except UserNotParticipantError:
+                return False
+
+    async def get_tag(
+        self,
+        user: Union[User, int],
+        WithID: bool = False,
+    ):
+        if isinstance(user, int):
+            user = await self._client.get_entity(user)
+        if isinstance(user, Channel):
+            if WithID:
+                return (f"<a href=tg://resolve?domain={user.username}>{user.title}</a> (<code>{str(user.id)}</code>)"
+                        if user.username
+                        else f"{user.title}(<code>{str(user.id)}</code>)")
+            return (f"<a href=tg://resolve?domain={user.username}>{user.title}</a>"
+                    if user.username
+                    else f"{user.title}")
+        if WithID:
+            return (f"<a href=tg://resolve?domain={user.username}>{user.first_name}</a> (<code>{str(user.id)}</code>)"
+                    if user.username
+                    else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a> (<code>{str(user.id)}</code>)")
+        return (f"<a href=tg://resolve?domain={user.username}>{user.first_name}</a>"
+                if user.username
+                else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a>")
+
+    async def get_invite_link(
+        self,
+        chat: Union[Chat, int],
+    ):
+        if isinstance(chat, int):
+            chat = await self._client.get_entity(chat)
+        if chat.username:
+            link = f"https://t.me/{chat.username}"
+        elif chat.admin_rights.invite_users:
+            link = await self._client(GetFullChannelRequest(channel=chat.id))
+            link = link.full_chat.exported_invite.link
+        else:
+            link = ""
+        return link
+
+
+class ApodiktumInternal(loader.Module):
+
+    def __init__(
+        self,
+        lib: loader.Library,
+    ):
+        self.utils = lib.utils if getattr(lib, "utils", False) else lib
+        self.utils.log(logging.DEBUG, lib.__class__.__name__, "class ApodiktumInternalFunctions is being initiated!", debug_msg=True)
+        self.lib = lib
+        self._db = lib.db or lib._db
+        self._client = lib.client or lib._client
+        self._libclassname = lib.__class__.__name__
+        self._lib_db = self._db.setdefault(self._libclassname, {})
+        self._chats_db = self._lib_db.setdefault("chats", {})
+        self._config = self._lib_db.setdefault("__config__", {})
+
+    async def refresh_lib(
+        self,
+        lib: loader.Library,
+    ):
+        self.lib = lib
+        self.utils = lib.utils
+
+    async def beta_access(self):
+        beta_ids = None
+        beta_access = False
+        async for messages in self._client.iter_messages("@apodiktum_modules_news"):
+            if messages and isinstance(messages, Message) and "#UtilsBetaAccess" in messages.raw_text:
+                string = messages.raw_text
+                beta_ids = list(map(int, string[string.find("[")+1:string.find("]")].split(',')))
+                if self._client.tg_id in beta_ids:
+                    beta_access = True
+            break
+        return beta_access
+
+
+class ApodiktumMigrator(loader.Module):
     """
     This is a Library module required for Apodiktum Modules and also 3rd-party modules.
     >>Do not unload this!<< 
