@@ -1,4 +1,4 @@
-__version__ = (0, 1, 1)
+__version__ = (0, 1, 2)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -170,7 +170,7 @@ class ApodiktumControllerLoader(loader.Module):
             if lib_controller := self.lib.lookup("Apo-LibController"):
                 self.utils.log(logging.DEBUG, self._libclassname, "ApoLibController found!")
                 return lib_controller
-            if not getattr(self.lookup("Loader"), "_fully_loaded", False):
+            if not getattr(self.lib.lookup("Loader"), "_fully_loaded", False):
                 retries = 1
             else:
                 retries -= 1
@@ -178,7 +178,7 @@ class ApodiktumControllerLoader(loader.Module):
                 logging.DEBUG,
                 self._libclassname,
                 "ApoLibController not found, retrying in %s seconds..."
-                "\nHikka fully loaded: %s", delay, getattr(self.lookup("Loader"), "_fully_loaded", False)
+                "\nHikka fully loaded: %s", delay, getattr(self.lib.lookup("Loader"), "_fully_loaded", False)
             )
 
             await asyncio.sleep(delay)
@@ -383,7 +383,7 @@ class ApodiktumUtils(loader.Module):
                 "f": telethon.tl.functions,
                 "c": self._client,
                 "m": message,
-                "lookup": self.lookup,
+                "lookup": self.lib.lookup,
                 "self": self,
             },
             **(
