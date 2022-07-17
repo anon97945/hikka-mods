@@ -1,4 +1,4 @@
-__version__ = (1, 0, 9)
+__version__ = (1, 0, 15)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -16,56 +16,28 @@ __version__ = (1, 0, 9)
 # meta developer: @apodiktum_modules
 
 # scope: hikka_only
-# scope: hikka_min 1.1.28
+# scope: hikka_min 1.2.11
 
 import asyncio
-import logging
-
 import contextlib
-import collections  # for MigratorClass
-import hashlib  # for MigratorClass
-import copy     # for MigratorClass
-
-from typing import Union
+import logging
 from datetime import timedelta
-from telethon.errors import UserNotParticipantError
-from telethon.tl.types import (
-    Channel,
-    Chat,
-    ChatAdminRights,
-    Message,
-    User,
-    ChatBannedRights,
-)
-from telethon.tl.functions.channels import (
-    GetFullChannelRequest,
-    EditAdminRequest,
-    InviteToChannelRequest,
-    EditBannedRequest,
-)
+from typing import Union
+
 from aiogram.types import ChatPermissions
-from aiogram.utils.exceptions import (
-    MessageCantBeDeleted,
-    MessageToDeleteNotFound,
-    ChatNotFound,
-    BotKicked,
-)
+from aiogram.utils.exceptions import (BotKicked, ChatNotFound,
+                                      MessageCantBeDeleted,
+                                      MessageToDeleteNotFound)
+from telethon.errors import UserNotParticipantError
+from telethon.tl.functions.channels import (EditAdminRequest,
+                                            EditBannedRequest,
+                                            InviteToChannelRequest)
+from telethon.tl.types import (Channel, Chat, ChatAdminRights,
+                               ChatBannedRights, Message, User)
 
 from .. import loader, utils
 
 logger = logging.getLogger(__name__)
-
-
-async def is_linkedchannel(
-    user: Union[User, int],
-    chat: Union[Chat, int],
-    message: Union[None, Message] = None,
-):
-    if isinstance(user, User):
-        return False
-    full_chat = await message.client(GetFullChannelRequest(channel=user.id))
-    if full_chat.full_chat.linked_chat_id:
-        return chat.id == int(full_chat.full_chat.linked_chat_id)
 
 
 def represents_int(s: str) -> bool:
@@ -87,9 +59,7 @@ def represents_tgid(s: str) -> bool:
 def to_bool(value: str) -> bool:
     try:
         loader.validators.Boolean().validate(value)
-        if value.lower() in "true":
-            return True
-        return False
+        return value.lower() in "true"
     except loader.validators.ValidationError:
         return None
 
@@ -135,36 +105,6 @@ class ApodiktumAdminToolsMod(loader.Module):
     }
 
     strings_en = {
-        "bcu_db_string": ("<b>[BlockChannelUser]</b> Current Database:\n\nWatcher:\n{}"
-                          "\n\nChatsettings:\n{}"),
-        "bcu_settings": ("<b>[BlockChannelUser]</b> Current settings in this "
-                         "chat are:\n{}"),
-        "bcu_start": "<b>[BlockChannelUser]</b> Activated in this chat.</b>",
-        "bcu_stopped": "<b>[BlockChannelUser]</b> Deactivated in this chat.</b>",
-        "bcu_triggered": "{}, you can't write as a channel here.",
-        "bcu_turned_off": "<b>[BlockChannelUser]</b> The module is now turned off in all chats.</b>",
-        "bnd_db_string": ("<b>[BlockNonDiscussion]</b> Current Database:\n\nWatcher:\n{}"
-                          "\n\nChatsettings:\n{}"),
-        "bnd_settings": ("<b>[BlockNonDiscussion]</b> Current settings in this "
-                         "chat are:\n{}"),
-        "bnd_start": "<b>[BlockNonDiscussion]</b> Activated in this chat.</b>",
-        "bnd_stopped": "<b>[BlockNonDiscussion]</b> Deactivated in this chat.</b>",
-        "bnd_triggered": ("{}, the comments are limited to discussiongroup members, "
-                          "please join our discussiongroup first."
-                          "\n\n👉🏻 {}\n\nRespectfully, the admins."),
-        "bnd_turned_off": "<b>[BlockNonDiscussion]</b> The module is now turned off in all chats.</b>",
-        "error": "<b>Your command was wrong.</b>",
-        "gl_db_string": ("<b>[Grouplogger]</b> Current Database:\n\nWatcher:\n{}"
-                         "\n\nChatsettings:\n{}"),
-        "gl_settings": ("<b>[Grouplogger]</b> Current settings in this "
-                        "chat are:\n{}"),
-        "gl_start": "<b>[Grouplogger]</b> Activated for the given chat.</b>",
-        "gl_stopped": "<b>[Grouplogger]</b> Deactivated in this chat.</b>",
-        "gl_turned_off": "<b>[Grouplogger]</b> The module is now turned off in all chats.</b>",
-        "no_id": "<b>Your input was no TG ID.</b>",
-        "no_int": "<b>Your input was no Integer.</b>",
-        "not_dc": "<b>This is no Groupchat.</b>",
-        "permerror": "<b>You have no delete permissions in this chat.</b>",
     }
 
     strings_de = {
@@ -278,6 +218,13 @@ class ApodiktumAdminToolsMod(loader.Module):
         "permerror": "<b>Вы не имеете права на удаление сообщений в этом чате</b>",
     }
 
+    all_strings = {
+        "strings": strings,
+        "strings_en": strings,
+        "strings_de": strings_de,
+        "strings_ru": strings_ru,
+    }
+
     _global_queue = []
 
     def __init__(self):
@@ -306,36 +253,15 @@ class ApodiktumAdminToolsMod(loader.Module):
     async def client_ready(self, client, db):
         self._db = db
         self._client = client
-        self.base_strings = self.strings._base_strings
+        self.apo_lib = await self.import_lib(
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py",
+            suspend_on_error=True,
+        )
         self._pt_task = asyncio.ensure_future(self._global_queue_handler())
-        # MigratorClass
-        self._migrator = MigratorClass()  # MigratorClass define
-        await self._migrator.init(client, db, self, self.__class__.__name__, self.strings("name"), self.config["auto_migrate_log"], self.config["auto_migrate_debug"])  # MigratorClass Initiate
-        await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
-        # MigratorClass
 
     async def on_unload(self):
         self._pt_task.cancel()
         return
-
-    def _strings(self, string: str, chat_id: int = None):
-        if self.lookup("Apo-Translations") and chat_id:
-            forced_translation_db = self.lookup("Apo-Translations").config
-            strings_en = self.strings_en if getattr(self, "strings_en", False) else {}
-            strings_de = self.strings_de if getattr(self, "strings_de", False) else {}
-            strings_ru = self.strings_ru if getattr(self, "strings_ru", False) else {}
-            languages = {
-                "en_chats": {**self.base_strings, **strings_en},
-                "de_chats": {**self.base_strings, **strings_de},
-                "ru_chats": {**self.base_strings, **strings_ru},
-            }
-            for lang, strings in languages.items():
-                if chat_id in forced_translation_db[lang]:
-                    if string in strings:
-                        return strings[string]
-                    logger.debug(f"String: {string} not found in\n{strings}")
-                    break
-        return self.strings(string)
 
     async def _mute(
         self,
@@ -436,60 +362,9 @@ class ApodiktumAdminToolsMod(loader.Module):
                 bot_perms = await message.client.get_permissions(chat_id, inline_bot_id)
                 if bot_perms.is_admin and bot_perms.ban_users and bot_perms.delete_messages:
                     return True
-                if await self._promote_bot(chat_id):
-                    return True
-                return False
+                return bool(await self._promote_bot(chat_id))
             except UserNotParticipantError:
                 return bool(chat.admin_rights.add_admins and await self._promote_bot(chat_id))
-
-    @staticmethod
-    async def _is_member(
-        chat: Union[Chat, int],
-        user: Union[User, int],
-        self_id: Union[None, int],
-        message: Union[None, Message] = None,
-    ):
-        if chat != self_id:
-            try:
-                await message.client.get_permissions(chat, user)
-                return True
-            except UserNotParticipantError:
-                return False
-
-    @staticmethod
-    def _get_tag(
-        user: Union[User, int],
-        WithID: bool = False,
-    ):
-        if isinstance(user, Channel):
-            if WithID:
-                return (f"<a href=tg://resolve?domain={user.username}>{user.title}</a> (<code>{str(user.id)}</code>)"
-                        if user.username
-                        else f"{user.title}(<code>{str(user.id)}</code>)")
-            return (f"<a href=tg://resolve?domain={user.username}>{user.title}</a>"
-                    if user.username
-                    else f"{user.title}")
-        if WithID:
-            return (f"<a href=tg://resolve?domain={user.username}>{user.first_name}</a> (<code>{str(user.id)}</code>)"
-                    if user.username
-                    else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a> (<code>{str(user.id)}</code>)")
-        return (f"<a href=tg://resolve?domain={user.username}>{user.first_name}</a>"
-                if user.username
-                else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a>")
-
-    @staticmethod
-    async def _get_invite_link(
-        chat: Union[Chat, int],
-        message: Union[None, Message] = None,
-    ):
-        if chat.username:
-            link = f"https://t.me/{chat.username}"
-        elif chat.admin_rights.invite_users:
-            link = await message.client(GetFullChannelRequest(channel=chat.id))
-            link = link.full_chat.exported_invite.link
-        else:
-            link = ""
-        return link
 
     async def bndcmd(self, message: Message):
         """
@@ -519,13 +394,13 @@ class ApodiktumAdminToolsMod(loader.Module):
         if args and args[0] == "clearall":
             self.set("bnd", [])
             self.set("bnd_sets", {})
-            return await utils.answer(message, self._strings("bnd_turned_off", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("bnd_turned_off", self.all_strings, message))
 
         if args and args[0] == "db":
-            return await utils.answer(message, self._strings("bnd_db_string", utils.get_chat_id(message)).format(str(bnd), str(sets)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("bnd_db_string", self.all_strings, message).format(str(bnd), str(sets)))
 
         if message.is_private:
-            await utils.answer(message, self._strings("not_dc"))
+            await utils.answer(message, self.apo_lib.utils.get_str("not_dc"), self.all_strings, message)
             return
 
         if (
@@ -534,7 +409,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             or not chat.admin_rights
             and not chat.creator
         ):
-            return await utils.answer(message, self._strings("permerror", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("permerror", self.all_strings, message))
 
         if not args:
             if chatid_str not in bnd:
@@ -545,31 +420,31 @@ class ApodiktumAdminToolsMod(loader.Module):
                 sets[chatid_str].setdefault("deltimer", 60)
                 self.set("bnd", bnd)
                 self.set("bnd_sets", sets)
-                return await utils.answer(message, self._strings("bnd_start", utils.get_chat_id(message)))
+                return await utils.answer(message, self.apo_lib.utils.get_str("bnd_start", self.all_strings, message))
             bnd.remove(chatid_str)
             sets.pop(chatid_str)
             self.set("bnd", bnd)
             self.set("bnd_sets", sets)
-            return await utils.answer(message, self._strings("bnd_stopped", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("bnd_stopped", self.all_strings, message))
 
         if chatid_str in bnd:
             if args[0] == "notify" and args[1] is not None:
                 if not isinstance(to_bool(args[1]), bool):
-                    return await utils.answer(message, self._strings("error", utils.get_chat_id(message)))
+                    return await utils.answer(message, self.apo_lib.utils.get_str("error", self.all_strings, message))
                 sets[chatid_str].update({"notify": to_bool(args[1])})
             elif args[0] == "mute" and args[1] is not None and chatid_str in bnd:
                 if not represents_int(args[1]):
-                    return await utils.answer(message, self._strings("no_int", utils.get_chat_id(message)))
+                    return await utils.answer(message, self.apo_lib.utils.get_str("no_int", self.all_strings, message))
                 sets[chatid_str].update({"mute": args[1].capitalize()})
             elif args[0] == "deltimer" and args[1] is not None and chatid_str in bnd:
                 if not represents_int(args[1]):
-                    return await utils.answer(message, self._strings("no_int", utils.get_chat_id(message)))
+                    return await utils.answer(message, self.apo_lib.utils.get_str("no_int", self.all_strings, message))
                 sets[chatid_str].update({"deltimer": args[1]})
             elif args[0] != "settings" and chatid_str in bnd:
                 return
             self.set("bnd", bnd)
             self.set("bnd_sets", sets)
-            return await utils.answer(message, self._strings("bnd_settings", utils.get_chat_id(message)).format(str(sets[chatid_str])))
+            return await utils.answer(message, self.apo_lib.utils.get_str("bnd_settings", self.all_strings, message).format(str(sets[chatid_str])))
 
     async def bcucmd(self, message: Message):
         """
@@ -599,13 +474,13 @@ class ApodiktumAdminToolsMod(loader.Module):
         if args and args[0] == "clearall":
             self.set("bcu", [])
             self.set("bcu_sets", {})
-            return await utils.answer(message, self._strings("bcu_turned_off", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("bcu_turned_off", self.all_strings, message))
 
         if args and args[0] == "db":
-            return await utils.answer(message, self._strings("bcu_db_string", utils.get_chat_id(message)).format(str(bcu), str(sets)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("bcu_db_string", self.all_strings, message).format(str(bcu), str(sets)))
 
         if message.is_private:
-            await utils.answer(message, self._strings("not_dc", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.utils.get_str("not_dc", self.all_strings, message))
             return
 
         if (
@@ -614,7 +489,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             or not chat.admin_rights
             and not chat.creator
         ):
-            return await utils.answer(message, self._strings("permerror", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("permerror", self.all_strings, message))
 
         if not args:
             if chatid_str not in bcu:
@@ -625,31 +500,31 @@ class ApodiktumAdminToolsMod(loader.Module):
                 sets[chatid_str].setdefault("deltimer", 60)
                 self.set("bcu", bcu)
                 self.set("bcu_sets", sets)
-                return await utils.answer(message, self._strings("bcu_start", utils.get_chat_id(message)))
+                return await utils.answer(message, self.apo_lib.utils.get_str("bcu_start", self.all_strings, message))
             bcu.remove(chatid_str)
             sets.pop(chatid_str)
             self.set("bcu", bcu)
             self.set("bcu_sets", sets)
-            return await utils.answer(message, self._strings("bcu_stopped", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("bcu_stopped", self.all_strings, message))
 
         if chatid_str in bcu:
             if args[0] == "notify" and args[1] is not None:
                 if not isinstance(to_bool(args[1]), bool):
-                    return await utils.answer(message, self._strings("error", utils.get_chat_id(message)))
+                    return await utils.answer(message, self.apo_lib.utils.get_str("error", self.all_strings, message))
                 sets[chatid_str].update({"notify": to_bool(args[1])})
             elif args[0] == "ban" and args[1] is not None and chatid_str in bcu:
                 if not isinstance(to_bool(args[1]), bool):
-                    return await utils.answer(message, self._strings("no_int", utils.get_chat_id(message)))
+                    return await utils.answer(message, self.apo_lib.utils.get_str("no_int", self.all_strings, message))
                 sets[chatid_str].update({"ban": to_bool(args[1])})
             elif args[0] == "deltimer" and args[1] is not None and chatid_str in bcu:
                 if not represents_int(args[1]):
-                    return await utils.answer(message, self._strings("no_int", utils.get_chat_id(message)))
+                    return await utils.answer(message, self.apo_lib.utils.get_str("no_int", self.all_strings, message))
                 sets[chatid_str].update({"deltimer": args[1]})
             elif args[0] != "settings" and chatid_str in bcu:
                 return
             self.set("bcu", bcu)
             self.set("bcu_sets", sets)
-            return await utils.answer(message, self._strings("bcu_settings", utils.get_chat_id(message)).format(str(sets[chatid_str])))
+            return await utils.answer(message, self.apo_lib.utils.get_str("bcu_settings", self.all_strings, message).format(str(sets[chatid_str])))
 
     async def glcmd(self, message: Message):
         """
@@ -673,14 +548,14 @@ class ApodiktumAdminToolsMod(loader.Module):
         chatid_str = str(chatid)
 
         if not args:
-            return await utils.answer(message, self._strings("error", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("error", self.all_strings, message))
 
         if args[0] == "clearall":
             self.set("gl", [])
             self.set("gl_sets", {})
-            return await utils.answer(message, self._strings("gl_turned_off", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("gl_turned_off", self.all_strings, message))
         if args[0] == "db":
-            return await utils.answer(message, self._strings("gl_db_string", utils.get_chat_id(message)).format(str(gl), str(sets)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("gl_db_string", self.all_strings, message).format(str(gl), str(sets)))
         if args[0] is not None and represents_tgid(args[0]):
             chatid = args[0]
             chatid_str = str(chatid)
@@ -688,39 +563,39 @@ class ApodiktumAdminToolsMod(loader.Module):
             chatid = args[1]
             chatid_str = str(chatid)
         elif args[0] == "db":
-            return await utils.answer(message, self._strings("gl_db_string", utils.get_chat_id(message)).format(str(sets)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("gl_db_string", self.all_strings, message).format(str(sets)))
         elif args[0] not in ["clearall", "settings"]:
-            return await utils.answer(message, self._strings("error", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("error", self.all_strings, message))
         elif not args:
-            return await utils.answer(message, self._strings("error", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("error", self.all_strings, message))
         if args[0] == "rem" and represents_tgid(args[1]) and chatid_str in gl:
             gl.remove(chatid_str)
             sets.pop(chatid_str)
             self.set("gl", gl)
             self.set("gl_sets", sets)
-            return await utils.answer(message, self._strings("gl_stopped", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("gl_stopped", self.all_strings, message))
         if args[0] == "rem" and (represents_tgid(args[1]) or chatid_str not in gl):
-            return await utils.answer(message, self._strings("error", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("error", self.all_strings, message))
         if not represents_tgid(chatid_str):
-            return await utils.answer(message, self._strings("error", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("error", self.all_strings, message))
         if chatid_str not in gl:
             if not represents_tgid(args[0]) or not represents_tgid(args[1]):
-                return await utils.answer(message, self._strings("no_id", utils.get_chat_id(message)))
+                return await utils.answer(message, self.apo_lib.utils.get_str("no_id", self.all_strings, message))
             gl.append(chatid_str)
             sets.setdefault(chatid_str, {})
             sets[chatid_str].setdefault("logchannel", args[1])
             self.set("gl", gl)
             self.set("gl_sets", sets)
-            return await utils.answer(message, self._strings("gl_start", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("gl_start", self.all_strings, message))
         if len(args) == 2:
             if not represents_tgid(args[0]) or not represents_tgid(args[1]):
-                return await utils.answer(message, self._strings("no_id", utils.get_chat_id(message)))
+                return await utils.answer(message, self.apo_lib.utils.get_str("no_id", self.all_strings, message))
             sets[chatid_str].update({"logchannel": args[1]})
         elif args[0] != "settings" and chatid_str in gl:
             return
         self.set("gl", gl)
         self.set("gl_sets", sets)
-        return await utils.answer(message, self._strings("gl_settings", utils.get_chat_id(message)).format(str(sets[chatid_str])))
+        return await utils.answer(message, self.apo_lib.utils.get_str("gl_settings", self.all_strings, message).format(str(sets[chatid_str])))
 
     async def p__bcu(
         self,
@@ -733,22 +608,22 @@ class ApodiktumAdminToolsMod(loader.Module):
         chatid_str = str(chat.id)
         if message.is_private or chatid_str not in bcu or not isinstance(user, Channel):
             return
-        UseBot = await self._check_inlinebot(chat, self.inline.bot_id, self._tg_id, message)
+        UseBot = await self._check_inlinebot(chat, self.inline.bot_id, self.tg_id, message)
         if (
             (chat.admin_rights or chat.creator)
             and (not chat.admin_rights.delete_messages
                  or not chat.admin_rights)
         ):
             return
-        usertag = self._get_tag(user, True)
+        usertag = self.apo_lib.utils.get_tag(user, True)
 
-        if await is_linkedchannel(user, chat, message):
+        if await self.apo_lib.utils.is_linkedchannel(chat.id, user.id, message):
             return
         await self._delete_message(chat, message, UseBot)
         if bcu_sets[chatid_str].get("ban") is True:
             await self._ban(chat, user, message, UseBot)
         if bcu_sets[chatid_str].get("notify") is True:
-            msgs = await utils.answer(message, self._strings("bcu_triggered", utils.get_chat_id(message)).format(usertag))
+            msgs = await utils.answer(message, self.apo_lib.utils.get_str("bcu_triggered", self.all_strings, message).format(usertag))
             if bcu_sets[chatid_str].get("deltimer") != "0":
                 DELTIMER = int(bcu_sets[chatid_str].get("deltimer"))
                 await asyncio.sleep(DELTIMER)
@@ -772,11 +647,11 @@ class ApodiktumAdminToolsMod(loader.Module):
                  or not chat.admin_rights)
         ):
             return
-        usertag = self._get_tag(user, True)
-        link = await self._get_invite_link(chat, message)
+        usertag = self.apo_lib.utils.get_tag(user, True)
+        link = await self.apo_lib.utils.get_invite_link(chat)
 
-        if not await self._is_member(chat.id, user.id, self._tg_id, message):
-            UseBot = await self._check_inlinebot(chat, self.inline.bot_id, self._tg_id, message)
+        if not await self.apo_lib.utils.is_member(chat.id, user.id):
+            UseBot = await self._check_inlinebot(chat, self.inline.bot_id, self.tg_id, message)
             await self._delete_message(chat, message, UseBot)
             if (
                 chat.admin_rights.ban_users
@@ -786,7 +661,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 MUTETIMER = bnd_sets[chatid_str].get("mute")
                 await self._mute(chat, user, message, MUTETIMER, UseBot)
             if bnd_sets[chatid_str].get("notify") is True:
-                msgs = await utils.answer(message, self._strings("bnd_triggered", utils.get_chat_id(message)).format(usertag, link))
+                msgs = await utils.answer(message, self.apo_lib.utils.get_str("bnd_triggered", self.all_strings, message).format(usertag, link))
                 if bnd_sets[chatid_str].get("deltimer") != "0":
                     DELTIMER = int(bnd_sets[chatid_str].get("deltimer"))
                     await asyncio.sleep(DELTIMER)
@@ -805,8 +680,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         if message.is_private or chatid_str not in gl:
             return
         logchan_id = int(gl_sets[chatid_str].get("logchannel"))
-        chat_tag = self._get_tag(chat, False)
-        user_tag = self._get_tag(user, False)
+        chat_tag = self.apo_lib.utils.get_tag(chat, True)
+        user_tag = self.apo_lib.utils.get_tag(user, True)
         link = (
             f"Chat: {chat_tag} | #ID_{chat.id}"
             + f"\nUser: {user_tag} | #ID_{user.id}"
@@ -874,251 +749,3 @@ class ApodiktumAdminToolsMod(loader.Module):
             asyncio.get_event_loop().create_task(self.p__bnd(chat, user, message, bnd, bnd_sets))
             asyncio.get_event_loop().create_task(self.p__bcu(chat, user, message, bcu, bcu_sets))
         return
-
-
-class MigratorClass():
-    """
-    # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
-    # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
-    #
-    #              © Copyright 2022
-    #
-    #             developed by @anon97945
-    #
-    #          https://t.me/apodiktum_modules
-    #
-    # 🔒 Licensed under the GNU GPLv3
-    # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
-    """
-
-    strings = {
-        "_log_doc_migrated_db": "Migrated {} database of {} -> {}:\n{}",
-        "_log_doc_migrated_cfgv_val": "[Dynamic={}] Migrated default config value:\n{} -> {}",
-        "_log_doc_no_dynamic_migration": "No module config found. Did not dynamic migrate:\n{{{}: {}}}",
-        "_log_doc_migrated_db_not_found": "`{}` database not found. Did not migrate {} -> {}",
-    }
-
-    changes = {
-    }
-
-    def __init__(self):
-        self._ratelimit = []
-
-    async def init(
-        self,
-        client: "TelegramClient",  # type: ignore
-        db: "Database",  # type: ignore
-        modules: str,  # type: ignore
-        classname: str,  # type: ignore
-        name: str,  # type: ignore
-        log: bool = False,  # type: ignore
-        debug: bool = False,  # type: ignore
-    ):
-        self._client = client
-        self._db = db
-        self._classname = classname
-        self._name = name
-        self.modules = modules
-        self.log = log
-        self.debug = debug
-        self.hashs = []
-        self.hashs = self._db.get(self._classname, "hashs", [])
-        self._migrate_to = list(self.changes)[-1] if self.changes else None
-
-    async def migrate(self, log: bool = False, debug: bool = False):
-        self.log = log
-        self.debug = debug
-        if self._migrate_to is not None:
-            self.hashs = self._db.get(self._classname, "hashs", [])
-
-            migrate = await self.check_new_migration()
-            full_migrated = await self.full_migrated()
-            if migrate:
-                await self._logger(f"Open migrations: {migrate}", self.debug, True)
-                if await self._migrator_func():
-                    await self._logger("Migration done.", self.debug, True)
-                    return True
-            elif not full_migrated:
-                await self.force_set_hashs()
-                await self._logger(f"Open migrations: {migrate} | Forcehash done: {self.hashs}", self.debug, True)
-                return False
-            else:
-                await self._logger(f"Open migrations: {migrate} | Skip migration.", self.debug, True)
-                return False
-            return False
-        await self._logger("No changes in `changes` dictionary found.", self.debug, True)
-        return False
-
-    async def auto_migrate_handler(self, auto_migrate: bool = False):
-        if self._migrate_to is not None:
-            self.hashs = self._db.get(self._classname, "hashs", [])
-            migrate = await self.check_new_migration()
-            full_migrated = await self.full_migrated()
-            if auto_migrate and migrate:
-                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate}", self.debug, True)
-                if await self._migrator_func():
-                    await self._logger("Migration done.", self.debug, True)
-                    return
-            elif not auto_migrate and not full_migrated:
-                await self.force_set_hashs()
-                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate} | Forcehash done: {self.hashs}", self.debug, True)
-                return
-            else:
-                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate} | Skip migrate_handler.", self.debug, True)
-                return
-        await self._logger("No changes in `changes` dictionary found.", self.debug, True)
-        return
-
-    async def force_set_hashs(self):
-        await self._set_missing_hashs()
-        return True
-
-    async def check_new_migration(self):
-        chash = hashlib.sha256(self._migrate_to.encode('utf-8')).hexdigest()
-        return chash not in self.hashs
-
-    async def full_migrated(self):
-        full_migrated = True
-        for migration in self.changes:
-            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
-            if chash not in self.hashs:
-                full_migrated = False
-        return full_migrated
-
-    async def _migrator_func(self):
-        for migration in self.changes:
-            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
-            if chash not in self.hashs:
-                old_classname, new_classname, old_name, new_name = await self._get_names(migration)
-                for category in self.changes[migration]:
-                    await self._copy_config_init(migration, old_classname, new_classname, old_name, new_name, category)
-                await self._set_hash(chash)
-        return True
-
-    async def _copy_config_init(self, migration, old_classname, new_classname, old_name, new_name, category):
-        if category == "classname":
-            if self._classname != old_classname and (old_classname in self._db.keys() and self._db[old_classname] and old_classname is not None):
-                await self._logger(f"{migration} | {category} | old_value: {str(old_classname)} | new_value: {str(new_classname)}", self.debug, True)
-                await self._copy_config(category, old_classname, new_classname, new_name)
-            else:
-                await self._logger(self.strings["_log_doc_migrated_db_not_found"].format(category, old_classname, new_classname))
-        elif category == "name":
-            await self._logger(f"{migration} | {category} | old_value: {str(old_name)} | new_value: {str(new_name)}", self.debug, True)
-            if self._name != old_name and (old_name in self._db.keys() and self._db[old_name] and old_name is not None):
-                await self._copy_config(category, old_name, new_name, new_classname)
-            else:
-                await self._logger(self.strings["_log_doc_migrated_db_not_found"].format(category, old_name, new_name))
-        elif category == "config":
-            await self._migrate_cfg_values(migration, category, new_name, new_classname)
-        return
-
-    async def _get_names(self, migration):
-        old_name = None
-        old_classname = None
-        new_name = None
-        new_classname = None
-        for category in self.changes[migration]:
-            if category == "classname":
-                old_classname, new_classname = await self._get_changes(self.changes[migration][category].items())
-            elif category == "name":
-                old_name, new_name = await self._get_changes(self.changes[migration][category].items())
-        if not new_name:
-            new_name = self._name
-        if not new_classname:
-            new_classname = self._classname
-        return old_classname, new_classname, old_name, new_name
-
-    @staticmethod
-    async def _get_changes(changes):
-        old_value = None
-        new_value = None
-        for state, value in changes:
-            if state == "old":
-                old_value = value
-            elif state == "new":
-                new_value = value
-        return old_value, new_value
-
-    async def _migrate_cfg_values(self, migration, category, new_name, new_classname):
-        if new_classname in self._db.keys() and "__config__" in self._db[new_classname]:
-            if configdb := self._db[new_classname]["__config__"]:
-                for cnfg_key in self.changes[migration][category]:
-                    old_value, new_value = await self._get_changes(self.changes[migration][category][cnfg_key].items())
-                    for key, value in configdb.items():
-                        await self._logger(f"{migration} | {category} | ({{old_value: {str(old_value)}}} `==` {{new_value: {str(value)}}}) `and` {{key: {key}}} `==` {{cnfg_key: {cnfg_key}}}", self.debug, True)
-                        if value == old_value and key == cnfg_key:
-                            dynamic = False
-                            self._db[new_classname]["__config__"][cnfg_key] = new_value
-                            if (
-                                self.modules.lookup(new_name)
-                                and self.modules.lookup(new_name).config
-                                and key in self.modules.lookup(new_name).config
-                            ):
-                                self.modules.lookup(new_name).config[cnfg_key] = new_value
-                                dynamic = True
-                            await self._logger(self.strings["_log_doc_migrated_cfgv_val"].format(dynamic, value, new_value))
-        return
-
-    async def _copy_config(self, category, old_name, new_name, name):
-        if self._db[new_name]:
-            temp_db = {new_name: copy.deepcopy(self._db[new_name])}
-            self._db[new_name].clear()
-            self._db[new_name] = await self._deep_dict_merge(temp_db[new_name], self._db[old_name])
-            temp_db.pop(new_name)
-        else:
-            self._db[new_name] = copy.deepcopy(self._db[old_name])
-        self._db.pop(old_name)
-        await self._logger(self.strings["_log_doc_migrated_db"].format(category, old_name, new_name, self._db[new_name]))
-        if category == "classname":
-            await self._make_dynamic_config(name, new_name)
-        if category == "name":
-            await self._make_dynamic_config(new_name, name)
-        return
-
-    async def _deep_dict_merge(self, dct1, dct2, override=True) -> dict:
-        merged = copy.deepcopy(dct1)
-        for k, v2 in dct2.items():
-            if k in merged:
-                v1 = merged[k]
-                if isinstance(v1, dict) and isinstance(v2, collections.abc.Mapping):
-                    merged[k] = await self._deep_dict_merge(v1, v2, override)
-                elif isinstance(v1, list) and isinstance(v2, list):
-                    merged[k] = v1 + v2
-                elif override:
-                    merged[k] = copy.deepcopy(v2)
-            else:
-                merged[k] = copy.deepcopy(v2)
-        return merged
-
-    async def _make_dynamic_config(self, new_name, new_classname=None):
-        if new_classname is None:
-            return
-        if "__config__" in self._db[new_classname].keys():
-            for key, value in self._db[new_classname]["__config__"].items():
-                if (
-                    self.modules.lookup(new_name)
-                    and self.modules.lookup(new_name).config
-                    and key in self.modules.lookup(new_name).config
-                ):
-                    self.modules.lookup(new_name).config[key] = value
-                else:
-                    await self._logger(self.strings["_log_doc_no_dynamic_migration"].format(key, value))
-        return
-
-    async def _set_hash(self, chash):
-        self.hashs.append(chash)
-        self._db.set(self._classname, "hashs", self.hashs)
-        return
-
-    async def _set_missing_hashs(self):
-        for migration in self.changes:
-            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
-            if chash not in self.hashs:
-                await self._set_hash(chash)
-
-    async def _logger(self, log_string, debug: bool = False, debug_msg: bool = False):
-        if not debug_msg and self.log:
-            return logger.info(log_string)
-        if debug and debug_msg:
-            return logger.info(log_string)
-        return logger.debug(log_string)
