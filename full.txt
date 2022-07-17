@@ -1,8 +1,6 @@
 admintools
 apo_migrator
-apo_python
 apoinfo
-apolib_controller
 auto_update
 autoreact
 dnd
