@@ -351,8 +351,8 @@ class ApodiktumUtils(loader.Module):
         match = regex.match(link)
         if not match:
             return False
-        chat_id = match.group(4)
-        msg_id = int(match.group(5))
+        chat_id = match[4]
+        msg_id = int(match[5])
         if chat_id.isnumeric():
             chat_id = int(chat_id)
         return chat_id, msg_id
