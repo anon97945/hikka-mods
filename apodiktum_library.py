@@ -1,4 +1,4 @@
-__version__ = (0, 1, 6)
+__version__ = (0, 1, 7)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -327,6 +327,9 @@ class ApodiktumUtils(loader.Module):
         try:
             if not str(t)[:-1].isdigit():
                 return 0
+
+            if "w" in str(t):
+                t = int(t[:-1]) * 60 * 60 * 24 * 7
 
             if "d" in str(t):
                 t = int(t[:-1]) * 60 * 60 * 24
