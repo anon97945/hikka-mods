@@ -81,9 +81,8 @@ class ApodiktumLib(loader.Library):
         )
         if main.__version__ < __scope__:
             raise loader.SelfSuspend(
-                "You're running Hikka v{}.{}.{} but Apodiktum Library requires v{}.{}.{}+. Please update.".format(
-                    *main.__version__, *__scope__
-                )
+                f"You're running Hikka v{main.__version__[0]}.{main.__version__[1]}.{main.__version__[2]} "
+                f"but Apodiktum Library requires v{__scope__[0]}.{__scope__[1]}.{__scope__[2]}+. Please update."
             )
         if self.config["log_channel"]:
             logging.getLogger(self.__class__.__name__).info("Apodiktum Library v%s.%s.%s loading...", *__version__)
