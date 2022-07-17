@@ -1,4 +1,4 @@
-__version__ = (0, 1, 14)
+__version__ = (0, 1, 15)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -223,7 +223,7 @@ class ApodiktumLangReplierMod(loader.Module):
             return
         allowed_alphabet, alphabet, detected_alphabet = self._is_alphabet(message)
         respond = not allowed_alphabet
-        if self.apo_lib.utils.is_emoji(message):
+        if self.apo_lib.utils.is_emoji(message.raw_text):
             return
         if (
             (
