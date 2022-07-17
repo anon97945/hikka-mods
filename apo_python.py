@@ -1,5 +1,4 @@
-import contextlib
-__version__ = (0, 0, 2)
+__version__ = (0, 0, 3)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -24,11 +23,12 @@ __version__ = (0, 0, 2)
 # scope: hikka_only
 # scope: hikka_min 1.2.11
 
+import contextlib
 import itertools
 import logging
+import os
 from traceback import format_exc
 from types import ModuleType
-import os
 
 import telethon
 from meval import meval
