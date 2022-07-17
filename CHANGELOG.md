@@ -9,6 +9,7 @@
 ### 📦 apodiktum_library:
 #### General:
 - added beta_id list
+- added hikka min version scope to library
 - added migrator, not testet and not working!
 - added translation strings
 - added utils_beta for testing
@@ -53,6 +54,7 @@
 - all | changed self.strings to support new library
 - all | dropped fast_download
 - all | removed migrator class, will be build into library
+- all | scoped to 1.2.11
 - all | use my apodiktum_library.py
 - apoinfo | changed default msg time to `code`
 - apoinfo | update for uptime
