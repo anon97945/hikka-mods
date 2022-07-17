@@ -1,4 +1,4 @@
-__version__ = (0, 0, 16)
+__version__ = (0, 0, 17)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -116,13 +116,6 @@ class ApodiktumPyPNGMod(loader.Module):
                     break
         return self.strings(string)
 
-    async def get_media(self, message: Message):
-        file = (
-            BytesIO((await self.fast_download(message.media)).getvalue())
-        )
-        file.seek(0)
-        return file
-
     async def pypngcmd(self, message: Message):
         """
         reply to url or py file
@@ -134,7 +127,7 @@ class ApodiktumPyPNGMod(loader.Module):
         if not reply:
             return await utils.answer(message, self._strings("no_file", utils.get_chat_id(message)))
         if reply.file:
-            file = await self.get_media(reply)
+            await message.client.download_file(reply, file)
             file.name = reply.file.name
         elif res := await _filefromurl(reply):
             file, file.name = res
