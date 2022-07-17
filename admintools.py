@@ -811,4 +811,3 @@ class ApodiktumAdminToolsMod(loader.Module):
             asyncio.get_event_loop().create_task(self.p__bnd(chat, user, message, bnd, bnd_sets))
             asyncio.get_event_loop().create_task(self.p__bcu(chat, user, message, bcu, bcu_sets))
         return
-
