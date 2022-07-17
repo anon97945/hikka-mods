@@ -1,4 +1,4 @@
-__version__ = (0, 1, 8)
+__version__ = (0, 1, 13)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,9 +19,11 @@ import asyncio
 import collections
 import copy
 import hashlib
+import html
 import itertools
 import logging
 import re
+from gettext import textdomain
 from types import ModuleType
 from typing import Union
 
@@ -283,12 +285,11 @@ class ApodiktumUtils(loader.Module):
     @staticmethod
     def get_tag_link(user: Union[User, Channel]) -> str:
         if isinstance(user, User):
-            tag_link = f"tg://user?id={user.id}"
+            return f"tg://user?id={user.id}"
         elif isinstance(user, Channel) and getattr(user, "username", None):
-            tag_link = f"tg://resolve?domain={user.username}"
+            return f"tg://resolve?domain={user.username}"
         else:
-            tag_link = ""
-        return tag_link
+            return ""
 
     async def get_invite_link(
         self,
@@ -365,6 +366,28 @@ class ApodiktumUtils(loader.Module):
         text = message.raw_text
         clean_text = emoji.replace_emoji(text, replace='')
         return not clean_text
+
+    @staticmethod
+    def remove_emoji(text: str) -> str:
+       return emoji.replace_emoji(text, replace='')
+
+    @staticmethod
+    def distinct_emoji_list(message):
+        if message.raw_text:
+            text = message.raw_text
+            return emoji.distinct_emoji_list(text)
+        return False
+
+    @staticmethod
+    def emoji_list(message):
+        if message.raw_text:
+            text = message.raw_text
+            return emoji.emoji_list(text)
+        return False
+
+    @staticmethod
+    def unescape_html(text):
+        return html.unescape(text)
 
     async def get_attrs(
         self,
