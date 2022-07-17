@@ -222,23 +222,23 @@ class ApodiktumUtils(loader.Module):
             return languages[default_lang][string].replace("<br>", "\n")
         return all_strings[base_strings][string].replace("<br>", "\n")
 
-def log(
-    self,
-    level: int,
-    name: str,
-    message: str,
-    *args,
-    **kwargs,
-):
-    if "debug_msg" in kwargs:
-        debug_msg = True
-        kwargs.pop("debug_msg")
-    else:
-        debug_msg = False
-    apo_logger = logging.getLogger(name)
-    if (not debug_msg and self._config["log_channel"] and level == logging.DEBUG) or (debug_msg and self._config["log_debug"] and level == logging.DEBUG):
-        return apo_logger._log(logging.INFO, message, *args, **kwargs)
-    return apo_logger._log(level, message, *args, **kwargs)
+    def log(
+        self,
+        level: int,
+        name: str,
+        message: str,
+        *args,
+        **kwargs,
+    ):
+        if "debug_msg" in kwargs:
+            debug_msg = True
+            kwargs.pop("debug_msg")
+        else:
+            debug_msg = False
+        apo_logger = logging.getLogger(name)
+        if (not debug_msg and self._config["log_channel"] and level == logging.DEBUG) or (debug_msg and self._config["log_debug"] and level == logging.DEBUG):
+            return apo_logger.log(logging.INFO, message, *args, **kwargs)
+        return apo_logger.log(level, message, *args, **kwargs)
 
 
 class ApodiktumUtilsBeta(loader.Module):
