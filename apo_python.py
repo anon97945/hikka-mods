@@ -112,7 +112,7 @@ class ApodiktumPythonMod(loader.Module):
             it = await meval(
                 utils.get_args_raw(message),
                 globals(),
-                **await self.apo_lib.utils.get_attrs(message, FakeDb()),
+                **await self.apo_lib.utils.get_attrs(self, message, FakeDb()),
             )
         except FakeDbException:
             await self.inline.form(
