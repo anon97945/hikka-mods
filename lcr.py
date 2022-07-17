@@ -1,4 +1,4 @@
-__version__ = (0, 0, 27)
+__version__ = (0, 0, 28)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -130,7 +130,7 @@ class ApodiktumLCRMod(loader.Module):
         logincode = False
         tgacc = 777000
         lc_timeout = self.config["timeout"]
-        if chatid == self._tg_id:
+        if chatid == self.tg_id:
             return await utils.answer(message, self.apo_lib.utils.get_str("no_self", self.all_strings, message))
         if user_msg not in ["", "group --force"]:
             return

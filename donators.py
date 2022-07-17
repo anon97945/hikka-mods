@@ -1,4 +1,4 @@
-__version__ = (0, 0, 15)
+__version__ = (0, 0, 16)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -358,7 +358,7 @@ class ApodiktumDonatorsMod(loader.Module):
                 userid = int(text.replace("#ID_", ""))
         kchannels = self.config["kick_channel"]
         for kchannel in kchannels:
-            if await self._is_member(kchannel, userid, self._tg_id, message):
+            if await self._is_member(kchannel, userid, self.tg_id, message):
                 await message.client.kick_participant(
                     kchannel,
                     userid,

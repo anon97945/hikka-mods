@@ -1,4 +1,4 @@
-__version__ = (0, 0, 29)
+__version__ = (0, 0, 30)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -235,7 +235,7 @@ class ApodiktumMsgMergerMod(loader.Module):
         if (
             not self.config["active"]
             or not isinstance(message, Message)
-            or message.sender_id != self._tg_id
+            or message.sender_id != self.tg_id
             or message.via_bot
             or message.fwd_from
             or (
@@ -325,7 +325,7 @@ class ApodiktumMsgMergerMod(loader.Module):
             return
 
         if(
-            last_msg.sender_id != self._tg_id
+            last_msg.sender_id != self.tg_id
             or not isinstance(last_msg, Message)
             or last_msg.via_bot
             or last_msg.fwd_from

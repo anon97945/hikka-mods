@@ -1,4 +1,4 @@
-__version__ = (0, 0, 149)
+__version__ = (0, 0, 150)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -265,7 +265,7 @@ class ApodiktumUtilsBeta(loader.Module):
         chat_id: int,
         user_id: int,
     ):
-        if chat_id != self._client._tg_id:
+        if chat_id != self._client.tg_id:
             try:
                 await self._client.get_permissions(chat_id, user_id)
                 return True
@@ -341,7 +341,7 @@ class ApodiktumInternal(loader.Module):
             if messages and isinstance(messages, Message) and "#UtilsBetaAccess" in messages.raw_text:
                 string = messages.raw_text
                 beta_ids = list(map(int, string[string.find("[")+1:string.find("]")].split(',')))
-                if self._client._tg_id in beta_ids:
+                if self._client.tg_id in beta_ids:
                     beta_access = True
             break
         return beta_access

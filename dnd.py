@@ -1,4 +1,4 @@
-__version__ = (0, 1, 32)
+__version__ = (0, 1, 33)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -288,7 +288,7 @@ class ApodiktumDNDMod(loader.Module):
         self._whitelist = self.get("whitelist", [])
         if not self.get("ignore_hello", False):
             await self.inline.bot.send_photo(
-                self._tg_id,
+                self.tg_id,
                 photo=r"https://github.com/hikariatama/assets/raw/master/unit_sigma.png",
                 caption=self.strings("hello"),
                 parse_mode="HTML",
@@ -379,7 +379,7 @@ class ApodiktumDNDMod(loader.Module):
             q = 0
 
             async for msg in self._client.iter_messages(peer, limit=200):
-                if msg.sender_id == self._tg_id:
+                if msg.sender_id == self.tg_id:
                     q += 1
 
                 if q >= self.config["active_threshold"]:
@@ -678,7 +678,7 @@ class ApodiktumDNDMod(loader.Module):
             or chat_id in {
                 1271266957,  # @replies
                 777000,  # Telegram Notifications
-                self._tg_id,  # Self
+                self.tg_id,  # Self
             }
         ):
             return
@@ -759,7 +759,7 @@ class ApodiktumDNDMod(loader.Module):
 
         if (
             getattr(message, "raw_text", False)
-            and first_message.sender_id == self._tg_id
+            and first_message.sender_id == self.tg_id
         ):
             return self._approve(cid, "started_by_you")
         started_by_you = False
@@ -775,7 +775,7 @@ class ApodiktumDNDMod(loader.Module):
             )
         )
 
-        await self._send_pmbl_message(message, peer, contact, started_by_you, active_peer, self._tg_id)
+        await self._send_pmbl_message(message, peer, contact, started_by_you, active_peer, self.tg_id)
         await self._punish_handler(cid)
 
         self._approve(cid, "blocked")
@@ -790,7 +790,7 @@ class ApodiktumDNDMod(loader.Module):
     ) -> bool:
         if not isinstance(message, Message) or not self.get("status", False):
             return
-        if getattr(message.to_id, "user_id", None) == self._tg_id:
+        if getattr(message.to_id, "user_id", None) == self.tg_id:
             if user.id in self._ratelimit_afk or user.is_self or user.bot or user.verified:
                 return
         elif not message.mentioned:

@@ -1,4 +1,4 @@
-__version__ = (1, 0, 13)
+__version__ = (1, 0, 14)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -670,7 +670,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         chatid_str = str(chat.id)
         if message.is_private or chatid_str not in bcu or not isinstance(user, Channel):
             return
-        UseBot = await self._check_inlinebot(chat, self.inline.bot_id, self._tg_id, message)
+        UseBot = await self._check_inlinebot(chat, self.inline.bot_id, self.tg_id, message)
         if (
             (chat.admin_rights or chat.creator)
             and (not chat.admin_rights.delete_messages
@@ -712,8 +712,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         usertag = self._get_tag(user, True)
         link = await self._get_invite_link(chat, message)
 
-        if not await self._is_member(chat.id, user.id, self._tg_id, message):
-            UseBot = await self._check_inlinebot(chat, self.inline.bot_id, self._tg_id, message)
+        if not await self._is_member(chat.id, user.id, self.tg_id, message):
+            UseBot = await self._check_inlinebot(chat, self.inline.bot_id, self.tg_id, message)
             await self._delete_message(chat, message, UseBot)
             if (
                 chat.admin_rights.ban_users

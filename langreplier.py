@@ -1,4 +1,4 @@
-__version__ = (0, 1, 13)
+__version__ = (0, 1, 14)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -218,7 +218,7 @@ class ApodiktumLangReplierMod(loader.Module):
             or not self.config["active"]
             or not message.mentioned
             or message.is_private
-            or message.sender_id == self._tg_id
+            or message.sender_id == self.tg_id
         ):
             return
         user_id = message.sender_id

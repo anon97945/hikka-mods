@@ -1,4 +1,4 @@
-__version__ = (0, 1, 21)
+__version__ = (0, 1, 22)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -275,7 +275,7 @@ class ApodiktumPurgeMod(loader.Module):
                 )
             )
 
-            msg_count = await self._purge_messages(chat, self._tg_id, can_delete, message)
+            msg_count = await self._purge_messages(chat, self.tg_id, can_delete, message)
         else:
             await utils.answer(message, self.apo_lib.utils.get_str("err_purge_start", self.all_strings, message))
             return
@@ -303,7 +303,7 @@ class ApodiktumPurgeMod(loader.Module):
                 )
             )
 
-            msg_count = await self._purge_messages(chat, self._tg_id, can_delete, message)
+            msg_count = await self._purge_messages(chat, self.tg_id, can_delete, message)
         else:
             await utils.answer(message, self.apo_lib.utils.get_str("err_purge_start", self.all_strings, message))
             return
@@ -327,7 +327,7 @@ class ApodiktumPurgeMod(loader.Module):
             await utils.answer(message, self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message))
             return
         purge_count = "all" if len(args) == 1 and "all" in args else int(args[0])
-        user_id = self._tg_id
+        user_id = self.tg_id
         await message.delete()
         msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
         done = await message.client.send_message(chat.id, self.apo_lib.utils.get_str("purge_cmpl", self.all_strings, message).format(str(msg_count)))
@@ -352,7 +352,7 @@ class ApodiktumPurgeMod(loader.Module):
             await utils.answer(message, self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message))
             return
         purge_count = "all" if len(args) == 1 and "all" in args else int(args[0])
-        user_id = self._tg_id
+        user_id = self.tg_id
         await message.delete()
         msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
         if self.config["log_purgeme"]:
@@ -433,7 +433,7 @@ class ApodiktumPurgeMod(loader.Module):
             return
         i = 1
         async for msg in message.client.iter_messages(chat):
-            if msg.sender_id == self._tg_id:
+            if msg.sender_id == self.tg_id:
                 if i == 2:
                     old_msg = msg.raw_text
                     new_msg = args

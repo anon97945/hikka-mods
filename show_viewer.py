@@ -1,4 +1,4 @@
-__version__ = (0, 0, 18)
+__version__ = (0, 0, 19)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -116,7 +116,7 @@ class ApodiktumShowViewsMod(loader.Module):
             await utils.answer(message, self.apo_lib.utils.get_str("no_args", self.all_strings, message))
             return
         await message.delete()
-        if message.is_reply and msg.sender_id == self._tg_id:
+        if message.is_reply and msg.sender_id == self.tg_id:
             await msg.delete()
         if msg:
             msg = await message.client.send_message(self.config["channel"], msg)
