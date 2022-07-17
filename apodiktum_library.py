@@ -1,4 +1,4 @@
-__version__ = (0, 1, 3)
+__version__ = (0, 1, 4)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -374,8 +374,8 @@ class ApodiktumUtils(loader.Module):
                 "client": self.module._client,
                 "reply": reply,
                 "r": reply,
-                **self.module.get_sub(telethon.tl.types),
-                **self.module.get_sub(telethon.tl.functions),
+                **self.get_sub(telethon.tl.types),
+                **self.get_sub(telethon.tl.functions),
                 "event": message,
                 "chat": message.to_id,
                 "telethon": telethon,
