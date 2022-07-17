@@ -1,4 +1,4 @@
-__version__ = (0, 0, 150)
+__version__ = (0, 0, 151)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -73,9 +73,9 @@ class ApodiktumLib(loader.Library):
             ),
         )
         if self.config["log_channel"]:
-            logging.getLogger(self.__class__.__name__).info("Apodiktum Library v%s.%s.%s loading...", *__version__)
+            logging.getLogger(self.__class__.__name__).info("Apodiktum Library v%s.%s.%s loading...", __version__)
         else:
-            logging.getLogger(self.__class__.__name__).debug("Apodiktum Library v%s.%s.%s loading...", *__version__)
+            logging.getLogger(self.__class__.__name__).debug("Apodiktum Library v%s.%s.%s loading...", __version__)
         self.utils = ApodiktumUtils(self)
         self.__controllerloader = ApodiktumControllerLoader(self)
         self.__internal = ApodiktumInternal(self)
@@ -95,7 +95,7 @@ class ApodiktumLib(loader.Library):
 
         self._acl_task = asyncio.ensure_future(self.__controllerloader.ensure_controller())
 
-        self.utils.log(logging.DEBUG, self.__class__.__name__, "Apodiktum Library v%s.%s.%s successfully loaded.", *__version__)
+        self.utils.log(logging.DEBUG, self.__class__.__name__, "Apodiktum Library v%s.%s.%s successfully loaded.", __version__)
 
     async def on_lib_update(self, _: loader.Library):
         self._acl_task.cancel()
@@ -222,18 +222,23 @@ class ApodiktumUtils(loader.Module):
             return languages[default_lang][string].replace("<br>", "\n")
         return all_strings[base_strings][string].replace("<br>", "\n")
 
-    def log(
-        self,
-        level: int,
-        name: str,
-        message: str,
-        *args,
-        debug_msg=False,
-    ):
-        apo_logger = logging.getLogger(name)
-        if (not debug_msg and self._config["log_channel"] and level == logging.DEBUG) or (debug_msg and self._config["log_debug"] and level == logging.DEBUG):
-            return apo_logger._log(logging.INFO, message, args)
-        return apo_logger._log(level, message, args)
+def log(
+    self,
+    level: int,
+    name: str,
+    message: str,
+    *args,
+    **kwargs,
+):
+    if "debug_msg" in kwargs:
+        debug_msg = True
+        kwargs.pop("debug_msg")
+    else:
+        debug_msg = False
+    apo_logger = logging.getLogger(name)
+    if (not debug_msg and self._config["log_channel"] and level == logging.DEBUG) or (debug_msg and self._config["log_debug"] and level == logging.DEBUG):
+        return apo_logger._log(logging.INFO, message, *args, **kwargs)
+    return apo_logger._log(level, message, *args, **kwargs)
 
 
 class ApodiktumUtilsBeta(loader.Module):
