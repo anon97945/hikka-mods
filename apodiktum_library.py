@@ -73,9 +73,9 @@ class ApodiktumLib(loader.Library):
             ),
         )
         if self.config["log_channel"]:
-            logging.getLogger(self.__class__.__name__).info("Apodiktum Library v%s.%s.%s loading...", __version__)
+            logging.getLogger(self.__class__.__name__).info("Apodiktum Library v%s.%s.%s loading...", *__version__)
         else:
-            logging.getLogger(self.__class__.__name__).debug("Apodiktum Library v%s.%s.%s loading...", __version__)
+            logging.getLogger(self.__class__.__name__).debug("Apodiktum Library v%s.%s.%s loading...", *__version__)
         self.utils = ApodiktumUtils(self)
         self.__controllerloader = ApodiktumControllerLoader(self)
         self.__internal = ApodiktumInternal(self)
@@ -95,7 +95,7 @@ class ApodiktumLib(loader.Library):
 
         self._acl_task = asyncio.ensure_future(self.__controllerloader.ensure_controller())
 
-        self.utils.log(logging.DEBUG, self.__class__.__name__, "Apodiktum Library v%s.%s.%s successfully loaded.", __version__)
+        self.utils.log(logging.DEBUG, self.__class__.__name__, "Apodiktum Library v%s.%s.%s successfully loaded.", *__version__)
 
     async def on_lib_update(self, _: loader.Library):
         self._acl_task.cancel()
