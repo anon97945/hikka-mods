@@ -382,7 +382,7 @@ class ApodiktumMsgMergerMod(loader.Module):
             )
         ):
             message, last_msg = last_msg, message
-        
+
         self.merged_msgs.clear()
         self.merged_msgs[utils.get_chat_id(message)] = {"message": {message.id: message.text}, "last_msg": {last_msg.id: last_msg.text}}
         if self.config["link_preview"] is None:
