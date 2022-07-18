@@ -690,8 +690,8 @@ class ApodiktumAdminToolsMod(loader.Module):
             await message.forward_to(logchan_id)
             await message.client.send_message(logchan_id, link)
             return
-        except Exception as e:
-            if "FORWARDS_RESTRICTED" in str(e):
+        except Exception as exc:  # skipcq: PYL-W0703
+            if "FORWARDS_RESTRICTED" in str(exc):
                 msgs = await message.client.get_messages(chat.id, ids=message.id)
                 await message.client.send_message(logchan_id, message=msgs)
                 await message.client.send_message(logchan_id, link)

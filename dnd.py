@@ -696,8 +696,8 @@ class ApodiktumDNDMod(loader.Module):
                 user = await self._client.get_entity(user_id)
                 await self.p__afk(chat, user, message)
             return
-        except ValueError as e:
-            logger.debug(e)
+        except ValueError as exc:  # skipcq: PYL-W0703
+            logger.debug(exc)
 
     async def p__pmbl(
         self,

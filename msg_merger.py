@@ -1,4 +1,4 @@
-__version__ = (0, 0, 32)
+__version__ = (0, 0, 35)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -22,7 +22,7 @@ import logging
 from datetime import datetime, timezone
 
 from telethon.errors import MessageNotModifiedError
-from telethon.tl.types import Message, MessageEntityUrl
+from telethon.tl.types import Message
 
 from .. import loader, utils
 
@@ -44,6 +44,7 @@ class ApodiktumMsgMergerMod(loader.Module):
         "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
         "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_edit_timeout": "The maximum time in minuted to edit the message. 0 for no limit.",
+        "_cfg_ignore_prefix": "The prefix to ignore the merging fully.",
         "_cfg_link_preview": ("Whether to send webpage previews."
                               "\nLeave empty to use automatically decide based on the messages to merge."),
         "_cfg_merge_own_reply": "Whether to merge any message from own reply.",
@@ -56,7 +57,7 @@ class ApodiktumMsgMergerMod(loader.Module):
         "_cfg_skip_prefix": "The prefix to skip the merging.",
         "_cfg_skip_reply": "Whether to skip the merging of messages with reply.",
         "_cfg_whitelist": "Whether the chatlist includes(True) or excludes(False) the chat.",
-        "_cfg_ignore_prefix": "The prefix to ignore the merging fully.",
+        "undo_merge_fail": "<b>Failed to unmerge the messages.</b>",
     }
 
     strings_en = {
@@ -77,6 +78,7 @@ class ApodiktumMsgMergerMod(loader.Module):
 
     def __init__(self):
         self._ratelimit = []
+        self.merged_msgs = {}
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "active",
@@ -208,13 +210,6 @@ class ApodiktumMsgMergerMod(loader.Module):
             suspend_on_error=True,
         )
 
-    @staticmethod
-    def _get_url(message):
-        for (ent, url) in message.get_entities_text():
-            url = isinstance(ent, MessageEntityUrl)
-            return url
-        return False
-
     async def cmsgmergercmd(self, message: Message):
         """
         This will open the config for the module.
@@ -223,6 +218,30 @@ class ApodiktumMsgMergerMod(loader.Module):
         await self.allmodules.commands["config"](
             await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
+
+    async def unmergecmd(self, message: Message):
+        """
+        This will unmerge the messages.
+        """
+        chat_id = utils.get_chat_id(message)
+        if utils.get_chat_id(message) in self.merged_msgs:
+            for key, msg_value in self.merged_msgs[chat_id]["message"].items():
+                if key == "text":
+                    msg_text = msg_value
+                elif key == "link_preview":
+                    msg_link_preview = msg_value
+            for key, msg_value in self.merged_msgs[chat_id]["last_msg"].items():
+                if key == "id":
+                    last_msg_id = msg_value
+                elif key == "text":
+                    last_msg_text = msg_value
+                elif key == "link_preview":
+                    last_msg_link_preview = msg_value
+            await self.client.edit_message(chat_id, last_msg_id, last_msg_text, link_preview=last_msg_link_preview)
+            await self.client.edit_message(message, msg_text, link_preview=msg_link_preview)
+        else:
+            await utils.answer(message, self.strings("undo_merge_fail"))
+        self.merged_msgs.clear()
 
     async def watcher(self, message):
         if (
@@ -236,7 +255,7 @@ class ApodiktumMsgMergerMod(loader.Module):
                 and not getattr(message.media, "webpage", False)
                 or (
                     not self.config["merge_urls"]
-                    and self._get_url(message)
+                    and self.apo_lib.utils.get_entityurls(message)
                 )
             )
             or utils.remove_html(message.text)[0] == self.get_prefix()
@@ -327,12 +346,18 @@ class ApodiktumMsgMergerMod(loader.Module):
                 and not getattr(last_msg.media, "webpage", False)
                 or (
                     not self.config["merge_urls"]
-                    and self._get_url(last_msg)
+                    and self.apo_lib.utils.get_entityurls(last_msg)
                 )
             )
             or utils.remove_html(last_msg.text)[0] == self.get_prefix()
         ):
             return
+
+        if self.config["ignore_prefix"]:
+            for prefix in self.config["ignore_prefix"]:
+                ignore_prefix_len = len(utils.escape_html(prefix))
+                if utils.remove_html(last_msg.text)[:ignore_prefix_len] == utils.escape_html(prefix):
+                    return
 
         if (
             (
@@ -367,11 +392,29 @@ class ApodiktumMsgMergerMod(loader.Module):
             )
         ):
             message, last_msg = last_msg, message
+            message_text = last_msg.text
+            last_msg_text = message.text
+        else:
+            message_text = message.text
+            last_msg_text = last_msg.text
 
         if self.config["link_preview"] is None:
             link_preview = getattr(message.media, "webpage", False) or getattr(last_msg.media, "webpage", False)
         else:
             link_preview = bool(self.config["link_preview"])
+
+        self.merged_msgs.clear()
+        self.merged_msgs[utils.get_chat_id(message)] = {
+            "message": {
+                "text": message_text,
+                "link_preview": link_preview,
+            },
+            "last_msg": {
+                "id": last_msg.id,
+                "text": last_msg_text,
+                "link_preview": link_preview,
+            },
+        }
 
         try:
             if (
@@ -400,11 +443,10 @@ class ApodiktumMsgMergerMod(loader.Module):
                     and not self.config["reverse_merge"]
                     and message.is_reply
                 ):
-                    logger.error("ping3")
                     await message.edit(self.config["own_reply_msg"], link_preview=link_preview)
                     return
                 await message.delete()
                 return
-        except Exception as e:
-            logger.debug(f"Edit last_msg:\n{str(e)}")
+        except Exception as exc:
+            logger.debug(f"Edit last_msg:\n{str(exc)}")
             return

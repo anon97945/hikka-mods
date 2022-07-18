@@ -3,21 +3,22 @@
 ## 🆕 Version 1.0.0
 
 ### ℹ️ General:
-- scoped to 1.2.11
+- scoped to hikka_min 1.2.11
 - deepsource fixes
 
 ### 📦 apodiktum_library:
 #### General:
 - added beta_id list
+- added full docstring to library
+- added hikka anonymous stats
 - added hikka min version scope to library
-- added migrator, not testet and not working!
 - added translation strings
 - added utils_beta for testing
 - changed to self.apo_lib.utils
 - edited library to use hikka native libs
 - get_str rework. forcelang > setlang > basestring
-- implementing migrator class
-- library sideload apolib_controller.py
+- implemented migrator class
+- library sideloads apolib_controller.py
 - logger rework
 - new beta utils
 - new internal class
@@ -29,17 +30,21 @@
 - library utils | added emoji_list
 - library utils | added escape_html
 - library utils | added get_attrs
+- library utils | added get_entityurls
+- library utils | added get_href_urls
 - library utils | added get_ids_from_tglink
 - library utils | added get_invite_link
 - library utils | added get_str
 - library utils | added get_sub
 - library utils | added get_tag
 - library utils | added get_tag_link
+- library utils | added get_urls
 - library utils | added is_emoji
 - library utils | added is_linkedchannel
 - library utils | added is_member 
 - library utils | added log
-- library utils | added remove_emoji
+- library utils | added rem_duplicates_list
+- library utils | added rem_emoji
 - library utils | added unescape_html
 
 ### 📕 new modules:
@@ -66,7 +71,9 @@
 - msg_merger | add ignore prefix to ignore the message fully
 - msg_merger | added new is_emoji skip
 - msg_merger | added reverse_merge to msg_merger to merge into newest
+- msg_merger | added unmerge cmd
 - msg_merger | delete reply message if its from self
+- msg_merger | dont merge into ignored prefix
 - msg_merger | fix ignores time on merge_own_reply `false`
 - msg_merger | force link_preview `True`/`False` or decide automatically if set to `None` (config bool)
 - msg_merger | merge urls `True`/`False` (config bool))
