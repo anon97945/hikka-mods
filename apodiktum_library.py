@@ -1,4 +1,4 @@
-__version__ = (0, 1, 25)
+__version__ = (0, 1, 30)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -59,6 +59,15 @@ class ApodiktumLib(loader.Library):
         loader.Library.__init__(self)
 
     async def init(self):
+        if main.__version__ < __hikka_min__:
+            hikka_min_error = (
+                f"You're running Hikka v{main.__version__[0]}.{main.__version__[1]}.{main.__version__[2]} "
+                f"but Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} requires "
+                f"Hikka v{__hikka_min__[0]}.{__hikka_min__[1]}.{__hikka_min__[2]}+. Please update."
+            )
+            logging.getLogger(self.__class__.__name__).debug(hikka_min_error)
+            raise loader.SelfSuspend(hikka_min_error)
+
         self.config = loader.LibraryConfig(
             loader.ConfigValue(
                 "auto_migrate",
@@ -79,14 +88,6 @@ class ApodiktumLib(loader.Library):
                 validator=loader.validators.Boolean(),
             ),
         )
-        if main.__version__ < __hikka_min__:
-            hikka_min_error = (
-                f"You're running Hikka v{main.__version__[0]}.{main.__version__[1]}.{main.__version__[2]} "
-                f"but Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} requires "
-                f"Hikka v{__hikka_min__[0]}.{__hikka_min__[1]}.{__hikka_min__[2]}+. Please update."
-            )
-            logging.getLogger(self.__class__.__name__).debug(hikka_min_error)
-            raise loader.SelfSuspend(hikka_min_error)
         if self.config["log_channel"]:
             logging.getLogger(self.__class__.__name__).info("Apodiktum Library v%s.%s.%s loading...", *__version__)
         else:
@@ -142,7 +143,7 @@ class ApodiktumControllerLoader(loader.Module):
         first_loop = True
         while True:
             if first_loop:
-                if not await self._wait_load(delay=5, retries=5) and not self._controller_refresh():
+                if not await self._wait_load(delay=5, retries=5, first_loop=first_loop) and not self._controller_refresh():
                     await self._init_controller()
                 first_loop = False
             elif not self._controller_refresh():
@@ -163,7 +164,7 @@ class ApodiktumControllerLoader(loader.Module):
 
     async def _load_github(self):
         link = (
-            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apolib_controller.py"  # Swap this out to the actual libcontroller link!
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apolib_controller.py"
         )
         async with aiohttp.ClientSession() as session, session.head(link) as response:
             if response.status >= 300:
@@ -176,21 +177,24 @@ class ApodiktumControllerLoader(loader.Module):
         await link_message.delete()
         return lib_controller
 
-    async def _wait_load(self, delay, retries):
+    async def _wait_load(self, delay, retries, first_loop=False):
         while retries:
             if lib_controller := self.lib.lookup("Apo-LibController"):
                 self.utils.log(logging.DEBUG, self._libclassname, "ApoLibController found!")
                 return lib_controller
             if not getattr(self.lib.lookup("Loader"), "_fully_loaded", False):
                 retries = 1
+            elif getattr(self.lib.lookup("Loader"), "_fully_loaded", False) and first_loop:
+                retries = 0
             else:
                 retries -= 1
-            self.utils.log(
-                logging.DEBUG,
-                self._libclassname,
-                "ApoLibController not found, retrying in %s seconds..."
-                "\nHikka fully loaded: %s", delay, getattr(self.lib.lookup("Loader"), "_fully_loaded", False)
-            )
+            if retries != 0:
+                self.utils.log(
+                    logging.DEBUG,
+                    self._libclassname,
+                    "ApoLibController not found, retrying in %s seconds..."
+                    "\nHikka fully loaded: %s", delay, getattr(self.lib.lookup("Loader"), "_fully_loaded", False)
+                )
 
             await asyncio.sleep(delay)
 
