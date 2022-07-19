@@ -1,4 +1,4 @@
-__version__ = (0, 1, 17)
+__version__ = (0, 1, 22)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -16,15 +16,11 @@ __version__ = (0, 1, 17)
 # meta developer: @apodiktum_modules
 
 # scope: hikka_only
-# scope: hikka_min 1.1.28
+# scope: hikka_min 1.2.11
 
 import asyncio
-import logging
 import contextlib
-
-import collections  # for MigratorClass
-import hashlib  # for MigratorClass
-import copy     # for MigratorClass
+import logging
 
 from telethon.tl.types import Message
 
@@ -69,15 +65,6 @@ class ApodiktumPurgeMod(loader.Module):
     }
 
     strings_en = {
-        "edit_success": ("Edit done successfully.\n"
-                         "Old message:\n{}\n\n\nNew message:\n{}"),
-        "err_cmd_wrong": "<b>Your command was wrong.</b>",
-        "err_purge_start": "<b>Please reply to a message to start purging.</b>",
-        "no_int": "<b>Your input was no integer.</b>",
-        "permerror": "<b>You don't have permission to use this command.</b>",
-        "purge_cmpl": "<b>Purge complete!</b>\nPurged <code>{}</code> messages.",
-        "purge_success": "Purge of {} messages done successfully.",
-        "sd_success": "Message after {} seconds successfully deleted.",
     }
 
     strings_de = {
@@ -152,6 +139,13 @@ class ApodiktumPurgeMod(loader.Module):
         "sd_success": "Сообщение после {} секунд успешно удалено.",
     }
 
+    all_strings = {
+        "strings": strings,
+        "strings_en": strings,
+        "strings_de": strings_de,
+        "strings_ru": strings_ru,
+    }
+
     def __init__(self):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
@@ -202,31 +196,10 @@ class ApodiktumPurgeMod(loader.Module):
     async def client_ready(self, client, db):
         self._db = db
         self._client = client
-        self.base_strings = self.strings._base_strings
-        # MigratorClass
-        self._migrator = MigratorClass()  # MigratorClass define
-        await self._migrator.init(client, db, self, self.__class__.__name__, self.strings("name"), self.config["auto_migrate_log"], self.config["auto_migrate_debug"])  # MigratorClass Initiate
-        await self._migrator.auto_migrate_handler(self.config["auto_migrate"])
-        # MigratorClass
-
-    def _strings(self, string: str, chat_id: int = None):
-        if self.lookup("Apo-Translations") and chat_id:
-            forced_translation_db = self.lookup("Apo-Translations").config
-            strings_en = self.strings_en if getattr(self, "strings_en", False) else {}
-            strings_de = self.strings_de if getattr(self, "strings_de", False) else {}
-            strings_ru = self.strings_ru if getattr(self, "strings_ru", False) else {}
-            languages = {
-                "en_chats": {**self.base_strings, **strings_en},
-                "de_chats": {**self.base_strings, **strings_de},
-                "ru_chats": {**self.base_strings, **strings_ru},
-            }
-            for lang, strings in languages.items():
-                if chat_id in forced_translation_db[lang]:
-                    if string in strings:
-                        return strings[string]
-                    logger.debug(f"String: {string} not found in\n{strings}")
-                    break
-        return self.strings(string)
+        self.apo_lib = await self.import_lib(
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
+            suspend_on_error=True,
+        )
 
     @staticmethod
     async def _purge_user_messages(chat, user_id, purge_count, message):
@@ -302,12 +275,12 @@ class ApodiktumPurgeMod(loader.Module):
                 )
             )
 
-            msg_count = await self._purge_messages(chat, self._tg_id, can_delete, message)
+            msg_count = await self._purge_messages(chat, self.tg_id, can_delete, message)
         else:
-            await utils.answer(message, self._strings("err_purge_start", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.utils.get_str("err_purge_start", self.all_strings, message))
             return
 
-        done = await message.client.send_message(chat.id, self._strings("purge_cmpl", utils.get_chat_id(message)).format(str(msg_count)))
+        done = await message.client.send_message(chat.id, self.apo_lib.utils.get_str("purge_cmpl", self.all_strings, message).format(str(msg_count)))
         await asyncio.sleep(2)
         await done.delete()
         if self.config["log_purge"]:
@@ -330,9 +303,9 @@ class ApodiktumPurgeMod(loader.Module):
                 )
             )
 
-            msg_count = await self._purge_messages(chat, self._tg_id, can_delete, message)
+            msg_count = await self._purge_messages(chat, self.tg_id, can_delete, message)
         else:
-            await utils.answer(message, self._strings("err_purge_start", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.utils.get_str("err_purge_start", self.all_strings, message))
             return
 
         if self.config["log_purge"]:
@@ -348,16 +321,16 @@ class ApodiktumPurgeMod(loader.Module):
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
         if not represents_int(args[0]) and "all" not in args:
-            await utils.answer(message, self._strings("no_int", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.utils.get_str("no_int", self.all_strings, message))
             return
         if len(args) > 1:
-            await utils.answer(message, self._strings("err_cmd_wrong", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message))
             return
         purge_count = "all" if len(args) == 1 and "all" in args else int(args[0])
-        user_id = self._tg_id
+        user_id = self.tg_id
         await message.delete()
         msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
-        done = await message.client.send_message(chat.id, self._strings("purge_cmpl", utils.get_chat_id(message)).format(str(msg_count)))
+        done = await message.client.send_message(chat.id, self.apo_lib.utils.get_str("purge_cmpl", self.all_strings, message).format(str(msg_count)))
         await asyncio.sleep(2)
         await done.delete()
         if self.config["log_purgeme"]:
@@ -373,13 +346,13 @@ class ApodiktumPurgeMod(loader.Module):
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
         if not represents_int(args[0]) and "all" not in args:
-            await utils.answer(message, self._strings("no_int", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.utils.get_str("no_int", self.all_strings, message))
             return
         if len(args) > 1:
-            await utils.answer(message, self._strings("err_cmd_wrong", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message))
             return
         purge_count = "all" if len(args) == 1 and "all" in args else int(args[0])
-        user_id = self._tg_id
+        user_id = self.tg_id
         await message.delete()
         msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
         if self.config["log_purgeme"]:
@@ -393,7 +366,7 @@ class ApodiktumPurgeMod(loader.Module):
         """
         chat = message.chat
         if not message.is_reply:
-            return await utils.answer(message, self._strings("no_reply", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("no_reply", self.all_strings, message))
         reply = await message.get_reply_message()
         user_id = reply.sender_id
         if (
@@ -402,11 +375,11 @@ class ApodiktumPurgeMod(loader.Module):
             or not chat.admin_rights
             and not chat.creator
         ):
-            return await utils.answer(message, self._strings("permerror", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("permerror", self.all_strings, message))
         purge_count = "all"
         await message.delete()
         msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
-        done = await message.client.send_message(chat.id, self._strings("purge_cmpl", utils.get_chat_id(message)).format(str(msg_count)))
+        done = await message.client.send_message(chat.id, self.apo_lib.utils.get_str("purge_cmpl", self.all_strings, message).format(str(msg_count)))
         await asyncio.sleep(2)
         await done.delete()
         if self.config["log_purgeme"]:
@@ -420,7 +393,7 @@ class ApodiktumPurgeMod(loader.Module):
         """
         chat = message.chat
         if not message.is_reply:
-            return await utils.answer(message, self._strings("no_reply", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("no_reply", self.all_strings, message))
         reply = await message.get_reply_message()
         user_id = reply.sender_id
         if (
@@ -429,7 +402,7 @@ class ApodiktumPurgeMod(loader.Module):
             or not chat.admin_rights
             and not chat.creator
         ):
-            return await utils.answer(message, self._strings("permerror", utils.get_chat_id(message)))
+            return await utils.answer(message, self.apo_lib.utils.get_str("permerror", self.all_strings, message))
         purge_count = "all"
         await message.delete()
         msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
@@ -456,11 +429,11 @@ class ApodiktumPurgeMod(loader.Module):
         chat = message.chat
         args = utils.get_args_raw(message)
         if not args:
-            await utils.answer(message, self._strings("err_cmd_wrong", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message))
             return
         i = 1
         async for msg in message.client.iter_messages(chat):
-            if msg.sender_id == self._tg_id:
+            if msg.sender_id == self.tg_id:
                 if i == 2:
                     old_msg = msg.raw_text
                     new_msg = args
@@ -480,12 +453,12 @@ class ApodiktumPurgeMod(loader.Module):
         args = utils.get_args_raw(message)
         args = str(args).split()
         if len(args) < 2:
-            await utils.answer(message, self._strings("err_cmd_wrong", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message))
             return
         counter = int(" ".join(args[:1]))
         text = " ".join(args[1:])
         if (not counter or not text) and not represents_int(counter):
-            await utils.answer(message, self._strings("err_cmd_wrong", utils.get_chat_id(message)))
+            await utils.answer(message, self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message))
             return
         msg = await utils.answer(message, text)
         await asyncio.sleep(counter)
@@ -493,251 +466,3 @@ class ApodiktumPurgeMod(loader.Module):
         if self.config["log_sd"]:
             return logger.info(self.strings("sd_success").format(str(counter)))
         return
-
-
-class MigratorClass():
-    """
-    # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
-    # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
-    #
-    #              © Copyright 2022
-    #
-    #             developed by @anon97945
-    #
-    #          https://t.me/apodiktum_modules
-    #
-    # 🔒 Licensed under the GNU GPLv3
-    # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
-    """
-
-    strings = {
-        "_log_doc_migrated_db": "Migrated {} database of {} -> {}:\n{}",
-        "_log_doc_migrated_cfgv_val": "[Dynamic={}] Migrated default config value:\n{} -> {}",
-        "_log_doc_no_dynamic_migration": "No module config found. Did not dynamic migrate:\n{{{}: {}}}",
-        "_log_doc_migrated_db_not_found": "`{}` database not found. Did not migrate {} -> {}",
-    }
-
-    changes = {
-    }
-
-    def __init__(self):
-        self._ratelimit = []
-
-    async def init(
-        self,
-        client: "TelegramClient",  # type: ignore
-        db: "Database",  # type: ignore
-        modules: str,  # type: ignore
-        classname: str,  # type: ignore
-        name: str,  # type: ignore
-        log: bool = False,  # type: ignore
-        debug: bool = False,  # type: ignore
-    ):
-        self._client = client
-        self._db = db
-        self._classname = classname
-        self._name = name
-        self.modules = modules
-        self.log = log
-        self.debug = debug
-        self.hashs = []
-        self.hashs = self._db.get(self._classname, "hashs", [])
-        self._migrate_to = list(self.changes)[-1] if self.changes else None
-
-    async def migrate(self, log: bool = False, debug: bool = False):
-        self.log = log
-        self.debug = debug
-        if self._migrate_to is not None:
-            self.hashs = self._db.get(self._classname, "hashs", [])
-
-            migrate = await self.check_new_migration()
-            full_migrated = await self.full_migrated()
-            if migrate:
-                await self._logger(f"Open migrations: {migrate}", self.debug, True)
-                if await self._migrator_func():
-                    await self._logger("Migration done.", self.debug, True)
-                    return True
-            elif not full_migrated:
-                await self.force_set_hashs()
-                await self._logger(f"Open migrations: {migrate} | Forcehash done: {self.hashs}", self.debug, True)
-                return False
-            else:
-                await self._logger(f"Open migrations: {migrate} | Skip migration.", self.debug, True)
-                return False
-            return False
-        await self._logger("No changes in `changes` dictionary found.", self.debug, True)
-        return False
-
-    async def auto_migrate_handler(self, auto_migrate: bool = False):
-        if self._migrate_to is not None:
-            self.hashs = self._db.get(self._classname, "hashs", [])
-            migrate = await self.check_new_migration()
-            full_migrated = await self.full_migrated()
-            if auto_migrate and migrate:
-                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate}", self.debug, True)
-                if await self._migrator_func():
-                    await self._logger("Migration done.", self.debug, True)
-                    return
-            elif not auto_migrate and not full_migrated:
-                await self.force_set_hashs()
-                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate} | Forcehash done: {self.hashs}", self.debug, True)
-                return
-            else:
-                await self._logger(f"Open migrations: {migrate} | auto_migrate: {auto_migrate} | Skip migrate_handler.", self.debug, True)
-                return
-        await self._logger("No changes in `changes` dictionary found.", self.debug, True)
-        return
-
-    async def force_set_hashs(self):
-        await self._set_missing_hashs()
-        return True
-
-    async def check_new_migration(self):
-        chash = hashlib.sha256(self._migrate_to.encode('utf-8')).hexdigest()
-        return chash not in self.hashs
-
-    async def full_migrated(self):
-        full_migrated = True
-        for migration in self.changes:
-            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
-            if chash not in self.hashs:
-                full_migrated = False
-        return full_migrated
-
-    async def _migrator_func(self):
-        for migration in self.changes:
-            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
-            if chash not in self.hashs:
-                old_classname, new_classname, old_name, new_name = await self._get_names(migration)
-                for category in self.changes[migration]:
-                    await self._copy_config_init(migration, old_classname, new_classname, old_name, new_name, category)
-                await self._set_hash(chash)
-        return True
-
-    async def _copy_config_init(self, migration, old_classname, new_classname, old_name, new_name, category):
-        if category == "classname":
-            if self._classname != old_classname and (old_classname in self._db.keys() and self._db[old_classname] and old_classname is not None):
-                await self._logger(f"{migration} | {category} | old_value: {str(old_classname)} | new_value: {str(new_classname)}", self.debug, True)
-                await self._copy_config(category, old_classname, new_classname, new_name)
-            else:
-                await self._logger(self.strings["_log_doc_migrated_db_not_found"].format(category, old_classname, new_classname))
-        elif category == "name":
-            await self._logger(f"{migration} | {category} | old_value: {str(old_name)} | new_value: {str(new_name)}", self.debug, True)
-            if self._name != old_name and (old_name in self._db.keys() and self._db[old_name] and old_name is not None):
-                await self._copy_config(category, old_name, new_name, new_classname)
-            else:
-                await self._logger(self.strings["_log_doc_migrated_db_not_found"].format(category, old_name, new_name))
-        elif category == "config":
-            await self._migrate_cfg_values(migration, category, new_name, new_classname)
-        return
-
-    async def _get_names(self, migration):
-        old_name = None
-        old_classname = None
-        new_name = None
-        new_classname = None
-        for category in self.changes[migration]:
-            if category == "classname":
-                old_classname, new_classname = await self._get_changes(self.changes[migration][category].items())
-            elif category == "name":
-                old_name, new_name = await self._get_changes(self.changes[migration][category].items())
-        if not new_name:
-            new_name = self._name
-        if not new_classname:
-            new_classname = self._classname
-        return old_classname, new_classname, old_name, new_name
-
-    @staticmethod
-    async def _get_changes(changes):
-        old_value = None
-        new_value = None
-        for state, value in changes:
-            if state == "old":
-                old_value = value
-            elif state == "new":
-                new_value = value
-        return old_value, new_value
-
-    async def _migrate_cfg_values(self, migration, category, new_name, new_classname):
-        if new_classname in self._db.keys() and "__config__" in self._db[new_classname]:
-            if configdb := self._db[new_classname]["__config__"]:
-                for cnfg_key in self.changes[migration][category]:
-                    old_value, new_value = await self._get_changes(self.changes[migration][category][cnfg_key].items())
-                    for key, value in configdb.items():
-                        await self._logger(f"{migration} | {category} | ({{old_value: {str(old_value)}}} `==` {{new_value: {str(value)}}}) `and` {{key: {key}}} `==` {{cnfg_key: {cnfg_key}}}", self.debug, True)
-                        if value == old_value and key == cnfg_key:
-                            dynamic = False
-                            self._db[new_classname]["__config__"][cnfg_key] = new_value
-                            if (
-                                self.modules.lookup(new_name)
-                                and self.modules.lookup(new_name).config
-                                and key in self.modules.lookup(new_name).config
-                            ):
-                                self.modules.lookup(new_name).config[cnfg_key] = new_value
-                                dynamic = True
-                            await self._logger(self.strings["_log_doc_migrated_cfgv_val"].format(dynamic, value, new_value))
-        return
-
-    async def _copy_config(self, category, old_name, new_name, name):
-        if self._db[new_name]:
-            temp_db = {new_name: copy.deepcopy(self._db[new_name])}
-            self._db[new_name].clear()
-            self._db[new_name] = await self._deep_dict_merge(temp_db[new_name], self._db[old_name])
-            temp_db.pop(new_name)
-        else:
-            self._db[new_name] = copy.deepcopy(self._db[old_name])
-        self._db.pop(old_name)
-        await self._logger(self.strings["_log_doc_migrated_db"].format(category, old_name, new_name, self._db[new_name]))
-        if category == "classname":
-            await self._make_dynamic_config(name, new_name)
-        if category == "name":
-            await self._make_dynamic_config(new_name, name)
-        return
-
-    async def _deep_dict_merge(self, dct1, dct2, override=True) -> dict:
-        merged = copy.deepcopy(dct1)
-        for k, v2 in dct2.items():
-            if k in merged:
-                v1 = merged[k]
-                if isinstance(v1, dict) and isinstance(v2, collections.abc.Mapping):
-                    merged[k] = await self._deep_dict_merge(v1, v2, override)
-                elif isinstance(v1, list) and isinstance(v2, list):
-                    merged[k] = v1 + v2
-                elif override:
-                    merged[k] = copy.deepcopy(v2)
-            else:
-                merged[k] = copy.deepcopy(v2)
-        return merged
-
-    async def _make_dynamic_config(self, new_name, new_classname=None):
-        if new_classname is None:
-            return
-        if "__config__" in self._db[new_classname].keys():
-            for key, value in self._db[new_classname]["__config__"].items():
-                if (
-                    self.modules.lookup(new_name)
-                    and self.modules.lookup(new_name).config
-                    and key in self.modules.lookup(new_name).config
-                ):
-                    self.modules.lookup(new_name).config[key] = value
-                else:
-                    await self._logger(self.strings["_log_doc_no_dynamic_migration"].format(key, value))
-        return
-
-    async def _set_hash(self, chash):
-        self.hashs.append(chash)
-        self._db.set(self._classname, "hashs", self.hashs)
-        return
-
-    async def _set_missing_hashs(self):
-        for migration in self.changes:
-            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
-            if chash not in self.hashs:
-                await self._set_hash(chash)
-
-    async def _logger(self, log_string, debug: bool = False, debug_msg: bool = False):
-        if not debug_msg and self.log:
-            return logger.info(log_string)
-        if debug and debug_msg:
-            return logger.info(log_string)
-        return logger.debug(log_string)
