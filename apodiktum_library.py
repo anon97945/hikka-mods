@@ -1,4 +1,4 @@
-__version__ = (0, 1, 73)
+__version__ = (0, 2, 2)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -18,22 +18,22 @@ __version__ = (0, 1, 73)
 __hikka_min__ = (1, 2, 11)
 # requires: emoji
 
+import ast
 import asyncio
 import collections
 import contextlib
 import copy
 import hashlib
 import html
-import itertools
 import logging
 import re
-from types import ModuleType
-from typing import Union
+from datetime import datetime, timedelta
+from typing import Any, Optional, Union
 
 import aiohttp
 import emoji
+import grapheme
 import requests
-import telethon
 from telethon.errors import UserNotParticipantError
 from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import Channel, Chat, Message, MessageEntityUrl, User
@@ -60,6 +60,16 @@ class ApodiktumLib(loader.Library):
         "_cfg_cst_auto_migrate": "Ob definierte Änderungen beim Start automatisch migriert werden sollen.",
         "_cfg_doc_log_channel": "Ob Debug als Info im Logger-Kanal protokolliert werden soll.",
         "_cfg_doc_log_debug": "Ob deklarierte Debug-Meldungen als Info im Logger-Kanal protokolliert werden sollen.",
+    }
+
+    strings_ru = {
+    }
+
+    all_strings = {
+        "strings": strings,
+        "strings_en": strings,
+        "strings_de": strings_de,
+        "strings_ru": strings_ru,
     }
 
     def __init__(self):
@@ -318,30 +328,30 @@ class ApodiktumUtils(loader.Module):
         self,
         level: int,
         name: str,
-        message: str,
+        text: str,
         debug_msg: bool = False,
     ):
         """
         Logs a message to the console
         :param level: The logging level
         :param name: The name of the module
-        :param message: The message to log
+        :param text: The text to log
         :param debug_msg: Whether to log the message as a defined debug message
         :return: None
         """
         apo_logger = logging.getLogger(name)
         if (not debug_msg and self.lib.config["log_channel"] and level == logging.DEBUG) or (debug_msg and self.lib.config["log_debug"] and level == logging.DEBUG):
-            return apo_logger.info(message)
+            return apo_logger.info(text)
         if level == logging.CRITICAL:
-            return apo_logger.critical(message)
+            return apo_logger.critical(text)
         if level == logging.ERROR:
-            return apo_logger.error(message)
+            return apo_logger.error(text)
         if level == logging.WARNING:
-            return apo_logger.warning(message)
+            return apo_logger.warning(text)
         if level == logging.INFO:
-            return apo_logger.info(message)
+            return apo_logger.info(text)
         if level == logging.DEBUG:
-            return apo_logger.debug(message)
+            return apo_logger.debug(text)
         return None
 
     async def is_member(
@@ -445,6 +455,241 @@ class ApodiktumUtils(loader.Module):
         full_chat = await self._client(GetFullChannelRequest(channel=user_id))
         if full_chat.full_chat.linked_chat_id:
             return chat_id == int(full_chat.full_chat.linked_chat_id)
+
+    async def get_user_id(self, message: Message) -> int:
+        """
+        Gets the user ID from a message
+        :param message: Message
+        :return: User ID
+        """
+        try:
+            user_id = (
+                getattr(message, "sender_id", False)
+                or message.action_message.action.users[0]
+            )
+        except Exception:  # skipcq: PYL-W0703
+            try:
+                user_id = message.action_message.action.from_id.user_id
+            except Exception:  # skipcq: PYL-W0703
+                try:
+                    user_id = message.from_id.user_id
+                except Exception:  # skipcq: PYL-W0703
+                    try:
+                        user_id = message.action_message.from_id.user_id
+                    except Exception:  # skipcq: PYL-W0703
+                        try:
+                            user_id = message.action.from_user.id
+                        except Exception:  # skipcq: PYL-W0703
+                            try:
+                                user_id = (await message.get_user()).id
+                            except Exception:  # skipcq: PYL-W0703
+                                self.log(logging.DEBUG, self._libclassname, f"Can't extract entity from event {type(message)}")
+                                return
+        user_id = (
+            int(str(user_id)[4:]) if str(user_id).startswith("-100") else int(user_id)
+        )
+        return user_id
+
+    @staticmethod
+    def validate_bool(s: Any) -> bool:
+        """
+        Validates a boolean value
+        :param s: String
+        :return: True if the string represents a boolean, False otherwise
+        """
+        try:
+            loader.validators.Integer().validate(s)
+            return True
+        except loader.validators.ValidationError:
+            return False
+
+    @staticmethod
+    def validate_integer(
+        s: Any,
+        digits: Optional[int] = None,
+        minimum: Optional[int] = None,
+        maximum: Optional[int] = None,
+    ) -> bool:
+        """
+        Checks if the string represents an integer
+        :param s: String to check
+        :param digits: Number of digits
+        :param minimum: Minimum value
+        :param maximum: Maximum value
+        :return: True if the string represents an integer, False otherwise
+        """
+        kwargs = {}
+        if digits is not None:
+            kwargs["digits"] = digits
+        if minimum is not None:
+            kwargs["minimum"] = minimum
+        if maximum is not None:
+            kwargs["maximum"] = maximum
+        try:
+            loader.validators.Integer().validate(s, **kwargs)
+            return True
+        except loader.validators.ValidationError:
+            return False
+
+    @staticmethod
+    def validate_string(
+        s: Any,
+        minimum: Optional[int] = None,
+        maximum: Optional[int] = None,
+        length: Optional[int] = None,
+    ) -> bool:
+        """
+        Checks if the string represents a string
+        :param s: String to check
+        :param minimum: Minimum length
+        :param maximum: Maximum length
+        :param length: Exact length
+        :return: True if the string represents a string, False otherwise
+        """
+        try:
+            if not isinstance(length, int):
+                if isinstance(minimum, int) and len(list(grapheme.graphemes(str(s)))) < minimum:
+                    return False
+                if isinstance(maximum, int) and len(list(grapheme.graphemes(str(s)))) > maximum:
+                    return False
+            elif isinstance(length, int) and len(list(grapheme.graphemes(str(s)))) != length:
+                return False
+            return True
+        except TypeError:
+            return False
+
+    @staticmethod
+    def validate_float(
+        s: Any,
+        minimum: Optional[float] = None,
+        maximum: Optional[float] = None,
+    ) -> bool:
+        """
+        Checks if the string represents a float
+        :param s: String to check
+        :param minimum: Minimum value
+        :param maximum: Maximum value
+        :return: True if the string represents a float, False otherwise
+        """
+        kwargs = {}
+        if minimum is not None:
+            kwargs["minimum"] = minimum
+        if maximum is not None:
+            kwargs["maximum"] = maximum
+        try:
+            loader.validators.Float().validate(s, **kwargs)
+            return True
+        except loader.validators.ValidationError:
+            return False
+
+    @staticmethod
+    def validate_datetime(
+        s: Any,
+        dt_format: str = "%Y-%m-%d"
+    ) -> bool:
+        """
+        Checks if the string represents a date
+        :param s: String to check
+        :param dt_format: Date/Time/Datetime format -> https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
+        :return: True if the string represents a date, False otherwise
+        """
+        try:
+            datetime.strptime(s, dt_format)
+            return True
+        except (ValueError, TypeError):
+            return False
+
+    @staticmethod
+    def validate_tgid(s: Any) -> bool:
+        """
+        Checks if the string represents a Telegram ID
+        :param s: String to check
+        :return: True if the string represents a Telegram ID, False otherwise
+        """
+        try:
+            loader.validators.TelegramID().validate(s)
+            return True
+        except loader.validators.ValidationError:
+            return False
+
+    @staticmethod
+    def validate_none(s: Any) -> bool:
+        """
+        Checks if the string represents a None value
+        :param s: String to check
+        :return: True if the string represents a None value, False otherwise
+        """
+        try:
+            return s in {None, False, ""}
+        except TypeError:
+            return False
+
+    @staticmethod
+    def validate_regex(
+        s: Any,
+        regex: str,
+    ) -> bool:
+        """
+        Checks if the string matches the regex
+        :param s: String to check
+        :param regex: Regex to match
+        :return: True if the string matches the regex, False otherwise
+        """
+        try:
+            return re.match(regex, s) is not None
+        except TypeError:
+            return False
+
+    @staticmethod
+    def validate_dict(s: Any) -> bool:
+        """
+        Checks if the string represents a dict
+        :param s: String to check
+        :return: True if the string represents a dict, False otherwise
+        """
+        try:
+            return isinstance(ast.literal_eval(s), dict)
+        except SyntaxError:
+            return False
+
+    @staticmethod
+    def validate_list(s: Any) -> bool:
+        """
+        Checks if the string represents a list
+        :param s: String to check
+        :return: True if the string represents a list, False otherwise
+        """
+        try:
+            return isinstance(ast.literal_eval(s), list)
+        except SyntaxError:
+            return False
+
+    @staticmethod
+    def validate_tuple(s: Any) -> bool:
+        """
+        Checks if the string represents a list
+        :param s: String to check
+        :return: True if the string represents a list, False otherwise
+        """
+        try:
+            return isinstance(ast.literal_eval(s), tuple)
+        except SyntaxError:
+            return False
+
+    @staticmethod
+    def validate_email(s: Any) -> bool:
+        """
+        Checks if the string represents an email
+        :param s: String to check
+        :return: True if the string represents an email, False otherwise
+        """
+        try:
+            pat = r"^[a-zA-Z0-9-_]+@[a-zA-Z0-9]+\.[a-z]{1,3}$"
+            if re.match(pat, s):
+                return True
+            return False
+        except TypeError:
+            return False
 
     @staticmethod
     def get_entityurls(message: Message) -> list:
@@ -600,7 +845,10 @@ class ApodiktumUtils(loader.Module):
         return html.escape(text)
 
     @staticmethod
-    def humanbytes(num: int, decimal: int = 2) -> str:
+    def humanbytes(
+        num: int,
+        decimal: int = 2
+    ) -> str:
         """
         Formats a number to a human readable string
         :param num: Bytes int to format
@@ -614,14 +862,38 @@ class ApodiktumUtils(loader.Module):
         return f"{num:.{decimal}f} Yi{suffix}"
 
     @staticmethod
-    def tdstring_to_seconds(tdstr: str) -> int:
-        parts = tdstr.strip(' ').split(' ')
-        d = int(parts[0]) if len(parts) > 1 else 0
-        s = sum(x * y for x, y in zip(map(int, parts[-1].split(':')), (3600, 60, 1)))
-        return 86400*d + s
+    def tdstring_to_seconds(
+        tdstr: str,
+        rev_order: bool = False,
+    ) -> int:
+        """
+        Convert timedelta string to seconds
+        :param tdstr: timedelta string
+        :param reversed: if True s:m:h -> h:m:s
+        :return: seconds as int or None if timedelta string is invalid
+        """
+        try:
+            if not isinstance(tdstr, str):
+                tdstr = str(tdstr)
+            if isinstance(tdstr, timedelta):
+                return int(tdstr.total_seconds())
+            if not isinstance(tdstr, str):
+                tdstr = str(tdstr)
+            parts = tdstr.strip(' ').split(' ')
+            d = int(parts[0]) if len(parts) > 1 else 0
+            if rev_order:
+                s = sum(x * y for x, y in zip(map(int, parts[-1].split(':')), (1, 60, 3600)))
+            else:
+                s = sum(x * y for x, y in zip(map(int, parts[-1].split(':')), (3600, 60, 1)))
+            return 86400 * d + s
+        except TypeError:
+            return None
 
     @staticmethod
-    def time_formatter(seconds: int, short: bool = False) -> str:
+    def time_formatter(
+        seconds: int,
+        short: bool = False
+    ) -> str:
         """
         Inputs time in seconds, to get beautified time,
         as string
@@ -661,84 +933,16 @@ class ApodiktumUtils(loader.Module):
                 result += f"{v_m}{string}, " if short else f"{v_m} {string}, "
         return result[:-2]
 
-    def get_uptime(self, short: bool = True) -> str:
+    def get_uptime(
+        self,
+        short: bool = True
+    ) -> str:
         """
         Get uptime of bot
         :param short: if True, will return short time format
         :return: uptime
         """
         return self.time_formatter(utils.uptime(), short)
-
-    async def get_attrs(
-        self,
-        module: loader.Module,
-        message,
-        fakedb
-    ):
-        self.module = module
-        reply = await message.get_reply_message()
-        return {
-            **{
-                "message": message,
-                "client": self.module.client,
-                "reply": reply,
-                "r": reply,
-                **self.get_sub(telethon.tl.types),
-                **self.get_sub(telethon.tl.functions),
-                "event": message,
-                "chat": message.to_id,
-                "telethon": telethon,
-                "utils": utils,
-                "main": main,
-                "loader": loader,
-                "f": telethon.tl.functions,
-                "c": self._client,
-                "m": message,
-                "lookup": self.module.lookup,
-                "self": self.module,
-            },
-            **(
-                {
-                    "db": self.module.db,
-                }
-                if self.module.db.get(main.__name__, "enable_db_eval", False)
-                else {
-                    "db": fakedb,
-                }
-            ),
-        }
-
-    def get_sub(
-        self,
-        it,
-        _depth: int = 1
-    ) -> dict:
-        """Get all callable capitalised objects in an object recursively, ignoring _*"""
-        return {
-            **dict(
-                filter(
-                    lambda x: x[0][0] != "_"
-                    and x[0][0].upper() == x[0][0]
-                    and callable(x[1]),
-                    it.__dict__.items(),
-                )
-            ),
-            **dict(
-                itertools.chain.from_iterable(
-                    [
-                        self.get_sub(y[1], _depth + 1).items()
-                        for y in filter(
-                            lambda x: x[0][0] != "_"
-                            and isinstance(x[1], ModuleType)
-                            and x[1] != it
-                            and x[1].__package__.rsplit(".", _depth)[0]
-                            == "telethon.tl",
-                            it.__dict__.items(),
-                        )
-                    ]
-                )
-            ),
-        }
 
 
 class ApodiktumUtilsBeta(loader.Module):

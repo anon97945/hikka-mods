@@ -1,5 +1,24 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 1.0.3
+### 📦 apodiktum_library:
+#### Utils:
+- library utils | added get_user_id
+- library utils | added validate_bool
+- library utils | added validate_datetime
+- library utils | added validate_dict
+- library utils | added validate_email
+- library utils | added validate_float
+- library utils | added validate_integer
+- library utils | added validate_list
+- library utils | added validate_none
+- library utils | added validate_regex
+- library utils | added validate_string
+- library utils | added validate_tgid
+- library utils | added validate_tuple
+- library utils | removed get_attrs
+- library utils | removed get_sub
+
 ## 🆕 Version 1.0.2
 ### 📦 apodiktum_library:
 #### General:
