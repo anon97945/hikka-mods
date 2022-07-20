@@ -1,4 +1,4 @@
-__version__ = (0, 1, 19)
+__version__ = (0, 1, 20)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -194,7 +194,7 @@ class ApodiktumAutoReactMod(loader.Module):
         reactions_chance = self.config["reactions_chance"]
 
         for reaction in reactions:
-            userid, chatid, *emojis = reaction.split("|")
+            userid, chatid, *emoji_list = reaction.split("|")
             if userid == "all" and chatid == "global":
                 return
             if (
@@ -204,7 +204,7 @@ class ApodiktumAutoReactMod(loader.Module):
                 if not await self._reactions_chance(reactions_chance, message):
                     return
                 if utils.get_chat_id(message) in self.config["shuffle_reactions"]:
-                    emoji_list = random.sample(emojis, len(emojis))
+                    emoji_list = random.sample(emoji_list, len(emoji_list))
                 await self._delay(chatid, userid)
                 for emoji_reaction in emoji_list:
                     if await self._react_message(message, emoji_reaction, chatid):

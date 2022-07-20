@@ -2,6 +2,19 @@
 
 ## 🆕 Version 1.0.2
 ### 📦 apodiktum_library:
+#### General:
+- deepsource fix
+- fixed logger
+
+#### Utils:
+- fixed keyerror in get_str() when db has no `hikka.translations`
+- library utils | added get_all_urls
+
+### 📃 module updates:
+- autoreact | fixed `local variable 'emoji_list' referenced before assignment`
+
+## 🆕 Version 1.0.2
+### 📦 apodiktum_library:
 #### Utils:
 - library utils | added get_uptime
 - library utils | added tdstring_to_seconds

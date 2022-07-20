@@ -1,4 +1,4 @@
-__version__ = (0, 1, 67)
+__version__ = (0, 1, 73)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -96,10 +96,10 @@ class ApodiktumLib(loader.Library):
             ),
         )
         if self.config["log_channel"]:
-            logging.getLogger(self.__class__.__name__).info("Apodiktum Library v%s.%s.%s loading...", *__version__)
+            logging.getLogger(self.__class__.__name__).info(f"Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} loading...")
         else:
-            logging.getLogger(self.__class__.__name__).debug("Apodiktum Library v%s.%s.%s loading...", *__version__)
-        logging.debug(f"Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} started for {self.client} | {self.client.tg_id}")
+            logging.getLogger(self.__class__.__name__).debug(f"Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} loading...")
+        logging.getLogger(self.__class__.__name__).debug(f"Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} started for {self.client} | {self.client.tg_id}")
         self.utils = ApodiktumUtils(self)
         self.__controllerloader = ApodiktumControllerLoader(self)
         self.__internal = ApodiktumInternal(self)
@@ -296,7 +296,7 @@ class ApodiktumUtils(loader.Module):
         """
         base_strings = "strings"
         default_lang = None
-        if self._db["hikka.translations"] and self._db["hikka.translations"]["lang"]:
+        if "hikka.translations" in self._db and "lang" in self._db["hikka.translations"]:
             default_lang = self._db["hikka.translations"]["lang"]
         languages = {base_strings: all_strings[base_strings]}
         for lang, strings in all_strings.items():
@@ -474,6 +474,20 @@ class ApodiktumUtils(loader.Module):
         URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:\'\".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))"""
         return re.findall(URL_REGEX, text)
 
+    def get_all_urls(self, text: str, rem_duplicates: bool = False) -> str:
+        """
+        Get all urls from text, search regex link types and href. This might double urls.
+        :param text: str
+        :param rem_duplicates: True to remove duplicates from the list
+        :return: list of urls
+        """
+        text = self.unescape_html(text)
+        urls = []
+        urls = self.get_urls(text) + self.get_href_urls(text)
+        if rem_duplicates:
+            urls = self.rem_duplicates_list(urls)
+        return urls
+
     @staticmethod
     def rem_duplicates_list(s: list) -> list:
         """
@@ -589,7 +603,7 @@ class ApodiktumUtils(loader.Module):
     def humanbytes(num: int, decimal: int = 2) -> str:
         """
         Formats a number to a human readable string
-        :param num: The number to format
+        :param num: Bytes int to format
         :return: The formatted number
         """
         suffix = "B"
@@ -897,7 +911,7 @@ class ApodiktumInternal(loader.Module):
                             self._db["LoaderMod"]["token"] = None
                         return await self._send_stats_handler(url, retry=True)
                 except Exception as exc:  # skipcq: PYL-W0703
-                    self.utils.log(logging.DEBUG, self._libclassname, "Failed to send stats: %s", exc)
+                    self.utils.log(logging.DEBUG, self._libclassname, f"Failed to send stats: {exc}")
 
 
 class ApodiktumMigrator(loader.Module):
