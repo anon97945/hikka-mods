@@ -168,6 +168,7 @@ class ApodiktumLangReplierMod(loader.Module):
             "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
             suspend_on_error=True,
         )
+        self.apo_lib.apodiktum_module()
         self._fw_protect = {}
         self._fw_protect_limit = 3
         self._ad = AlphabetDetector()

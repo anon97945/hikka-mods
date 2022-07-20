@@ -1,4 +1,4 @@
-__version__ = (0, 1, 62)
+__version__ = (0, 1, 65)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -82,7 +82,7 @@ class ApodiktumLib(loader.Library):
             ),
             loader.ConfigValue(
                 "log_channel",
-                False,
+                True,
                 doc=lambda: self.strings("_cfg_doc_log_channel"),
                 validator=loader.validators.Boolean(),
             ),
@@ -120,9 +120,8 @@ class ApodiktumLib(loader.Library):
 
         self.utils.log(logging.DEBUG, self.__class__.__name__, "Apodiktum Library v{}.{}.{} successfully loaded.".format(*__version__))
 
-    def _apodiktum_stats(self):
+    def apodiktum_module(self):
         """
-        !do not use this method directly!
         Sets Apodiktum Library init module to Apodiktum Module
         :return: None
         """
@@ -183,7 +182,7 @@ class ApodiktumControllerLoader(loader.Module):
         """
         Initializes the Apo-LibController downnload and load
         """
-        self.utils.log(logging.DEBUG, self._libclassname, "Attempting to load ApoLibController from GitHub.")
+        self.utils.log(logging.DEBUG, self._libclassname, "Attempting to load ApoLibController from GitHub.", debug_msg=True)
         controller_loaded = await self._load_github()
         if controller_loaded:
             return controller_loaded
@@ -230,7 +229,7 @@ class ApodiktumControllerLoader(loader.Module):
         """
         while retries:
             if lib_controller := self.lib.lookup("Apo-LibController"):
-                self.utils.log(logging.DEBUG, self._libclassname, "ApoLibController found!")
+                self.utils.log(logging.DEBUG, self._libclassname, "ApoLibController found!", debug_msg=True)
                 return lib_controller
             if not getattr(self.lib.lookup("Loader"), "_fully_loaded", False):
                 retries = 1
@@ -243,7 +242,8 @@ class ApodiktumControllerLoader(loader.Module):
                     logging.DEBUG,
                     self._libclassname,
                     f"ApoLibController not found, retrying in {delay} seconds..."
-                    f"\nHikka fully loaded: {getattr(self.lib.lookup('Loader'), '_fully_loaded', False)}"
+                    f"\nHikka fully loaded: {getattr(self.lib.lookup('Loader'), '_fully_loaded', False)}",
+                    debug_msg=True
                 )
             if retries == 0:
                 return False
@@ -582,6 +582,50 @@ class ApodiktumUtils(loader.Module):
         """
         return html.escape(text)
 
+    @staticmethod
+    def humanbytes(num: int, decimal: int = 2) -> str:
+        """
+        Formats a number to a human readable string
+        :param num: The number to format
+        :return: The formatted number
+        """
+        suffix="B"
+        for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
+            if abs(num) < 1024.0:
+                return f"{num:3.{decimal}f} {unit}{suffix}"
+            num /= 1024.0
+        return f"{num:.{decimal}f} Yi{suffix}"
+
+    @staticmethod
+    def time_formatter(seconds: int) -> str:
+        """
+        Inputs time in seconds, to get beautified time,
+        as string
+        :param seconds: time in seconds
+        :return: beautified time
+        """
+        result = ""
+        v_m = 0
+        remainder = seconds
+        r_ange_s = {
+            "millenia": (60 * 60 * 24 * 365 * 1000),
+            "centuries": (60 * 60 * 24 * 365 * 100),
+            "decades": (60 * 60 * 24 * 365 * 10),
+            "years": (60 * 60 * 24 * 365),
+            "month": (60 * 60 * 24 * 30),
+            "weeks": (60 * 60 * 24 * 7),
+            "days": (60 * 60 * 24),
+            "hours": (60 * 60),
+            "minutes": 60,
+            "seconds": 1
+        }
+        for age, divisor in r_ange_s.items():
+            v_m, remainder = divmod(remainder, divisor)
+            v_m = int(v_m)
+            if v_m != 0:
+                result += f"{v_m} {age}, "
+        return result[:-2]
+
     async def get_attrs(
         self,
         module: loader.Module,
@@ -771,11 +815,11 @@ class ApodiktumInternal(loader.Module):
         Send anonymous stats to Hikka
         :return: None
         """
-        await asyncio.sleep(5)
+        await asyncio.sleep(8)
         urls = ["https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py", "https://raw.githubusercontent.com/anon97945/hikka-mods/master/total_users.py"]
         if not getattr(self, "apodiktum_module", False):
             urls.append("https://raw.githubusercontent.com/anon97945/hikka-mods/master/ApoLib_others.py")
-            self.apodiktum_module = False
+        self.apodiktum_module = False
         for url in urls:
             asyncio.ensure_future(self.__send_stats_handler(url))
 

@@ -257,6 +257,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
             suspend_on_error=True,
         )
+        self.apo_lib.apodiktum_module()
         self._pt_task = asyncio.ensure_future(self._global_queue_handler())
 
     async def on_unload(self):

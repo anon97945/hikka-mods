@@ -1,7 +1,18 @@
-# 📝 Apodiktum Changelog:
+# 📝 Apodiktum Modules Changelog:
+
+## 🆕 Version 1.0.1
+### 📦 apodiktum_library:
+#### General:
+- ControllerLoader Log set as debug_msg
+- fixed config
+- reworked hikka anonymous stats
+- reworked logger
+
+#### Utils:
+- library utils | added humanbytes
+- library utils | added time_formatter
 
 ## 🆕 Version 1.0.0
-
 ### ℹ️ General:
 - scoped to hikka_min 1.2.11
 - deepsource fixes

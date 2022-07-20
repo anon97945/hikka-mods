@@ -162,6 +162,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
             "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
             suspend_on_error=True,
         )
+        self.apo_lib.apodiktum_module()
         self._init_heroku_vars()
 
     def _init_heroku_vars(self):

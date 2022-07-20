@@ -191,6 +191,7 @@ class ApodiktumTTSMod(loader.Module):
             "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
             suspend_on_error=True,
         )
+        self.apo_lib.apodiktum_module()
 
     async def cttscmd(self, message: Message):
         """

@@ -74,6 +74,7 @@ class ApodiktumLibControllerMod(loader.Module):
             "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
             suspend_on_error=True,
         )
+        self.apo_lib.apodiktum_module()
         self._lib_classname = "ApodiktumLib"
         self._lib_db = self._db[self._lib_classname]
         self._chats_db = self._lib_db.setdefault("chats", {})
