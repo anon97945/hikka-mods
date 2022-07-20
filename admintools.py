@@ -1,4 +1,4 @@
-__version__ = (1, 0, 15)
+__version__ = (1, 0, 16)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,6 +17,7 @@ __version__ = (1, 0, 15)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
+# requires: emoji
 
 import asyncio
 import contextlib
@@ -24,6 +25,7 @@ import logging
 from datetime import timedelta
 from typing import Union
 
+import emoji  # skipcq: PY-W2000
 from aiogram.types import ChatPermissions
 from aiogram.utils.exceptions import (BotKicked, ChatNotFound,
                                       MessageCantBeDeleted,
@@ -616,7 +618,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                  or not chat.admin_rights)
         ):
             return
-        usertag = self.apo_lib.utils.get_tag(user, True)
+        usertag = await self.apo_lib.utils.get_tag(user, True)
 
         if await self.apo_lib.utils.is_linkedchannel(chat.id, user.id, message):
             return
@@ -648,7 +650,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                  or not chat.admin_rights)
         ):
             return
-        usertag = self.apo_lib.utils.get_tag(user, True)
+        usertag = await self.apo_lib.utils.get_tag(user, True)
         link = await self.apo_lib.utils.get_invite_link(chat)
 
         if not await self.apo_lib.utils.is_member(chat.id, user.id):
@@ -681,8 +683,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         if message.is_private or chatid_str not in gl:
             return
         logchan_id = int(gl_sets[chatid_str].get("logchannel"))
-        chat_tag = self.apo_lib.utils.get_tag(chat, True)
-        user_tag = self.apo_lib.utils.get_tag(user, True)
+        chat_tag = await self.apo_lib.utils.get_tag(chat, True)
+        user_tag = await self.apo_lib.utils.get_tag(user, True)
         link = (
             f"Chat: {chat_tag} | #ID_{chat.id}"
             + f"\nUser: {user_tag} | #ID_{user.id}"

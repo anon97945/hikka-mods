@@ -1,4 +1,4 @@
-__version__ = (0, 0, 12)
+__version__ = (0, 0, 13)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,9 +17,11 @@ __version__ = (0, 0, 12)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
+# requires: emoji
 
 import logging
 
+import emoji  # skipcq: PY-W2000
 from telethon.tl.types import Message
 
 from .. import loader, utils

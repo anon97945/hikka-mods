@@ -1,4 +1,4 @@
-__version__ = (0, 1, 34)
+__version__ = (0, 1, 35)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,6 +17,7 @@ __version__ = (0, 1, 34)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
+# requires: emoji
 
 # █ █ ▀ █▄▀ ▄▀█ █▀█ ▀    ▄▀█ ▀█▀ ▄▀█ █▀▄▀█ ▄▀█
 # █▀█ █ █ █ █▀█ █▀▄ █ ▄  █▀█  █  █▀█ █ ▀ █ █▀█
@@ -33,6 +34,7 @@ import logging
 import time
 from typing import Union
 
+import emoji  # skipcq: PY-W2000
 from telethon.tl.functions.contacts import BlockRequest, UnblockRequest
 from telethon.tl.functions.messages import (DeleteHistoryRequest,
                                             ReportSpamRequest)

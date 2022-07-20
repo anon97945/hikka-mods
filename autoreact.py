@@ -1,4 +1,4 @@
-__version__ = (0, 1, 18)
+__version__ = (0, 1, 19)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,11 +17,13 @@ __version__ = (0, 1, 18)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
+# requires: emoji
 
 import asyncio
 import logging
 import random
 
+import emoji  # skipcq: PY-W2000
 from telethon.errors import ReactionInvalidError
 from telethon.tl.types import Message
 
@@ -202,10 +204,10 @@ class ApodiktumAutoReactMod(loader.Module):
                 if not await self._reactions_chance(reactions_chance, message):
                     return
                 if utils.get_chat_id(message) in self.config["shuffle_reactions"]:
-                    emojis = random.sample(emojis, len(emojis))
+                    emoji_list = random.sample(emojis, len(emojis))
                 await self._delay(chatid, userid)
-                for emoji in emojis:
-                    if await self._react_message(message, emoji, chatid):
+                for emoji_reaction in emoji_list:
+                    if await self._react_message(message, emoji_reaction, chatid):
                         return
 
     async def _delay(self, chatid, userid):
@@ -243,18 +245,18 @@ class ApodiktumAutoReactMod(loader.Module):
                 return False
         return True
 
-    async def _react_message(self, message, emoji, chatid):
+    async def _react_message(self, message, emoji_reaction, chatid):
         try:
-            await message.react(emoji)
+            await message.react(emoji_reaction)
             return True
         except ReactionInvalidError:
             if self.config["raise_error"]:
-                logger.info(f"ReactionInvalidError: {emoji} in chat {chatid}")
+                logger.info(f"ReactionInvalidError: {emoji_reaction} in chat {chatid}")
             return False
         except Exception as exc:  # skipcq: PYL-W0703
             if self.config["raise_error"]:
                 if "PREMIUM_ACCOUNT_REQUIRED" in str(exc):
-                    logger.info(f"PREMIUM_ACCOUNT_REQUIRED: {emoji} in chat {chatid}")
+                    logger.info(f"PREMIUM_ACCOUNT_REQUIRED: {emoji_reaction} in chat {chatid}")
                 else:
                     logger.info(f"Error: {exc}")
             return False

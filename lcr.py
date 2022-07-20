@@ -17,10 +17,12 @@ __version__ = (0, 0, 28)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
+# requires: emoji
 
 import asyncio
 import logging
 
+import emoji  # skipcq: PY-W2000
 from telethon import events
 from telethon.tl.types import Message
 

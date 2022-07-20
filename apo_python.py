@@ -1,4 +1,4 @@
-__version__ = (0, 0, 4)
+__version__ = (0, 0, 5)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -22,12 +22,14 @@ __version__ = (0, 0, 4)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
+# requires: emoji
 
 import contextlib
 import logging
 import os
 from traceback import format_exc
 
+import emoji  # skipcq: PY-W2000
 from meval import meval
 from telethon.errors.rpcerrorlist import MessageIdInvalidError
 from telethon.tl.types import Message

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 63)
+__version__ = (0, 0, 64)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,10 +17,11 @@ __version__ = (0, 0, 63)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
-# requires: googletrans==4.0.0-rc1
+# requires: googletrans==4.0.0-rc1 emoji
 
 import logging
 
+import emoji  # skipcq: PY-W2000
 import googletrans
 from telethon.tl.types import Message
 

@@ -1,4 +1,4 @@
-__version__ = (1, 0, 22)
+__version__ = (1, 0, 23)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,13 +17,14 @@ __version__ = (1, 0, 22)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
-# requires: numpy scipy noisereduce soundfile pyrubberband
+# requires: numpy scipy noisereduce soundfile pyrubberband emoji
 
 import logging
 import os
 import subprocess
 from io import BytesIO
 
+import emoji  # skipcq: PY-W2000
 import noisereduce as nr
 import numpy as np
 import pyrubberband

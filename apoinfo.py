@@ -1,4 +1,4 @@
-__version__ = (0, 1, 21)
+__version__ = (0, 1, 23)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -18,9 +18,11 @@ __version__ = (0, 1, 21)
 # scope: inline
 # scope: hikka_only
 # scope: hikka_min 1.2.10
+# requires: emoji
 
 import logging
 
+import emoji  # skipcq: PY-W2000
 import git
 from telethon.tl.types import Message
 from telethon.utils import get_display_name
@@ -294,7 +296,7 @@ class ApodiktumInfoMod(loader.Module):
         build = f'<a href="https://github.com/hikariatama/Hikka/commit/{ver}">#{ver[:8]}</a>'  # fmt: skip
         prefix = f"«<code>{utils.escape_html(self.get_prefix())}</code>»"
         platform = utils.get_named_platform()
-        uptime = utils.formatted_uptime()
+        uptime = self.apo_lib.utils.get_uptime(short=True)
 
         return (
             self.config["custom_message"].format(

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 21)
+__version__ = (0, 0, 22)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,12 +17,13 @@ __version__ = (0, 0, 21)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
-# requires: pygments requests
+# requires: pygments requests emoji
 
 import logging
 import os
 from io import BytesIO
 
+import emoji  # skipcq: PY-W2000
 import pygments
 from pygments.formatters import ImageFormatter
 from pygments.lexers import Python3Lexer

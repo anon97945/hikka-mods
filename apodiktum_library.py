@@ -1,4 +1,4 @@
-__version__ = (0, 1, 65)
+__version__ = (0, 1, 67)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -14,7 +14,9 @@ __version__ = (0, 1, 65)
 # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
 
 # meta developer: @apodiktum_modules
+
 __hikka_min__ = (1, 2, 11)
+# requires: emoji
 
 import asyncio
 import collections
@@ -97,7 +99,7 @@ class ApodiktumLib(loader.Library):
             logging.getLogger(self.__class__.__name__).info("Apodiktum Library v%s.%s.%s loading...", *__version__)
         else:
             logging.getLogger(self.__class__.__name__).debug("Apodiktum Library v%s.%s.%s loading...", *__version__)
-        logging.debug("Apodiktum Library v{}.{}.{} started for {} | {}".format(*__version__, self.client, self.client.tg_id))
+        logging.debug(f"Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} started for {self.client} | {self.client.tg_id}")
         self.utils = ApodiktumUtils(self)
         self.__controllerloader = ApodiktumControllerLoader(self)
         self.__internal = ApodiktumInternal(self)
@@ -118,7 +120,7 @@ class ApodiktumLib(loader.Library):
 
         self._acl_task = asyncio.ensure_future(self.__controllerloader.ensure_controller())
 
-        self.utils.log(logging.DEBUG, self.__class__.__name__, "Apodiktum Library v{}.{}.{} successfully loaded.".format(*__version__))
+        self.utils.log(logging.DEBUG, self.__class__.__name__, f"Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} successfully loaded.")
 
     def apodiktum_module(self):
         """
@@ -129,7 +131,7 @@ class ApodiktumLib(loader.Library):
 
     async def on_lib_update(self, _: loader.Library):
         self._acl_task.cancel()
-        self.utils.log(logging.DEBUG, self.__class__.__name__, "Apodiktum Library v{}.{}.{} was updated.".format(*__version__))
+        self.utils.log(logging.DEBUG, self.__class__.__name__, f"Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} was updated.")
         self.allmodules._apodiktum_controller_init = False
         return
 
@@ -340,6 +342,7 @@ class ApodiktumUtils(loader.Module):
             return apo_logger.info(message)
         if level == logging.DEBUG:
             return apo_logger.debug(message)
+        return None
 
     async def is_member(
         self,
@@ -589,7 +592,7 @@ class ApodiktumUtils(loader.Module):
         :param num: The number to format
         :return: The formatted number
         """
-        suffix="B"
+        suffix = "B"
         for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
             if abs(num) < 1024.0:
                 return f"{num:3.{decimal}f} {unit}{suffix}"
@@ -597,34 +600,60 @@ class ApodiktumUtils(loader.Module):
         return f"{num:.{decimal}f} Yi{suffix}"
 
     @staticmethod
-    def time_formatter(seconds: int) -> str:
+    def tdstring_to_seconds(tdstr: str) -> int:
+        parts = tdstr.strip(' ').split(' ')
+        d = int(parts[0]) if len(parts) > 1 else 0
+        s = sum(x * y for x, y in zip(map(int, parts[-1].split(':')), (3600, 60, 1)))
+        return 86400*d + s
+
+    @staticmethod
+    def time_formatter(seconds: int, short: bool = False) -> str:
         """
         Inputs time in seconds, to get beautified time,
         as string
         :param seconds: time in seconds
+        :param short: if True, will return short time format
         :return: beautified time
         """
         result = ""
         v_m = 0
         remainder = seconds
-        r_ange_s = {
-            "millenia": (60 * 60 * 24 * 365 * 1000),
-            "centuries": (60 * 60 * 24 * 365 * 100),
-            "decades": (60 * 60 * 24 * 365 * 10),
-            "years": (60 * 60 * 24 * 365),
-            "month": (60 * 60 * 24 * 30),
-            "weeks": (60 * 60 * 24 * 7),
-            "days": (60 * 60 * 24),
-            "hours": (60 * 60),
-            "minutes": 60,
-            "seconds": 1
-        }
-        for age, divisor in r_ange_s.items():
+        if short:
+            times = {
+                "y": (60 * 60 * 24 * 365),
+                "w": (60 * 60 * 24 * 7),
+                "d": (60 * 60 * 24),
+                "h": (60 * 60),
+                "m": 60,
+                "s": 1
+            }
+        else:
+            times = {
+                "millenia": (60 * 60 * 24 * 365 * 1000),
+                "centuries": (60 * 60 * 24 * 365 * 100),
+                "decades": (60 * 60 * 24 * 365 * 10),
+                "years": (60 * 60 * 24 * 365),
+                "month": (60 * 60 * 24 * 30),
+                "weeks": (60 * 60 * 24 * 7),
+                "days": (60 * 60 * 24),
+                "hours": (60 * 60),
+                "minutes": 60,
+                "seconds": 1
+            }
+        for string, divisor in times.items():
             v_m, remainder = divmod(remainder, divisor)
             v_m = int(v_m)
             if v_m != 0:
-                result += f"{v_m} {age}, "
+                result += f"{v_m}{string}, " if short else f"{v_m} {string}, "
         return result[:-2]
+
+    def get_uptime(self, short: bool = True) -> str:
+        """
+        Get uptime of bot
+        :param short: if True, will return short time format
+        :return: uptime
+        """
+        return self.time_formatter(utils.uptime(), short)
 
     async def get_attrs(
         self,
@@ -869,7 +898,6 @@ class ApodiktumInternal(loader.Module):
                         return await self._send_stats_handler(url, retry=True)
                 except Exception as exc:  # skipcq: PYL-W0703
                     self.utils.log(logging.DEBUG, self._libclassname, "Failed to send stats: %s", exc)
-
 
 
 class ApodiktumMigrator(loader.Module):

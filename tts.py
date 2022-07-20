@@ -1,4 +1,4 @@
-__version__ = (0, 1, 84)
+__version__ = (0, 1, 85)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,13 +19,14 @@ __version__ = (0, 1, 84)
 # scope: hikka_only
 # scope: hikka_min 1.2.11
 
-# requires: gtts pydub soundfile pyrubberband numpy AudioSegment wave
+# requires: gtts pydub soundfile pyrubberband numpy AudioSegment wave emoji
 
 import logging
 import os
 from io import BytesIO
 from subprocess import PIPE, Popen
 
+import emoji  # skipcq: PY-W2000
 import pyrubberband
 import soundfile
 from gtts import gTTS

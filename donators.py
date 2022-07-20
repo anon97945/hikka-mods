@@ -1,4 +1,4 @@
-__version__ = (0, 0, 18)
+__version__ = (0, 0, 19)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -15,10 +15,12 @@ __version__ = (0, 0, 18)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
+# requires: emoji
 
 import logging
 from datetime import date, timedelta
 
+import emoji  # skipcq: PY-W2000
 from telethon.tl.types import Message
 
 from .. import loader, utils

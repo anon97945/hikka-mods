@@ -1,5 +1,17 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 1.0.2
+### 📦 apodiktum_library:
+#### Utils:
+- library utils | added get_uptime
+- library utils | added tdstring_to_seconds
+- library utils | added time_formatter(short=True)
+
+### 📃 module updates:
+- all | added emoji requirement scope to ensure lib can load
+- admintools | fixed get_tag not awaited
+- apoinfo | changed get_uptime to apo_lib instead of hikka native
+
 ## 🆕 Version 1.0.1
 ### 📦 apodiktum_library:
 #### General:

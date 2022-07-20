@@ -1,4 +1,4 @@
-__version__ = (0, 0, 27)
+__version__ = (0, 0, 28)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -17,7 +17,7 @@ __version__ = (0, 0, 27)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
-# requires: heroku3
+# requires: heroku3 emoji
 
 
 import asyncio
@@ -25,6 +25,7 @@ import logging
 import math
 import os
 
+import emoji  # skipcq: PY-W2000
 import heroku3
 import requests
 from telethon.tl.types import Message
