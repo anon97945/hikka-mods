@@ -1,5 +1,10 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 1.0.4
+### 📦 apodiktum_library:
+#### Utils:
+- library utils beta | added get_buttons_as_dict
+
 ## 🆕 Version 1.0.3
 ### 📦 apodiktum_library:
 #### Utils:

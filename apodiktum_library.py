@@ -1,4 +1,4 @@
-__version__ = (0, 2, 2)
+__version__ = (0, 2, 4)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -976,6 +976,29 @@ class ApodiktumUtilsBeta(loader.Module):
         self.lib = lib
         self.utils = lib.utils
 
+    async def get_buttons_as_dict(
+        self,
+        message: Message,
+    ) -> dict:
+        """
+        Gets the buttons as a dict
+        :param message: Message
+        :return: Buttons as dict
+        """
+        chat_id = utils.get_chat_id(message)
+        button_dict = {}
+        bmsg = await message.client.get_messages(chat_id, ids=message.id)
+        buttons = bmsg.buttons
+        for row_count, row in enumerate(buttons):
+            button_dict[row_count] = {}
+            for button_count, button in enumerate(row):
+                button_dict[row_count][button_count] = {"text": button.text}
+                if button.data:
+                    button_dict[row_count][button_count]["data"] = button.data
+                if button.url:
+                    button_dict[row_count][button_count]["url"] = button.url
+        return(button_dict)
+
     def log_old(
         self,
         level: int,
@@ -1050,7 +1073,7 @@ class ApodiktumInternal(loader.Module):
                     beta_ids = list(map(int, string[string.find("[")+1:string.find("]")].split(',')))
                     if self._client.tg_id in beta_ids:
                         beta_access = True
-                break
+                    break
             return beta_access
         except Exception as exc:  # skipcq: PYL-W0703
             self.utils.log(logging.DEBUG, self._libclassname, f"Error while checking beta access: {exc}")
