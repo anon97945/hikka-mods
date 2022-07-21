@@ -1,4 +1,4 @@
-__version__ = (0, 1, 23)
+__version__ = (0, 1, 24)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -14,6 +14,8 @@ __version__ = (0, 1, 23)
 # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
 
 # meta developer: @apodiktum_modules
+# meta banner: https://i.ibb.co/N7c0Ks2/cat.jpg
+# meta pic: https://i.ibb.co/4jLTywZ/apo-modules.jpg
 
 # scope: inline
 # scope: hikka_only
@@ -40,9 +42,8 @@ class ApodiktumInfoMod(loader.Module):
     """
 
     strings = {
-        "name": "Apo Info",
-        "developer": "@anon97945",
         "_cfg_banner": "Set `True` in order to disable an media banner.",
+        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_cst_bnr": "Custom Banner.",
         "_cfg_cst_btn": "Custom button. Leave empty to remove button.",
         "_cfg_cst_frmt": "Custom fileformat for Banner.",
@@ -50,6 +51,8 @@ class ApodiktumInfoMod(loader.Module):
         "_cfg_inline_banner": "Set `True` in order to disable an inline media banner.",
         "build": "Build",
         "description": "ℹ This will not compromise any sensitive info.",
+        "developer": "@anon97945",
+        "name": "Apo Info",
         "owner": "Owner",
         "prefix": "Prefix",
         "send_info": "Send userbot info.",
@@ -64,9 +67,6 @@ class ApodiktumInfoMod(loader.Module):
 
     strings_de = {
         "_cfg_banner": "Setzen Sie `True`, um das Media Banner zu deaktivieren.",
-        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
-        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
-        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_cst_bnr": "Benutzerdefiniertes Banner.",
         "_cfg_cst_btn": "Benutzerdefinierte Schaltfläche für Informationen. Leer lassen, um die Schaltfläche zu entfernen.",
         "_cfg_cst_frmt": "Benutzerdefiniertes Dateiformat für das Banner.",
@@ -253,18 +253,6 @@ class ApodiktumInfoMod(loader.Module):
                 "auto_migrate",
                 True,
                 doc=lambda: self.strings("_cfg_cst_auto_migrate"),
-                validator=loader.validators.Boolean(),
-            ),  # for MigratorClass
-            loader.ConfigValue(
-                "auto_migrate_log",
-                True,
-                doc=lambda: self.strings("_cfg_cst_auto_migrate_log"),
-                validator=loader.validators.Boolean(),
-            ),  # for MigratorClass
-            loader.ConfigValue(
-                "auto_migrate_debug",
-                False,
-                doc=lambda: self.strings("_cfg_cst_auto_migrate_debug"),
                 validator=loader.validators.Boolean(),
             ),  # for MigratorClass
         )

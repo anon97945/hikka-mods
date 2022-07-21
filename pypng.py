@@ -14,6 +14,8 @@ __version__ = (0, 0, 22)
 # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
 
 # meta developer: @apodiktum_modules
+# meta banner: https://i.ibb.co/N7c0Ks2/cat.jpg
+# meta pic: https://i.ibb.co/4jLTywZ/apo-modules.jpg
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
@@ -58,8 +60,6 @@ class ApodiktumPyPNGMod(loader.Module):
         "no_url": "<b>No url in reply found.</b>",
         "py2png": "<b>Converting Py to PNG</b>",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
-        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
-        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
     }
 
     strings_en = {
@@ -85,18 +85,6 @@ class ApodiktumPyPNGMod(loader.Module):
                 "auto_migrate",
                 True,
                 doc=lambda: self.strings("_cfg_cst_auto_migrate"),
-                validator=loader.validators.Boolean(),
-            ),  # for MigratorClass
-            loader.ConfigValue(
-                "auto_migrate_log",
-                True,
-                doc=lambda: self.strings("_cfg_cst_auto_migrate_log"),
-                validator=loader.validators.Boolean(),
-            ),  # for MigratorClass
-            loader.ConfigValue(
-                "auto_migrate_debug",
-                False,
-                doc=lambda: self.strings("_cfg_cst_auto_migrate_debug"),
                 validator=loader.validators.Boolean(),
             ),  # for MigratorClass
         )

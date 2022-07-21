@@ -1,4 +1,4 @@
-__version__ = (0, 2, 4)
+__version__ = (0, 2, 5)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -14,6 +14,8 @@ __version__ = (0, 2, 4)
 # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
 
 # meta developer: @apodiktum_modules
+# meta banner: https://i.ibb.co/N7c0Ks2/cat.jpg
+# meta pic: https://i.ibb.co/4jLTywZ/apo-modules.jpg
 
 __hikka_min__ = (1, 2, 11)
 # requires: emoji
@@ -873,7 +875,7 @@ class ApodiktumUtils(loader.Module):
         :return: seconds as int or None if timedelta string is invalid
         """
         try:
-            if not isinstance(tdstr, str):
+            if not isinstance(tdstr, Any):
                 tdstr = str(tdstr)
             if isinstance(tdstr, timedelta):
                 return int(tdstr.total_seconds())
@@ -976,7 +978,7 @@ class ApodiktumUtilsBeta(loader.Module):
         self.lib = lib
         self.utils = lib.utils
 
-    async def get_buttons_as_dict(
+    async def get_buttons(
         self,
         message: Message,
     ) -> dict:
@@ -997,7 +999,7 @@ class ApodiktumUtilsBeta(loader.Module):
                     button_dict[row_count][button_count]["data"] = button.data
                 if button.url:
                     button_dict[row_count][button_count]["url"] = button.url
-        return(button_dict)
+        return button_dict
 
     def log_old(
         self,

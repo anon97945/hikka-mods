@@ -1,5 +1,19 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 1.0.5
+### ℹ️ General:
+- added # meta banner and # meta pic
+
+### 📦 apodiktum_library:
+#### Utils:
+- renamed get_buttons_as_dict to get_buttons
+
+### 📃 module updates:
+- all | removed migrator log configs from modules, they are now in the lib config
+- apo_migrator_class | removed, is now implemented in library
+- dnd | .status now remove reply messages if it was already .status
+- msg_merger | fixed multiple errors, fixed unmerge command
+
 ## 🆕 Version 1.0.4
 ### 📦 apodiktum_library:
 #### Utils:
@@ -8,21 +22,21 @@
 ## 🆕 Version 1.0.3
 ### 📦 apodiktum_library:
 #### Utils:
-- library utils | added get_user_id
-- library utils | added validate_bool
-- library utils | added validate_datetime
-- library utils | added validate_dict
-- library utils | added validate_email
-- library utils | added validate_float
-- library utils | added validate_integer
-- library utils | added validate_list
-- library utils | added validate_none
-- library utils | added validate_regex
-- library utils | added validate_string
-- library utils | added validate_tgid
-- library utils | added validate_tuple
-- library utils | removed get_attrs
-- library utils | removed get_sub
+- added get_user_id
+- added validate_bool
+- added validate_datetime
+- added validate_dict
+- added validate_email
+- added validate_float
+- added validate_integer
+- added validate_list
+- added validate_none
+- added validate_regex
+- added validate_string
+- added validate_tgid
+- added validate_tuple
+- removed get_attrs
+- removed get_sub
 
 ## 🆕 Version 1.0.2
 ### 📦 apodiktum_library:
@@ -32,7 +46,7 @@
 
 #### Utils:
 - fixed keyerror in get_str() when db has no `hikka.translations`
-- library utils | added get_all_urls
+- added get_all_urls
 
 ### 📃 module updates:
 - autoreact | fixed `local variable 'emoji_list' referenced before assignment`
@@ -40,9 +54,9 @@
 ## 🆕 Version 1.0.2
 ### 📦 apodiktum_library:
 #### Utils:
-- library utils | added get_uptime
-- library utils | added tdstring_to_seconds
-- library utils | added time_formatter(short=True)
+- added get_uptime
+- added tdstring_to_seconds
+- added time_formatter(short=True)
 
 ### 📃 module updates:
 - all | added emoji requirement scope to ensure lib can load
@@ -58,8 +72,8 @@
 - reworked logger
 
 #### Utils:
-- library utils | added humanbytes
-- library utils | added time_formatter
+- added humanbytes
+- added time_formatter
 
 ## 🆕 Version 1.0.0
 ### ℹ️ General:
@@ -85,27 +99,27 @@
 - using different classes
 
 #### Utils:
-- library utils | added convert_time
-- library utils | added distinct_emoji_list
-- library utils | added emoji_list
-- library utils | added escape_html
-- library utils | added get_attrs
-- library utils | added get_entityurls
-- library utils | added get_href_urls
-- library utils | added get_ids_from_tglink
-- library utils | added get_invite_link
-- library utils | added get_str
-- library utils | added get_sub
-- library utils | added get_tag
-- library utils | added get_tag_link
-- library utils | added get_urls
-- library utils | added is_emoji
-- library utils | added is_linkedchannel
-- library utils | added is_member 
-- library utils | added log
-- library utils | added rem_duplicates_list
-- library utils | added rem_emoji
-- library utils | added unescape_html
+- added convert_time
+- added distinct_emoji_list
+- added emoji_list
+- added escape_html
+- added get_attrs
+- added get_entityurls
+- added get_href_urls
+- added get_ids_from_tglink
+- added get_invite_link
+- added get_str
+- added get_sub
+- added get_tag
+- added get_tag_link
+- added get_urls
+- added is_emoji
+- added is_linkedchannel
+- added is_member 
+- added log
+- added rem_duplicates_list
+- added rem_emoji
+- added unescape_html
 
 ### 📕 new modules:
 - apo_python.py

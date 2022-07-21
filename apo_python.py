@@ -19,6 +19,8 @@ __version__ = (0, 0, 6)
 #           https://t.me/hikariatama
 
 # meta developer: @apodiktum_modules
+# meta banner: https://i.ibb.co/N7c0Ks2/cat.jpg
+# meta pic: https://i.ibb.co/4jLTywZ/apo-modules.jpg
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11

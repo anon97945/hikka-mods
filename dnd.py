@@ -1,4 +1,4 @@
-__version__ = (0, 1, 36)
+__version__ = (0, 1, 38)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -14,6 +14,8 @@ __version__ = (0, 1, 36)
 # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
 
 # meta developer: @apodiktum_modules
+# meta banner: https://i.ibb.co/N7c0Ks2/cat.jpg
+# meta pic: https://i.ibb.co/4jLTywZ/apo-modules.jpg
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
@@ -67,10 +69,8 @@ class ApodiktumDNDMod(loader.Module):
         "developer": "@anon97945",
         "_cfg_active_threshold": "What number of your messages is required to trust peer.",
         "_cfg_afk_no_grp": "If set to true, AFK will not reply in groups.",
-        "_cfg_afk_show_length": "If set to true, AFK message will include the the automatic removal time.",
+        "_cfg_afk_show_duration": "If set to true, AFK message will include the the automatic removal time.",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
-        "_cfg_cst_auto_migrate_debug": "Wheather log debug messages of auto migrate.",
-        "_cfg_cst_auto_migrate_log": "Wheather log auto migrate as info(True) or debug(False).",
         "_cfg_custom_msg": "Custom message to notify untrusted peers. Leave empty for default one.",
         "_cfg_delete_dialog": "If set to true, dialog will be deleted after banning.",
         "_cfg_gone": "If set to true, the AFK message will include the time you were gone.",
@@ -84,7 +84,7 @@ class ApodiktumDNDMod(loader.Module):
         "_log_msg_unapproved": "User unapproved in pm {}.",
         "afk_message": "{}",
         "afk_message_gone": "\n\n<b><u>Gone since:</u></b>\n<code>{}</code>",
-        "afk_message_length": "\n<b><u>AFK for:</u></b>\n<code>{}</code>",
+        "afk_message_duration": "\n<b><u>AFK for:</u></b>\n<code>{}</code>",
         "approved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> approved in pm.</b>',
         "args_pmban": "ℹ️ <b>Example usage: </b><code>.pmbanlast 5</code>",
         "available_statuses": "<b>🦊 Available statuses:</b>\n\n",
@@ -134,7 +134,7 @@ class ApodiktumDNDMod(loader.Module):
                                " - Пример: .newstatus test 1 Привет!"),
         "_cfg_active_threshold": "Какое количество Ваших сообщений необходимо, чтобы доверять пользователю.",
         "_cfg_afk_no_grp": "Если установлено True, AFK не будет отвечать в группах.",
-        "_cfg_afk_show_length": "Если True, AFK-сообщение будет указывать время автоматического самоудаления",
+        "_cfg_afk_show_duration": "Если включено, сообщение AFK будет содержать время его окончания",
         "_cfg_custom_msg": "Кастомное оповещение неодобренных пользователей. Оставьте пустым, чтобы оставить по умолчанию.",
         "_cfg_delete_dialog": "Если установлено true, диалог будет удалён после блокировки.",
         "_cfg_gone": "Если установлено true, AFK сообщение будет включать время, когда вы ушли.",
@@ -144,7 +144,7 @@ class ApodiktumDNDMod(loader.Module):
         "_cfg_pmbl": "Если установлено true, PMBL активирован.",
         "_cfg_report_spam": "Если установлено true, после блокировки на пользователя будет отправлена жалоба.",
         "_cmd_doc_pmbanlast": "<число> - Блокирует и удаляет диалоги с большим кол-вом новых пользователей.",
-        "_cmd_doc_status": "<короткое_название> - Устанавливает статус.",
+        "_cmd_doc_status": "<короткое название> [длительность|1s/m/h/d] - Установить статус",
         "_cmd_doc_statuses": " - Показывает доступные статусы.",
         "_cmd_doc_unstatus": " - Удаляет статус.",
         "_log_msg_approved": "Пользователь {} допущен в ЛС, фильтр: {}",
@@ -152,7 +152,7 @@ class ApodiktumDNDMod(loader.Module):
         "_log_msg_unapproved": "Пользователь {} не допущен к ЛС.",
         "afk_message": "{}",
         "afk_message_gone": "\n\n<b><u>Не в сети с:</u></b>\n<code>{}</code>",
-        "afk_message_length": "\n<b><u>Буду AFK:</u></b>\n<code>{}</code>",
+        "afk_message_duration": "\n<b><u>Буду AFK:</u></b>\n<code>{}</code>",
         "approved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> допущен к ЛС.</b>',
         "args_pmban": "ℹ️ <b>Пример использования: </b><code>.pmbanlast 5</code>",
         "available_statuses": "<b>🦊 Доступные статусы:</b>\n\n",
@@ -249,27 +249,15 @@ class ApodiktumDNDMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
-                "afk_show_length",
+                "afk_show_duration",
                 True,
-                doc=lambda: self.strings("_cfg_afk_show_length"),
+                doc=lambda: self.strings("_cfg_afk_show_duration"),
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
                 "auto_migrate",
                 True,
                 doc=lambda: self.strings("_cfg_cst_auto_migrate"),
-                validator=loader.validators.Boolean(),
-            ),  # for MigratorClass
-            loader.ConfigValue(
-                "auto_migrate_log",
-                True,
-                doc=lambda: self.strings("_cfg_cst_auto_migrate_log"),
-                validator=loader.validators.Boolean(),
-            ),  # for MigratorClass
-            loader.ConfigValue(
-                "auto_migrate_debug",
-                False,
-                doc=lambda: self.strings("_cfg_cst_auto_migrate_debug"),
                 validator=loader.validators.Boolean(),
             ),  # for MigratorClass
         )
@@ -374,15 +362,15 @@ class ApodiktumDNDMod(loader.Module):
 
     async def _unstatus_func(self):
         self.set("status", False)
-        self.set("status_length", "")
+        self.set("status_duration", "")
         self.set("gone", "")
         self._ratelimit_afk = []
 
         for m in self._sent_messages:
             try:
                 await m.delete()
-            except Exception:
-                logger.exception("Message not deleted due to")
+            except Exception as exc:  # skipcq: PYL-W0703
+                logger.exception(f"Message not deleted due to {exc}")
 
         self._sent_messages = []
 
@@ -535,9 +523,9 @@ class ApodiktumDNDMod(loader.Module):
 
     async def statuscmd(self, message: Message):
         """
-        <short_name> <optional length|1s/m/h/d> - Set status.
+        <short_name> [optional duration|1s/m/h/d] - Set status.
         """
-        status_length = ""
+        status_duration = ""
         args = utils.get_args_raw(message)
         t = ([_ for _ in args.split() if self.apo_lib.utils.convert_time(_)] or ["0"])[0]
         args = args.split()[0]
@@ -547,19 +535,20 @@ class ApodiktumDNDMod(loader.Module):
             await asyncio.sleep(3)
             await message.delete()
             return
+        await self._unstatus_func()
         self.set("status", args)
         self.set("gone", time.time())
         self._ratelimit_afk = []
         if t:
-            self.set("status_length", time.time() + t)
-        status_length = (datetime.datetime.fromtimestamp(self.get("status_length")).replace(microsecond=0) -
+            self.set("status_duration", time.time() + t)
+        status_duration = (datetime.datetime.fromtimestamp(self.get("status_duration")).replace(microsecond=0) -
                          datetime.datetime.now().replace(microsecond=0)).total_seconds()
         msg = await utils.answer(
             message,
             self.apo_lib.utils.get_str("status_set", self.all_strings, message).format(
                 utils.escape_html(self.get("texts", {})[args]),
                 str(self.get("notif")[args]),
-                self.apo_lib.utils.time_formatter(status_length, short=True),
+                self.apo_lib.utils.time_formatter(status_duration, short=True),
             ),
         )
         self._sent_messages += [msg]
@@ -600,7 +589,6 @@ class ApodiktumDNDMod(loader.Module):
 
         notif = self.get("notif", {})
         notif[args[0]] = args[1]
-        logger.error(args)
         self.set("notif", notif)
         await utils.answer(
             message,
@@ -777,11 +765,11 @@ class ApodiktumDNDMod(loader.Module):
             return
         now = datetime.datetime.now().replace(microsecond=0)
         gone = datetime.datetime.fromtimestamp(self.get("gone")).replace(microsecond=0)
-        status_length = datetime.datetime.fromtimestamp(self.get("status_length")).replace(microsecond=0)
+        status_duration = datetime.datetime.fromtimestamp(self.get("status_duration")).replace(microsecond=0)
         diff = now - gone
-        status_len_sec = (status_length - gone).total_seconds()
+        status_len_sec = (status_duration - gone).total_seconds()
         diff_sec = diff.total_seconds()
-        if now > status_length:
+        if now > status_duration:
             await self._unstatus_func()
         if message.is_private or not self.config["afk_no_group"]:
             afk_string = (
@@ -789,10 +777,10 @@ class ApodiktumDNDMod(loader.Module):
             )
             if self.config["afk_gone_time"]:
                 afk_string += f"{self.apo_lib.utils.get_str('afk_message_gone', self.all_strings, message).format(self.apo_lib.utils.time_formatter(diff_sec, short=True))}"
-            if not self.config["afk_gone_time"] and self.config["afk_show_length"]:
+            if not self.config["afk_gone_time"] and self.config["afk_show_duration"]:
                 afk_string += "\n"
-            if self.config["afk_show_length"]:
-                afk_string += f"{self.apo_lib.utils.get_str('afk_message_length', self.all_strings, message).format(self.apo_lib.utils.time_formatter(status_len_sec, short=True))}"
+            if self.config["afk_show_duration"]:
+                afk_string += f"{self.apo_lib.utils.get_str('afk_message_duration', self.all_strings, message).format(self.apo_lib.utils.time_formatter(status_len_sec, short=True))}"
 
             m = await utils.answer(
                 message,
