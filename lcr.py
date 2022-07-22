@@ -1,4 +1,4 @@
-__version__ = (0, 0, 29)
+__version__ = (0, 0, 30)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -38,6 +38,7 @@ class ApodiktumLCRMod(loader.Module):
     """
     Telegram Login Code Reciever
     """
+
     strings = {
         "name": "Apo LoginCodeReciever",
         "developer": "@anon97945",
@@ -45,22 +46,28 @@ class ApodiktumLCRMod(loader.Module):
         "error": "<b>No Login code in the message found.</b>",
         "no_self": "<b>You can't use it on yourself.</b>",
         "not_group": "This command is for groups only.",
-        "not_pchat": "<b>This is no private chat. Use <code>.lcr group --force</code></b>",
+        "not_pchat": (
+            "<b>This is no private chat. Use <code>.lcr group --force</code></b>"
+        ),
         "timeouterror": "<b>TimeoutError:</b>\nNo login code for {} seconds recieved.",
         "waiting": "<b>Waiting for the login code...</b>",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
     }
 
-    strings_en = {
-    }
+    strings_en = {}
 
     strings_de = {
         "_cfg_timeout": "<b>Definieren Sie eine Wartezeit für den Code.</b>",
         "error": "<b>Kein Anmeldecode in der Nachricht gefunden.</b>",
         "no_self": "<b>Sie können es nicht an sich selbst verwenden.</b>",
         "not_group": "Dieser Befehl ist nur für Gruppen.",
-        "not_pchat": "<b>Dies ist kein privater Chat. Verwenden Sie <code>.lcr group --force</code></b>",
-        "timeouterror": "<b>TimeoutError:</b>\nKein Anmeldecode für {} Sekunden erhalten.",
+        "not_pchat": (
+            "<b>Dies ist kein privater Chat. Verwenden Sie <code>.lcr group"
+            " --force</code></b>"
+        ),
+        "timeouterror": (
+            "<b>TimeoutError:</b>\nKein Anmeldecode für {} Sekunden erhalten."
+        ),
         "waiting": "<b>Warten auf den Anmeldecode...</b>",
     }
 
@@ -69,7 +76,9 @@ class ApodiktumLCRMod(loader.Module):
         "error": "<b>Код входа не найден в сообщении.</b>",
         "no_self": "<b>Вы не можете использовать это на себе.</b>",
         "not_group": "Эта команда только для групп.",
-        "not_pchat": "<b>Это не приватный чат. Используйте <code>.lcr группа --force</code></b>",
+        "not_pchat": (
+            "<b>Это не приватный чат. Используйте <code>.lcr группа --force</code></b>"
+        ),
         "timeouterror": "<b>TimeoutError:</b>\nНе получен код за {} секунд.",
         "waiting": "<b>Ожидание кода для входа...</b>",
     }
@@ -111,10 +120,10 @@ class ApodiktumLCRMod(loader.Module):
     @loader.owner
     async def lcrcmd(self, message: Message):
         """Available commands:
-           .lcr
-             - waiting for the login code from TG service chat, use in private.
-           .lcr group --force
-             - waiting for the login code from TG service chat, use in group."""
+        .lcr
+          - waiting for the login code from TG service chat, use in private.
+        .lcr group --force
+          - waiting for the login code from TG service chat, use in group."""
 
         user_msg = utils.get_args_raw(message)
         chatid = utils.get_chat_id(message)
@@ -122,27 +131,57 @@ class ApodiktumLCRMod(loader.Module):
         tgacc = 777000
         lc_timeout = self.config["timeout"]
         if chatid == self.tg_id:
-            return await utils.answer(message, self.apo_lib.utils.get_str("no_self", self.all_strings, message))
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_self", self.all_strings, message),
+            )
         if user_msg not in ["", "group --force"]:
             return
         if not message.is_private and user_msg != "group --force":
-            return await utils.answer(message, self.apo_lib.utils.get_str("not_pchat", self.all_strings, message))
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("not_pchat", self.all_strings, message),
+            )
         if message.is_private and user_msg == "group --force":
-            return await utils.answer(message, self.apo_lib.utils.get_str("not_group", self.all_strings, message))
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("not_group", self.all_strings, message),
+            )
         async with message.client.conversation(tgacc) as conv:
             try:
-                msgs = await utils.answer(message, self.apo_lib.utils.get_str("waiting", self.all_strings, message))
-                logincode = conv.wait_event(events.NewMessage(incoming=True, from_users=tgacc), timeout=lc_timeout)
+                msgs = await utils.answer(
+                    message,
+                    self.apo_lib.utils.get_str("waiting", self.all_strings, message),
+                )
+                logincode = conv.wait_event(
+                    events.NewMessage(incoming=True, from_users=tgacc),
+                    timeout=lc_timeout,
+                )
                 logincode = await logincode
-                logincodemsg = " ".join((await message.client.get_messages(tgacc, 1))[0].message)
-                if logincodemsg is not None and sum(bool(s.isnumeric()) for s in logincodemsg) == 5:
+                logincodemsg = " ".join(
+                    (await message.client.get_messages(tgacc, 1))[0].message
+                )
+                if (
+                    logincodemsg is not None
+                    and sum(bool(s.isnumeric()) for s in logincodemsg) == 5
+                ):
                     logincode = True
                 if logincode:
-                    await message.client.send_read_acknowledge(tgacc, clear_mentions=True)
+                    await message.client.send_read_acknowledge(
+                        tgacc, clear_mentions=True
+                    )
                     await message.client.delete_messages(chatid, msgs)
                     return await message.client.send_message(chatid, logincodemsg)
                 await message.client.delete_messages(chatid, msgs)
-                return await message.client.send_message(chatid, self.apo_lib.utils.get_str("error", self.all_strings, message))
+                return await message.client.send_message(
+                    chatid,
+                    self.apo_lib.utils.get_str("error", self.all_strings, message),
+                )
             except asyncio.TimeoutError:
                 await message.client.delete_messages(chatid, msgs)
-                return await message.client.send_message(chatid, self.apo_lib.utils.get_str("timeouterror", self.all_strings, message).format(lc_timeout))
+                return await message.client.send_message(
+                    chatid,
+                    self.apo_lib.utils.get_str(
+                        "timeouterror", self.all_strings, message
+                    ).format(lc_timeout),
+                )

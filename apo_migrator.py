@@ -1,4 +1,4 @@
-__version__ = (0, 1, 12)
+__version__ = (0, 1, 13)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -61,8 +61,12 @@ ModuleNames = {
 }
 
 Links = {
-    "https://github.com/anon97945/hikka-mods/raw/master/anoninfo.py": "https://github.com/anon97945/hikka-mods/raw/master/apoinfo.py",
-    "https://github.com/anon97945/hikka-mods/raw/master/apodiktumadmintools.py": "https://github.com/anon97945/hikka-mods/raw/master/admintools.py",
+    "https://github.com/anon97945/hikka-mods/raw/master/anoninfo.py": (
+        "https://github.com/anon97945/hikka-mods/raw/master/apoinfo.py"
+    ),
+    "https://github.com/anon97945/hikka-mods/raw/master/apodiktumadmintools.py": (
+        "https://github.com/anon97945/hikka-mods/raw/master/admintools.py"
+    ),
 }
 
 
@@ -71,6 +75,7 @@ class ApodiktumMigratorMod(loader.Module):
     """
     Migrate old names with new ones.
     """
+
     strings = {
         "name": "Apo Migrator",
         "developer": "@anon97945",
@@ -85,18 +90,18 @@ class ApodiktumMigratorMod(loader.Module):
         "_log_doc_migrates": "Migrated {}:\n{} -> {}.",
         "_log_doc_migrating": "Migrating modules...",
         "already_migrated": "<b>[Error] You already migrated your modules.</b>",
-        "migrate_now": "<b>Hello👋🏻,\ndo you want to migrate now?\nEnsure to backup your DB before!</b>\n<code>.backupdb</code>",
+        "migrate_now": (
+            "<b>Hello👋🏻,\ndo you want to migrate now?\nEnsure to backup your DB"
+            " before!</b>\n<code>.backupdb</code>"
+        ),
         "restart_now": "<b><u>Done.</u>\nDo you want to restart now?</b>",
     }
 
-    strings_en = {
-    }
+    strings_en = {}
 
-    strings_de = {
-    }
+    strings_de = {}
 
-    strings_ru = {
-    }
+    strings_ru = {}
 
     all_strings = {
         "strings": strings,
@@ -132,44 +137,61 @@ class ApodiktumMigratorMod(loader.Module):
         chat_id = utils.get_chat_id(message)
 
         if self.get("hash") == "e1cc9d13bf96ec1aca7edd2fb67f0816":
-            await self.inline.form(message=message,
-                                   text=self.apo_lib.utils.get_str("already_migrated", self.all_strings, message),
-                                   reply_markup=[
-                                                    {
-                                                        "text": self.apo_lib.utils.get_str("_btn_force", self.all_strings, message),
-                                                        "callback": self._migrate,
-                                                        "args": (chat_id,),
-                                                    },
-                                                    {
-                                                        "text": self.apo_lib.utils.get_str("_btn_close", self.all_strings, message),
-                                                        "callback": self._close
-                                                    }
-                                                ])
+            await self.inline.form(
+                message=message,
+                text=self.apo_lib.utils.get_str(
+                    "already_migrated", self.all_strings, message
+                ),
+                reply_markup=[
+                    {
+                        "text": self.apo_lib.utils.get_str(
+                            "_btn_force", self.all_strings, message
+                        ),
+                        "callback": self._migrate,
+                        "args": (chat_id,),
+                    },
+                    {
+                        "text": self.apo_lib.utils.get_str(
+                            "_btn_close", self.all_strings, message
+                        ),
+                        "callback": self._close,
+                    },
+                ],
+            )
             return
-        await self.inline.form(message=message,
-                               text=self.apo_lib.utils.get_str("migrate_now", self.all_strings, message),
-                               reply_markup=[
-                                                {
-                                                    "text": self.apo_lib.utils.get_str("_btn_yes", self.all_strings, message),
-                                                    "callback": self._migrate,
-                                                    "args": (chat_id,),
-                                                },
-                                                {
-                                                    "text": self.apo_lib.utils.get_str("_btn_no", self.all_strings, message),
-                                                    "callback": self._close,
-                                                },
-                                                ])
+        await self.inline.form(
+            message=message,
+            text=self.apo_lib.utils.get_str("migrate_now", self.all_strings, message),
+            reply_markup=[
+                {
+                    "text": self.apo_lib.utils.get_str(
+                        "_btn_yes", self.all_strings, message
+                    ),
+                    "callback": self._migrate,
+                    "args": (chat_id,),
+                },
+                {
+                    "text": self.apo_lib.utils.get_str(
+                        "_btn_no", self.all_strings, message
+                    ),
+                    "callback": self._close,
+                },
+            ],
+        )
 
     async def _migrate(self, call: InlineCall, chat_id):
         logger.info(self.strings("_log_doc_migrating"))
         await self._migrate_db()
         logger.info(self.strings("_log_doc_migrated_finish"))
         self.set("hash", "e1cc9d13bf96ec1aca7edd2fb67f0816")
-        await call.edit(text=self.strings("restart_now"),
-                        reply_markup={"text": self.strings("_btn_restart"),
-                                      "callback": self._restart,
-                                      "args": (chat_id,)
-                                      })
+        await call.edit(
+            text=self.strings("restart_now"),
+            reply_markup={
+                "text": self.strings("_btn_restart"),
+                "callback": self._restart,
+                "args": (chat_id,),
+            },
+        )
 
     async def _migrate_db(self):
         old_db = self._db.get("Loader", "loaded_modules")
@@ -182,7 +204,9 @@ class ApodiktumMigratorMod(loader.Module):
     async def _restart(self, call: InlineCall, chat_id):
         await call.delete()
         await self.allmodules.commands["update"](
-            await self._client.send_message(chat_id, f"{self.get_prefix()}restart --force")
+            await self._client.send_message(
+                chat_id, f"{self.get_prefix()}restart --force"
+            )
         )
 
     async def _close(self, call) -> None:
@@ -194,7 +218,11 @@ class ApodiktumMigratorMod(loader.Module):
                 old_config = self._db[old_name]
                 for key, _value in old_config.items():
                     self._db.set(new_name, key, self._db.get(old_name, key))
-                    logger.info(self.strings("_log_doc_migrated_db").format(typename, old_name, new_name, self._db.get(old_name, key)))
+                    logger.info(
+                        self.strings("_log_doc_migrated_db").format(
+                            typename, old_name, new_name, self._db.get(old_name, key)
+                        )
+                    )
 
     async def _key_rename(self, old_db, mlist):
         new_dict = {}
@@ -203,7 +231,11 @@ class ApodiktumMigratorMod(loader.Module):
             new_dict[new_key] = old_db[key]
         for old_key, new_key in mlist.items():
             if new_key in new_dict:
-                logger.info(self.strings("_log_doc_migrates").format("old ClassName", old_key, new_key))
+                logger.info(
+                    self.strings("_log_doc_migrates").format(
+                        "old ClassName", old_key, new_key
+                    )
+                )
         return new_dict
 
     async def _update_key_value(self, new_db, mlist):
@@ -211,5 +243,9 @@ class ApodiktumMigratorMod(loader.Module):
             for key, value in new_db.items():
                 if value == old_value:
                     new_db[key] = new_value
-                    logger.info(self.strings("_log_doc_migrates").format("old URL", old_value, new_value))
+                    logger.info(
+                        self.strings("_log_doc_migrates").format(
+                            "old URL", old_value, new_value
+                        )
+                    )
         return new_db

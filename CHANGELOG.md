@@ -1,5 +1,16 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 1.0.6
+### ℹ️ General:
+- reformatted modules with black
+
+### 📦 apodiktum_library:
+#### Utils:
+- added get_buttons
+
+### 📃 module updates:
+- dnd | fixed .status without optional time
+
 ## 🆕 Version 1.0.5
 ### ℹ️ General:
 - added # meta banner and # meta pic

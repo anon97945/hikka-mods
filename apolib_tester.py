@@ -1,4 +1,4 @@
-__version__ = (0, 0, 11)
+__version__ = (0, 0, 12)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -91,4 +91,6 @@ class ApoLibTesterMod(loader.Module):
         """
         This will log the message.
         """
-        self.apo_lib.utils.log(logging.DEBUG, __name__, "some debug message", debug_msg=True)
+        self.apo_lib.utils.log(
+            logging.DEBUG, __name__, "some debug message", debug_msg=True
+        )

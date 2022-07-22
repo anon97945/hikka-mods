@@ -1,4 +1,4 @@
-__version__ = (0, 0, 20)
+__version__ = (0, 0, 21)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -35,15 +35,24 @@ class ApodiktumDonatorsMod(loader.Module):
     """
     Handle donations in a given channel and kick them after the period of time.
     """
+
     strings = {
         "name": "Apo Donators",
         "developer": "@anon97945",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_cst_channel": "The Channel ID where the donations should be saved.",
-        "_cfg_cst_custom_message": "The message send to the user after the subscription is added. Use <br> for new line.",
-        "_cfg_cst_kickchannel": "The channel ids to kick the user from after the subscription.",
+        "_cfg_cst_custom_message": (
+            "The message send to the user after the subscription is added. Use <br> for"
+            " new line."
+        ),
+        "_cfg_cst_kickchannel": (
+            "The channel ids to kick the user from after the subscription."
+        ),
         "_cfg_cst_monthlyamount": "The monthly cost of the subscription.",
-        "_cfg_cst_subscription_gift": "The gift to send to the user after the subscription. Will be attached to custom_message. Use <br> for new line.",
+        "_cfg_cst_subscription_gift": (
+            "The gift to send to the user after the subscription. Will be attached to"
+            " custom_message. Use <br> for new line."
+        ),
         "_cfg_doc_log_kick": "Logs successful kicks from the chats.",
         "_log_doc_kicked": "Kicked {} from {}.",
         "amount": "Amount",
@@ -62,15 +71,24 @@ class ApodiktumDonatorsMod(loader.Module):
         "username": "Username",
     }
 
-    strings_en = {
-    }
+    strings_en = {}
 
     strings_de = {
         "_cfg_cst_channel": "Die Kanal-ID, wo die Spenden gespeichert werden sollen.",
-        "_cfg_cst_custom_message": "Die Nachricht, die an den Benutzer gesendet wird, nachdem das Abonnement hinzugefügt wurde. Benutze <br> für einen Zeilenumbruch.",
-        "_cfg_cst_kickchannel": "Die Kanal-IDs, aus denen der Benutzer nach dem Abonnement gekickt werden soll.",
+        "_cfg_cst_custom_message": (
+            "Die Nachricht, die an den Benutzer gesendet wird, nachdem das Abonnement"
+            " hinzugefügt wurde. Benutze <br> für einen Zeilenumbruch."
+        ),
+        "_cfg_cst_kickchannel": (
+            "Die Kanal-IDs, aus denen der Benutzer nach dem Abonnement gekickt werden"
+            " soll."
+        ),
         "_cfg_cst_monthlyamount": "Die monatlichen Kosten des Abonnements.",
-        "_cfg_cst_subscription_gift": "Das Geschenk, das an den Benutzer gesendet wird, nachdem das Abonnement hinzugefügt wurde. Wird an custom_message angehängt. Benutze <br> für einen Zeilenumbruch.",
+        "_cfg_cst_subscription_gift": (
+            "Das Geschenk, das an den Benutzer gesendet wird, nachdem das Abonnement"
+            " hinzugefügt wurde. Wird an custom_message angehängt. Benutze <br> für"
+            " einen Zeilenumbruch."
+        ),
         "_log_doc_kicked": "{} von {} gekickt.",
         "_log_doc_log_kicks": "Protokolliert die erfolgreichen Kicks aus den Chats.",
         "amount": "Betrag",
@@ -89,8 +107,7 @@ class ApodiktumDonatorsMod(loader.Module):
         "username": "Benutzername",
     }
 
-    strings_ru = {
-    }
+    strings_ru = {}
 
     all_strings = {
         "strings": strings,
@@ -135,7 +152,7 @@ class ApodiktumDonatorsMod(loader.Module):
                 "monthly_amount",
                 10,
                 doc=lambda: self.strings("_cfg_cst_monthlyamount"),
-                validator=loader.validators.Integer(minimum=1)
+                validator=loader.validators.Integer(minimum=1),
             ),
             loader.ConfigValue(
                 "subscription_gift",
@@ -177,13 +194,24 @@ class ApodiktumDonatorsMod(loader.Module):
         Calculate the amount of donations.
         """
         if not self.config["logchannel"]:
-            await utils.answer(message, self.apo_lib.utils.get_str("no_channel", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_channel", self.all_strings, message),
+            )
             return
         amounts = await self._get_amounts(message, self.config["logchannel"])
         if amounts:
-            await utils.answer(message, self.apo_lib.utils.get_str("total_amount", self.all_strings, message).format(amounts))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str(
+                    "total_amount", self.all_strings, message
+                ).format(amounts),
+            )
         else:
-            await utils.answer(message, self.apo_lib.utils.get_str("no_amount", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_amount", self.all_strings, message),
+            )
 
     async def donsavecmd(self, message: Message):
         """
@@ -195,23 +223,48 @@ class ApodiktumDonatorsMod(loader.Module):
         """
         reply = await message.get_reply_message()
         if not self.config["logchannel"]:
-            await utils.answer(message, self.apo_lib.utils.get_str("no_channel", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_channel", self.all_strings, message),
+            )
             return
         if not reply:
-            await utils.answer(message, self.apo_lib.utils.get_str("no_reply", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_reply", self.all_strings, message),
+            )
             return
         user = await self._client.get_entity(reply.sender_id)
         if not user:
-            await utils.answer(message, self.apo_lib.utils.get_str("no_user", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_user", self.all_strings, message),
+            )
             return
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
         if not args:
-            await utils.answer(message, self.apo_lib.utils.get_str("no_args", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_args", self.all_strings, message),
+            )
             return
-        monthly_amount, today, uname, username, userid, amount, currency, dtype, rank, code = self._vars(user, args)
+        (
+            monthly_amount,
+            today,
+            uname,
+            username,
+            userid,
+            amount,
+            currency,
+            dtype,
+            rank,
+            code,
+        ) = self._vars(user, args)
 
-        string_join, string_kick = self._jk_strings(today, uname, username, userid, amount, currency, dtype, rank, code)
+        string_join, string_kick = self._jk_strings(
+            today, uname, username, userid, amount, currency, dtype, rank, code
+        )
 
         msg = await message.client.send_message(
             int(self.config["logchannel"]),
@@ -221,7 +274,9 @@ class ApodiktumDonatorsMod(loader.Module):
         await message.client.send_message(
             int(self.config["logchannel"]),
             string_kick,
-            schedule=(date.today() + timedelta(days=(int(amount)/monthly_amount*30))),
+            schedule=(
+                date.today() + timedelta(days=(int(amount) / monthly_amount * 30))
+            ),
         )
         if self.config["custom_message"]:
             custom_msg = " ".join(self.config["custom_message"])
@@ -230,7 +285,10 @@ class ApodiktumDonatorsMod(loader.Module):
             custom_msg = custom_msg.replace("<br>", "\n")
             await utils.answer(message, custom_msg)
         else:
-            await utils.answer(message, self.apo_lib.utils.get_str("donation_saved", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("donation_saved", self.all_strings, message),
+            )
         await msg.react("👍")
 
     @staticmethod
@@ -242,11 +300,7 @@ class ApodiktumDonatorsMod(loader.Module):
         amounts_rub = []
         itermsg = message.client.iter_messages(entity=logchannel, limit=None)
         async for msg in itermsg:
-            if (
-                msg
-                and isinstance(msg, Message)
-                and "#join" in msg.raw_text.lower()
-            ):
+            if msg and isinstance(msg, Message) and "#join" in msg.raw_text.lower():
                 msg_lines = msg.raw_text.splitlines()
                 for lines in msg_lines:
                     if (
@@ -295,29 +349,45 @@ class ApodiktumDonatorsMod(loader.Module):
         dtype = args[2].capitalize()
         rank = args[3].upper()
         code = str(args[4:]).upper()
-        return monthly_amount, today, uname, username, userid, amount, currency, dtype, rank, code
+        return (
+            monthly_amount,
+            today,
+            uname,
+            username,
+            userid,
+            amount,
+            currency,
+            dtype,
+            rank,
+            code,
+        )
 
-    def _jk_strings(self, today, uname, username, userid, amount, currency, dtype, rank, code):
-        string_join = ("#Join\n"
-                       + f"#{self.strings('date')} {today}\n"
-                       + f"#{self.strings('uname')} {uname}\n"
-                       + f"#{self.strings('username')} {username}\n"
-                       + f"#ID_{userid}\n"
-                       + f"#{self.strings('dtype')} {dtype}\n"
-                       + f"#{self.strings('amount')} {amount}{currency}\n"
-                       + f"#{self.strings('rank')} {rank}\n"
-                       + f"#{self.strings('code')} {code}\n")
+    def _jk_strings(
+        self, today, uname, username, userid, amount, currency, dtype, rank, code
+    ):
+        string_join = (
+            "#Join\n"
+            + f"#{self.strings('date')} {today}\n"
+            + f"#{self.strings('uname')} {uname}\n"
+            + f"#{self.strings('username')} {username}\n"
+            + f"#ID_{userid}\n"
+            + f"#{self.strings('dtype')} {dtype}\n"
+            + f"#{self.strings('amount')} {amount}{currency}\n"
+            + f"#{self.strings('rank')} {rank}\n"
+            + f"#{self.strings('code')} {code}\n"
+        )
 
-        string_kick = ("#Kick\n"
-                       + f"#{self.strings('date')} {today}\n"
-                       + f"#{self.strings('uname')} {uname}\n"
-                       + f"#{self.strings('username')} {username}\n"
-                       + f"#ID_{userid}\n"
-                       + f"#{self.strings('dtype')} {dtype}\n"
-                       + f"#{self.strings('amount')} {amount}{currency}\n"
-                       + f"#{self.strings('rank')} {rank}\n"
-                       + f"#{self.strings('code')} {code}\n"
-                       )
+        string_kick = (
+            "#Kick\n"
+            + f"#{self.strings('date')} {today}\n"
+            + f"#{self.strings('uname')} {uname}\n"
+            + f"#{self.strings('username')} {username}\n"
+            + f"#ID_{userid}\n"
+            + f"#{self.strings('dtype')} {dtype}\n"
+            + f"#{self.strings('amount')} {amount}{currency}\n"
+            + f"#{self.strings('rank')} {rank}\n"
+            + f"#{self.strings('code')} {code}\n"
+        )
         return string_join, string_kick
 
     async def watcher(self, message: Message):

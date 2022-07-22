@@ -1,4 +1,4 @@
-__version__ = (0, 1, 24)
+__version__ = (0, 1, 25)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -47,6 +47,7 @@ class ApodiktumPurgeMod(loader.Module):
     Userbot module for purging unneeded messages(usually spam or ot).
     Check the `.config apodiktum purge` to enable/disable logging.
     """
+
     strings = {
         "name": "Apo Purge",
         "developer": "@anon97945",
@@ -54,8 +55,9 @@ class ApodiktumPurgeMod(loader.Module):
         "_cfg_log_purge": "Log purge `count` as info.",
         "_cfg_log_purgeme": "Log `purgeme `count as info.",
         "_cfg_log_sd": "Log `sd` as info.",
-        "edit_success": ("Edit done successfully.\n"
-                         "Old message:\n{}\n\n\nNew message:\n{}"),
+        "edit_success": (
+            "Edit done successfully.\nOld message:\n{}\n\n\nNew message:\n{}"
+        ),
         "err_cmd_wrong": "<b>Your command was wrong.</b>",
         "err_purge_start": "<b>Please reply to a message to start purging.</b>",
         "no_int": "<b>Your input was no integer.</b>",
@@ -66,42 +68,69 @@ class ApodiktumPurgeMod(loader.Module):
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
     }
 
-    strings_en = {
-    }
+    strings_en = {}
 
     strings_de = {
         "_cfg_log_edit": "Protokollieren Sie `edit` Nachrichten als Info.",
-        "_cfg_log_purge": "Protokollieren Sie die Anzahl der `purge` Nachrichten als Info.",
-        "_cfg_log_purgeme": "Protokollieren Sie die Anzahl der `purgeme` Nachrichten als Info.",
+        "_cfg_log_purge": (
+            "Protokollieren Sie die Anzahl der `purge` Nachrichten als Info."
+        ),
+        "_cfg_log_purgeme": (
+            "Protokollieren Sie die Anzahl der `purgeme` Nachrichten als Info."
+        ),
         "_cfg_log_sd": "Protokollieren `self-destructive` Nachrichten als Info.",
-        "_cls_doc:": ("Module zum entfernen von Nachrichten(normalerweise spam, etc.).\n"
-                      "Check `.config apodiktum purge` um das Protokollieren zu aktivieren/deaktivieren."),
+        "_cls_doc:": (
+            "Module zum entfernen von Nachrichten(normalerweise spam, etc.).\nCheck"
+            " `.config apodiktum purge` um das Protokollieren zu"
+            " aktivieren/deaktivieren."
+        ),
         "_cmd_doc_cpurge": "Dadurch wird die Konfiguration für das Modul geöffnet.",
-        "_cmd_doc_del": ("Löscht die beantwortete Nachricht.\n"
-                         "- Verwendung: .adel <Antwort>"),
-        "_cmd_doc_edit": ("Bearbeitet die letzte Nachricht.\n"
-                          "- Verwendung: .edit <Nachricht>"),
-        "_cmd_doc_purge": ("Löscht alle Nachrichten bis zu und inklusive der Antwort.\n"
-                           "- Verwendung: .apurge <Antwort>"),
-        "_cmd_doc_purgeme": ("Löscht x (oder alle) Nachrichten von dir.\n"
-                             "- Verwendung: .purgeme <anzahl/all>"),
-        "_cmd_doc_purgeuser": ("Löscht alle Nachrichten von einem Nutzer.\n"
-                               "- Verwendung: .purgeuser <Antwort>"),
-        "_cmd_doc_sd": ("Löscht die letzte Nachricht nach x Sekunden. Funktioniert auch mit Medien.\n"
-                        "Verwendung: .sd <Sekunden> <Nachricht>"),
-        "_cmd_doc_spurge": ("Löscht alle Nachrichten bis zu und inklusive der Antwort ohne Benachrichtigung.\n"
-                            "- Verwendung: .spurge <Antwort>"),
-        "_cmd_doc_spurgeme": ("Löscht x (oder alle) Nachrichten von dir ohne Benachrichtigung.\n"
-                              "- Verwendung: .spurgeme <anzahl/all>"),
-        "_cmd_doc_spurgeuser": ("Löscht alle Nachrichten von einem Nutzer ohne Benachrichtigung.\n"
-                                "- Verwendung: .spurgeuser <Antwort>"),
-        "edit_success": ("Bearbeitung erfolgreich.\n"
-                         "Alte Nachricht:\n{}\n\n\nNeue Nachricht:\n{}"),
+        "_cmd_doc_del": (
+            "Löscht die beantwortete Nachricht.\n- Verwendung: .adel <Antwort>"
+        ),
+        "_cmd_doc_edit": (
+            "Bearbeitet die letzte Nachricht.\n- Verwendung: .edit <Nachricht>"
+        ),
+        "_cmd_doc_purge": (
+            "Löscht alle Nachrichten bis zu und inklusive der Antwort.\n"
+            "- Verwendung: .apurge <Antwort>"
+        ),
+        "_cmd_doc_purgeme": (
+            "Löscht x (oder alle) Nachrichten von dir.\n"
+            "- Verwendung: .purgeme <anzahl/all>"
+        ),
+        "_cmd_doc_purgeuser": (
+            "Löscht alle Nachrichten von einem Nutzer.\n"
+            "- Verwendung: .purgeuser <Antwort>"
+        ),
+        "_cmd_doc_sd": (
+            "Löscht die letzte Nachricht nach x Sekunden. Funktioniert auch mit"
+            " Medien.\nVerwendung: .sd <Sekunden> <Nachricht>"
+        ),
+        "_cmd_doc_spurge": (
+            "Löscht alle Nachrichten bis zu und inklusive der Antwort ohne"
+            " Benachrichtigung.\n- Verwendung: .spurge <Antwort>"
+        ),
+        "_cmd_doc_spurgeme": (
+            "Löscht x (oder alle) Nachrichten von dir ohne Benachrichtigung.\n"
+            "- Verwendung: .spurgeme <anzahl/all>"
+        ),
+        "_cmd_doc_spurgeuser": (
+            "Löscht alle Nachrichten von einem Nutzer ohne Benachrichtigung.\n"
+            "- Verwendung: .spurgeuser <Antwort>"
+        ),
+        "edit_success": (
+            "Bearbeitung erfolgreich.\nAlte Nachricht:\n{}\n\n\nNeue Nachricht:\n{}"
+        ),
         "err_cmd_wrong": "<b>Deine Eingabe war falsch.</b>",
-        "err_purge_start": "<b>Bitte antworte auf eine Nachricht, um die Löschung zu starten.</b>",
+        "err_purge_start": (
+            "<b>Bitte antworte auf eine Nachricht, um die Löschung zu starten.</b>"
+        ),
         "no_int": "<b>Dein Eingabe war kein Integer.</b>",
         "permerror": "<b>Du hast keine Berechtigung, diesen Befehl zu verwenden.</b>",
-        "purge_cmpl": "<b>Purge fertig!</b>\n<code>{}</code> Nachrichten wurden gelöscht.",
+        "purge_cmpl": (
+            "<b>Purge fertig!</b>\n<code>{}</code> Nachrichten wurden gelöscht."
+        ),
         "purge_success": "Löschung von {} Nachrichten erfolgreich durchgeführt.",
         "sd_success": "Nachricht nach {} Sekunden erfolgreich gelöscht.",
     }
@@ -109,31 +138,54 @@ class ApodiktumPurgeMod(loader.Module):
     strings_ru = {
         "_cfg_log_edit": "Логировать редактирование сообщения как info.",
         "_cfg_log_purge": "Логировать количество очищенных сообщений как info.",
-        "_cfg_log_purgeme": "Логировать количество удаленных сообщений от вас как info.",
+        "_cfg_log_purgeme": (
+            "Логировать количество удаленных сообщений от вас как info."
+        ),
         "_cfg_log_sd": "Логировать создание сообщения как info.",
-        "_cls_doc": ("Модуль для очистки спама и т.д."
-                     "Проверьте `.config apodiktum purge`, чтобы включить/выключить ведение журнала."),
+        "_cls_doc": (
+            "Модуль для очистки спама и т.д.Проверьте `.config apodiktum purge`, чтобы"
+            " включить/выключить ведение журнала."
+        ),
         "_cmd_doc_cpurge": "Это откроет конфиг для модуля.",
-        "_cmd_doc_edit": ("Редактирует последнее сообщение.\n"
-                          "- Использование: .aedit <сообщение>"),
-        "_cmd_doc_purge": ("Удаляет все сообщения до и включая ответ.\n"
-                           "- Использование: .apurge <реплай>"),
-        "_cmd_doc_purgeme": ("Удаляет x (или все) сообщений от вас.\n"
-                             "- Использование: .purgeme <количество/все>"),
-        "_cmd_doc_purgeuser": ("Удаляет все сообщения от определенного пользователя.\n"
-                               "- Использование: .purgeuser <реплай>"),
-        "_cmd_doc_sd": ("Удаляет последнее сообщение через x секунд.\n"
-                        "- Использование: .sd <секунды> <сообщение>"),
-        "_cmd_doc_spurge": ("Удаляет все сообщения до и включая ответ без оповещения.\n"
-                            "- Использование: .spurge <реплай>"),
-        "_cmd_doc_spurgeme": ("Удаляет x (или все) сообщений от вас без оповещения.\n"
-                              "- Использование: .spurgeme <количество/все>"),
-        "_cmd_doc_spurgeuser": ("Удаляет все сообщения от определенного пользователя без оповещения.\n"
-                                "- Использование: .spurgeuser <реплай>"),
-        "edit_success": ("Редактирование завершено успешно.\n"
-                         "Старое сообщение:\n{}\n\n\nНовое сообщение:\n{}"),
+        "_cmd_doc_edit": (
+            "Редактирует последнее сообщение.\n- Использование: .aedit <сообщение>"
+        ),
+        "_cmd_doc_purge": (
+            "Удаляет все сообщения до и включая ответ.\n"
+            "- Использование: .apurge <реплай>"
+        ),
+        "_cmd_doc_purgeme": (
+            "Удаляет x (или все) сообщений от вас.\n"
+            "- Использование: .purgeme <количество/все>"
+        ),
+        "_cmd_doc_purgeuser": (
+            "Удаляет все сообщения от определенного пользователя.\n"
+            "- Использование: .purgeuser <реплай>"
+        ),
+        "_cmd_doc_sd": (
+            "Удаляет последнее сообщение через x секунд.\n"
+            "- Использование: .sd <секунды> <сообщение>"
+        ),
+        "_cmd_doc_spurge": (
+            "Удаляет все сообщения до и включая ответ без оповещения.\n"
+            "- Использование: .spurge <реплай>"
+        ),
+        "_cmd_doc_spurgeme": (
+            "Удаляет x (или все) сообщений от вас без оповещения.\n"
+            "- Использование: .spurgeme <количество/все>"
+        ),
+        "_cmd_doc_spurgeuser": (
+            "Удаляет все сообщения от определенного пользователя без оповещения.\n"
+            "- Использование: .spurgeuser <реплай>"
+        ),
+        "edit_success": (
+            "Редактирование завершено успешно.\n"
+            "Старое сообщение:\n{}\n\n\nНовое сообщение:\n{}"
+        ),
         "err_cmd_wrong": "<b>Ваш команда была неверной.</b>",
-        "err_purge_start": "<b>Пожалуйста, ответьте на сообщение для начала очистки.</b>",
+        "err_purge_start": (
+            "<b>Пожалуйста, ответьте на сообщение для начала очистки.</b>"
+        ),
         "no_int": "<b>Ваш ввод не является целочисленным типом (int)</b>",
         "permerror": "<b>У вас нет прав на использование этой команды.</b>",
         "purge_cmpl": "<b>Очистка завершена!</b>\nОчищено <code>{}</code> сообщений.",
@@ -224,7 +276,9 @@ class ApodiktumPurgeMod(loader.Module):
     @staticmethod
     async def _purge_messages(chat, self_id, can_delete, message):
         msg_count = 0
-        itermsg = message.client.iter_messages(entity=chat, min_id=message.reply_to_msg_id, reverse=True)
+        itermsg = message.client.iter_messages(
+            entity=chat, min_id=message.reply_to_msg_id, reverse=True
+        )
         msgs = [message.reply_to_msg_id]
         async for msg in itermsg:
             if can_delete:
@@ -266,12 +320,24 @@ class ApodiktumPurgeMod(loader.Module):
                 )
             )
 
-            msg_count = await self._purge_messages(chat, self.tg_id, can_delete, message)
+            msg_count = await self._purge_messages(
+                chat, self.tg_id, can_delete, message
+            )
         else:
-            await utils.answer(message, self.apo_lib.utils.get_str("err_purge_start", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str(
+                    "err_purge_start", self.all_strings, message
+                ),
+            )
             return
 
-        done = await message.client.send_message(chat.id, self.apo_lib.utils.get_str("purge_cmpl", self.all_strings, message).format(str(msg_count)))
+        done = await message.client.send_message(
+            chat.id,
+            self.apo_lib.utils.get_str("purge_cmpl", self.all_strings, message).format(
+                str(msg_count)
+            ),
+        )
         await asyncio.sleep(2)
         await done.delete()
         if self.config["log_purge"]:
@@ -294,9 +360,16 @@ class ApodiktumPurgeMod(loader.Module):
                 )
             )
 
-            msg_count = await self._purge_messages(chat, self.tg_id, can_delete, message)
+            msg_count = await self._purge_messages(
+                chat, self.tg_id, can_delete, message
+            )
         else:
-            await utils.answer(message, self.apo_lib.utils.get_str("err_purge_start", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str(
+                    "err_purge_start", self.all_strings, message
+                ),
+            )
             return
 
         if self.config["log_purge"]:
@@ -312,16 +385,26 @@ class ApodiktumPurgeMod(loader.Module):
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
         if not represents_int(args[0]) and "all" not in args:
-            await utils.answer(message, self.apo_lib.utils.get_str("no_int", self.all_strings, message))
+            await utils.answer(
+                message, self.apo_lib.utils.get_str("no_int", self.all_strings, message)
+            )
             return
         if len(args) > 1:
-            await utils.answer(message, self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message),
+            )
             return
         purge_count = "all" if len(args) == 1 and "all" in args else int(args[0])
         user_id = self.tg_id
         await message.delete()
         msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
-        done = await message.client.send_message(chat.id, self.apo_lib.utils.get_str("purge_cmpl", self.all_strings, message).format(str(msg_count)))
+        done = await message.client.send_message(
+            chat.id,
+            self.apo_lib.utils.get_str("purge_cmpl", self.all_strings, message).format(
+                str(msg_count)
+            ),
+        )
         await asyncio.sleep(2)
         await done.delete()
         if self.config["log_purgeme"]:
@@ -337,10 +420,15 @@ class ApodiktumPurgeMod(loader.Module):
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
         if not represents_int(args[0]) and "all" not in args:
-            await utils.answer(message, self.apo_lib.utils.get_str("no_int", self.all_strings, message))
+            await utils.answer(
+                message, self.apo_lib.utils.get_str("no_int", self.all_strings, message)
+            )
             return
         if len(args) > 1:
-            await utils.answer(message, self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message),
+            )
             return
         purge_count = "all" if len(args) == 1 and "all" in args else int(args[0])
         user_id = self.tg_id
@@ -357,7 +445,10 @@ class ApodiktumPurgeMod(loader.Module):
         """
         chat = message.chat
         if not message.is_reply:
-            return await utils.answer(message, self.apo_lib.utils.get_str("no_reply", self.all_strings, message))
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_reply", self.all_strings, message),
+            )
         reply = await message.get_reply_message()
         user_id = reply.sender_id
         if (
@@ -366,11 +457,19 @@ class ApodiktumPurgeMod(loader.Module):
             or not chat.admin_rights
             and not chat.creator
         ):
-            return await utils.answer(message, self.apo_lib.utils.get_str("permerror", self.all_strings, message))
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("permerror", self.all_strings, message),
+            )
         purge_count = "all"
         await message.delete()
         msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
-        done = await message.client.send_message(chat.id, self.apo_lib.utils.get_str("purge_cmpl", self.all_strings, message).format(str(msg_count)))
+        done = await message.client.send_message(
+            chat.id,
+            self.apo_lib.utils.get_str("purge_cmpl", self.all_strings, message).format(
+                str(msg_count)
+            ),
+        )
         await asyncio.sleep(2)
         await done.delete()
         if self.config["log_purgeme"]:
@@ -384,7 +483,10 @@ class ApodiktumPurgeMod(loader.Module):
         """
         chat = message.chat
         if not message.is_reply:
-            return await utils.answer(message, self.apo_lib.utils.get_str("no_reply", self.all_strings, message))
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_reply", self.all_strings, message),
+            )
         reply = await message.get_reply_message()
         user_id = reply.sender_id
         if (
@@ -393,7 +495,10 @@ class ApodiktumPurgeMod(loader.Module):
             or not chat.admin_rights
             and not chat.creator
         ):
-            return await utils.answer(message, self.apo_lib.utils.get_str("permerror", self.all_strings, message))
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("permerror", self.all_strings, message),
+            )
         purge_count = "all"
         await message.delete()
         msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
@@ -420,7 +525,10 @@ class ApodiktumPurgeMod(loader.Module):
         chat = message.chat
         args = utils.get_args_raw(message)
         if not args:
-            await utils.answer(message, self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message),
+            )
             return
         i = 1
         async for msg in message.client.iter_messages(chat):
@@ -433,7 +541,9 @@ class ApodiktumPurgeMod(loader.Module):
                     break
                 i = i + 1
         if self.config["log_edit"]:
-            return logger.info(self.strings("edit_success").format(str(old_msg), str(new_msg)))
+            return logger.info(
+                self.strings("edit_success").format(str(old_msg), str(new_msg))
+            )
         return
 
     async def sdcmd(self, message: Message):
@@ -444,12 +554,18 @@ class ApodiktumPurgeMod(loader.Module):
         args = utils.get_args_raw(message)
         args = str(args).split()
         if len(args) < 2:
-            await utils.answer(message, self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message),
+            )
             return
         counter = int(" ".join(args[:1]))
         text = " ".join(args[1:])
         if (not counter or not text) and not represents_int(counter):
-            await utils.answer(message, self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("err_cmd_wrong", self.all_strings, message),
+            )
             return
         msg = await utils.answer(message, text)
         await asyncio.sleep(counter)

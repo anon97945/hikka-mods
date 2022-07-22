@@ -1,4 +1,4 @@
-__version__ = (0, 2, 5)
+__version__ = (0, 2, 10)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -18,7 +18,6 @@ __version__ = (0, 2, 5)
 # meta pic: https://i.ibb.co/4jLTywZ/apo-modules.jpg
 
 __hikka_min__ = (1, 2, 11)
-# requires: emoji
 
 import ast
 import asyncio
@@ -49,23 +48,32 @@ class ApodiktumLib(loader.Library):
     """
     The Apodiktum Library is a collection of useful functions and classes for all Hikka developers.
     """
+
     developer = "@apodiktum_modules"
     version = __version__
 
     strings = {
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_doc_log_channel": "Wheather to log debug as info in logger channel.",
-        "_cfg_doc_log_debug": "Wheather to log declared debug messages as info in logger channel.",
+        "_cfg_doc_log_debug": (
+            "Wheather to log declared debug messages as info in logger channel."
+        ),
     }
 
     strings_de = {
-        "_cfg_cst_auto_migrate": "Ob definierte Änderungen beim Start automatisch migriert werden sollen.",
-        "_cfg_doc_log_channel": "Ob Debug als Info im Logger-Kanal protokolliert werden soll.",
-        "_cfg_doc_log_debug": "Ob deklarierte Debug-Meldungen als Info im Logger-Kanal protokolliert werden sollen.",
+        "_cfg_cst_auto_migrate": (
+            "Ob definierte Änderungen beim Start automatisch migriert werden sollen."
+        ),
+        "_cfg_doc_log_channel": (
+            "Ob Debug als Info im Logger-Kanal protokolliert werden soll."
+        ),
+        "_cfg_doc_log_debug": (
+            "Ob deklarierte Debug-Meldungen als Info im Logger-Kanal protokolliert"
+            " werden sollen."
+        ),
     }
 
-    strings_ru = {
-    }
+    strings_ru = {}
 
     all_strings = {
         "strings": strings,
@@ -80,9 +88,12 @@ class ApodiktumLib(loader.Library):
     async def init(self):
         if main.__version__ < __hikka_min__:
             hikka_min_error = (
-                f"You're running Hikka v{main.__version__[0]}.{main.__version__[1]}.{main.__version__[2]} "
-                f"but Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} requires "
-                f"Hikka v{__hikka_min__[0]}.{__hikka_min__[1]}.{__hikka_min__[2]}+. Please update."
+                "You're running Hikka"
+                f" v{main.__version__[0]}.{main.__version__[1]}.{main.__version__[2]} but"
+                " Apodiktum Library"
+                f" v{__version__[0]}.{__version__[1]}.{__version__[2]} requires Hikka"
+                f" v{__hikka_min__[0]}.{__hikka_min__[1]}.{__hikka_min__[2]}+. Please"
+                " update."
             )
             logging.getLogger(self.__class__.__name__).debug(hikka_min_error)
             raise loader.SelfSuspend(hikka_min_error)
@@ -108,10 +119,20 @@ class ApodiktumLib(loader.Library):
             ),
         )
         if self.config["log_channel"]:
-            logging.getLogger(self.__class__.__name__).info(f"Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} loading...")
+            logging.getLogger(self.__class__.__name__).info(
+                "Apodiktum Library"
+                f" v{__version__[0]}.{__version__[1]}.{__version__[2]} loading..."
+            )
         else:
-            logging.getLogger(self.__class__.__name__).debug(f"Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} loading...")
-        logging.getLogger(self.__class__.__name__).debug(f"Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} started for {self.client} | {self.client.tg_id}")
+            logging.getLogger(self.__class__.__name__).debug(
+                "Apodiktum Library"
+                f" v{__version__[0]}.{__version__[1]}.{__version__[2]} loading..."
+            )
+        logging.getLogger(self.__class__.__name__).debug(
+            "Apodiktum Library"
+            f" v{__version__[0]}.{__version__[1]}.{__version__[2]} started for"
+            f" {self.client} | {self.client.tg_id}"
+        )
         self.utils = ApodiktumUtils(self)
         self.__controllerloader = ApodiktumControllerLoader(self)
         self.__internal = ApodiktumInternal(self)
@@ -121,18 +142,33 @@ class ApodiktumLib(loader.Library):
             self.utils_beta = ApodiktumUtilsBeta(self)
         asyncio.ensure_future(self.__internal._send_stats())
 
-        self.utils.log(logging.DEBUG, self.__class__.__name__, "Refreshing all classes to the current library state.", debug_msg=True)
+        self.utils.log(
+            logging.DEBUG,
+            self.__class__.__name__,
+            "Refreshing all classes to the current library state.",
+            debug_msg=True,
+        )
         await self.utils._refresh_lib(self)
         await self.__controllerloader._refresh_lib(self)
         await self.__internal._refresh_lib(self)
         await self.migrator._refresh_lib(self)
         if beta_access:
             await self.utils_beta._refresh_lib(self)
-        self.utils.log(logging.DEBUG, self.__class__.__name__, "Refresh done.", debug_msg=True)
+        self.utils.log(
+            logging.DEBUG, self.__class__.__name__, "Refresh done.", debug_msg=True
+        )
 
-        self._acl_task = asyncio.ensure_future(self.__controllerloader.ensure_controller())
+        self._acl_task = asyncio.ensure_future(
+            self.__controllerloader.ensure_controller()
+        )
 
-        self.utils.log(logging.DEBUG, self.__class__.__name__, f"Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} successfully loaded.")
+        self.utils.log(
+            logging.DEBUG,
+            self.__class__.__name__,
+            "Apodiktum Library"
+            f" v{__version__[0]}.{__version__[1]}.{__version__[2]} successfully"
+            " loaded.",
+        )
 
     def apodiktum_module(self):
         """
@@ -143,7 +179,12 @@ class ApodiktumLib(loader.Library):
 
     async def on_lib_update(self, _: loader.Library):
         self._acl_task.cancel()
-        self.utils.log(logging.DEBUG, self.__class__.__name__, f"Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} was updated.")
+        self.utils.log(
+            logging.DEBUG,
+            self.__class__.__name__,
+            f"Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} was"
+            " updated.",
+        )
         self.allmodules._apodiktum_controller_init = False
         return
 
@@ -152,12 +193,18 @@ class ApodiktumControllerLoader(loader.Module):
     """
     This class is used to load the Apo-LibController
     """
+
     def __init__(
         self,
         lib: loader.Library,
     ):
         self.utils = lib.utils
-        self.utils.log(logging.DEBUG, lib.__class__.__name__, "class ApodiktumControllerLoader is being initiated!", debug_msg=True)
+        self.utils.log(
+            logging.DEBUG,
+            lib.__class__.__name__,
+            "class ApodiktumControllerLoader is being initiated!",
+            debug_msg=True,
+        )
         self.lib = lib
         self._db = lib.db
         self._client = lib.client
@@ -184,7 +231,12 @@ class ApodiktumControllerLoader(loader.Module):
             self.lib.allmodules._apodiktum_controller_init = True
             while True:
                 if first_loop:
-                    if not await self._wait_load(delay=5, retries=5, first_loop=first_loop) and not self._controller_refresh():
+                    if (
+                        not await self._wait_load(
+                            delay=5, retries=5, first_loop=first_loop
+                        )
+                        and not self._controller_refresh()
+                    ):
                         await self._init_controller()
                     first_loop = False
                 elif not self._controller_refresh():
@@ -196,7 +248,12 @@ class ApodiktumControllerLoader(loader.Module):
         """
         Initializes the Apo-LibController downnload and load
         """
-        self.utils.log(logging.DEBUG, self._libclassname, "Attempting to load ApoLibController from GitHub.", debug_msg=True)
+        self.utils.log(
+            logging.DEBUG,
+            self._libclassname,
+            "Attempting to load ApoLibController from GitHub.",
+            debug_msg=True,
+        )
         controller_loaded = await self._load_github()
         if controller_loaded:
             return controller_loaded
@@ -214,9 +271,7 @@ class ApodiktumControllerLoader(loader.Module):
         """
         Downloads the Apo-LibController from GitHub
         """
-        link = (
-            "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apolib_controller.py"
-        )
+        link = "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apolib_controller.py"
         async with aiohttp.ClientSession() as session, session.head(link) as response:
             if response.status >= 300:
                 return None
@@ -228,12 +283,7 @@ class ApodiktumControllerLoader(loader.Module):
         await link_message.delete()
         return lib_controller
 
-    async def _wait_load(
-        self,
-        delay,
-        retries,
-        first_loop=False
-    ):
+    async def _wait_load(self, delay, retries, first_loop=False):
         """
         Waits for the Apo-LibController to load
         :param delay: The delay between retries
@@ -243,11 +293,19 @@ class ApodiktumControllerLoader(loader.Module):
         """
         while retries:
             if lib_controller := self.lib.lookup("Apo-LibController"):
-                self.utils.log(logging.DEBUG, self._libclassname, "ApoLibController found!", debug_msg=True)
+                self.utils.log(
+                    logging.DEBUG,
+                    self._libclassname,
+                    "ApoLibController found!",
+                    debug_msg=True,
+                )
                 return lib_controller
             if not getattr(self.lib.lookup("Loader"), "_fully_loaded", False):
                 retries = 1
-            elif getattr(self.lib.lookup("Loader"), "_fully_loaded", False) and first_loop:
+            elif (
+                getattr(self.lib.lookup("Loader"), "_fully_loaded", False)
+                and first_loop
+            ):
                 retries = 0
             else:
                 retries -= 1
@@ -255,9 +313,10 @@ class ApodiktumControllerLoader(loader.Module):
                 self.utils.log(
                     logging.DEBUG,
                     self._libclassname,
-                    f"ApoLibController not found, retrying in {delay} seconds..."
-                    f"\nHikka fully loaded: {getattr(self.lib.lookup('Loader'), '_fully_loaded', False)}",
-                    debug_msg=True
+                    f"ApoLibController not found, retrying in {delay} seconds...\nHikka"
+                    " fully loaded:"
+                    f" {getattr(self.lib.lookup('Loader'), '_fully_loaded', False)}",
+                    debug_msg=True,
                 )
             if retries == 0:
                 return False
@@ -268,6 +327,7 @@ class ApodiktumUtils(loader.Module):
     """
     This class is used to handle all the utility functions of the library.
     """
+
     def __init__(
         self,
         lib: loader.Library,
@@ -278,7 +338,12 @@ class ApodiktumUtils(loader.Module):
         self._libclassname = lib.__class__.__name__
         self._lib_db = self._db.setdefault(self._libclassname, {})
         self._chats_db = self._lib_db.setdefault("chats", {})
-        self.log(logging.DEBUG, lib.__class__.__name__, "class ApodiktumUtils is being initiated!", debug_msg=True)
+        self.log(
+            logging.DEBUG,
+            lib.__class__.__name__,
+            "class ApodiktumUtils is being initiated!",
+            debug_msg=True,
+        )
 
     async def _refresh_lib(
         self,
@@ -293,12 +358,7 @@ class ApodiktumUtils(loader.Module):
         self.lib = lib
         self.utils = lib.utils
 
-    def get_str(
-        self,
-        string: str,
-        all_strings: dict,
-        message: Message
-    ) -> str:
+    def get_str(self, string: str, all_strings: dict, message: Message) -> str:
         """
         Get a string from a dictionary
         :param string: The string to get
@@ -308,12 +368,18 @@ class ApodiktumUtils(loader.Module):
         """
         base_strings = "strings"
         default_lang = None
-        if "hikka.translations" in self._db and "lang" in self._db["hikka.translations"]:
+        if (
+            "hikka.translations" in self._db
+            and "lang" in self._db["hikka.translations"]
+        ):
             default_lang = self._db["hikka.translations"]["lang"]
         languages = {base_strings: all_strings[base_strings]}
         for lang, strings in all_strings.items():
             if len(lang.split("_", 1)) == 2:
-                languages[lang.split('_', 1)[1]] = {**all_strings[base_strings], **all_strings[lang]}
+                languages[lang.split("_", 1)[1]] = {
+                    **all_strings[base_strings],
+                    **all_strings[lang],
+                }
         if chat_id := utils.get_chat_id(message):
             chatid_db = self._chats_db.setdefault(str(chat_id), {})
             forced_lang = chatid_db.get("forced_lang")
@@ -322,7 +388,11 @@ class ApodiktumUtils(loader.Module):
                     if string in strings:
                         return strings[string].replace("<br>", "\n")
                     break
-        if default_lang and default_lang in list(languages) and string in languages[default_lang]:
+        if (
+            default_lang
+            and default_lang in list(languages)
+            and string in languages[default_lang]
+        ):
             return languages[default_lang][string].replace("<br>", "\n")
         return all_strings[base_strings][string].replace("<br>", "\n")
 
@@ -342,7 +412,9 @@ class ApodiktumUtils(loader.Module):
         :return: None
         """
         apo_logger = logging.getLogger(name)
-        if (not debug_msg and self.lib.config["log_channel"] and level == logging.DEBUG) or (debug_msg and self.lib.config["log_debug"] and level == logging.DEBUG):
+        if (
+            not debug_msg and self.lib.config["log_channel"] and level == logging.DEBUG
+        ) or (debug_msg and self.lib.config["log_debug"] and level == logging.DEBUG):
             return apo_logger.info(text)
         if level == logging.CRITICAL:
             return apo_logger.critical(text)
@@ -374,6 +446,29 @@ class ApodiktumUtils(loader.Module):
             except UserNotParticipantError:
                 return False
 
+    @staticmethod
+    async def get_buttons(
+        message: Message,
+    ) -> dict:
+        """
+        Gets the buttons as a dict
+        :param message: Message
+        :return: Buttons as dict
+        """
+        chat_id = utils.get_chat_id(message)
+        button_dict = {}
+        bmsg = await message.client.get_messages(chat_id, ids=message.id)
+        buttons = bmsg.buttons
+        for row_count, row in enumerate(buttons):
+            button_dict[row_count] = {}
+            for button_count, button in enumerate(row):
+                button_dict[row_count][button_count] = {"text": button.text}
+                if button.data:
+                    button_dict[row_count][button_count]["data"] = button.data
+                if button.url:
+                    button_dict[row_count][button_count]["url"] = button.url
+        return button_dict
+
     async def get_tag(
         self,
         user: Union[Chat, int],
@@ -389,24 +484,34 @@ class ApodiktumUtils(loader.Module):
             user = await self._client.get_entity(user)
         if isinstance(user, Channel):
             if WithID:
-                return (f"<a href=tg://resolve?domain={user.username}>{user.title}</a> (<code>{str(user.id)}</code>)"
-                        if user.username
-                        else f"{user.title}(<code>{str(user.id)}</code>)")
-            return (f"<a href=tg://resolve?domain={user.username}>{user.title}</a>"
+                return (
+                    f"<a href=tg://resolve?domain={user.username}>{user.title}</a>"
+                    f" (<code>{str(user.id)}</code>)"
                     if user.username
-                    else f"{user.title}")
-        if WithID:
-            return (f"<a href=tg://resolve?domain={user.username}>{user.first_name}</a> (<code>{str(user.id)}</code>)"
-                    if user.username
-                    else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a> (<code>{str(user.id)}</code>)")
-        return (f"<a href=tg://resolve?domain={user.username}>{user.first_name}</a>"
+                    else f"{user.title}(<code>{str(user.id)}</code>)"
+                )
+            return (
+                f"<a href=tg://resolve?domain={user.username}>{user.title}</a>"
                 if user.username
-                else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a>")
+                else f"{user.title}"
+            )
+        if WithID:
+            return (
+                f"<a href=tg://resolve?domain={user.username}>{user.first_name}</a>"
+                f" (<code>{str(user.id)}</code>)"
+                if user.username
+                else (
+                    f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a>"
+                    f" (<code>{str(user.id)}</code>)"
+                )
+            )
+        return (
+            f"<a href=tg://resolve?domain={user.username}>{user.first_name}</a>"
+            if user.username
+            else f"<a href=tg://user?id={str(user.id)}>{user.first_name}</a>"
+        )
 
-    async def get_tag_link(
-        self,
-        user: Union[Chat, int]
-    ) -> str:
+    async def get_tag_link(self, user: Union[Chat, int]) -> str:
         """
         Returns a tag link to the user's profile
         :param user: User or user ID
@@ -458,10 +563,11 @@ class ApodiktumUtils(loader.Module):
         if full_chat.full_chat.linked_chat_id:
             return chat_id == int(full_chat.full_chat.linked_chat_id)
 
-    async def get_user_id(self, message: Message) -> int:
+    async def get_user_id(self, message: Message, strip: bool = False) -> int:
         """
         Gets the user ID from a message
         :param message: Message
+        :param strip: Remove -100 from the user_id
         :return: User ID
         """
         try:
@@ -485,11 +591,16 @@ class ApodiktumUtils(loader.Module):
                             try:
                                 user_id = (await message.get_user()).id
                             except Exception:  # skipcq: PYL-W0703
-                                self.log(logging.DEBUG, self._libclassname, f"Can't extract entity from event {type(message)}")
+                                self.log(
+                                    logging.DEBUG,
+                                    self._libclassname,
+                                    f"Can't extract entity from event {type(message)}",
+                                )
                                 return
-        user_id = (
-            int(str(user_id)[4:]) if str(user_id).startswith("-100") else int(user_id)
-        )
+        if str(user_id).startswith("-100") and strip:
+            user_id = int(str(user_id)[4:])
+        else:
+            user_id = int(user_id)
         return user_id
 
     @staticmethod
@@ -550,11 +661,20 @@ class ApodiktumUtils(loader.Module):
         """
         try:
             if not isinstance(length, int):
-                if isinstance(minimum, int) and len(list(grapheme.graphemes(str(s)))) < minimum:
+                if (
+                    isinstance(minimum, int)
+                    and len(list(grapheme.graphemes(str(s)))) < minimum
+                ):
                     return False
-                if isinstance(maximum, int) and len(list(grapheme.graphemes(str(s)))) > maximum:
+                if (
+                    isinstance(maximum, int)
+                    and len(list(grapheme.graphemes(str(s)))) > maximum
+                ):
                     return False
-            elif isinstance(length, int) and len(list(grapheme.graphemes(str(s)))) != length:
+            elif (
+                isinstance(length, int)
+                and len(list(grapheme.graphemes(str(s)))) != length
+            ):
                 return False
             return True
         except TypeError:
@@ -585,10 +705,7 @@ class ApodiktumUtils(loader.Module):
             return False
 
     @staticmethod
-    def validate_datetime(
-        s: Any,
-        dt_format: str = "%Y-%m-%d"
-    ) -> bool:
+    def validate_datetime(s: Any, dt_format: str = "%Y-%m-%d") -> bool:
         """
         Checks if the string represents a date
         :param s: String to check
@@ -700,7 +817,11 @@ class ApodiktumUtils(loader.Module):
         :param message: Message
         :return: list of entityurls
         """
-        return [url for ent, url in message.get_entities_text() if isinstance(ent, MessageEntityUrl)]
+        return [
+            url
+            for ent, url in message.get_entities_text()
+            if isinstance(ent, MessageEntityUrl)
+        ]
 
     @staticmethod
     def get_href_urls(text: str) -> list:
@@ -709,7 +830,7 @@ class ApodiktumUtils(loader.Module):
         :param text: str
         :return: list of href urls
         """
-        return re.findall("href=[\"\'](.*?)[\"\']", text)
+        return re.findall("href=[\"'](.*?)[\"']", text)
 
     @staticmethod
     def get_urls(text: str) -> list:
@@ -782,7 +903,9 @@ class ApodiktumUtils(loader.Module):
         :param link: telegram link
         :return: chat ID and message ID as string
         """
-        regex = re.compile(r"(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$")
+        regex = re.compile(
+            r"(https://)?(t\.me/|telegram\.me/|telegram\.dog/)(c/)?(\d+|[a-zA-Z_0-9]+)/(\d+)$"
+        )
         match = regex.match(link)
         if not match:
             return False
@@ -799,7 +922,7 @@ class ApodiktumUtils(loader.Module):
         :param text: text
         :return: True if text is only emoji, False otherwise
         """
-        return not emoji.replace_emoji(text, replace='') if text else False
+        return not emoji.replace_emoji(text, replace="") if text else False
 
     @staticmethod
     def rem_emoji(text: str) -> str:
@@ -808,7 +931,7 @@ class ApodiktumUtils(loader.Module):
         :param text: text
         :return: text
         """
-        return emoji.replace_emoji(text, replace='')
+        return emoji.replace_emoji(text, replace="")
 
     @staticmethod
     def distinct_emoji_list(text: str) -> list:
@@ -847,10 +970,7 @@ class ApodiktumUtils(loader.Module):
         return html.escape(text)
 
     @staticmethod
-    def humanbytes(
-        num: int,
-        decimal: int = 2
-    ) -> str:
+    def humanbytes(num: int, decimal: int = 2) -> str:
         """
         Formats a number to a human readable string
         :param num: Bytes int to format
@@ -865,7 +985,7 @@ class ApodiktumUtils(loader.Module):
 
     @staticmethod
     def tdstring_to_seconds(
-        tdstr: str,
+        tdstr: Any,
         rev_order: bool = False,
     ) -> int:
         """
@@ -881,21 +1001,22 @@ class ApodiktumUtils(loader.Module):
                 return int(tdstr.total_seconds())
             if not isinstance(tdstr, str):
                 tdstr = str(tdstr)
-            parts = tdstr.strip(' ').split(' ')
+            parts = tdstr.strip(" ").split(" ")
             d = int(parts[0]) if len(parts) > 1 else 0
             if rev_order:
-                s = sum(x * y for x, y in zip(map(int, parts[-1].split(':')), (1, 60, 3600)))
+                s = sum(
+                    x * y for x, y in zip(map(int, parts[-1].split(":")), (1, 60, 3600))
+                )
             else:
-                s = sum(x * y for x, y in zip(map(int, parts[-1].split(':')), (3600, 60, 1)))
+                s = sum(
+                    x * y for x, y in zip(map(int, parts[-1].split(":")), (3600, 60, 1))
+                )
             return 86400 * d + s
         except TypeError:
             return None
 
     @staticmethod
-    def time_formatter(
-        seconds: int,
-        short: bool = False
-    ) -> str:
+    def time_formatter(seconds: int, short: bool = False) -> str:
         """
         Inputs time in seconds, to get beautified time,
         as string
@@ -913,7 +1034,7 @@ class ApodiktumUtils(loader.Module):
                 "d": (60 * 60 * 24),
                 "h": (60 * 60),
                 "m": 60,
-                "s": 1
+                "s": 1,
             }
         else:
             times = {
@@ -926,7 +1047,7 @@ class ApodiktumUtils(loader.Module):
                 "days": (60 * 60 * 24),
                 "hours": (60 * 60),
                 "minutes": 60,
-                "seconds": 1
+                "seconds": 1,
             }
         for string, divisor in times.items():
             v_m, remainder = divmod(remainder, divisor)
@@ -935,10 +1056,7 @@ class ApodiktumUtils(loader.Module):
                 result += f"{v_m}{string}, " if short else f"{v_m} {string}, "
         return result[:-2]
 
-    def get_uptime(
-        self,
-        short: bool = True
-    ) -> str:
+    def get_uptime(self, short: bool = True) -> str:
         """
         Get uptime of bot
         :param short: if True, will return short time format
@@ -951,19 +1069,29 @@ class ApodiktumUtilsBeta(loader.Module):
     """
     Apodiktum Utils Beta, just for testing purposes
     """
+
     def __init__(
         self,
         lib: loader.Library,
     ):
         self.utils = lib.utils
-        self.utils.log(logging.DEBUG, lib.__class__.__name__, "class ApodiktumUtilsBeta is being initiated!", debug_msg=True)
+        self.utils.log(
+            logging.DEBUG,
+            lib.__class__.__name__,
+            "class ApodiktumUtilsBeta is being initiated!",
+            debug_msg=True,
+        )
         self.lib = lib
         self._db = lib.db
         self._client = lib.client
         self._libclassname = self.lib.__class__.__name__
         self._lib_db = self._db.setdefault(self._libclassname, {})
         self._chats_db = self._lib_db.setdefault("chats", {})
-        self.utils.log(logging.DEBUG, lib.__class__.__name__, "Congratulations! You have access to the ApodiktumUtilsBeta!")
+        self.utils.log(
+            logging.DEBUG,
+            lib.__class__.__name__,
+            "Congratulations! You have access to the ApodiktumUtilsBeta!",
+        )
 
     async def _refresh_lib(
         self,
@@ -977,29 +1105,6 @@ class ApodiktumUtilsBeta(loader.Module):
         """
         self.lib = lib
         self.utils = lib.utils
-
-    async def get_buttons(
-        self,
-        message: Message,
-    ) -> dict:
-        """
-        Gets the buttons as a dict
-        :param message: Message
-        :return: Buttons as dict
-        """
-        chat_id = utils.get_chat_id(message)
-        button_dict = {}
-        bmsg = await message.client.get_messages(chat_id, ids=message.id)
-        buttons = bmsg.buttons
-        for row_count, row in enumerate(buttons):
-            button_dict[row_count] = {}
-            for button_count, button in enumerate(row):
-                button_dict[row_count][button_count] = {"text": button.text}
-                if button.data:
-                    button_dict[row_count][button_count]["data"] = button.data
-                if button.url:
-                    button_dict[row_count][button_count]["url"] = button.url
-        return button_dict
 
     def log_old(
         self,
@@ -1025,7 +1130,9 @@ class ApodiktumUtilsBeta(loader.Module):
         else:
             debug_msg = False
         apo_logger = logging.getLogger(name)
-        if (not debug_msg and self.lib.config["log_channel"] and level == logging.DEBUG) or (debug_msg and self.lib.config["log_debug"] and level == logging.DEBUG):
+        if (
+            not debug_msg and self.lib.config["log_channel"] and level == logging.DEBUG
+        ) or (debug_msg and self.lib.config["log_debug"] and level == logging.DEBUG):
             return apo_logger.log(logging.INFO, message, *args, **kwargs)
         return apo_logger.log(level, message, *args, **kwargs)
 
@@ -1034,12 +1141,18 @@ class ApodiktumInternal(loader.Module):
     """
     Apodiktum Internal, just for internal purposes
     """
+
     def __init__(
         self,
         lib: loader.Library,
     ):
         self.utils = lib.utils if getattr(lib, "utils", False) else lib
-        self.utils.log(logging.DEBUG, lib.__class__.__name__, "class ApodiktumInternalFunctions is being initiated!", debug_msg=True)
+        self.utils.log(
+            logging.DEBUG,
+            lib.__class__.__name__,
+            "class ApodiktumInternalFunctions is being initiated!",
+            debug_msg=True,
+        )
         self.lib = lib
         self._db = lib.db or lib._db
         self._client = lib.client or lib._client
@@ -1070,15 +1183,28 @@ class ApodiktumInternal(loader.Module):
         beta_access = False
         try:
             async for messages in self._client.iter_messages("@apodiktum_modules_news"):
-                if messages and isinstance(messages, Message) and "#UtilsBetaAccess" in messages.raw_text:
+                if (
+                    messages
+                    and isinstance(messages, Message)
+                    and "#UtilsBetaAccess" in messages.raw_text
+                ):
                     string = messages.raw_text
-                    beta_ids = list(map(int, string[string.find("[")+1:string.find("]")].split(',')))
+                    beta_ids = list(
+                        map(
+                            int,
+                            string[string.find("[") + 1 : string.find("]")].split(","),
+                        )
+                    )
                     if self._client.tg_id in beta_ids:
                         beta_access = True
                     break
             return beta_access
         except Exception as exc:  # skipcq: PYL-W0703
-            self.utils.log(logging.DEBUG, self._libclassname, f"Error while checking beta access: {exc}")
+            self.utils.log(
+                logging.DEBUG,
+                self._libclassname,
+                f"Error while checking beta access: {exc}",
+            )
             return beta_access
 
     async def _send_stats(self):
@@ -1088,9 +1214,14 @@ class ApodiktumInternal(loader.Module):
         :return: None
         """
         await asyncio.sleep(8)
-        urls = ["https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py", "https://raw.githubusercontent.com/anon97945/hikka-mods/master/total_users.py"]
+        urls = [
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/master/total_users.py",
+        ]
         if not getattr(self, "apodiktum_module", False):
-            urls.append("https://raw.githubusercontent.com/anon97945/hikka-mods/master/ApoLib_others.py")
+            urls.append(
+                "https://raw.githubusercontent.com/anon97945/hikka-mods/master/ApoLib_others.py"
+            )
         self.apodiktum_module = False
         for url in urls:
             asyncio.ensure_future(self.__send_stats_handler(url))
@@ -1124,7 +1255,8 @@ class ApodiktumInternal(loader.Module):
                                 await self._client.inline_query(
                                     "@hikkamods_bot", "#get_hikka_token"
                                 )
-                            )[0].title)
+                            )[0].title,
+                        )
 
                     res = await utils.run_sync(
                         requests.post,
@@ -1140,7 +1272,11 @@ class ApodiktumInternal(loader.Module):
                             self._db["LoaderMod"]["token"] = None
                         return await self._send_stats_handler(url, retry=True)
                 except Exception as exc:  # skipcq: PYL-W0703
-                    self.utils.log(logging.DEBUG, self._libclassname, f"Failed to send stats: {exc}")
+                    self.utils.log(
+                        logging.DEBUG,
+                        self._libclassname,
+                        f"Failed to send stats: {exc}",
+                    )
 
 
 class ApodiktumMigrator(loader.Module):
@@ -1151,9 +1287,15 @@ class ApodiktumMigrator(loader.Module):
 
     strings = {
         "_log_doc_migrated_db": "Migrated {} database of {} -> {}:\n{}",
-        "_log_doc_migrated_cfgv_val": "[Dynamic={}] Migrated default config value:\n{} -> {}",
-        "_log_doc_no_dynamic_migration": "No module config found. Did not dynamic migrate:\n{{{}: {}}}",
-        "_log_doc_migrated_db_not_found": "`{}` database not found. Did not migrate {} -> {}",
+        "_log_doc_migrated_cfgv_val": (
+            "[Dynamic={}] Migrated default config value:\n{} -> {}"
+        ),
+        "_log_doc_no_dynamic_migration": (
+            "No module config found. Did not dynamic migrate:\n{{{}: {}}}"
+        ),
+        "_log_doc_migrated_db_not_found": (
+            "`{}` database not found. Did not migrate {} -> {}"
+        ),
     }
 
     def __init__(
@@ -1161,7 +1303,12 @@ class ApodiktumMigrator(loader.Module):
         lib: loader.Library,
     ):
         self.utils = lib.utils
-        self.utils.log(logging.DEBUG, lib.__class__.__name__, "class ApodiktumMigrator successfully initiated!", debug_msg=True)
+        self.utils.log(
+            logging.DEBUG,
+            lib.__class__.__name__,
+            "class ApodiktumMigrator successfully initiated!",
+            debug_msg=True,
+        )
         self.lib = lib
         self._db = lib.db
         self._client = lib.client
@@ -1204,19 +1351,41 @@ class ApodiktumMigrator(loader.Module):
             migrate = await self._check_new_migration()
             full_migrated = await self._full_migrated()
             if migrate:
-                self.utils.log(logging.DEBUG, self._name, f"Open migrations: {migrate}", debug_msg=True)
+                self.utils.log(
+                    logging.DEBUG,
+                    self._name,
+                    f"Open migrations: {migrate}",
+                    debug_msg=True,
+                )
                 if await self._migrator_func():
-                    self.utils.log(logging.DEBUG, self._name, "Migration done.", debug_msg=True)
+                    self.utils.log(
+                        logging.DEBUG, self._name, "Migration done.", debug_msg=True
+                    )
                     return True
             elif not full_migrated:
                 await self._force_set_hashs()
-                self.utils.log(logging.DEBUG, self._name, f"Open migrations: {migrate} | Forcehash done: {self.hashs}", debug_msg=True)
+                self.utils.log(
+                    logging.DEBUG,
+                    self._name,
+                    f"Open migrations: {migrate} | Forcehash done: {self.hashs}",
+                    debug_msg=True,
+                )
                 return False
             else:
-                self.utils.log(logging.DEBUG, self._name, f"Open migrations: {migrate} | Skip migration.", debug_msg=True)
+                self.utils.log(
+                    logging.DEBUG,
+                    self._name,
+                    f"Open migrations: {migrate} | Skip migration.",
+                    debug_msg=True,
+                )
                 return False
             return False
-        self.utils.log(logging.DEBUG, self._name, "No changes in `changes` dictionary found.", debug_msg=True)
+        self.utils.log(
+            logging.DEBUG,
+            self._name,
+            "No changes in `changes` dictionary found.",
+            debug_msg=True,
+        )
         return False
 
     async def auto_migrate_handler(
@@ -1224,7 +1393,7 @@ class ApodiktumMigrator(loader.Module):
         classname: str,  # type: ignore
         name: str,  # type: ignore
         changes: dict,  # type: ignore
-        auto_migrate: bool = False
+        auto_migrate: bool = False,
     ):
         """
         Handles the auto migration of a module
@@ -1244,18 +1413,42 @@ class ApodiktumMigrator(loader.Module):
             migrate = await self._check_new_migration()
             full_migrated = await self._full_migrated()
             if auto_migrate and migrate:
-                self.utils.log(logging.DEBUG, self._name, f"Open migrations: {migrate} | auto_migrate: {auto_migrate}", debug_msg=True)
+                self.utils.log(
+                    logging.DEBUG,
+                    self._name,
+                    f"Open migrations: {migrate} | auto_migrate: {auto_migrate}",
+                    debug_msg=True,
+                )
                 if await self._migrator_func():
-                    self.utils.log(logging.DEBUG, self._name, "Migration done.", debug_msg=True)
+                    self.utils.log(
+                        logging.DEBUG, self._name, "Migration done.", debug_msg=True
+                    )
                     return
             elif not auto_migrate and not full_migrated:
                 await self._force_set_hashs()
-                self.utils.log(logging.DEBUG, self._name, f"Open migrations: {migrate} | auto_migrate: {auto_migrate} | Forcehash done: {self.hashs}", debug_msg=True)
+                self.utils.log(
+                    logging.DEBUG,
+                    self._name,
+                    f"Open migrations: {migrate} | auto_migrate: {auto_migrate} |"
+                    f" Forcehash done: {self.hashs}",
+                    debug_msg=True,
+                )
                 return
             else:
-                self.utils.log(logging.DEBUG, self._name, f"Open migrations: {migrate} | auto_migrate: {auto_migrate} | Skip migrate_handler.", debug_msg=True)
+                self.utils.log(
+                    logging.DEBUG,
+                    self._name,
+                    f"Open migrations: {migrate} | auto_migrate: {auto_migrate} | Skip"
+                    " migrate_handler.",
+                    debug_msg=True,
+                )
                 return
-        self.utils.log(logging.DEBUG, self._name, "No changes in `changes` dictionary found.", debug_msg=True)
+        self.utils.log(
+            logging.DEBUG,
+            self._name,
+            "No changes in `changes` dictionary found.",
+            debug_msg=True,
+        )
         return
 
     async def _force_set_hashs(self):
@@ -1271,7 +1464,7 @@ class ApodiktumMigrator(loader.Module):
         Checks if a new migration is available
         :return: True if a new migration is available, False otherwise
         """
-        chash = hashlib.sha256(self._migrate_to.encode('utf-8')).hexdigest()
+        chash = hashlib.sha256(self._migrate_to.encode("utf-8")).hexdigest()
         return chash not in self.hashs
 
     async def _full_migrated(self):
@@ -1282,7 +1475,7 @@ class ApodiktumMigrator(loader.Module):
         """
         full_migrated = True
         for migration in self._changes:
-            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
+            chash = hashlib.sha256(migration.encode("utf-8")).hexdigest()
             if chash not in self.hashs:
                 full_migrated = False
         return full_migrated
@@ -1294,15 +1487,29 @@ class ApodiktumMigrator(loader.Module):
         :return: True if the migration was successful
         """
         for migration in self._changes:
-            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
+            chash = hashlib.sha256(migration.encode("utf-8")).hexdigest()
             if chash not in self.hashs:
-                old_classname, new_classname, old_name, new_name = await self._get_names(migration)
+                (
+                    old_classname,
+                    new_classname,
+                    old_name,
+                    new_name,
+                ) = await self._get_names(migration)
                 for category in self._changes[migration]:
-                    await self._copy_config_init(migration, old_classname, new_classname, old_name, new_name, category)
+                    await self._copy_config_init(
+                        migration,
+                        old_classname,
+                        new_classname,
+                        old_name,
+                        new_name,
+                        category,
+                    )
                 await self._set_hash(chash)
         return True
 
-    async def _copy_config_init(self, migration, old_classname, new_classname, old_name, new_name, category):
+    async def _copy_config_init(
+        self, migration, old_classname, new_classname, old_name, new_name, category
+    ):
         """
         !do not use this method directly!
         Initializes the copy of the config
@@ -1315,17 +1522,51 @@ class ApodiktumMigrator(loader.Module):
         :return: None
         """
         if category == "classname":
-            if self._classname != old_classname and (old_classname in self._db.keys() and self._db[old_classname] and old_classname is not None):
-                self.utils.log(logging.DEBUG, self._name, f"{migration} | {category} | old_value: {old_classname} | new_value: {new_classname}", debug_msg=True)
-                await self._copy_config(category, old_classname, new_classname, new_name)
+            if self._classname != old_classname and (
+                old_classname in self._db.keys()
+                and self._db[old_classname]
+                and old_classname is not None
+            ):
+                self.utils.log(
+                    logging.DEBUG,
+                    self._name,
+                    f"{migration} | {category} | old_value: {old_classname} |"
+                    f" new_value: {new_classname}",
+                    debug_msg=True,
+                )
+                await self._copy_config(
+                    category, old_classname, new_classname, new_name
+                )
             else:
-                self.utils.log(logging.DEBUG, self._name, self.strings["_log_doc_migrated_db_not_found"].format(category, old_classname, new_classname))
+                self.utils.log(
+                    logging.DEBUG,
+                    self._name,
+                    self.strings["_log_doc_migrated_db_not_found"].format(
+                        category, old_classname, new_classname
+                    ),
+                )
         elif category == "name":
-            self.utils.log(logging.DEBUG, self._name, f"{migration} | {category} | old_value: {old_name} | new_value: {new_name}", debug_msg=True)
-            if self._name != old_name and (old_name in self._db.keys() and self._db[old_name] and old_name is not None):
+            self.utils.log(
+                logging.DEBUG,
+                self._name,
+                f"{migration} | {category} | old_value: {old_name} | new_value:"
+                f" {new_name}",
+                debug_msg=True,
+            )
+            if self._name != old_name and (
+                old_name in self._db.keys()
+                and self._db[old_name]
+                and old_name is not None
+            ):
                 await self._copy_config(category, old_name, new_name, new_classname)
             else:
-                self.utils.log(logging.DEBUG, self._name, self.strings["_log_doc_migrated_db_not_found"].format(category, old_name, new_name))
+                self.utils.log(
+                    logging.DEBUG,
+                    self._name,
+                    self.strings["_log_doc_migrated_db_not_found"].format(
+                        category, old_name, new_name
+                    ),
+                )
         elif category == "config":
             await self._migrate_cfg_values(migration, category, new_name, new_classname)
         return
@@ -1342,9 +1583,13 @@ class ApodiktumMigrator(loader.Module):
         new_classname = None
         for category in self._changes[migration]:
             if category == "classname":
-                old_classname, new_classname = await self._get_changes(self._changes[migration][category].items())
+                old_classname, new_classname = await self._get_changes(
+                    self._changes[migration][category].items()
+                )
             elif category == "name":
-                old_name, new_name = await self._get_changes(self._changes[migration][category].items())
+                old_name, new_name = await self._get_changes(
+                    self._changes[migration][category].items()
+                )
         if not new_name:
             new_name = self._name
         if not new_classname:
@@ -1380,9 +1625,18 @@ class ApodiktumMigrator(loader.Module):
         if new_classname in self._db.keys() and "__config__" in self._db[new_classname]:
             if configdb := self._db[new_classname]["__config__"]:
                 for cnfg_key in self._changes[migration][category]:
-                    old_value, new_value = await self._get_changes(self._changes[migration][category][cnfg_key].items())
+                    old_value, new_value = await self._get_changes(
+                        self._changes[migration][category][cnfg_key].items()
+                    )
                     for key, value in configdb.items():
-                        self.utils.log(logging.DEBUG, self._name, f"{migration} | {category} | ({{old_value: {str(old_value)}}} `==` {{new_value: {str(value)}}}) `and` {{key: {key}}} `==` {{cnfg_key: {cnfg_key}}}", debug_msg=True)
+                        self.utils.log(
+                            logging.DEBUG,
+                            self._name,
+                            f"{migration} | {category} | ({{old_value:"
+                            f" {str(old_value)}}} `==` {{new_value: {str(value)}}})"
+                            f" `and` {{key: {key}}} `==` {{cnfg_key: {cnfg_key}}}",
+                            debug_msg=True,
+                        )
                         if value == old_value and key == cnfg_key:
                             dynamic = False
                             self._db[new_classname]["__config__"][cnfg_key] = new_value
@@ -1393,7 +1647,13 @@ class ApodiktumMigrator(loader.Module):
                             ):
                                 self.lib.lookup(new_name).config[cnfg_key] = new_value
                                 dynamic = True
-                            self.utils.log(logging.DEBUG, self._name, self.strings["_log_doc_migrated_cfgv_val"].format(dynamic, value, new_value))
+                            self.utils.log(
+                                logging.DEBUG,
+                                self._name,
+                                self.strings["_log_doc_migrated_cfgv_val"].format(
+                                    dynamic, value, new_value
+                                ),
+                            )
         return
 
     async def _copy_config(self, category, old_name, new_name, name):
@@ -1409,12 +1669,20 @@ class ApodiktumMigrator(loader.Module):
         if self._db[new_name]:
             temp_db = {new_name: copy.deepcopy(self._db[new_name])}
             self._db[new_name].clear()
-            self._db[new_name] = await self._deep_dict_merge(temp_db[new_name], self._db[old_name])
+            self._db[new_name] = await self._deep_dict_merge(
+                temp_db[new_name], self._db[old_name]
+            )
             temp_db.pop(new_name)
         else:
             self._db[new_name] = copy.deepcopy(self._db[old_name])
         self._db.pop(old_name)
-        self.utils.log(logging.DEBUG, self._name, self.strings["_log_doc_migrated_db"].format(category, old_name, new_name, self._db[new_name]))
+        self.utils.log(
+            logging.DEBUG,
+            self._name,
+            self.strings["_log_doc_migrated_db"].format(
+                category, old_name, new_name, self._db[new_name]
+            ),
+        )
         if category == "classname":
             await self._make_dynamic_config(name, new_name)
         if category == "name":
@@ -1463,7 +1731,13 @@ class ApodiktumMigrator(loader.Module):
                 ):
                     self.lib.lookup(new_name).config[key] = value
                 else:
-                    self.utils.log(logging.DEBUG, self._name, self.strings["_log_doc_no_dynamic_migration"].format(key, value))
+                    self.utils.log(
+                        logging.DEBUG,
+                        self._name,
+                        self.strings["_log_doc_no_dynamic_migration"].format(
+                            key, value
+                        ),
+                    )
         return
 
     async def _set_hash(self, chash):
@@ -1484,6 +1758,6 @@ class ApodiktumMigrator(loader.Module):
         :return: None
         """
         for migration in self._changes:
-            chash = hashlib.sha256(migration.encode('utf-8')).hexdigest()
+            chash = hashlib.sha256(migration.encode("utf-8")).hexdigest()
             if chash not in self.hashs:
                 await self._set_hash(chash)

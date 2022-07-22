@@ -1,4 +1,4 @@
-__version__ = (0, 0, 38)
+__version__ = (0, 0, 39)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -45,31 +45,38 @@ class ApodiktumMsgMergerMod(loader.Module):
         "_cfg_active": "Whether the module is turned on (or not).",
         "_cfg_blacklist_chats": "The list of chats that the module will watch(or not).",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
-        "_cfg_edit_timeout": "The maximum time in minuted to edit the message. 0 for no limit.",
+        "_cfg_edit_timeout": (
+            "The maximum time in minuted to edit the message. 0 for no limit."
+        ),
         "_cfg_ignore_prefix": "The prefix to ignore the merging fully.",
-        "_cfg_link_preview": ("Whether to send webpage previews."
-                              "\nLeave empty to use automatically decide based on the messages to merge."),
+        "_cfg_link_preview": (
+            "Whether to send webpage previews."
+            "\nLeave empty to use automatically decide based on the messages to merge."
+        ),
         "_cfg_merge_own_reply": "Whether to merge any message from own reply.",
-        "_cfg_merge_own_reply_msg": "The message which will stay if the message is merged from own reply.",
+        "_cfg_merge_own_reply_msg": (
+            "The message which will stay if the message is merged from own reply."
+        ),
         "_cfg_merge_urls": "Whether to merge messages with URLs.",
         "_cfg_new_lines": "The number of new lines to add to the message.",
-        "_cfg_reverse_merge": "Whether to merge into the new(True) or old(False) message.",
+        "_cfg_reverse_merge": (
+            "Whether to merge into the new(True) or old(False) message."
+        ),
         "_cfg_skip_emoji": "Whether to skip the merging of messages with single emoji.",
         "_cfg_skip_length": "The length of the message to skip the merging.",
         "_cfg_skip_prefix": "The prefix to skip the merging.",
         "_cfg_skip_reply": "Whether to skip the merging of messages with reply.",
-        "_cfg_whitelist": "Whether the chatlist includes(True) or excludes(False) the chat.",
+        "_cfg_whitelist": (
+            "Whether the chatlist includes(True) or excludes(False) the chat."
+        ),
         "undo_merge_fail": "<b>Failed to unmerge the messages.</b>",
     }
 
-    strings_en = {
-    }
+    strings_en = {}
 
-    strings_de = {
-    }
+    strings_de = {}
 
-    strings_ru = {
-    }
+    strings_ru = {}
 
     all_strings = {
         "strings": strings,
@@ -91,9 +98,7 @@ class ApodiktumMsgMergerMod(loader.Module):
             loader.ConfigValue(
                 "chatlist",
                 doc=lambda: self.strings("_cfg_blacklist_chats"),
-                validator=loader.validators.Series(
-                    loader.validators.TelegramID()
-                ),
+                validator=loader.validators.Series(loader.validators.TelegramID()),
             ),
             loader.ConfigValue(
                 "edit_timeout",
@@ -241,8 +246,15 @@ class ApodiktumMsgMergerMod(loader.Module):
                         last_msg_text = msg_value
                     elif key == "link_preview":
                         last_msg_link_preview = msg_value
-                await self.client.edit_message(chat_id, last_msg_id, last_msg_text, link_preview=last_msg_link_preview)
-                await self.client.edit_message(message, msg_text, link_preview=msg_link_preview)
+                await self.client.edit_message(
+                    chat_id,
+                    last_msg_id,
+                    last_msg_text,
+                    link_preview=last_msg_link_preview,
+                )
+                await self.client.edit_message(
+                    message, msg_text, link_preview=msg_link_preview
+                )
             except MessageIdInvalidError:
                 await utils.answer(message, self.strings("undo_merge_fail"))
         else:
@@ -270,28 +282,25 @@ class ApodiktumMsgMergerMod(loader.Module):
 
         chat_id = utils.get_chat_id(message)
 
-        if (
-            (
-                self.config["whitelist"]
-                and chat_id not in self.config["chatlist"]
-            )
-            or (
-                not self.config["whitelist"]
-                and chat_id in self.config["chatlist"]
-            )
+        if (self.config["whitelist"] and chat_id not in self.config["chatlist"]) or (
+            not self.config["whitelist"] and chat_id in self.config["chatlist"]
         ):
             return
         last_msg = None
         if self.config["ignore_prefix"]:
             for prefix in self.config["ignore_prefix"]:
                 ignore_prefix_len = len(utils.escape_html(prefix))
-                if utils.remove_html(message.text)[:ignore_prefix_len] == utils.escape_html(prefix):
+                if utils.remove_html(message.text)[
+                    :ignore_prefix_len
+                ] == utils.escape_html(prefix):
                     return
 
         if self.config["skip_prefix"]:
             for prefix in self.config["skip_prefix"]:
                 skip_prefix_len = len(utils.escape_html(prefix))
-                if utils.remove_html(message.text)[:skip_prefix_len] == utils.escape_html(prefix):
+                if utils.remove_html(message.text)[
+                    :skip_prefix_len
+                ] == utils.escape_html(prefix):
                     text = message.text.replace(utils.escape_html(prefix), "", 1)
                     if len(text) > 0:
                         try:
@@ -331,18 +340,17 @@ class ApodiktumMsgMergerMod(loader.Module):
             or (
                 self.config["skip_reply"]
                 and not self.config["merge_own_reply"]
-                and (
-                    message.is_reply
-                    or last_msg.is_reply
-                )
+                and (message.is_reply or last_msg.is_reply)
             )
             or (
-                last_msg.is_reply and message.is_reply and not self.config["merge_own_reply"]
+                last_msg.is_reply
+                and message.is_reply
+                and not self.config["merge_own_reply"]
             )
         ):
             return
 
-        if(
+        if (
             last_msg.sender_id != self.tg_id
             or not isinstance(last_msg, Message)
             or last_msg.via_bot
@@ -362,20 +370,20 @@ class ApodiktumMsgMergerMod(loader.Module):
         if self.config["ignore_prefix"]:
             for prefix in self.config["ignore_prefix"]:
                 ignore_prefix_len = len(utils.escape_html(prefix))
-                if utils.remove_html(last_msg.text)[:ignore_prefix_len] == utils.escape_html(prefix):
+                if utils.remove_html(last_msg.text)[
+                    :ignore_prefix_len
+                ] == utils.escape_html(prefix):
                     return
 
         if (
-            (
-                self.config["edit_timeout"]
-                and (datetime.now(timezone.utc) - (last_msg.edit_date or last_msg.date)).total_seconds() > self.config["edit_timeout"] * 60
-            )
+            self.config["edit_timeout"]
             and (
-                (
-                    self.config["merge_own_reply"] and not message.is_reply
-                )
-                or not self.config["merge_own_reply"]
-            )
+                datetime.now(timezone.utc) - (last_msg.edit_date or last_msg.date)
+            ).total_seconds()
+            > self.config["edit_timeout"] * 60
+        ) and (
+            (self.config["merge_own_reply"] and not message.is_reply)
+            or not self.config["merge_own_reply"]
         ):
             return
 
@@ -386,16 +394,8 @@ class ApodiktumMsgMergerMod(loader.Module):
             text += self.config["new_line_pref"]
         text += message.text
 
-        if (
-            (
-                message.is_reply
-                or self.config["reverse_merge"]
-            )
-            and
-            (
-                not self.config["merge_own_reply"]
-                or not message.is_reply
-            )
+        if (message.is_reply or self.config["reverse_merge"]) and (
+            not self.config["merge_own_reply"] or not message.is_reply
         ):
             message, last_msg = last_msg, message
             message_text = last_msg.text
@@ -404,26 +404,24 @@ class ApodiktumMsgMergerMod(loader.Module):
             message_text = message.text
             last_msg_text = last_msg.text
         if self.config["link_preview"] is None:
-            link_preview = getattr(message.media, "webpage", False) or getattr(last_msg.media, "webpage", False)
+            link_preview = getattr(message.media, "webpage", False) or getattr(
+                last_msg.media, "webpage", False
+            )
         else:
             link_preview = bool(self.config["link_preview"])
         try:
-            if (
-                self.config["reverse_merge"]
-                and (
-                    self.config["merge_own_reply"]
-                    and (
-                        last_msg.is_reply
-                        or message.is_reply
-                        )
-                    )
+            if self.config["reverse_merge"] and (
+                self.config["merge_own_reply"]
+                and (last_msg.is_reply or message.is_reply)
             ):
                 if last_msg.is_reply:
                     reply = await last_msg.get_reply_message()
                 else:
                     reply = await message.get_reply_message()
                 await last_msg.delete()
-                msg = await last_msg.client.send_message(chat_id, text, reply_to=reply, link_preview=link_preview)
+                msg = await last_msg.client.send_message(
+                    chat_id, text, reply_to=reply, link_preview=link_preview
+                )
             else:
                 msg = await last_msg.edit(text, link_preview=link_preview)
 
@@ -434,7 +432,9 @@ class ApodiktumMsgMergerMod(loader.Module):
                     and not self.config["reverse_merge"]
                     and message.is_reply
                 ):
-                    await message.edit(self.config["own_reply_msg"], link_preview=link_preview)
+                    await message.edit(
+                        self.config["own_reply_msg"], link_preview=link_preview
+                    )
                 else:
                     await message.delete()
             self.merged_msgs.clear()

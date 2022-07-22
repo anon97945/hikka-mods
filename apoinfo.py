@@ -1,4 +1,4 @@
-__version__ = (0, 1, 24)
+__version__ = (0, 1, 25)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -47,7 +47,10 @@ class ApodiktumInfoMod(loader.Module):
         "_cfg_cst_bnr": "Custom Banner.",
         "_cfg_cst_btn": "Custom button. Leave empty to remove button.",
         "_cfg_cst_frmt": "Custom fileformat for Banner.",
-        "_cfg_cst_msg": "Custom message for info. May contain {me}, {version}, {build}, {prefix}, {platform}, {upd}, {uptime} keywords.",
+        "_cfg_cst_msg": (
+            "Custom message for info. May contain {me}, {version}, {build}, {prefix},"
+            " {platform}, {upd}, {uptime} keywords."
+        ),
         "_cfg_inline_banner": "Set `True` in order to disable an inline media banner.",
         "build": "Build",
         "description": "ℹ This will not compromise any sensitive info.",
@@ -62,16 +65,23 @@ class ApodiktumInfoMod(loader.Module):
         "version": "Version",
     }
 
-    strings_en = {
-    }
+    strings_en = {}
 
     strings_de = {
         "_cfg_banner": "Setzen Sie `True`, um das Media Banner zu deaktivieren.",
         "_cfg_cst_bnr": "Benutzerdefiniertes Banner.",
-        "_cfg_cst_btn": "Benutzerdefinierte Schaltfläche für Informationen. Leer lassen, um die Schaltfläche zu entfernen.",
+        "_cfg_cst_btn": (
+            "Benutzerdefinierte Schaltfläche für Informationen. Leer lassen, um die"
+            " Schaltfläche zu entfernen."
+        ),
         "_cfg_cst_frmt": "Benutzerdefiniertes Dateiformat für das Banner.",
-        "_cfg_cst_msg": "Benutzerdefinierte Nachricht für Info. Kann die Schlüsselwörter {me}, {version}, {build}, {prefix}, {platform}, {upd}, {uptime} enthalten.",
-        "_cfg_inline_banner": "Setzen Sie `True`, um das Inline Media Banner zu deaktivieren.",
+        "_cfg_cst_msg": (
+            "Benutzerdefinierte Nachricht für Info. Kann die Schlüsselwörter {me},"
+            " {version}, {build}, {prefix}, {platform}, {upd}, {uptime} enthalten."
+        ),
+        "_cfg_inline_banner": (
+            "Setzen Sie `True`, um das Inline Media Banner zu deaktivieren."
+        ),
         "_cmd_doc_capoinfo": "Dadurch wird die Konfiguration für das Modul geöffnet.",
         "_ihandle_doc_info": "Отправить информацию о юзерботе",
         "build": "Build",
@@ -88,10 +98,17 @@ class ApodiktumInfoMod(loader.Module):
     strings_ru = {
         "_cfg_banner": "Поставь `True`, чтобы отключить баннер-картинку.",
         "_cfg_cst_bnr": "Кастомный баннер.",
-        "_cfg_cst_btn": "Кастомная кнопка в сообщении в info. Оставь пустым, чтобы убрать кнопку.",
+        "_cfg_cst_btn": (
+            "Кастомная кнопка в сообщении в info. Оставь пустым, чтобы убрать кнопку."
+        ),
         "_cfg_cst_frmt": "Кастомный формат файла для баннера.",
-        "_cfg_cst_msg": "Кастомный текст сообщения в info. Может содержать ключевые слова {me}, {version}, {build}, {prefix}, {platform}, {upd}, {uptime}.",
-        "_cfg_inline_banner": "Установите `True`, чтобы отключить встроенный медиа-баннер",
+        "_cfg_cst_msg": (
+            "Кастомный текст сообщения в info. Может содержать ключевые слова {me},"
+            " {version}, {build}, {prefix}, {platform}, {upd}, {uptime}."
+        ),
+        "_cfg_inline_banner": (
+            "Установите `True`, чтобы отключить встроенный медиа-баннер"
+        ),
         "_cmd_doc_capoinfo": "Это откроет конфиг для модуля.",
         "_ihandle_doc_info": "Отправить информацию о юзерботе.",
         "build": "Сборка",
@@ -274,12 +291,19 @@ class ApodiktumInfoMod(loader.Module):
             repo = git.Repo()
             diff = repo.git.log(["HEAD..origin/master", "--oneline"])
             upd = (
-                self.strings("update_required").format({utils.escape_html(self.get_prefix())}) if diff else self.strings("up-to-date")
+                self.strings("update_required").format(
+                    {utils.escape_html(self.get_prefix())}
+                )
+                if diff
+                else self.strings("up-to-date")
             )
         except Exception:
             upd = ""
 
-        me = f'<b><a href="tg://user?id={self._me.id}">{utils.escape_html(get_display_name(self._me))}</a></b>'
+        me = (
+            "<b><a"
+            f' href="tg://user?id={self._me.id}">{utils.escape_html(get_display_name(self._me))}</a></b>'
+        )
         version = f'<i>{".".join(list(map(str, list(main.__version__))))}</i>'
         build = f'<a href="https://github.com/hikariatama/Hikka/commit/{ver}">#{ver[:8]}</a>'  # fmt: skip
         prefix = f"«<code>{utils.escape_html(self.get_prefix())}</code>»"
@@ -351,7 +375,9 @@ class ApodiktumInfoMod(loader.Module):
             "description": self.strings("description"),
             msg_type: self._render_info(),
             self.config["custom_format"]: self.config["custom_banner"],
-            "thumb": "https://github.com/hikariatama/Hikka/raw/master/assets/hikka_pfp.png",
+            "thumb": (
+                "https://github.com/hikariatama/Hikka/raw/master/assets/hikka_pfp.png"
+            ),
             "reply_markup": btns,
         }
 
@@ -396,5 +422,5 @@ class ApodiktumInfoMod(loader.Module):
             reply_markup=btns,
             **{}
             if self.config["disable_banner"]
-            else {self.config["custom_format"]: self.config["custom_banner"]}
+            else {self.config["custom_format"]: self.config["custom_banner"]},
         )

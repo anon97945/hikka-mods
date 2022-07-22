@@ -1,4 +1,4 @@
-__version__ = (0, 0, 23)
+__version__ = (0, 0, 24)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -36,6 +36,7 @@ class ApodiktumSaveMessageMod(loader.Module):
     """
     Get Message/Media from given link (also works for forward restricted content).
     """
+
     strings = {
         "name": "Apo SaveMessage",
         "developer": "@anon97945",
@@ -44,8 +45,7 @@ class ApodiktumSaveMessageMod(loader.Module):
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
     }
 
-    strings_en = {
-    }
+    strings_en = {}
 
     strings_de = {
         "done": "<b>Weiterleitung zu gespeicherten Daten abgeschlossen.</b>",
@@ -91,11 +91,16 @@ class ApodiktumSaveMessageMod(loader.Module):
         if not args:
             return
         if not self.apo_lib.utils.get_ids_from_tglink(args):
-            return await utils.answer(message, self.apo_lib.utils.get_str("invalid_link", self.all_strings, message))
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("invalid_link", self.all_strings, message),
+            )
         channel_id, msg_id = self.apo_lib.utils.get_ids_from_tglink(args)
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
         msgs = await message.client.send_message(self._id, message=msgs)
-        return await utils.answer(message, self.apo_lib.utils.get_str("done", self.all_strings, message))
+        return await utils.answer(
+            message, self.apo_lib.utils.get_str("done", self.all_strings, message)
+        )
 
     async def smhcmd(self, message: Message):
         """<messagelink> to forward message/media to current chat."""
@@ -103,8 +108,13 @@ class ApodiktumSaveMessageMod(loader.Module):
         if not args:
             return
         if not self.apo_lib.utils.get_ids_from_tglink(args):
-            return await utils.answer(message, self.apo_lib.utils.get_str("invalid_link", self.all_strings, message))
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("invalid_link", self.all_strings, message),
+            )
         channel_id, msg_id = self.apo_lib.utils.get_ids_from_tglink(args)
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
-        msgs = await message.client.send_message(utils.get_chat_id(message), message=msgs)
+        msgs = await message.client.send_message(
+            utils.get_chat_id(message), message=msgs
+        )
         return await message.delete()

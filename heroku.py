@@ -1,4 +1,4 @@
-__version__ = (0, 0, 29)
+__version__ = (0, 0, 30)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -42,85 +42,137 @@ class ApodiktumHerokuManagerMod(loader.Module):
     """
     Show Remaining Dyno Usage And Manage The Settings Of Your 🦸🏼‍♂️ Hero!ku Hikka Instance.
     """
+
     strings = {
         "name": "Apo HerokuManager",
         "developer": "@anon97945",
         "args_error": "<b>[🦸🏼‍♂️ Hero!ku]</b> Too many args are given.",
-        "dyno_usage": ("<b><i><u>Dyno Usage</u></i></b>:\n"
-                       "\nDyno usage for <code>Hikka Userbot</code>:\n"
-                       "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]\n"
-                       "Dyno hours quota remaining this month:\n"
-                       "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]"),
+        "dyno_usage": (
+            "<b><i><u>Dyno Usage</u></i></b>:\n"
+            "\nDyno usage for <code>Hikka Userbot</code>:\n"
+            "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]\n"
+            "Dyno hours quota remaining this month:\n"
+            "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]"
+        ),
         "get_usage": "<b>[🦸🏼‍♂️ Hero!ku]</b> Getting Dyno usage...</b>",
         "get_var": "<b>[🦸🏼‍♂️ Hero!ku]</b> Getting variable...</b>",
         "no_args": "<b>[🦸🏼‍♂️ Hero!ku]</b> No args are given...</b>",
-        "no_force": "<b>[🦸🏼‍♂️ Hero!ku]</b> You must use '--force' but this will leak credentials!</b>",
+        "no_force": (
+            "<b>[🦸🏼‍♂️ Hero!ku]</b> You must use '--force' but this will leak"
+            " credentials!</b>"
+        ),
         "restarted": "<b>[🦸🏼‍♂️ Hero!ku]</b> Restart finished.",
         "set_var": "<b>[🦸🏼‍♂️ Hero!ku]</b> Setting variable...</b>",
-        "usage_error": ("<b>Error:</b> An error occured.\n"
-                        "<code>{}</code>"),
-        "var_added": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Variable successfully added:\n"
-                      "<code>{}</code> = <code>{}</code>\n\n"
-                      "<b>The Heroku Dyno will now be restarted.</b>"),
-        "var_changed": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Variable successfully changed to:\n"
-                        "<code>{}</code> = <code>{}</code>\n\n"
-                        "<b>The Heroku Dyno will now be restarted.</b>"),
-        "var_deleted": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Variable successfully deleted:\n"
-                        "<code>{}</code>\n\n"
-                        "<b>The Heroku Dyno will now be restarted.</b>"),
-        "var_not_exists": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Variable does not exist:\n"
-                           "<code>{}</code>"),
-        "var_settings": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Current Config:\n"
-                         "<code>{}</code> = <code>{}</code>"),
-        "wrong_platform": "[🦸🏼‍♂️ Hero!ku] This module only works on Heroku. {} is not supported.",
+        "usage_error": "<b>Error:</b> An error occured.\n<code>{}</code>",
+        "var_added": (
+            "<b>[🦸🏼‍♂️ Hero!ku]</b> Variable successfully added:\n"
+            "<code>{}</code> = <code>{}</code>\n\n"
+            "<b>The Heroku Dyno will now be restarted.</b>"
+        ),
+        "var_changed": (
+            "<b>[🦸🏼‍♂️ Hero!ku]</b> Variable successfully changed to:\n"
+            "<code>{}</code> = <code>{}</code>\n\n"
+            "<b>The Heroku Dyno will now be restarted.</b>"
+        ),
+        "var_deleted": (
+            "<b>[🦸🏼‍♂️ Hero!ku]</b> Variable successfully deleted:\n"
+            "<code>{}</code>\n\n"
+            "<b>The Heroku Dyno will now be restarted.</b>"
+        ),
+        "var_not_exists": (
+            "<b>[🦸🏼‍♂️ Hero!ku]</b> Variable does not exist:\n<code>{}</code>"
+        ),
+        "var_settings": (
+            "<b>[🦸🏼‍♂️ Hero!ku]</b> Current Config:\n<code>{}</code> = <code>{}</code>"
+        ),
+        "wrong_platform": (
+            "[🦸🏼‍♂️ Hero!ku] This module only works on Heroku. {} is not supported."
+        ),
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
     }
 
-    strings_en = {
-    }
+    strings_en = {}
 
-    strings_de = {
-    }
+    strings_de = {}
 
     strings_ru = {
-        "_cls_doc": "Показать оставшееся использование Dyno и управлять настройками вашего экземпляра 🦸🏼‍♂️ Hero!ku Hikka.",
-        "_cmd_doc_herodel": ("⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Удалить переменную настроек Heroku.\n"
-                             "⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .herodel <variable>"),
-        "_cmd_doc_heroget": ("⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Получить переменную настроек Heroku.\n"
-                             "⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .heroget <variable>"),
-        "_cmd_doc_herogetall": ("⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Получить все переменные настроек Heroku. Это может привести к утечке API!\n"
-                                "⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .herogetall --force"),
-        "_cmd_doc_heroset": ("⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Установить переменную настроек Heroku.\n"
-                             "⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .heroset <variable> <some settings>"),
-        "_cmd_doc_herousage": "⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Получить использование Heroku Dyno.",
+        "_cls_doc": (
+            "Показать оставшееся использование Dyno и управлять настройками вашего"
+            " экземпляра 🦸🏼‍♂️ Hero!ku Hikka."
+        ),
+        "_cmd_doc_herodel": (
+            "⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭"
+            " ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Удалить переменную настроек"
+            " Heroku.\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬"
+            "   - Example: .herodel <variable>"
+        ),
+        "_cmd_doc_heroget": (
+            "⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭"
+            " ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Получить переменную настроек"
+            " Heroku.\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬"
+            "   - Example: .heroget <variable>"
+        ),
+        "_cmd_doc_herogetall": (
+            "⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭"
+            " ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Получить все переменные настроек Heroku."
+            " Это может привести к утечке API!\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭"
+            " ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .herogetall"
+            " --force"
+        ),
+        "_cmd_doc_heroset": (
+            "⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭"
+            " ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Установить переменную настроек"
+            " Heroku.\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬"
+            "   - Example: .heroset <variable> <some settings>"
+        ),
+        "_cmd_doc_herousage": (
+            "⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭"
+            " ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Получить использование Heroku Dyno."
+        ),
         "args_error": "<b>[🦸🏼‍♂️ Hero!ku]</b> Задано слишком много аргументов.",
-        "dyno_usage": ("<b><i><u>Dyno Usage</u></i></b>:\n"
-                       "\nИспользование Дино для <code>Hikka Userbot</code>:\n"
-                       "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]\n"
-                       "Осталось часов Дино по квоте в месяц:\n"
-                       "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]"),
+        "dyno_usage": (
+            "<b><i><u>Dyno Usage</u></i></b>:\n"
+            "\nИспользование Дино для <code>Hikka Userbot</code>:\n"
+            "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]\n"
+            "Осталось часов Дино по квоте в месяц:\n"
+            "    • <code>{}h {}m</code> <b>|</b> [<code>{}%</code>]"
+        ),
         "get_usage": "<b>[🦸🏼‍♂️ Hero!ku]</b> Получение использования Dyno...</b>",
         "get_var": "<b>[🦸🏼‍♂️ Hero!ku]</b> Получение переменной...</b>",
         "no_args": "<b>[🦸🏼‍♂️ Hero!ku]</b> Аргументы не указаны...</b>",
-        "no_force": "<b>[🦸🏼‍♂️ Hero!ku]</b> Вы должны использовать '--force', но это приведет к утечке учетных данных!</b>",
+        "no_force": (
+            "<b>[🦸🏼‍♂️ Hero!ku]</b> Вы должны использовать '--force', но это приведет к"
+            " утечке учетных данных!</b>"
+        ),
         "restarted": "<b>[🦸🏼‍♂️ Hero!ku]</b> Перезагрузка завершена.",
         "set_var": "<b>[🦸🏼‍♂️ Hero!ku]</b> Настройка переменной...</b>",
-        "usage_error": ("<b>Error:</b> Произошла ошибка.\n"
-                        "<code>{}</code>"),
-        "var_added": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Переменная успешно добавлена:\n"
-                      "<code>{}</code> = <code>{}</code>\n\n"
-                      "<b>Теперь Heroku Dyno будет перезапущен.</b>"),
-        "var_changed": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Переменная успешно изменена на:\n"
-                        "<code>{}</code> = <code>{}</code>\n\n"
-                        "<b>Теперь Heroku Dyno будет перезапущен.</b>"),
-        "var_deleted": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Переменная успешно удалена:\n"
-                        "<code>{}</code>\n\n"
-                        "<b>Теперь Heroku Dyno будет перезапущен.</b>"),
-        "var_not_exists": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Переменная не существует:\n"
-                           "<code>{}</code>"),
-        "var_settings": ("<b>[🦸🏼‍♂️ Hero!ku]</b> Текущая конфигурацияТекущая конфигурация:\n"
-                         "<code>{}</code> = <code>{}</code>"),
-        "wrong_platform": "[🦸🏼‍♂️ Hero!ku] Этот модуль работает только на Heroku. {} не поддерживается.",
+        "usage_error": "<b>Error:</b> Произошла ошибка.\n<code>{}</code>",
+        "var_added": (
+            "<b>[🦸🏼‍♂️ Hero!ku]</b> Переменная успешно добавлена:\n"
+            "<code>{}</code> = <code>{}</code>\n\n"
+            "<b>Теперь Heroku Dyno будет перезапущен.</b>"
+        ),
+        "var_changed": (
+            "<b>[🦸🏼‍♂️ Hero!ku]</b> Переменная успешно изменена на:\n"
+            "<code>{}</code> = <code>{}</code>\n\n"
+            "<b>Теперь Heroku Dyno будет перезапущен.</b>"
+        ),
+        "var_deleted": (
+            "<b>[🦸🏼‍♂️ Hero!ku]</b> Переменная успешно удалена:\n"
+            "<code>{}</code>\n\n"
+            "<b>Теперь Heroku Dyno будет перезапущен.</b>"
+        ),
+        "var_not_exists": (
+            "<b>[🦸🏼‍♂️ Hero!ku]</b> Переменная не существует:\n<code>{}</code>"
+        ),
+        "var_settings": (
+            "<b>[🦸🏼‍♂️ Hero!ku]</b> Текущая конфигурацияТекущая конфигурация:\n"
+            "<code>{}</code> = <code>{}</code>"
+        ),
+        "wrong_platform": (
+            "[🦸🏼‍♂️ Hero!ku] Этот модуль работает только на Heroku. {} не"
+            " поддерживается."
+        ),
     }
 
     all_strings = {
@@ -170,20 +222,28 @@ class ApodiktumHerokuManagerMod(loader.Module):
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
         ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Get Heroku Dyno Usage.
         """
-        msg = await utils.answer(message, self.apo_lib.utils.get_str("get_usage", self.all_strings, message))
-        useragent = ("Mozilla/5.0 (Linux; Android 10; SM-G975F)"
-                     "AppleWebKit/537.36 (KHTML, like Gecko)"
-                     "Chrome/80.0.3987.149 Mobile Safari/537.36"
-                     )
+        msg = await utils.answer(
+            message, self.apo_lib.utils.get_str("get_usage", self.all_strings, message)
+        )
+        useragent = (
+            "Mozilla/5.0 (Linux; Android 10; SM-G975F)"
+            "AppleWebKit/537.36 (KHTML, like Gecko)"
+            "Chrome/80.0.3987.149 Mobile Safari/537.36"
+        )
         headers = {
-         "User-Agent": useragent,
-         "Authorization": f"Bearer {self._heroku_api_key}",
-         "Accept": "application/vnd.heroku+json; version=3.account-quotas",
+            "User-Agent": useragent,
+            "Authorization": f"Bearer {self._heroku_api_key}",
+            "Accept": "application/vnd.heroku+json; version=3.account-quotas",
         }
         path = f"/accounts/{self._herokuid}/actions/get-quota"
         r = requests.get(self._heroku_api + path, headers=headers)
         if r.status_code != 200:
-            return await utils.answer(message, self.apo_lib.utils.get_str("usage_error", self.all_strings, message).format(str(r.reason)))
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str(
+                    "usage_error", self.all_strings, message
+                ).format(str(r.reason)),
+            )
         result = r.json()
         quota = result["account_quota"]
         quota_used = result["quota_used"]
@@ -213,7 +273,12 @@ class ApodiktumHerokuManagerMod(loader.Module):
         AppMinutes = math.floor(AppQuotaUsed % 60)
         # AppName = self._heroku_app_name
         await asyncio.sleep(1.5)
-        return await utils.answer(msg, self.apo_lib.utils.get_str("dyno_usage", self.all_strings, message).format(AppHours, AppMinutes, AppPercentage, hours, minutes, percentage))
+        return await utils.answer(
+            msg,
+            self.apo_lib.utils.get_str("dyno_usage", self.all_strings, message).format(
+                AppHours, AppMinutes, AppPercentage, hours, minutes, percentage
+            ),
+        )
 
     @loader.owner
     async def herosetcmd(self, message: Message):
@@ -225,15 +290,30 @@ class ApodiktumHerokuManagerMod(loader.Module):
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             heroku_var = self._heroku_app.config()
-            msg = await utils.answer(message, self.apo_lib.utils.get_str("set_var", self.all_strings, message))
+            msg = await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("set_var", self.all_strings, message),
+            )
             await asyncio.sleep(1.5)
             if args[0] in heroku_var:
-                msg = await utils.answer(msg, self.apo_lib.utils.get_str("var_changed", self.all_strings, message).format(args[0], " ".join(args[1:])))
+                msg = await utils.answer(
+                    msg,
+                    self.apo_lib.utils.get_str(
+                        "var_changed", self.all_strings, message
+                    ).format(args[0], " ".join(args[1:])),
+                )
             else:
-                msg = await utils.answer(msg, self.apo_lib.utils.get_str("var_added", self.all_strings, message).format(args[0], " ".join(args[1:])))
+                msg = await utils.answer(
+                    msg,
+                    self.apo_lib.utils.get_str(
+                        "var_added", self.all_strings, message
+                    ).format(args[0], " ".join(args[1:])),
+                )
             heroku_var[args[0]] = " ".join(args[1:])
             return
-        return await utils.answer(message, self.apo_lib.utils.get_str("no_var", self.all_strings, message))
+        return await utils.answer(
+            message, self.apo_lib.utils.get_str("no_var", self.all_strings, message)
+        )
 
     @loader.owner
     async def herogetcmd(self, message: Message):
@@ -245,14 +325,32 @@ class ApodiktumHerokuManagerMod(loader.Module):
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             if len(args) > 1:
-                return await utils.answer(message, self.apo_lib.utils.get_str("args_error", self.all_strings, message))
+                return await utils.answer(
+                    message,
+                    self.apo_lib.utils.get_str("args_error", self.all_strings, message),
+                )
             heroku_var = self._heroku_app.config()
-            msg = await utils.answer(message, self.apo_lib.utils.get_str("get_var", self.all_strings, message))
+            msg = await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("get_var", self.all_strings, message),
+            )
             await asyncio.sleep(1.5)
             if args[0] in heroku_var:
-                return await utils.answer(msg, self.apo_lib.utils.get_str("var_settings", self.all_strings, message).format(args[0], heroku_var[args[0]]))
-            return await utils.answer(msg, self.apo_lib.utils.get_str("var_not_exists", self.all_strings, message).format(args[0]))
-        return await utils.answer(message, self.apo_lib.utils.get_str("no_var", self.all_strings, message))
+                return await utils.answer(
+                    msg,
+                    self.apo_lib.utils.get_str(
+                        "var_settings", self.all_strings, message
+                    ).format(args[0], heroku_var[args[0]]),
+                )
+            return await utils.answer(
+                msg,
+                self.apo_lib.utils.get_str(
+                    "var_not_exists", self.all_strings, message
+                ).format(args[0]),
+            )
+        return await utils.answer(
+            message, self.apo_lib.utils.get_str("no_var", self.all_strings, message)
+        )
 
     @loader.owner
     async def herogetallcmd(self, message: Message):
@@ -265,9 +363,15 @@ class ApodiktumHerokuManagerMod(loader.Module):
         args = str(args).split()
         if args and args[0] == "--force":
             if len(args) > 1:
-                return await utils.answer(message, self.apo_lib.utils.get_str("args_error", self.all_strings, message))
+                return await utils.answer(
+                    message,
+                    self.apo_lib.utils.get_str("args_error", self.all_strings, message),
+                )
             heroku_var = self._heroku_app.config()
-            msg = await utils.answer(message, self.apo_lib.utils.get_str("get_var", self.all_strings, message))
+            msg = await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("get_var", self.all_strings, message),
+            )
             await asyncio.sleep(1.5)
             cmpl_cnfg = ""
             for x in heroku_var.to_dict():
@@ -278,7 +382,9 @@ class ApodiktumHerokuManagerMod(loader.Module):
                     + "</code>\n\n"
                 )
             return await utils.answer(msg, cmpl_cnfg)
-        return await utils.answer(message, self.apo_lib.utils.get_str("no_force", self.all_strings, message))
+        return await utils.answer(
+            message, self.apo_lib.utils.get_str("no_force", self.all_strings, message)
+        )
 
     @loader.owner
     async def herodelcmd(self, message: Message):
@@ -290,13 +396,31 @@ class ApodiktumHerokuManagerMod(loader.Module):
         args = utils.get_args_raw(message.message)
         if args := str(args).split():
             if len(args) > 1:
-                return await utils.answer(message, self.apo_lib.utils.get_str("args_error", self.all_strings, message))
+                return await utils.answer(
+                    message,
+                    self.apo_lib.utils.get_str("args_error", self.all_strings, message),
+                )
             heroku_var = self._heroku_app.config()
-            msg = await utils.answer(message, self.apo_lib.utils.get_str("get_var", self.all_strings, message))
+            msg = await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("get_var", self.all_strings, message),
+            )
             await asyncio.sleep(1.5)
             if args[0] in heroku_var:
-                msg = await utils.answer(msg, self.apo_lib.utils.get_str("var_deleted", self.all_strings, message).format(args[0]))
+                msg = await utils.answer(
+                    msg,
+                    self.apo_lib.utils.get_str(
+                        "var_deleted", self.all_strings, message
+                    ).format(args[0]),
+                )
                 del heroku_var[args[0]]
                 return
-            return await utils.answer(message, self.apo_lib.utils.get_str("var_not_exists", self.all_strings, message).format(args[0]))
-        return await utils.answer(message, self.apo_lib.utils.get_str("no_var", self.all_strings, message))
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str(
+                    "var_not_exists", self.all_strings, message
+                ).format(args[0]),
+            )
+        return await utils.answer(
+            message, self.apo_lib.utils.get_str("no_var", self.all_strings, message)
+        )

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 22)
+__version__ = (0, 0, 23)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -53,6 +53,7 @@ class ApodiktumPyPNGMod(loader.Module):
     """
     Converts link/file from Py to PNG.
     """
+
     strings = {
         "name": "Apo PyPNG",
         "developer": "@anon97945",
@@ -62,14 +63,11 @@ class ApodiktumPyPNGMod(loader.Module):
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
     }
 
-    strings_en = {
-    }
+    strings_en = {}
 
-    strings_de = {
-    }
+    strings_de = {}
 
-    strings_ru = {
-    }
+    strings_ru = {}
 
     all_strings = {
         "strings": strings,
@@ -102,24 +100,38 @@ class ApodiktumPyPNGMod(loader.Module):
         """
         reply to url or py file
         """
-        await utils.answer(message, self.apo_lib.utils.get_str("py2png", self.all_strings, message))
+        await utils.answer(
+            message, self.apo_lib.utils.get_str("py2png", self.all_strings, message)
+        )
         reply = await message.get_reply_message()
         file = BytesIO()
         pngfile = BytesIO()
         if not reply:
-            return await utils.answer(message, self.apo_lib.utils.get_str("no_file", self.all_strings, message))
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_file", self.all_strings, message),
+            )
         if reply.file:
             await message.client.download_file(reply, file)
             file.name = reply.file.name
         elif res := await _filefromurl(reply):
             file, file.name = res
         else:
-            return await utils.answer(message, self.apo_lib.utils.get_str("no_url", self.all_strings, message))
+            return await utils.answer(
+                message, self.apo_lib.utils.get_str("no_url", self.all_strings, message)
+            )
         file.seek(0)
         byte_str = file.read()
         text = byte_str.decode("utf-8")
-        pygments.highlight(text, Python3Lexer(), ImageFormatter(font_name="DejaVu Sans Mono", line_numbers=True), pngfile)
+        pygments.highlight(
+            text,
+            Python3Lexer(),
+            ImageFormatter(font_name="DejaVu Sans Mono", line_numbers=True),
+            pngfile,
+        )
         pngfile.name = f"{os.path.splitext(file.name)[0]}.png"
         pngfile.seek(0)
-        await message.client.send_file(message.to_id, pngfile, force_document=True, reply_to=reply)
+        await message.client.send_file(
+            message.to_id, pngfile, force_document=True, reply_to=reply
+        )
         await message.delete()

@@ -1,4 +1,4 @@
-__version__ = (0, 1, 86)
+__version__ = (0, 1, 87)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -58,13 +58,25 @@ async def audiohandler(bytes_io_file, fn, fe):
     bytes_io_file.seek(0)
     bytes_io_file.name = fn + fe
     content = bytes_io_file.getvalue()
-    cmd = ['ffmpeg', '-y', '-i', 'pipe:', '-acodec', 'pcm_s16le', '-f', 'wav', '-ac', '1', 'pipe:']
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-i",
+        "pipe:",
+        "-acodec",
+        "pcm_s16le",
+        "-f",
+        "wav",
+        "-ac",
+        "1",
+        "pipe:",
+    ]
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, bufsize=-1)
     out, _ = p.communicate(input=content)
     p.stdin.close()
     bytes_io_file.name = f"{fn}.wav"
     fn, fe = os.path.splitext(bytes_io_file.name)
-    return BytesIO(out), fn, fe if out.startswith(b'RIFF\xff\xff\xff') else None
+    return BytesIO(out), fn, fe if out.startswith(b"RIFF\xff\xff\xff") else None
 
 
 async def makewaves(bytes_io_file, fn, fe):
@@ -72,7 +84,19 @@ async def makewaves(bytes_io_file, fn, fe):
     bytes_io_file.seek(0)
     bytes_io_file.name = fn + fe
     content = bytes_io_file.getvalue()
-    cmd = ['ffmpeg', '-y', '-i', 'pipe:', '-c:a', 'libopus', '-f', 'opus', '-ac', '2', 'pipe:']
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-i",
+        "pipe:",
+        "-c:a",
+        "libopus",
+        "-f",
+        "opus",
+        "-ac",
+        "2",
+        "pipe:",
+    ]
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, bufsize=-1)
     out, _ = p.communicate(input=content)
     p.stdin.close()
@@ -95,7 +119,7 @@ async def speedup(bytes_io_file, fn, fe, speed):
     y, sr = soundfile.read(bytes_io_file)
     y_stretch = pyrubberband.time_stretch(y, sr, speed)
     bytes_io_file.seek(0)
-    soundfile.write(bytes_io_file, y_stretch, sr, format='wav')
+    soundfile.write(bytes_io_file, y_stretch, sr, format="wav")
     bytes_io_file.seek(0)
     bytes_io_file.name = f"{fn}.wav"
     return bytes_io_file, fn, fe
@@ -117,19 +141,25 @@ class ApodiktumTTSMod(loader.Module):
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
     }
 
-    strings_en = {
-    }
+    strings_en = {}
 
     strings_de = {
         "_cfg_tts_lang": "Stellen Sie hier Ihren Sprachcode für TTS ein.",
         "_cfg_tts_speed": "Stellen Sie die gewünschte Sprechgeschwindigkeit ein.",
         "_cmd_doc_ctts": "Dadurch wird die Konfiguration für das Modul geöffnet.",
-        "needspeed": "Sie müssen einen Geschwindigkeitswert zwischen 0.25 und 3.0 angeben.",
+        "needspeed": (
+            "Sie müssen einen Geschwindigkeitswert zwischen 0.25 und 3.0 angeben."
+        ),
         "needvoice": "<b>[TTS]</b> Dieser Befehl benötigt eine Sprachnachricht.",
         "no_reply": "<b>[TTS]</b> Sie müssen auf eine Sprachnachricht antworten.",
-        "no_speed": "<b>[TTS]</b> Ihre Eingabe war ein nicht unterstützter Geschwindigkeitswert.",
+        "no_speed": (
+            "<b>[TTS]</b> Ihre Eingabe war ein nicht unterstützter"
+            " Geschwindigkeitswert."
+        ),
         "processing": "<b>[TTS]</b> Nachricht wird verarbeitet ...",
-        "tts_needs_text": "<b>[TTS]</b> Ich brauche Text, um ihn in Sprache umzuwandeln!",
+        "tts_needs_text": (
+            "<b>[TTS]</b> Ich brauche Text, um ihn in Sprache umzuwandeln!"
+        ),
     }
 
     strings_ru = {
@@ -139,7 +169,9 @@ class ApodiktumTTSMod(loader.Module):
         "needspeed": "Вам нужно предоставить значение скорости между 0.25 и 3.0",
         "needvoice": "<b>[TTS]</b> Этой команде нужно голосовое сообщение.",
         "no_reply": "<b>[TTS]</b> Вам нужно сделать реплай на голосовое сообщение.",
-        "no_speed": "<b>[TTS]</b> Ваш ввод является неподдерживаемым значением скорости.",
+        "no_speed": (
+            "<b>[TTS]</b> Ваш ввод является неподдерживаемым значением скорости."
+        ),
         "processing": "<b>[TTS]</b> Сообщение обрабатывается...",
         "tts_needs_text": "<b>[TTS]</b> Мне нужен текст для преобразования в речь!",
     }
@@ -199,9 +231,16 @@ class ApodiktumTTSMod(loader.Module):
             if message.is_reply:
                 text = (await message.get_reply_message()).message
             else:
-                await utils.answer(message, self.apo_lib.utils.get_str("tts_needs_text", self.all_strings, message))
+                await utils.answer(
+                    message,
+                    self.apo_lib.utils.get_str(
+                        "tts_needs_text", self.all_strings, message
+                    ),
+                )
                 return
-        msg = await utils.answer(message, self.apo_lib.utils.get_str("processing", self.all_strings, message))
+        msg = await utils.answer(
+            message, self.apo_lib.utils.get_str("processing", self.all_strings, message)
+        )
         tts = await utils.run_sync(gTTS, text, lang=self.config["tts_lang"])
         voice = BytesIO()
         await utils.run_sync(tts.write_to_fp, voice)
@@ -225,19 +264,33 @@ class ApodiktumTTSMod(loader.Module):
         """Speed up voice by x"""
         speed = utils.get_args_raw(message)
         if not message.is_reply:
-            await utils.answer(message, self.apo_lib.utils.get_str("no_reply", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_reply", self.all_strings, message),
+            )
             return
         replymsg = await message.get_reply_message()
         if not replymsg.voice:
-            await utils.answer(message, self.apo_lib.utils.get_str("needvoice", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("needvoice", self.all_strings, message),
+            )
             return
         if len(speed) == 0:
-            await utils.answer(message, self.apo_lib.utils.get_str("needspeed", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("needspeed", self.all_strings, message),
+            )
             return
         if not represents_speed(speed):
-            await utils.answer(message, self.apo_lib.utils.get_str("no_speed", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_speed", self.all_strings, message),
+            )
             return
-        msg = await utils.answer(message, self.apo_lib.utils.get_str("processing", self.all_strings, message))
+        msg = await utils.answer(
+            message, self.apo_lib.utils.get_str("processing", self.all_strings, message)
+        )
         ext = replymsg.file.ext
         voice = BytesIO()
         voice.name = replymsg.file.name

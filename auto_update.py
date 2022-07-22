@@ -1,4 +1,4 @@
-__version__ = (1, 0, 16)
+__version__ = (1, 0, 17)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -57,39 +57,61 @@ class ApodiktumAutoUpdateMod(loader.Module):
     """
     Automatically update your Hikka Userbot
     """
+
     strings = {
         "name": "Apo AutoUpdater",
         "developer": "@anon97945",
-        "_cfg_auto_update": "Whether the Hikka Userbot should automatically update or not.",
-        "_cfg_auto_update_delay": "Choose a delay to wait to start the automatic update.",
+        "_cfg_auto_update": (
+            "Whether the Hikka Userbot should automatically update or not."
+        ),
+        "_cfg_auto_update_delay": (
+            "Choose a delay to wait to start the automatic update."
+        ),
         "_cfg_update_msg_read": "Whether to mark the message as read or not.",
         "_cfg_update_skip": "The update was skipped due to {}.\n{}",
-        "updating": ("Hikka Userbot will be automatically updated in {} seconds.\n\n"
-                     "Changelog:\n{}"),
+        "updating": (
+            "Hikka Userbot will be automatically updated in {} seconds.\n\n"
+            "Changelog:\n{}"
+        ),
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
     }
 
-    strings_en = {
-    }
+    strings_en = {}
 
     strings_de = {
-        "_cfg_auto_update": "Ob der Hikka Userbot automatisch aktualisieren soll oder nicht.",
-        "_cfg_auto_update_delay": "Wählen Sie eine Wartezeit bis zum Start des automatischen Updates.",
-        "_cfg_update_msg_read": "Ob die Nachricht als gelesen markiert werden soll oder nicht.",
+        "_cfg_auto_update": (
+            "Ob der Hikka Userbot automatisch aktualisieren soll oder nicht."
+        ),
+        "_cfg_auto_update_delay": (
+            "Wählen Sie eine Wartezeit bis zum Start des automatischen Updates."
+        ),
+        "_cfg_update_msg_read": (
+            "Ob die Nachricht als gelesen markiert werden soll oder nicht."
+        ),
         "_cfg_update_skip": "Das Update wurde wegen {} übersprungen.\n{}",
-        "_cmd_doc_cautoupdate": "Dadurch wird die Konfiguration für das Modul geöffnet.",
-        "updating": ("Hikka Userbot wird in {} Sekunden automatisch aktualisiert.\n\n"
-                     "Changelog:\n{}"),
+        "_cmd_doc_cautoupdate": (
+            "Dadurch wird die Konfiguration für das Modul geöffnet."
+        ),
+        "updating": (
+            "Hikka Userbot wird in {} Sekunden automatisch aktualisiert.\n\n"
+            "Changelog:\n{}"
+        ),
     }
 
     strings_ru = {
-        "_cfg_auto_update": "Должен ли Hikka UserBot обновляться автоматически или нет.",
+        "_cfg_auto_update": (
+            "Должен ли Hikka UserBot обновляться автоматически или нет."
+        ),
         "_cfg_auto_update_delay": "Выберите задержку для автоматического обновления.",
-        "_cfg_update_msg_read": "Будет ли отмечать сообщение обновления как прочтённое или нет.",
+        "_cfg_update_msg_read": (
+            "Будет ли отмечать сообщение обновления как прочтённое или нет."
+        ),
         "_cfg_update_skip": "Обновление было пропущено из-за {}.\n{}",
         "_cmd_doc_cautoupdate": "Это откроет конфиг для модуля.",
-        "updating": ("Хикка будет автоматически обновлена через {} секунд.\n\n"
-                     "Список изменений:\n{}"),
+        "updating": (
+            "Хикка будет автоматически обновлена через {} секунд.\n\n"
+            "Список изменений:\n{}"
+        ),
     }
 
     all_strings = {
@@ -145,7 +167,9 @@ class ApodiktumAutoUpdateMod(loader.Module):
                 clear_mentions=True,
             )
 
-        logger.info(self.strings("updating").format(self.config["update_delay"], changes))
+        logger.info(
+            self.strings("updating").format(self.config["update_delay"], changes)
+        )
         await asyncio.sleep(self.config["update_delay"])
         try:
             return await message.click(0)
@@ -155,18 +179,16 @@ class ApodiktumAutoUpdateMod(loader.Module):
     async def _check_skip(self, message):
         last_commit = message.raw_text.splitlines()[5].lower()
         for x in skip_update:
-            if (
-                x.lower() in last_commit
-                and "revert" not in last_commit
-            ):
+            if x.lower() in last_commit and "revert" not in last_commit:
                 logger.info(self.strings("_cfg_update_skip").format(x, last_commit))
                 return True
         return False
 
     async def _check_on_load(self, client):
         if self.config["auto_update"]:
-            async for message in client.iter_messages(entity=self.inline.bot_id,
-                                                      limit=5):
+            async for message in client.iter_messages(
+                entity=self.inline.bot_id, limit=5
+            ):
                 if (
                     isinstance(message, Message)
                     and message.sender_id == self.inline.bot_id

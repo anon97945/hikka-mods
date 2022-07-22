@@ -60,8 +60,7 @@ class ApodiktumSkeletonMod(loader.Module):
         "skeleton_msg": "This is a skeleton message.",
     }
 
-    strings_en = {
-    }
+    strings_en = {}
 
     strings_de = {
         "_cfg_skel_bool": "Dies ist ein Skeleton Boolean Config.",
@@ -161,7 +160,10 @@ class ApodiktumSkeletonMod(loader.Module):
         """
         This is a skeleton command.
         """
-        await utils.answer(message, self.apo_lib.utils.get_str("skeleton_msg", self.all_strings, message))
+        await utils.answer(
+            message,
+            self.apo_lib.utils.get_str("skeleton_msg", self.all_strings, message),
+        )
         return
 
     async def skeletoargscmd(self, message):
@@ -170,12 +172,22 @@ class ApodiktumSkeletonMod(loader.Module):
         """
         args = utils.get_args_raw(message)
         if not args:
-            await utils.answer(message, self.apo_lib.utils.get_str("no_args", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_args", self.all_strings, message),
+            )
             return
         if not represents_int(args[0]):
-            await utils.answer(message, self.apo_lib.utils.get_str("no_int", self.all_strings, message))
+            await utils.answer(
+                message, self.apo_lib.utils.get_str("no_int", self.all_strings, message)
+            )
             return
-        await utils.answer(message, self.apo_lib.utils.get_str("skeleton_argmsg", self.all_strings, message).format(args))
+        await utils.answer(
+            message,
+            self.apo_lib.utils.get_str(
+                "skeleton_argmsg", self.all_strings, message
+            ).format(args),
+        )
 
     async def watcher(self, message):
         """

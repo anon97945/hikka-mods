@@ -1,4 +1,4 @@
-__version__ = (0, 0, 21)
+__version__ = (0, 0, 22)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -36,6 +36,7 @@ class ApodiktumShowViewsMod(loader.Module):
     """
     Send a message to get the current count of viewers.
     """
+
     strings = {
         "name": "Apo-ShowViews",
         "developer": "@anon97945",
@@ -47,14 +48,11 @@ class ApodiktumShowViewsMod(loader.Module):
         "views": "Total <code>{}</code> views.",
     }
 
-    strings_en = {
-    }
+    strings_en = {}
 
-    strings_de = {
-    }
+    strings_de = {}
 
-    strings_ru = {
-    }
+    strings_ru = {}
 
     all_strings = {
         "strings": strings,
@@ -99,12 +97,18 @@ class ApodiktumShowViewsMod(loader.Module):
         args = utils.get_args_raw(message)
         msg = None
         if not self.config["channel"]:
-            await utils.answer(message, self.apo_lib.utils.get_str("no_channel", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_channel", self.all_strings, message),
+            )
             return
         if message.is_reply:
             msg = await message.get_reply_message()
         elif not args:
-            await utils.answer(message, self.apo_lib.utils.get_str("no_args", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_args", self.all_strings, message),
+            )
             return
         await message.delete()
         if message.is_reply and msg.sender_id == self.tg_id:
@@ -124,7 +128,15 @@ class ApodiktumShowViewsMod(loader.Module):
         if message.is_reply:
             msg = await message.get_reply_message()
         else:
-            await utils.answer(message, self.apo_lib.utils.get_str("no_reply", self.all_strings, message))
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("no_reply", self.all_strings, message),
+            )
             return
         view_count = msg.views
-        await utils.answer(message, self.apo_lib.utils.get_str("views", self.all_strings, message).format(view_count))
+        await utils.answer(
+            message,
+            self.apo_lib.utils.get_str("views", self.all_strings, message).format(
+                view_count
+            ),
+        )

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 33)
+__version__ = (0, 0, 34)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -38,26 +38,39 @@ class ApodiktumPMLogMod(loader.Module):
     """
     Logs PMs to a group/channel
     """
+
     strings = {
         "name": "Apo PMLogger",
         "developer": "@anon97945",
         "_cfg_bots": "Whether to log bots or not.",
         "_cfg_log_group": "Group or channel ID where to send the PMs.",
         "_cfg_loglist": "Add telegram id's to log them.",
-        "_cfg_selfdestructive": "Whether selfdestructive media should be logged or not. This violates TG TOS!",
-        "_cfg_whitelist": "Whether the list is a for excluded(True) or included(False) chats.",
+        "_cfg_selfdestructive": (
+            "Whether selfdestructive media should be logged or not. This violates TG"
+            " TOS!"
+        ),
+        "_cfg_whitelist": (
+            "Whether the list is a for excluded(True) or included(False) chats."
+        ),
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
     }
 
-    strings_en = {
-    }
+    strings_en = {}
 
     strings_de = {
         "_cfg_bots": "Ob Bots geloggt werden sollen oder nicht.",
-        "_cfg_log_group": "Gruppen- oder Kanal-ID, an die die PMs gesendet werden sollen.",
+        "_cfg_log_group": (
+            "Gruppen- oder Kanal-ID, an die die PMs gesendet werden sollen."
+        ),
         "_cfg_loglist": "Fügen Sie Telegram-IDs hinzu, um sie zu protokollieren.",
-        "_cfg_selfdestructive": "Ob selbstzerstörende Medien geloggt werden sollen oder nicht. Dies verstößt gegen die TG TOS!",
-        "_cfg_whitelist": "Ob die Liste für ausgeschlossene (Wahr) oder eingeschlossene (Falsch) Chats ist.",
+        "_cfg_selfdestructive": (
+            "Ob selbstzerstörende Medien geloggt werden sollen oder nicht. Dies"
+            " verstößt gegen die TG TOS!"
+        ),
+        "_cfg_whitelist": (
+            "Ob die Liste für ausgeschlossene (Wahr) oder eingeschlossene (Falsch)"
+            " Chats ist."
+        ),
         "_cmd_doc_cpmlog": "Dadurch wird die Konfiguration für das Modul geöffnet.",
     }
 
@@ -65,8 +78,13 @@ class ApodiktumPMLogMod(loader.Module):
         "_cfg_bots": "Регистрировать ботов или нет",
         "_cfg_log_group": "Айди группы или канала для отправки личных сообщений.",
         "_cfg_loglist": "Добавьте айди Telegram, чтобы зарегистрировать их",
-        "_cfg_selfdestructive": "Должны ли самоуничтожающиеся медиафайлы регистрироваться или нет. Это нарушает «Условия использования Telegram» (ToS)",
-        "_cfg_whitelist": "Является ли список для исключённых (True) или включённых чатов (False).",
+        "_cfg_selfdestructive": (
+            "Должны ли самоуничтожающиеся медиафайлы регистрироваться или нет. Это"
+            " нарушает «Условия использования Telegram» (ToS)"
+        ),
+        "_cfg_whitelist": (
+            "Является ли список для исключённых (True) или включённых чатов (False)."
+        ),
         "_cmd_doc_cpmlog": "Это откроет конфиг для модуля.",
     }
 
@@ -170,6 +188,10 @@ class ApodiktumPMLogMod(loader.Module):
                 file = BytesIO()
                 caption = message.text + "\n\n" + link
                 await message.client.download_file(message, file)
-                file.name = message.file.name or f"{message.file.media.id}{message.file.ext}"
+                file.name = (
+                    message.file.name or f"{message.file.media.id}{message.file.ext}"
+                )
                 file.seek(0)
-                await message.client.send_file(pmlog_group, file, force_document=True, caption=caption)
+                await message.client.send_file(
+                    pmlog_group, file, force_document=True, caption=caption
+                )
