@@ -1,4 +1,4 @@
-__version__ = (1, 0, 21)
+__version__ = (1, 0, 22)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -776,7 +776,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             return
         usertag = await self.apo_lib.utils.get_tag(user, True)
 
-        if await self.apo_lib.utils.is_linkedchannel(chat.id, user.id, message):
+        if await self.apo_lib.utils.is_linkedchannel(chat.id, user.id):
             return
         await self._delete_message(chat, message, UseBot)
         if bcu_sets[chatid_str].get("ban") is True:

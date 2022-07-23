@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.1
+### 📃 module updates:
+- dnd | fixed is_linkedchannel
+
 ## 🆕 Version 2.0.0
 ### 📦 apodiktum_library:
 #### General:
