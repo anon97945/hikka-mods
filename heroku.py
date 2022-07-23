@@ -19,15 +19,13 @@ __version__ = (0, 0, 30)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
-# requires: heroku3 emoji
-
+# requires: heroku3
 
 import asyncio
 import logging
 import math
 import os
 
-import emoji  # skipcq: PY-W2000
 import heroku3
 import requests
 from telethon.tl.types import Message
@@ -200,7 +198,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
         self._db = db
         self._client = client
         self.apo_lib = await self.import_lib(
-            "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()

@@ -19,14 +19,13 @@ __version__ = (1, 0, 25)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
-# requires: numpy scipy noisereduce soundfile pyrubberband emoji
+# requires: numpy scipy noisereduce soundfile pyrubberband
 
 import logging
 import os
 import subprocess
 from io import BytesIO
 
-import emoji  # skipcq: PY-W2000
 import noisereduce as nr
 import numpy as np
 import pyrubberband
@@ -524,7 +523,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         self._db = db
         self._client = client
         self.apo_lib = await self.import_lib(
-            "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()

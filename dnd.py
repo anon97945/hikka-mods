@@ -19,7 +19,6 @@ __version__ = (0, 1, 46)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
-# requires: emoji
 
 # █ █ ▀ █▄▀ ▄▀█ █▀█ ▀    ▄▀█ ▀█▀ ▄▀█ █▀▄▀█ ▄▀█
 # █▀█ █ █ █ █▀█ █▀▄ █ ▄  █▀█  █  █▀█ █ ▀ █ █▀█
@@ -28,7 +27,6 @@ __version__ = (0, 1, 46)
 #
 #          https://t.me/hikariatama
 
-
 import asyncio
 import contextlib
 import datetime
@@ -36,7 +34,6 @@ import logging
 import time
 from typing import Union
 
-import emoji  # skipcq: PY-W2000
 from telethon.tl.functions.contacts import BlockRequest, UnblockRequest
 from telethon.tl.functions.messages import DeleteHistoryRequest, ReportSpamRequest
 from telethon.tl.types import Channel, Chat, Message, PeerUser, User
@@ -334,7 +331,7 @@ class ApodiktumDNDMod(loader.Module):
         self._db = db
         self._client = client
         self.apo_lib = await self.import_lib(
-            "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()

@@ -19,13 +19,12 @@ __version__ = (0, 1, 18)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
-# requires: alphabet-detector emoji googletrans==4.0.0-rc1
+# requires: alphabet-detector googletrans==4.0.0-rc1
 
 import asyncio
 import logging
 import time
 
-import emoji  # skipcq: PY-W2000
 import googletrans
 from alphabet_detector import AlphabetDetector
 from telethon.tl.types import Message
@@ -170,7 +169,7 @@ class ApodiktumLangReplierMod(loader.Module):
         self._db = db
         self._client = client
         self.apo_lib = await self.import_lib(
-            "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()

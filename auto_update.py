@@ -19,12 +19,10 @@ __version__ = (1, 0, 17)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
-# requires: emoji
 
 import asyncio
 import logging
 
-import emoji  # skipcq: PY-W2000
 from telethon.tl.types import Message
 
 from .. import loader, utils
@@ -209,7 +207,7 @@ class ApodiktumAutoUpdateMod(loader.Module):
         self._db = db
         self._client = client
         self.apo_lib = await self.import_lib(
-            "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
+            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
