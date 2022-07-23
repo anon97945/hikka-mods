@@ -1,14 +1,14 @@
-__version__ = (0, 2, 62)
+__version__ = (1, 0, 0)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
-#              © Copyright 2022
+#           © Copyright 2022
 #
-#             developed by @anon97945
+#        developed by @anon97945
 #
-#          https://t.me/apodiktum_modules
+#     https://t.me/apodiktum_modules
 #
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
@@ -29,11 +29,11 @@ import contextlib
 import copy
 import hashlib
 import html
-import importlib  # importer
+import importlib
 import logging
-import os  # importer
+import os
 import re
-import sys  # importer
+import sys
 from datetime import datetime, timedelta
 from typing import Any, Optional, Union
 
@@ -289,7 +289,7 @@ class ApodiktumControllerLoader(loader.Module):
         """
         Downloads the Apo-LibController from GitHub
         """
-        link = "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apolib_controller.py"
+        link = "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apolib_controller.py"
         async with aiohttp.ClientSession() as session, session.head(link) as response:
             if response.status >= 300:
                 return None
@@ -377,7 +377,9 @@ class ApodiktumUtils(loader.Module):
         self.utils = lib.utils
         self.imports = lib.importer
 
-    def get_str(self, string: str, all_strings: dict, message: Optional[Message] = None) -> str:
+    def get_str(
+        self, string: str, all_strings: dict, message: Optional[Message] = None
+    ) -> str:
         """
         Get a string from a dictionary
         :param string: The string to get
@@ -1234,7 +1236,7 @@ class ApodiktumInternal(loader.Module):
         """
         await asyncio.sleep(8)
         urls = [
-            "https://raw.githubusercontent.com/anon97945/hikka-mods/lib_test/apodiktum_library.py",
+            "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             "https://raw.githubusercontent.com/anon97945/hikka-mods/master/total_users.py",
         ]
         if not getattr(self, "apodiktum_module", False):
@@ -1933,7 +1935,6 @@ class ApodiktumImporter(loader.Module):
                 *["--user"] if USER_INSTALL else [],
                 *requirements,
             )
-
             if await pip.wait() != 0:
                 if "com.termux" in os.environ.get("PREFIX", ""):
                     self.utils.log(
@@ -1950,8 +1951,7 @@ class ApodiktumImporter(loader.Module):
                         self.utils.get_str("requirements_failed", self.all_strings),
                     )
                 return
-
             importlib.invalidate_caches()
             kwargs = utils.get_kwargs()
             kwargs["did_requirements"] = True
-            return await self._import_req(**kwargs)  # Try again
+            return await self._import_req(**kwargs)
