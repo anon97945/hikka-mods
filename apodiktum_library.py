@@ -402,8 +402,7 @@ class ApodiktumUtils(loader.Module):
                     **all_strings[lang],
                 }
         if message:
-            chat_id = utils.get_chat_id(message)
-            if chat_id:
+            if chat_id := utils.get_chat_id(message):
                 chatid_db = self._chats_db.setdefault(str(chat_id), {})
                 forced_lang = chatid_db.get("forced_lang")
                 for lang, strings in languages.items():
@@ -447,9 +446,7 @@ class ApodiktumUtils(loader.Module):
             return apo_logger.warning(text)
         if level == logging.INFO:
             return apo_logger.info(text)
-        if level == logging.DEBUG:
-            return apo_logger.debug(text)
-        return None
+        return apo_logger.debug(text) if level == logging.DEBUG else None
 
     async def is_member(
         self,
@@ -827,9 +824,7 @@ class ApodiktumUtils(loader.Module):
         """
         try:
             pat = r"^[a-zA-Z0-9-_]+@[a-zA-Z0-9]+\.[a-z]{1,3}$"
-            if re.match(pat, s):
-                return True
-            return False
+            return bool(re.match(pat, s))
         except TypeError:
             return False
 
@@ -1878,9 +1873,10 @@ class ApodiktumImporter(loader.Module):
                 self.utils.log(
                     logging.DEBUG,
                     self._libclassname,
-                    "Apo-Importer is importing: {}".format(imports),
+                    f"Apo-Importer is importing: {imports}",
                     debug_msg=True,
                 )
+
                 setattr(self, imports, __import__(imports))
                 requirements.remove(imports)
             if did_requirements:
