@@ -1885,7 +1885,7 @@ class ApodiktumImporter(loader.Module):
                     self._libclassname,
                     self.utils.get_str("requirements_installed", self.all_strings),
                 )
-        except Exception as e:
+        except Exception as e:  # skipcq: PYL-W0703
             requirements += [e.name]
             requirements = self.utils.rem_duplicates_list(requirements)
             self.utils.log(
