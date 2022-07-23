@@ -1,14 +1,14 @@
-__version__ = (0, 2, 10)
+__version__ = (1, 0, 0)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
-#              © Copyright 2022
+#           © Copyright 2022
 #
-#             developed by @anon97945
+#        developed by @anon97945
 #
-#          https://t.me/apodiktum_modules
+#     https://t.me/apodiktum_modules
 #
 # 🔒 Licensed under the GNU GPLv3
 # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
@@ -17,7 +17,10 @@ __version__ = (0, 2, 10)
 # meta banner: https://i.ibb.co/N7c0Ks2/cat.jpg
 # meta pic: https://i.ibb.co/4jLTywZ/apo-modules.jpg
 
+# apodiktum_scopes:
 __hikka_min__ = (1, 2, 11)
+__requires__ = ["alphabet_detector", "emoji"]
+
 
 import ast
 import asyncio
@@ -26,13 +29,15 @@ import contextlib
 import copy
 import hashlib
 import html
+import importlib
 import logging
+import os
 import re
+import sys
 from datetime import datetime, timedelta
 from typing import Any, Optional, Union
 
 import aiohttp
-import emoji
 import grapheme
 import requests
 from telethon.errors import UserNotParticipantError
@@ -134,26 +139,17 @@ class ApodiktumLib(loader.Library):
             f" {self.client} | {self.client.tg_id}"
         )
         self.utils = ApodiktumUtils(self)
+        self.importer = ApodiktumImporter(self)
+        await self.importer._import_req(__requires__)
         self.__controllerloader = ApodiktumControllerLoader(self)
         self.__internal = ApodiktumInternal(self)
         self.migrator = ApodiktumMigrator(self)
-        beta_access = await self.__internal._beta_access()
-        if beta_access:
+        self.beta_access = await self.__internal._beta_access()
+        if self.beta_access:
             self.utils_beta = ApodiktumUtilsBeta(self)
         asyncio.ensure_future(self.__internal._send_stats())
 
-        self.utils.log(
-            logging.DEBUG,
-            self.__class__.__name__,
-            "Refreshing all classes to the current library state.",
-            debug_msg=True,
-        )
-        await self.utils._refresh_lib(self)
-        await self.__controllerloader._refresh_lib(self)
-        await self.__internal._refresh_lib(self)
-        await self.migrator._refresh_lib(self)
-        if beta_access:
-            await self.utils_beta._refresh_lib(self)
+        await self._refresh()
         self.utils.log(
             logging.DEBUG, self.__class__.__name__, "Refresh done.", debug_msg=True
         )
@@ -168,6 +164,27 @@ class ApodiktumLib(loader.Library):
             "Apodiktum Library"
             f" v{__version__[0]}.{__version__[1]}.{__version__[2]} successfully"
             " loaded.",
+        )
+
+    async def _refresh(self):
+        self.utils.log(
+            logging.DEBUG,
+            self.__class__.__name__,
+            "Refreshing all classes to the current library state.",
+            debug_msg=True,
+        )
+        await self.importer._refresh_lib(self)
+        await self.utils._refresh_lib(self)
+        await self.__controllerloader._refresh_lib(self)
+        await self.__internal._refresh_lib(self)
+        await self.migrator._refresh_lib(self)
+        if self.beta_access:
+            await self.utils_beta._refresh_lib(self)
+        self.utils.log(
+            logging.DEBUG,
+            self.__class__.__name__,
+            "Refreshing of all classes done.",
+            debug_msg=True,
         )
 
     def apodiktum_module(self):
@@ -222,6 +239,7 @@ class ApodiktumControllerLoader(loader.Module):
         """
         self.lib = lib
         self.utils = lib.utils
+        self.imports = lib.importer
 
     async def ensure_controller(self, first_loop: bool = True):
         """
@@ -357,8 +375,11 @@ class ApodiktumUtils(loader.Module):
         """
         self.lib = lib
         self.utils = lib.utils
+        self.imports = lib.importer
 
-    def get_str(self, string: str, all_strings: dict, message: Message) -> str:
+    def get_str(
+        self, string: str, all_strings: dict, message: Optional[Message] = None
+    ) -> str:
         """
         Get a string from a dictionary
         :param string: The string to get
@@ -380,14 +401,15 @@ class ApodiktumUtils(loader.Module):
                     **all_strings[base_strings],
                     **all_strings[lang],
                 }
-        if chat_id := utils.get_chat_id(message):
-            chatid_db = self._chats_db.setdefault(str(chat_id), {})
-            forced_lang = chatid_db.get("forced_lang")
-            for lang, strings in languages.items():
-                if lang and forced_lang == lang:
-                    if string in strings:
-                        return strings[string].replace("<br>", "\n")
-                    break
+        if message:
+            if chat_id := utils.get_chat_id(message):
+                chatid_db = self._chats_db.setdefault(str(chat_id), {})
+                forced_lang = chatid_db.get("forced_lang")
+                for lang, strings in languages.items():
+                    if lang and forced_lang == lang:
+                        if string in strings:
+                            return strings[string].replace("<br>", "\n")
+                        break
         if (
             default_lang
             and default_lang in list(languages)
@@ -424,9 +446,7 @@ class ApodiktumUtils(loader.Module):
             return apo_logger.warning(text)
         if level == logging.INFO:
             return apo_logger.info(text)
-        if level == logging.DEBUG:
-            return apo_logger.debug(text)
-        return None
+        return apo_logger.debug(text) if level == logging.DEBUG else None
 
     async def is_member(
         self,
@@ -804,9 +824,7 @@ class ApodiktumUtils(loader.Module):
         """
         try:
             pat = r"^[a-zA-Z0-9-_]+@[a-zA-Z0-9]+\.[a-z]{1,3}$"
-            if re.match(pat, s):
-                return True
-            return False
+            return bool(re.match(pat, s))
         except TypeError:
             return False
 
@@ -915,41 +933,37 @@ class ApodiktumUtils(loader.Module):
             chat_id = int(chat_id)
         return chat_id, msg_id
 
-    @staticmethod
-    def is_emoji(text: str) -> str:
+    def is_emoji(self, text: str) -> str:
         """
         Check if text is only emoji
         :param text: text
         :return: True if text is only emoji, False otherwise
         """
-        return not emoji.replace_emoji(text, replace="") if text else False
+        return not self.imports.emoji.replace_emoji(text, replace="") if text else False
 
-    @staticmethod
-    def rem_emoji(text: str) -> str:
+    def rem_emoji(self, text: str) -> str:
         """
         Remove emoji from text
         :param text: text
         :return: text
         """
-        return emoji.replace_emoji(text, replace="")
+        return self.imports.emoji.replace_emoji(text, replace="")
 
-    @staticmethod
-    def distinct_emoji_list(text: str) -> list:
+    def distinct_emoji_list(self, text: str) -> list:
         """
         Get distinct list of emoji from text
         :param text: text
         :return: list of distinct emoji
         """
-        return emoji.distinct_emoji_list(text)
+        return self.imports.emoji.distinct_emoji_list(text)
 
-    @staticmethod
-    def emoji_list(text: str) -> dict:
+    def emoji_list(self, text: str) -> dict:
         """
         Get dict of emoji from text with index positions
         :param text: text
         :return: dict of emoji with index positions
         """
-        return emoji.emoji_list(text)
+        return self.imports.emoji.emoji_list(text)
 
     @staticmethod
     def unescape_html(text: str) -> str:
@@ -1105,6 +1119,7 @@ class ApodiktumUtilsBeta(loader.Module):
         """
         self.lib = lib
         self.utils = lib.utils
+        self.imports = lib.importer
 
     def log_old(
         self,
@@ -1172,6 +1187,7 @@ class ApodiktumInternal(loader.Module):
         """
         self.lib = lib
         self.utils = lib.utils
+        self.imports = lib.importer
 
     async def _beta_access(self):
         """
@@ -1215,7 +1231,7 @@ class ApodiktumInternal(loader.Module):
         """
         await asyncio.sleep(8)
         urls = [
-            "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
+            "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             "https://raw.githubusercontent.com/anon97945/hikka-mods/master/total_users.py",
         ]
         if not getattr(self, "apodiktum_module", False):
@@ -1327,6 +1343,7 @@ class ApodiktumMigrator(loader.Module):
         """
         self.lib = lib
         self.utils = lib.utils
+        self.imports = lib.importer
 
     async def migrate(
         self,
@@ -1761,3 +1778,176 @@ class ApodiktumMigrator(loader.Module):
             chash = hashlib.sha256(migration.encode("utf-8")).hexdigest()
             if chash not in self.hashs:
                 await self._set_hash(chash)
+
+
+class ApodiktumImporter(loader.Module):
+    """
+    Apodiktum Importer
+    Ensures that the Apodiktum Library has all required modules
+    """
+
+    strings = {
+        "heroku_install_failed": (
+            "\n♓️⚠️ This module requires additional libraries to be installed, which"
+            " can't be done on Heroku. Don't report it as bug, this can't be solved."
+        ),
+        "requirements_failed": "\n🚫 Requirements installation failed",
+        "requirements_failed_termux": (
+            "\n🕶🚫 Requirements installation failed\nThe most common reason is"
+            " that Termux doesn't support many libraries. Don't report it as bug, this"
+            " can't be solved."
+        ),
+        "requirements_installed": "\n✅ Requirements successfully installed",
+        "requirements_installing": "\n🔄 Installing requirements:\n{}",
+        "requirements_restart": (
+            "\n🔄 Requirements installed, but a restart is required for {} to apply"
+        ),
+    }
+
+    strings_de = {}
+
+    strings_ru = {
+        "heroku_install_failed": (
+            "\n♓️⚠️ Этому модулю требуются дополнительные библиотека, которые нельзя"
+            " установить на Heroku. Не сообщайте об этом как об ошибке, это не может"
+            " быть исправлено"
+        ),
+        "requirements_failed": "\n🚫 Ошибка установки зависимостей",
+        "requirements_failed_termux": (
+            "\n🕶🚫 Ошибка установки зависимостей\nНаиболее часто возникает из-за"
+            " того, что Termux не поддерживает многие библиотека. Не сообщайте об этом"
+            " как об ошибке, это не может быть исправлено."
+        ),
+        "requirements_installed": "\n✅ Зависимости успешно установлены",
+        "requirements_installing": "\n🔄 Устанавливаю зависимости:\n{}",
+        "requirements_restart": (
+            "\n🔄 Зависимости установлены, но нужна перезагрузка для применения {}"
+        ),
+    }
+
+    all_strings = {
+        "strings": strings,
+        "strings_en": strings,
+        "strings_de": strings_de,
+        "strings_ru": strings_ru,
+    }
+
+    def __init__(
+        self,
+        lib: loader.Library,
+    ):
+        self.utils = lib.utils
+        self.utils.log(
+            logging.DEBUG,
+            lib.__class__.__name__,
+            "class ApodiktumImporter is being initiated!",
+            debug_msg=True,
+        )
+        self.lib = lib
+        self._db = lib.db
+        self._client = lib.client
+        self._libclassname = lib.__class__.__name__
+
+    async def _refresh_lib(
+        self,
+        lib: loader.Library,
+    ):
+        """
+        !do not use this method directly!
+        Refreshes the class with the current state of the library
+        :param lib: The library class
+        :return: None
+        """
+        self.lib = lib
+        self.utils = lib.utils
+        self.imports = lib.importer
+
+    async def _import_req(
+        self, requirements: list = None, did_requirements: Optional[bool] = False
+    ):
+        USER_INSTALL = (
+            "PIP_TARGET" not in os.environ and "VIRTUAL_ENV" not in os.environ
+        )
+        try:
+            for imports in list(requirements):
+                self.utils.log(
+                    logging.DEBUG,
+                    self._libclassname,
+                    f"Apo-Importer is importing: {imports}",
+                    debug_msg=True,
+                )
+
+                setattr(self, imports, __import__(imports))
+                requirements.remove(imports)
+            if did_requirements:
+                self.utils.log(
+                    logging.INFO,
+                    self._libclassname,
+                    self.utils.get_str("requirements_installed", self.all_strings),
+                )
+        except Exception as e:  # skipcq: PYL-W0703
+            requirements += [e.name]
+            requirements = self.utils.rem_duplicates_list(requirements)
+            self.utils.log(
+                logging.DEBUG,
+                self._libclassname,
+                f"Installing requirements: {requirements}",
+                debug_msg=True,
+            )
+            if not requirements:
+                self.utils.log(logging.INFO, self._libclassname, "Nothing to install")
+            if did_requirements:
+                if "DYNO" in os.environ:
+                    self.utils.log(
+                        logging.WARNING,
+                        self._libclassname,
+                        self.utils.get_str("heroku_install_failed", self.all_strings),
+                    )
+                else:
+                    self.utils.log(
+                        logging.WARNING,
+                        self._libclassname,
+                        self.utils.get_str(
+                            "requirements_restart", self.all_strings
+                        ).format(e.name),
+                    )
+                return
+            self.utils.log(
+                logging.INFO,
+                self._libclassname,
+                self.utils.get_str("requirements_installing", self.all_strings).format(
+                    "\n".join(f"▫️ {req}" for req in requirements)
+                ),
+            )
+            pip = await asyncio.create_subprocess_exec(
+                sys.executable,
+                "-m",
+                "pip",
+                "install",
+                "--upgrade",
+                "-q",
+                "--disable-pip-version-check",
+                "--no-warn-script-location",
+                *["--user"] if USER_INSTALL else [],
+                *requirements,
+            )
+            if await pip.wait() != 0:
+                if "com.termux" in os.environ.get("PREFIX", ""):
+                    self.utils.log(
+                        logging.ERROR,
+                        self._libclassname,
+                        self.utils.get_str(
+                            "requirements_failed_termux", self.all_strings
+                        ),
+                    )
+                else:
+                    self.utils.log(
+                        logging.ERROR,
+                        self._libclassname,
+                        self.utils.get_str("requirements_failed", self.all_strings),
+                    )
+                return
+            importlib.invalidate_caches()
+            kwargs = utils.get_kwargs()
+            kwargs["did_requirements"] = True
+            return await self._import_req(**kwargs)

@@ -24,7 +24,6 @@ __version__ = (0, 0, 6)
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
-# requires: emoji
 
 import contextlib
 import itertools
@@ -34,7 +33,6 @@ import sys
 from types import ModuleType
 from typing import Any
 
-import emoji  # skipcq: PY-W2000
 import telethon
 from meval import meval
 from telethon.errors.rpcerrorlist import MessageIdInvalidError
@@ -95,7 +93,7 @@ class ApodiktumPythonMod(loader.Module):
         self._client = client
         self._db = db
         self.apo_lib = await self.import_lib(
-            "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
+            "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()

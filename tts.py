@@ -21,14 +21,13 @@ __version__ = (0, 1, 87)
 # scope: hikka_only
 # scope: hikka_min 1.2.11
 
-# requires: gtts pydub soundfile pyrubberband numpy AudioSegment wave emoji
+# requires: gtts pydub soundfile pyrubberband numpy AudioSegment wave
 
 import logging
 import os
 from io import BytesIO
 from subprocess import PIPE, Popen
 
-import emoji  # skipcq: PY-W2000
 import pyrubberband
 import soundfile
 from gtts import gTTS
@@ -209,7 +208,7 @@ class ApodiktumTTSMod(loader.Module):
         self._db = db
         self._client = client
         self.apo_lib = await self.import_lib(
-            "https://raw.githubusercontent.com/anon97945/hikka-mods/master/apodiktum_library.py",
+            "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()

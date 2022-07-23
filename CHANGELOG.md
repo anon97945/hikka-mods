@@ -1,5 +1,14 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.0
+### 📦 apodiktum_library:
+#### General:
+- Switched Library to his own repo -> https://github.com/anon97945/hikka-libs
+- Library now supports scope for requirements, not need to add unnecessary imports into the module
+
+### 📃 module updates:
+- all | dropped imports and req scope of emoji
+
 ## 🆕 Version 1.0.6
 ### ℹ️ General:
 - reformatted modules with black
