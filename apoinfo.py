@@ -1,4 +1,4 @@
-__version__ = (0, 1, 25)
+__version__ = (0, 1, 28)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -58,7 +58,7 @@ class ApodiktumInfoMod(loader.Module):
         "prefix": "Prefix",
         "send_info": "Send userbot info.",
         "up-to-date": "😌 Up-to-date.",
-        "update_required": "😕 Update required </b><code>{}update</code><b>",
+        "update_required": "😕 Update required: <code>{}update</code>",
         "uptime": "Uptime",
         "version": "Version",
     }
@@ -88,7 +88,7 @@ class ApodiktumInfoMod(loader.Module):
         "prefix": "Prefix",
         "send_info": "Benutzerbot-Informationen senden.",
         "up-to-date": "😌 Up-to-date",
-        "update_required": "😕 Aktualisierung erforderlich </b><code>{}update</code><b>",
+        "update_required": "😕 Aktualisierung erforderlich: <code>{}update</code>",
         "uptime": "Betriebszeit",
         "version": "Version",
     }
@@ -115,7 +115,7 @@ class ApodiktumInfoMod(loader.Module):
         "prefix": "Префикс",
         "send_info": "Отправить информацию о юзерботе.",
         "up-to-date": "😌 Актуальная версия.",
-        "update_required": "😕 Требуется обновление </b><code>{}update</code><b>",
+        "update_required": "😕 Требуется обновление: <code>{}update</code>",
         "uptime": "Аптайм",
         "version": "Версия",
     }
@@ -290,7 +290,7 @@ class ApodiktumInfoMod(loader.Module):
             diff = repo.git.log(["HEAD..origin/master", "--oneline"])
             upd = (
                 self.strings("update_required").format(
-                    {utils.escape_html(self.get_prefix())}
+                    utils.escape_html(self.get_prefix())
                 )
                 if diff
                 else self.strings("up-to-date")
