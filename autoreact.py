@@ -1,4 +1,4 @@
-__version__ = (0, 1, 21)
+__version__ = (0, 1, 22)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -42,24 +42,20 @@ class ApodiktumAutoReactMod(loader.Module):
     strings = {
         "name": "Apo AutoReact",
         "developer": "@anon97945",
-        "_cfg_doc_raise_error": "Raise an error if the emoji is not valid.",
-        "_cfg_doc_shuffle_chats": "A list of chats where the emoji list is shuffled.",
+        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_doc_delay": "The delay between reactions are send in seconds.",
         "_cfg_doc_delay_chats": (
             "List of delay chats.\nIf the chat is in the list, the delay is used."
         ),
-        "_cfg_doc_random_delay_chats": (
-            "List of random delay chats.\nIf the chat is in the list, a random delay is"
-            " used."
-        ),
+        "_cfg_doc_ignore_self": "Do not react to messages from yourself.",
+        "_cfg_doc_raise_error": "Raise an error if the emoji is not valid.",
         "_cfg_doc_random_delay": (
             "Randomizes the delay between reactions. Randomness is between 0 and the"
             " global delay."
         ),
-        "_cfg_doc_reactions_chance": (
-            "The chance of reacting to a message.\n0.0 is the chance of not reacting to"
-            " a message.\n1.0 is the chance of reacting to a message every time."
-            "Pattern:\n<userid/all>|<chatid/global>|<percentage(0.00-1)>\n\nExample:\n1234567|global|0.8"
+        "_cfg_doc_random_delay_chats": (
+            "List of random delay chats.\nIf the chat is in the list, a random delay is"
+            " used."
         ),
         "_cfg_doc_reactions": (
             "Setup AutoReact.\nYou can define alternative emojis to react with, when"
@@ -70,7 +66,12 @@ class ApodiktumAutoReactMod(loader.Module):
             " ALL!\n\nPattern:\n<userid/all>|<chatid/global>|<emoji1>|<emoji2>|<emoji3>...\n\nExample:\nall|1792410946|❤️|👍|🔥\nFor"
             " Channels:\nall|<channelid>|❤️|👍|🔥"
         ),
-        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
+        "_cfg_doc_reactions_chance": (
+            "The chance of reacting to a message.\n0.0 is the chance of not reacting to"
+            " a message.\n1.0 is the chance of reacting to a message every time."
+            "Pattern:\n<userid/all>|<chatid/global>|<percentage(0.00-1)>\n\nExample:\n1234567|global|0.8"
+        ),
+        "_cfg_doc_shuffle_chats": "A list of chats where the emoji list is shuffled.",
     }
 
     strings_en = {}
@@ -78,29 +79,22 @@ class ApodiktumAutoReactMod(loader.Module):
     strings_de = {}
 
     strings_ru = {
-        "_cfg_doc_raise_error": (
-            "Вызывает ошибку, если эмодзи не является действительным."
-        ),
-        "_cfg_doc_shuffle_chats": (
-            "Список чатов, в которых перемешивается список эмодзи."
-        ),
         "_cfg_doc_delay": "Задержка между реакциями передается в секундах",
         "_cfg_doc_delay_chats": (
             "Список чатов с задержкой.\nЕсли чат находится в списке, то используется"
             " задержка."
         ),
-        "_cfg_doc_random_delay_chats": (
-            "Список чатов со случайной задержкой.\nЕсли чат находится в списке,"
-            " используется случайная задержка."
+        "_cfg_doc_ignore_self": "Не реагируйте на собственные сообщения",
+        "_cfg_doc_raise_error": (
+            "Вызывает ошибку, если эмодзи не является действительным."
         ),
         "_cfg_doc_random_delay": (
             "Случайным образом изменяет задержку между реакциями. Случайность находится"
             " в диапазоне от 0 до глобальной задержки."
         ),
-        "_cfg_doc_reactions_chance": (
-            "Шанс реакции на сообщение.\n0.0 - шанс не реагировать на сообщение.\n1.0 -"
-            " шанс реагировать на сообщение каждый раз."
-            "Pattern:\n<userid/all>|<chatid/global>|<percentage(0.00-1)>\n\nПример:\n1234567|global|0.8"
+        "_cfg_doc_random_delay_chats": (
+            "Список чатов со случайной задержкой.\nЕсли чат находится в списке,"
+            " используется случайная задержка."
         ),
         "_cfg_doc_reactions": (
             "Настройка автореакции.\nВы можете определить альтернативные эмодзи для"
@@ -112,6 +106,14 @@ class ApodiktumAutoReactMod(loader.Module):
             " использовать"
             " ALL!\n\nPattern:\n<userid/all>|<chatid/global>|<emoji1>|<emoji2>|<emoji3>...\n\nПример:\nall|1792410946|❤️|👍|🔥\nДля"
             " каналов:\nall|<channelid>|❤️|👍|🔥"
+        ),
+        "_cfg_doc_reactions_chance": (
+            "Шанс реакции на сообщение.\n0.0 - шанс не реагировать на сообщение.\n1.0 -"
+            " шанс реагировать на сообщение каждый раз."
+            "Pattern:\n<userid/all>|<chatid/global>|<percentage(0.00-1)>\n\nПример:\n1234567|global|0.8"
+        ),
+        "_cfg_doc_shuffle_chats": (
+            "Список чатов, в которых перемешивается список эмодзи."
         ),
         "_cls_doc": "Автореакция на сообщения.\nПроверьте .config apodiktum autoreact.",
         "_cmd_doc_cautoreact": "Это откроет конфиг для модуля.",
@@ -147,6 +149,12 @@ class ApodiktumAutoReactMod(loader.Module):
                 validator=loader.validators.Series(
                     loader.validators.TelegramID(),
                 ),
+            ),
+            loader.ConfigValue(
+                "ignore_self",
+                False,
+                doc=lambda: self.strings("_cfg_doc_ignore_self"),
+                validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
                 "raise_error",
@@ -225,8 +233,14 @@ class ApodiktumAutoReactMod(loader.Module):
             userid, chatid, *emoji_list = reaction.split("|")
             if userid == "all" and chatid == "global":
                 return
-            if (str(message.sender_id) == userid or userid == "all") and (
-                str(utils.get_chat_id(message)) == chatid or chatid == "global"
+            if (
+                (str(message.sender_id) == userid or userid == "all")
+                and (str(utils.get_chat_id(message)) == chatid or chatid == "global")
+                and not (
+                    userid == "all"
+                    and self.config["ignore_self"]
+                    and message.sender_id == self.tg_id
+                )
             ):
                 if not await self._reactions_chance(reactions_chance, message):
                     return

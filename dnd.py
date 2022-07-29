@@ -1,4 +1,4 @@
-__version__ = (0, 1, 46)
+__version__ = (0, 1, 47)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -99,7 +99,7 @@ class ApodiktumDNDMod(loader.Module):
             " security.</b>"
         ),
         "banned_log": (
-            '👮 <b>I banned <a href="tg://user?id={}">{}</a>.</b>\n\n<b>{}'
+            "👮 <b>I banned {}.</b>\n\n<b>{}"
             " Contact</b>\n<b>{} Started by you</b>\n<b>{} Active"
             " conversation</b>\n\n<b>✊ Actions</b>\n\n<b>{} Reported spam</b>\n<b>{}"
             " Deleted dialog</b>\n<b>{} Blocked</b>\n\n<b>ℹ️"
@@ -211,7 +211,7 @@ class ApodiktumDNDMod(loader.Module):
             " заблокировать Вас.</b>"
         ),
         "banned_log": (
-            '👮 <b>Я заблокировал <a href="tg://user?id={}">{}</a>.</b>\n\n<b>{}'
+            "👮 <b>Я заблокировал {}.</b>\n\n<b>{}"
             " Контакт</b>\n<b>{} Начатый тобой</b>\n<b>{} Активный диалог</b>\n\n<b>✊"
             " Действия</b>\n\n<b>{} Сообщить о спаме</b>\n<b>{} Удалить"
             " диалог</b>\n<b>{} Заблокировать</b>\n\n<b>ℹ️"
@@ -396,8 +396,7 @@ class ApodiktumDNDMod(loader.Module):
                 self.apo_lib.utils.get_str(
                     "banned_log", self.all_strings, message
                 ).format(
-                    peer.id,
-                    utils.escape_html(peer.first_name),
+                    await self.apo_lib.utils.get_tag(peer, True),
                     format_(contact),
                     format_(started_by_you),
                     format_(active_peer),
@@ -433,7 +432,9 @@ class ApodiktumDNDMod(loader.Module):
                 DeleteHistoryRequest(peer=cid, just_clear=True, max_id=0)
             )
 
-    async def _unstatus_func(self):
+    async def _unstatus_func(self, delay=None):
+        if delay:
+            await asyncio.sleep(delay)
         self.set("status", False)
         self.set("status_duration", "")
         self.set("gone", "")
@@ -665,6 +666,9 @@ class ApodiktumDNDMod(loader.Module):
         self.set("gone", time.time())
         self._ratelimit_afk = []
         if t:
+            with contextlib.suppress(Exception):
+                self._unstatus_task.cancel()
+            self._unstatus_task = asyncio.ensure_future(self._unstatus_func(t))
             self.set("status_duration", time.time() + t)
             status_duration = (
                 datetime.datetime.fromtimestamp(self.get("status_duration")).replace(
@@ -689,6 +693,8 @@ class ApodiktumDNDMod(loader.Module):
         """
         Remove status.
         """
+        with contextlib.suppress(Exception):
+            self._unstatus_task.cancel()
         if not self.get("status", False):
             await utils.answer(
                 message,
@@ -697,7 +703,6 @@ class ApodiktumDNDMod(loader.Module):
             await asyncio.sleep(3)
             await message.delete()
             return
-
         await self._unstatus_func()
 
         msg = await utils.answer(
@@ -910,6 +915,7 @@ class ApodiktumDNDMod(loader.Module):
             status_len_sec = (status_duration - gone).total_seconds()
             if now > status_duration:
                 await self._unstatus_func()
+                return
         diff = now - gone
         diff_sec = diff.total_seconds()
         if message.is_private or not self.config["afk_no_group"]:

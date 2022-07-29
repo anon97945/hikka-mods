@@ -1,4 +1,4 @@
-__version__ = (1, 0, 22)
+__version__ = (1, 0, 24)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -21,29 +21,12 @@ __version__ = (1, 0, 22)
 # scope: hikka_min 1.2.11
 
 import asyncio
-import contextlib
 import logging
-from datetime import timedelta
 from typing import Union
 
-from aiogram.types import ChatPermissions
-from aiogram.utils.exceptions import (
-    BotKicked,
-    ChatNotFound,
-    MessageCantBeDeleted,
-    MessageToDeleteNotFound,
-)
-from telethon.errors import UserNotParticipantError
-from telethon.tl.functions.channels import (
-    EditAdminRequest,
-    EditBannedRequest,
-    InviteToChannelRequest,
-)
 from telethon.tl.types import (
     Channel,
     Chat,
-    ChatAdminRights,
-    ChatBannedRights,
     Message,
     User,
 )
@@ -51,30 +34,6 @@ from telethon.tl.types import (
 from .. import loader, utils
 
 logger = logging.getLogger(__name__)
-
-
-def represents_int(s: str) -> bool:
-    try:
-        loader.validators.Integer().validate(s)
-        return True
-    except loader.validators.ValidationError:
-        return False
-
-
-def represents_tgid(s: str) -> bool:
-    try:
-        loader.validators.TelegramID().validate(s)
-        return True
-    except loader.validators.ValidationError:
-        return False
-
-
-def to_bool(value: str) -> bool:
-    try:
-        loader.validators.Boolean().validate(value)
-        return value.lower() in "true"
-    except loader.validators.ValidationError:
-        return None
 
 
 @loader.tds
@@ -86,13 +45,19 @@ class ApodiktumAdminToolsMod(loader.Module):
     strings = {
         "name": "Apo AdminTools",
         "developer": "@anon97945",
+        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
+        "_cfg_doc_admin_tag_chats": "React to @admin in given chats.",
         "bcu_db_string": (
             "<b>[BlockChannelUser]</b> Current Database:\n\nWatcher:\n{}"
             "\n\nChatsettings:\n{}"
         ),
         "bcu_settings": (
-            "<b>[BlockChannelUser]</b> Current settings in this chat are:\n{}"
+            "<b>[BlockChannelUser]</b> Current settings in this chat"
+            " are:\n<code>{}</code>"
         ),
+        "admin_tag": "The User {} asked for help.",
+        "admin_tag_reply": "\n\nThe corresponding message from {} is:\n{}",
+        "admin_tag_reply_msg": "Thanks, the owner of this Bot got informed.",
         "bcu_start": "<b>[BlockChannelUser]</b> Activated in this chat.</b>",
         "bcu_stopped": "<b>[BlockChannelUser]</b> Deactivated in this chat.</b>",
         "bcu_triggered": "{}, you can't write as a channel here.",
@@ -136,6 +101,10 @@ class ApodiktumAdminToolsMod(loader.Module):
     strings_en = {}
 
     strings_de = {
+        "_cfg_cst_auto_migrate": (
+            "Ob definierte Änderungen beim Start automatisch migriert werden sollen."
+        ),
+        "_cfg_doc_admin_tag_chats": "Reagieren Sie in bestimmten Chats auf @admin.",
         "_cls_doc": "Toolpack für Kanal- und Gruppenadministratoren.",
         "bcu_db_string": (
             "<b>[BlockChannelUser]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
@@ -185,7 +154,6 @@ class ApodiktumAdminToolsMod(loader.Module):
         "no_int": "<b>Ihre Eingabe war keine Integer.</b>",
         "not_dc": "<b>Dies ist kein Gruppenchat.</b>",
         "permerror": "<b>Sie haben in diesem Chat keine Löschberechtigung.</b>",
-        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
     }
 
     strings_ru = {
@@ -282,6 +250,13 @@ class ApodiktumAdminToolsMod(loader.Module):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
+                "admin_tag_chats",
+                doc=lambda: self.strings("_cfg_doc_admin_tag_chats"),
+                validator=loader.validators.Series(
+                    loader.validators.TelegramID(),
+                ),
+            ),
+            loader.ConfigValue(
                 "auto_migrate",
                 True,
                 doc=lambda: self.strings("_cfg_cst_auto_migrate"),
@@ -303,121 +278,14 @@ class ApodiktumAdminToolsMod(loader.Module):
         self._pt_task.cancel()
         return
 
-    async def _mute(
-        self,
-        chat: Union[Chat, int],
-        user: Union[User, int],
-        message: Union[None, Message] = None,
-        MUTETIMER: int = 0,
-        UseBot: bool = False,
-    ):
-        if UseBot:
-            with contextlib.suppress(Exception):
-                await self.inline.bot.restrict_chat_member(
-                    int(f"-100{getattr(chat, 'id', chat)}"),
-                    user.id,
-                    permissions=ChatPermissions(can_send_messages=False),
-                    until_date=timedelta(minutes=MUTETIMER),
-                )
-                return
-        await message.client.edit_permissions(
-            chat.id, user.id, timedelta(minutes=MUTETIMER), send_messages=False
+    async def cadmintoolscmd(self, message: Message):
+        """
+        This will open the config for the module.
+        """
+        name = self.strings("name")
+        await self.allmodules.commands["config"](
+            await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
-        return
-
-    async def _ban(
-        self,
-        chat: Union[Chat, int],
-        user: Union[User, int],
-        message: Union[None, Message] = None,
-        UseBot: bool = False,
-    ):
-        if UseBot:
-            with contextlib.suppress(Exception):
-                if isinstance(user, Channel):
-                    return await self.inline.bot.ban_chat_sender_chat(
-                        int(f"-100{getattr(chat, 'id', chat)}"),
-                        f"-100{user.id}",
-                    )
-                return await self.inline.bot.kick_chat_member(
-                    int(f"-100{getattr(chat, 'id', chat)}"),
-                    user.id,
-                )
-        await message.client(
-            EditBannedRequest(
-                chat.id, user.id, ChatBannedRights(until_date=None, view_messages=True)
-            )
-        )
-
-    async def _delete_message(
-        self,
-        chat: Union[Chat, int],
-        message: Union[None, Message] = None,
-        UseBot: bool = False,
-    ):
-        chat_id = getattr(chat, "id", chat)
-        if UseBot:
-            try:
-                await self.inline.bot.delete_message(
-                    int(f"-100{chat_id}"),
-                    message.id,
-                )
-                return
-            except MessageToDeleteNotFound:
-                pass
-            except (MessageCantBeDeleted, BotKicked, ChatNotFound):
-                pass
-        return await message.delete()
-
-    async def _promote_bot(
-        self,
-        chat_id: Union[Chat, int],
-    ):
-        try:
-            await self._client(
-                InviteToChannelRequest(chat_id, [self.inline.bot_username])
-            )
-        except Exception:
-            logger.debug(
-                f"Unable to invite cleaner to {chat_id}. Maybe he's already there?"
-            )
-
-        try:
-            await self._client(
-                EditAdminRequest(
-                    channel=chat_id,
-                    user_id=self.inline.bot_username,
-                    admin_rights=ChatAdminRights(ban_users=True, delete_messages=True),
-                    rank="Bot",
-                )
-            )
-            return True
-        except Exception:
-            logger.debug(f"Cleaner promotion in chat {chat_id} failed!")
-            return False
-
-    async def _check_inlinebot(
-        self,
-        chat: Union[Chat, int],
-        inline_bot_id: Union[None, int],
-        self_id: Union[None, int],
-        message: Union[None, Message] = None,
-    ):
-        chat_id = getattr(chat, "id", chat)
-        if chat_id != self_id:
-            try:
-                bot_perms = await message.client.get_permissions(chat_id, inline_bot_id)
-                if (
-                    bot_perms.is_admin
-                    and bot_perms.ban_users
-                    and bot_perms.delete_messages
-                ):
-                    return True
-                return bool(await self._promote_bot(chat_id))
-            except UserNotParticipantError:
-                return bool(
-                    chat.admin_rights.add_admins and await self._promote_bot(chat_id)
-                )
 
     async def bndcmd(self, message: Message):
         """
@@ -501,21 +369,23 @@ class ApodiktumAdminToolsMod(loader.Module):
 
         if chatid_str in bnd:
             if args[0] == "notify" and args[1] is not None:
-                if not isinstance(to_bool(args[1]), bool):
+                if not isinstance(self.apo_lib.utils.validate_boolean(args[1]), bool):
                     return await utils.answer(
                         message,
                         self.apo_lib.utils.get_str("error", self.all_strings, message),
                     )
-                sets[chatid_str].update({"notify": to_bool(args[1])})
+                sets[chatid_str].update(
+                    {"notify": self.apo_lib.utils.validate_boolean(args[1])}
+                )
             elif args[0] == "mute" and args[1] is not None and chatid_str in bnd:
-                if not represents_int(args[1]):
+                if not self.apo_lib.utils.validate_integer(args[1]):
                     return await utils.answer(
                         message,
                         self.apo_lib.utils.get_str("no_int", self.all_strings, message),
                     )
                 sets[chatid_str].update({"mute": args[1].capitalize()})
             elif args[0] == "deltimer" and args[1] is not None and chatid_str in bnd:
-                if not represents_int(args[1]):
+                if not self.apo_lib.utils.validate_integer(args[1]):
                     return await utils.answer(
                         message,
                         self.apo_lib.utils.get_str("no_int", self.all_strings, message),
@@ -614,21 +484,25 @@ class ApodiktumAdminToolsMod(loader.Module):
 
         if chatid_str in bcu:
             if args[0] == "notify" and args[1] is not None:
-                if not isinstance(to_bool(args[1]), bool):
+                if not isinstance(self.apo_lib.utils.validate_boolean(args[1]), bool):
                     return await utils.answer(
                         message,
                         self.apo_lib.utils.get_str("error", self.all_strings, message),
                     )
-                sets[chatid_str].update({"notify": to_bool(args[1])})
+                sets[chatid_str].update(
+                    {"notify": self.apo_lib.utils.validate_boolean(args[1])}
+                )
             elif args[0] == "ban" and args[1] is not None and chatid_str in bcu:
-                if not isinstance(to_bool(args[1]), bool):
+                if not isinstance(self.apo_lib.utils.validate_boolean(args[1]), bool):
                     return await utils.answer(
                         message,
                         self.apo_lib.utils.get_str("no_int", self.all_strings, message),
                     )
-                sets[chatid_str].update({"ban": to_bool(args[1])})
+                sets[chatid_str].update(
+                    {"ban": self.apo_lib.utils.validate_boolean(args[1])}
+                )
             elif args[0] == "deltimer" and args[1] is not None and chatid_str in bcu:
-                if not represents_int(args[1]):
+                if not self.apo_lib.utils.validate_integer(args[1]):
                     return await utils.answer(
                         message,
                         self.apo_lib.utils.get_str("no_int", self.all_strings, message),
@@ -685,7 +559,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                     "gl_db_string", self.all_strings, message
                 ).format(str(gl), str(sets)),
             )
-        if args[0] is not None and represents_tgid(args[0]):
+        if args[0] is not None and self.apo_lib.utils.validate_tgid(args[0]):
             chatid = args[0]
             chatid_str = str(chatid)
         elif args[0] == "rem":
@@ -706,7 +580,11 @@ class ApodiktumAdminToolsMod(loader.Module):
             return await utils.answer(
                 message, self.apo_lib.utils.get_str("error", self.all_strings, message)
             )
-        if args[0] == "rem" and represents_tgid(args[1]) and chatid_str in gl:
+        if (
+            args[0] == "rem"
+            and self.apo_lib.utils.validate_tgid(args[1])
+            and chatid_str in gl
+        ):
             gl.remove(chatid_str)
             sets.pop(chatid_str)
             self.set("gl", gl)
@@ -715,16 +593,20 @@ class ApodiktumAdminToolsMod(loader.Module):
                 message,
                 self.apo_lib.utils.get_str("gl_stopped", self.all_strings, message),
             )
-        if args[0] == "rem" and (represents_tgid(args[1]) or chatid_str not in gl):
+        if args[0] == "rem" and (
+            self.apo_lib.utils.validate_tgid(args[1]) or chatid_str not in gl
+        ):
             return await utils.answer(
                 message, self.apo_lib.utils.get_str("error", self.all_strings, message)
             )
-        if not represents_tgid(chatid_str):
+        if not self.apo_lib.utils.validate_tgid(chatid_str):
             return await utils.answer(
                 message, self.apo_lib.utils.get_str("error", self.all_strings, message)
             )
         if chatid_str not in gl:
-            if not represents_tgid(args[0]) or not represents_tgid(args[1]):
+            if not self.apo_lib.utils.validate_tgid(
+                args[0]
+            ) or not self.apo_lib.utils.validate_tgid(args[1]):
                 return await utils.answer(
                     message,
                     self.apo_lib.utils.get_str("no_id", self.all_strings, message),
@@ -739,7 +621,9 @@ class ApodiktumAdminToolsMod(loader.Module):
                 self.apo_lib.utils.get_str("gl_start", self.all_strings, message),
             )
         if len(args) == 2:
-            if not represents_tgid(args[0]) or not represents_tgid(args[1]):
+            if not self.apo_lib.utils.validate_tgid(
+                args[0]
+            ) or not self.apo_lib.utils.validate_tgid(args[1]):
                 return await utils.answer(
                     message,
                     self.apo_lib.utils.get_str("no_id", self.all_strings, message),
@@ -767,9 +651,6 @@ class ApodiktumAdminToolsMod(loader.Module):
         chatid_str = str(chat.id)
         if message.is_private or chatid_str not in bcu or not isinstance(user, Channel):
             return
-        UseBot = await self._check_inlinebot(
-            chat, self.inline.bot_id, self.tg_id, message
-        )
         if (chat.admin_rights or chat.creator) and (
             not chat.admin_rights.delete_messages or not chat.admin_rights
         ):
@@ -778,20 +659,20 @@ class ApodiktumAdminToolsMod(loader.Module):
 
         if await self.apo_lib.utils.is_linkedchannel(chat.id, user.id):
             return
-        await self._delete_message(chat, message, UseBot)
+        await self.apo_lib.utils.delete_message(message)
         if bcu_sets[chatid_str].get("ban") is True:
-            await self._ban(chat, user, message, UseBot)
+            await self.apo_lib.utils.ban(chat.id, user.id)
         if bcu_sets[chatid_str].get("notify") is True:
-            msgs = await utils.answer(
+            msg = await utils.answer(
                 message,
                 self.apo_lib.utils.get_str(
                     "bcu_triggered", self.all_strings, message
                 ).format(usertag),
             )
             if bcu_sets[chatid_str].get("deltimer") != "0":
-                DELTIMER = int(bcu_sets[chatid_str].get("deltimer"))
-                await asyncio.sleep(DELTIMER)
-                await self._delete_message(chat, msgs, UseBot)
+                del_duration = int(bcu_sets[chatid_str].get("deltimer"))
+                await asyncio.sleep(del_duration)
+                await self.apo_lib.utils.delete_message(msg)
         return
 
     async def p__bnd(
@@ -813,19 +694,16 @@ class ApodiktumAdminToolsMod(loader.Module):
         link = await self.apo_lib.utils.get_invite_link(chat)
 
         if not await self.apo_lib.utils.is_member(chat.id, user.id):
-            UseBot = await self._check_inlinebot(
-                chat, self.inline.bot_id, self.tg_id, message
-            )
-            await self._delete_message(chat, message, UseBot)
+            await self.apo_lib.utils.delete_message(message, True)
             if (
                 chat.admin_rights.ban_users
                 and bnd_sets[chatid_str].get("mute") is not None
                 and bnd_sets[chatid_str].get("mute") != "0"
             ):
-                MUTETIMER = bnd_sets[chatid_str].get("mute")
-                await self._mute(chat, user, message, MUTETIMER, UseBot)
+                duration = int(bnd_sets[chatid_str].get("mute"))
+                await self.apo_lib.utils.mute(chat.id, user.id, duration)
             if bnd_sets[chatid_str].get("notify") is True:
-                msgs = await utils.answer(
+                msg = await utils.answer(
                     message,
                     self.apo_lib.utils.get_str(
                         "bnd_triggered", self.all_strings, message
@@ -834,7 +712,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 if bnd_sets[chatid_str].get("deltimer") != "0":
                     DELTIMER = int(bnd_sets[chatid_str].get("deltimer"))
                     await asyncio.sleep(DELTIMER)
-                    await self._delete_message(chat, msgs, UseBot)
+                    await self.apo_lib.utils.delete_message(msg)
         return
 
     async def p__gl(
@@ -864,6 +742,40 @@ class ApodiktumAdminToolsMod(loader.Module):
                 await message.client.send_message(logchan_id, message=msgs)
                 await message.client.send_message(logchan_id, link)
             return
+
+    async def p__admin(
+        self,
+        user: Union[User, int],
+        message: Union[None, Message] = None,
+    ) -> bool:
+        if message.is_private or "@admin" not in message.raw_text:
+            return
+
+        admin_tag_string = self.apo_lib.utils.get_str(
+            "admin_tag", self.all_strings, message
+        ).format(await self.apo_lib.utils.get_tag(user, True))
+        if message.is_reply:
+            reply = await message.get_reply_message()
+            reply_user = await self._client.get_entity(reply.sender_id)
+            admin_tag_string += self.apo_lib.utils.get_str(
+                "admin_tag_reply", self.all_strings, message
+            ).format(
+                await self.apo_lib.utils.get_tag(reply_user, True),
+                reply.text,
+            )
+
+        await utils.answer(
+            message,
+            self.apo_lib.utils.get_str(
+                "admin_tag_reply_msg", self.all_strings, message
+            ),
+        )
+        await self.inline.bot.send_message(
+            self.tg_id,
+            admin_tag_string,
+            parse_mode="HTML",
+            disable_web_page_preview=True,
+        )
 
     async def watcher(self, message: Message):
         self._global_queue += [message]
@@ -899,4 +811,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             asyncio.get_event_loop().create_task(
                 self.p__bcu(chat, user, message, bcu, bcu_sets)
             )
+        if chat_id in self.config["admin_tag_chats"]:
+            user = await self._client.get_entity(user_id)
+            asyncio.get_event_loop().create_task(self.p__admin(user, message))
         return
