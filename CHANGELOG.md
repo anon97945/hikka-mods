@@ -2,6 +2,10 @@
 
 ## 🆕 Version 2.0.3
 ### 📃 module updates:
+- admintools | added ability to add custom admin tags in config such as `/report`, `.report`, etc.
+
+## 🆕 Version 2.0.3
+### 📃 module updates:
 - admintools | added `@admin` tag for chats (check config)
 - autoreact | added `ignore_self` config
 - dnd | automatically removes status after given time, improved bot message

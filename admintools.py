@@ -1,4 +1,4 @@
-__version__ = (1, 0, 24)
+__version__ = (1, 0, 28)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -106,6 +106,9 @@ class ApodiktumAdminToolsMod(loader.Module):
         ),
         "_cfg_doc_admin_tag_chats": "Reagieren Sie in bestimmten Chats auf @admin.",
         "_cls_doc": "Toolpack für Kanal- und Gruppenadministratoren.",
+        "admin_tag": "Der Benutzer {} hat um Hilfe gebeten.",
+        "admin_tag_reply": "\n\Die entsprechende Nachricht von {} ist:\n{}",
+        "admin_tag_reply_msg": "Danke, der Besitzer dieses Bot wurde informiert.",
         "bcu_db_string": (
             "<b>[BlockChannelUser]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
             "\n\nChateinstellungen:\n{}"
@@ -254,6 +257,14 @@ class ApodiktumAdminToolsMod(loader.Module):
                 doc=lambda: self.strings("_cfg_doc_admin_tag_chats"),
                 validator=loader.validators.Series(
                     loader.validators.TelegramID(),
+                ),
+            ),
+            loader.ConfigValue(
+                "admin_tag",
+                ["@admin"],
+                doc=lambda: self.strings("_cfg_doc_admin_cst_tag"),
+                validator=loader.validators.Series(
+                    loader.validators.String(),
                 ),
             ),
             loader.ConfigValue(
@@ -642,8 +653,8 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     async def p__bcu(
         self,
-        chat: Union[Chat, int],
-        user: Union[User, int],
+        chat: Chat,
+        user: User,
         message: Union[None, Message] = None,
         bcu: list = None,
         bcu_sets: dict = None,
@@ -677,8 +688,8 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     async def p__bnd(
         self,
-        chat: Union[Chat, int],
-        user: Union[User, int],
+        chat: Chat,
+        user: User,
         message: Union[None, Message] = None,
         bnd: list = None,
         bnd_sets: dict = None,
@@ -717,8 +728,8 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     async def p__gl(
         self,
-        chat: Union[Chat, int],
-        user: Union[User, int],
+        chat: Chat,
+        user: User,
         message: Union[None, Message] = None,
         gl: list = None,
         gl_sets: dict = None,
@@ -745,12 +756,24 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     async def p__admin(
         self,
-        user: Union[User, int],
+        chat: Chat,
+        user: User,
         message: Union[None, Message] = None,
     ) -> bool:
-        if message.is_private or "@admin" not in message.raw_text:
+        found = False
+        if (
+            message.is_private
+            or message.sender_id == self.tg_id
+            or not chat.admin_rights
+        ):
             return
-
+        if self.config["admin_tag"]:
+            for cst_tag in self.config["admin_tag"]:
+                if cst_tag in message.raw_text.split():
+                    found = True
+                    break
+        if not found:
+            return
         admin_tag_string = self.apo_lib.utils.get_str(
             "admin_tag", self.all_strings, message
         ).format(await self.apo_lib.utils.get_tag(user, True))
@@ -769,6 +792,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             self.apo_lib.utils.get_str(
                 "admin_tag_reply_msg", self.all_strings, message
             ),
+            reply_to=message,
         )
         await self.inline.bot.send_message(
             self.tg_id,
@@ -812,6 +836,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 self.p__bcu(chat, user, message, bcu, bcu_sets)
             )
         if chat_id in self.config["admin_tag_chats"]:
+            chat = await self._client.get_entity(chat_id)
             user = await self._client.get_entity(user_id)
-            asyncio.get_event_loop().create_task(self.p__admin(user, message))
+            asyncio.get_event_loop().create_task(self.p__admin(chat, user, message))
         return
