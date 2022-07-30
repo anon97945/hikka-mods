@@ -257,6 +257,14 @@ class ApodiktumAdminToolsMod(loader.Module):
                 ),
             ),
             loader.ConfigValue(
+                "admin_tag",
+                ["@admin"],
+                doc=lambda: self.strings("_cfg_doc_admin_cst_tag"),
+                validator=loader.validators.Series(
+                    loader.validators.String(),
+                ),
+            ),
+            loader.ConfigValue(
                 "auto_migrate",
                 True,
                 doc=lambda: self.strings("_cfg_cst_auto_migrate"),
@@ -748,9 +756,16 @@ class ApodiktumAdminToolsMod(loader.Module):
         user: Union[User, int],
         message: Union[None, Message] = None,
     ) -> bool:
-        if message.is_private or "@admin" not in message.raw_text:
+        found = False
+        if message.is_private:
             return
-
+        if self.config["admin_tag"]:
+            for cst_tag in self.config["admin_tag"]:
+                if cst_tag in message.raw_text.split():
+                    found = True
+                    break
+        if not found:
+            return
         admin_tag_string = self.apo_lib.utils.get_str(
             "admin_tag", self.all_strings, message
         ).format(await self.apo_lib.utils.get_tag(user, True))
