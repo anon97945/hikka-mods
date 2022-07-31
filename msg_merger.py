@@ -50,8 +50,8 @@ class ApodiktumMsgMergerMod(loader.Module):
         ),
         "_cfg_ignore_prefix": "The prefix to ignore the merging fully.",
         "_cfg_link_preview": (
-            "Whether to send webpage previews."
-            "\nLeave empty to use automatically decide based on the messages to merge."
+            "Whether to send webpage previews.\nLeave empty to use"
+            " automatically decide based on the messages to merge."
         ),
         "_cfg_merge_own_reply": "Whether to merge any message from own reply.",
         "_cfg_merge_own_reply_msg": (
@@ -91,7 +91,7 @@ class ApodiktumMsgMergerMod(loader.Module):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "active",
-                "True",
+                True,
                 doc=lambda: self.strings("_cfg_active"),
                 validator=loader.validators.Boolean(),
             ),

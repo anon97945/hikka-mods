@@ -44,8 +44,8 @@ class ApodiktumPMLogMod(loader.Module):
         "_cfg_log_group": "Group or channel ID where to send the PMs.",
         "_cfg_loglist": "Add telegram id's to log them.",
         "_cfg_selfdestructive": (
-            "Whether selfdestructive media should be logged or not. This violates TG"
-            " TOS!"
+            "Whether selfdestructive media should be logged or not. This"
+            " violates TG TOS!"
         ),
         "_cfg_whitelist": (
             "Whether the list is a for excluded(True) or included(False) chats."
@@ -66,8 +66,8 @@ class ApodiktumPMLogMod(loader.Module):
             " verstößt gegen die TG TOS!"
         ),
         "_cfg_whitelist": (
-            "Ob die Liste für ausgeschlossene (Wahr) oder eingeschlossene (Falsch)"
-            " Chats ist."
+            "Ob die Liste für ausgeschlossene (Wahr) oder eingeschlossene"
+            " (Falsch) Chats ist."
         ),
         "_cmd_doc_cpmlog": "Dadurch wird die Konfiguration für das Modul geöffnet.",
     }
@@ -77,8 +77,8 @@ class ApodiktumPMLogMod(loader.Module):
         "_cfg_log_group": "Айди группы или канала для отправки личных сообщений.",
         "_cfg_loglist": "Добавьте айди Telegram, чтобы зарегистрировать их",
         "_cfg_selfdestructive": (
-            "Должны ли самоуничтожающиеся медиафайлы регистрироваться или нет. Это"
-            " нарушает «Условия использования Telegram» (ToS)"
+            "Должны ли самоуничтожающиеся медиафайлы регистрироваться или нет."
+            " Это нарушает «Условия использования Telegram» (ToS)"
         ),
         "_cfg_whitelist": (
             "Является ли список для исключённых (True) или включённых чатов (False)."
@@ -98,7 +98,7 @@ class ApodiktumPMLogMod(loader.Module):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "log_bots",
-                "False",
+                False,
                 doc=lambda: self.strings("_cfg_bots"),
                 validator=loader.validators.Boolean(),
             ),
@@ -116,13 +116,13 @@ class ApodiktumPMLogMod(loader.Module):
             ),
             loader.ConfigValue(
                 "log_self_destr",
-                "False",
+                False,
                 doc=lambda: self.strings("_cfg_selfdestructive"),
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
                 "whitelist",
-                "false",
+                True,
                 doc=lambda: self.strings("_cfg_whitelist"),
                 validator=loader.validators.Boolean(),
             ),

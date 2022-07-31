@@ -100,7 +100,8 @@ class ApodiktumPyPNGMod(loader.Module):
         reply to url or py file
         """
         await utils.answer(
-            message, self.apo_lib.utils.get_str("py2png", self.all_strings, message)
+            message,
+            self.apo_lib.utils.get_str("py2png", self.all_strings, message),
         )
         reply = await message.get_reply_message()
         file = BytesIO()
@@ -117,7 +118,8 @@ class ApodiktumPyPNGMod(loader.Module):
             file, file.name = res
         else:
             return await utils.answer(
-                message, self.apo_lib.utils.get_str("no_url", self.all_strings, message)
+                message,
+                self.apo_lib.utils.get_str("no_url", self.all_strings, message),
             )
         file.seek(0)
         byte_str = file.read()

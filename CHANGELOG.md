@@ -1,6 +1,17 @@
 # 📝 Apodiktum Modules Changelog:
 
-## 🆕 Version 2.0.3
+## 🆕 Version 2.0.5
+#### General:
+- black formatting
+
+### 📃 module updates:
+- admintools | `admin_tags` is not case insensetive
+- admintools | added message link to bot message
+- admintools | added `whitelist` config for admin_tag
+- admintools | added `ignore_admins` config to ignore `admin tags` of admins
+- dnd | hopefully fixed entity error
+
+## 🆕 Version 2.0.4
 ### 📃 module updates:
 - admintools | added ability to add custom admin tags in config such as `/report`, `.report`, etc.
 

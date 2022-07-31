@@ -78,8 +78,8 @@ class ApodiktumPurgeMod(loader.Module):
         ),
         "_cfg_log_sd": "Protokollieren `self-destructive` Nachrichten als Info.",
         "_cls_doc:": (
-            "Module zum entfernen von Nachrichten(normalerweise spam, etc.).\nCheck"
-            " `.config apodiktum purge` um das Protokollieren zu"
+            "Module zum entfernen von Nachrichten(normalerweise spam,"
+            " etc.).\nCheck `.config apodiktum purge` um das Protokollieren zu"
             " aktivieren/deaktivieren."
         ),
         "_cmd_doc_cpurge": "Dadurch wird die Konfiguration für das Modul geöffnet.",
@@ -141,8 +141,8 @@ class ApodiktumPurgeMod(loader.Module):
         ),
         "_cfg_log_sd": "Логировать создание сообщения как info.",
         "_cls_doc": (
-            "Модуль для очистки спама и т.д.Проверьте `.config apodiktum purge`, чтобы"
-            " включить/выключить ведение журнала."
+            "Модуль для очистки спама и т.д.Проверьте `.config apodiktum"
+            " purge`, чтобы включить/выключить ведение журнала."
         ),
         "_cmd_doc_cpurge": "Это откроет конфиг для модуля.",
         "_cmd_doc_edit": (
@@ -173,8 +173,8 @@ class ApodiktumPurgeMod(loader.Module):
             "- Использование: .spurgeme <количество/все>"
         ),
         "_cmd_doc_spurgeuser": (
-            "Удаляет все сообщения от определенного пользователя без оповещения.\n"
-            "- Использование: .spurgeuser <реплай>"
+            "Удаляет все сообщения от определенного пользователя без"
+            " оповещения.\n- Использование: .spurgeuser <реплай>"
         ),
         "edit_success": (
             "Редактирование завершено успешно.\n"
@@ -384,7 +384,8 @@ class ApodiktumPurgeMod(loader.Module):
         args = str(args).split()
         if not represents_int(args[0]) and "all" not in args:
             await utils.answer(
-                message, self.apo_lib.utils.get_str("no_int", self.all_strings, message)
+                message,
+                self.apo_lib.utils.get_str("no_int", self.all_strings, message),
             )
             return
         if len(args) > 1:
@@ -419,7 +420,8 @@ class ApodiktumPurgeMod(loader.Module):
         args = str(args).split()
         if not represents_int(args[0]) and "all" not in args:
             await utils.answer(
-                message, self.apo_lib.utils.get_str("no_int", self.all_strings, message)
+                message,
+                self.apo_lib.utils.get_str("no_int", self.all_strings, message),
             )
             return
         if len(args) > 1:

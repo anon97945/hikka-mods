@@ -30,9 +30,10 @@ from .. import loader, utils
 
 if googletrans.__version__ != "4.0.0-rc.1":
     raise KeyError(
-        f'The googletrans version is {googletrans.__version__}, not "4.0.0-rc.1".It'
-        " means the module cannot run properly. To fix this, reinstall"
-        " googletrans==4.0.0-rc1..terminal pip install googletrans==4.0.0-rc1"
+        f"The googletrans version is {googletrans.__version__}, not"
+        ' "4.0.0-rc.1".It means the module cannot run properly. To fix this,'
+        " reinstall googletrans==4.0.0-rc1..terminal pip install"
+        " googletrans==4.0.0-rc1"
     )
 
 
@@ -87,8 +88,8 @@ class ApodiktumGTranslateMod(loader.Module):
         "_cmd_doc_cgtranslate": "Это откроет конфиг для модуля.",
         "invalid_text": "Неправильный текст для перевода",
         "split_error": (
-            "Ошибка в функции Python – split(). Если в тексте есть ->, то это должно"
-            " быть разделено."
+            "Ошибка в функции Python – split(). Если в тексте есть ->, то это"
+            " должно быть разделено."
         ),
         "translated": (
             "<b>[ <code>{frlang}</code> -> </b><b><code>{to}</code>"
@@ -115,7 +116,7 @@ class ApodiktumGTranslateMod(loader.Module):
             ),
             loader.ConfigValue(
                 "vodka_easteregg",
-                "False",
+                False,
                 doc=lambda: self.strings("_cfg_vodkatr_msg"),
                 validator=loader.validators.Boolean(),
             ),

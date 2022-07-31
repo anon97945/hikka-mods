@@ -101,7 +101,7 @@ class ApodiktumSkeletonMod(loader.Module):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "skeleton_bool",
-                "True",
+                True,
                 doc=lambda: self.strings("_cfg_skel_bool"),
                 validator=loader.validators.Boolean(),
             ),
@@ -177,7 +177,8 @@ class ApodiktumSkeletonMod(loader.Module):
             return
         if not represents_int(args[0]):
             await utils.answer(
-                message, self.apo_lib.utils.get_str("no_int", self.all_strings, message)
+                message,
+                self.apo_lib.utils.get_str("no_int", self.all_strings, message),
             )
             return
         await utils.answer(

@@ -50,8 +50,9 @@ class ApodiktumLibControllerMod(loader.Module):
 
     strings_de = {
         "_cls_doc": (
-            "Dies ist ein Bibliothekssteuerungsmodul, das für Apodiktum Library Module"
-            " und auch Module von Drittanbietern benötigt wird.>>Nicht entfernen!<<"
+            "Dies ist ein Bibliothekssteuerungsmodul, das für Apodiktum Library"
+            " Module und auch Module von Drittanbietern benötigt wird.>>Nicht"
+            " entfernen!<<"
         ),
         "_cmd_doc_capolib": "Dadurch wird die Konfiguration für das Modul geöffnet.",
     }

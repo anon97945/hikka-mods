@@ -238,7 +238,8 @@ class ApodiktumTTSMod(loader.Module):
                 )
                 return
         msg = await utils.answer(
-            message, self.apo_lib.utils.get_str("processing", self.all_strings, message)
+            message,
+            self.apo_lib.utils.get_str("processing", self.all_strings, message),
         )
         tts = await utils.run_sync(gTTS, text, lang=self.config["tts_lang"])
         voice = BytesIO()
@@ -288,7 +289,8 @@ class ApodiktumTTSMod(loader.Module):
             )
             return
         msg = await utils.answer(
-            message, self.apo_lib.utils.get_str("processing", self.all_strings, message)
+            message,
+            self.apo_lib.utils.get_str("processing", self.all_strings, message),
         )
         ext = replymsg.file.ext
         voice = BytesIO()

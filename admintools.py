@@ -1,4 +1,4 @@
-__version__ = (1, 0, 28)
+__version__ = (1, 0, 32)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -47,6 +47,14 @@ class ApodiktumAdminToolsMod(loader.Module):
         "developer": "@anon97945",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_doc_admin_tag_chats": "React to @admin in given chats.",
+        "_cfg_doc_ignore_admins": "Wheather to ignore tags from admins.",
+        "_cfg_doc_whitelist": (
+            "Whether the `admin_tag_chats`-list is a for excluded(True) or"
+            " included(False) chats."
+        ),
+        "admin_tag": "The User {} asked for help.\n{}",
+        "admin_tag_reply": "\n\nThe corresponding message from {} is:\n{}",
+        "admin_tag_reply_msg": "Thanks, the owner of this Bot got informed.",
         "bcu_db_string": (
             "<b>[BlockChannelUser]</b> Current Database:\n\nWatcher:\n{}"
             "\n\nChatsettings:\n{}"
@@ -55,9 +63,6 @@ class ApodiktumAdminToolsMod(loader.Module):
             "<b>[BlockChannelUser]</b> Current settings in this chat"
             " are:\n<code>{}</code>"
         ),
-        "admin_tag": "The User {} asked for help.",
-        "admin_tag_reply": "\n\nThe corresponding message from {} is:\n{}",
-        "admin_tag_reply_msg": "Thanks, the owner of this Bot got informed.",
         "bcu_start": "<b>[BlockChannelUser]</b> Activated in this chat.</b>",
         "bcu_stopped": "<b>[BlockChannelUser]</b> Deactivated in this chat.</b>",
         "bcu_triggered": "{}, you can't write as a channel here.",
@@ -106,9 +111,9 @@ class ApodiktumAdminToolsMod(loader.Module):
         ),
         "_cfg_doc_admin_tag_chats": "Reagieren Sie in bestimmten Chats auf @admin.",
         "_cls_doc": "Toolpack für Kanal- und Gruppenadministratoren.",
-        "admin_tag": "Der Benutzer {} hat um Hilfe gebeten.",
-        "admin_tag_reply": "\n\Die entsprechende Nachricht von {} ist:\n{}",
-        "admin_tag_reply_msg": "Danke, der Besitzer dieses Bot wurde informiert.",
+        "admin_tag": "Der Benutzer {} hat um Hilfe gebeten.\n{}",
+        "admin_tag_reply": "\n\nDie entsprechende Nachricht von {} ist:\n{}",
+        "admin_tag_reply_msg": "Danke, der Besitzer dieses Bots wurde informiert.",
         "bcu_db_string": (
             "<b>[BlockChannelUser]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
             "\n\nChateinstellungen:\n{}"
@@ -123,12 +128,12 @@ class ApodiktumAdminToolsMod(loader.Module):
         "bcu_triggered": "{}, du kannst hier nicht als Kanal schreiben.",
         "bcu_turned_off": "<b>[BlockChannelUser]</b> In allen Chats ausgeschaltet.</b>",
         "bnd_db_string": (
-            "<b>[BlockNonDiscussion - Settings]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
-            "\n\nChateinstellungen:\n{}"
+            "<b>[BlockNonDiscussion - Settings]</b> Aktuelle"
+            " Datenbank:\n\nWatcher:\n{}\n\nChateinstellungen:\n{}"
         ),
         "bnd_settings": (
-            "<b>[BlockNonDiscussion - Settings]</b> Aktuelle Einstellungen in diesem "
-            "Chat:\n{}"
+            "<b>[BlockNonDiscussion - Settings]</b> Aktuelle Einstellungen in"
+            " diesem Chat:\n{}"
         ),
         "bnd_start": "<b>[BlockNonDiscussion]</b> In diesem Chat aktiviert.</b>",
         "bnd_stopped": (
@@ -162,39 +167,42 @@ class ApodiktumAdminToolsMod(loader.Module):
     strings_ru = {
         "_cls_doc": "Пакет инструментов для администраторов каналов и групп.",
         "_cmd_doc_bcu": (
-            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Переключает BlockChannelUser"
-            " для текущего чата.\n.bcu notify <true/false>\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  -"
-            " Переключает уведомление.\n.bcu ban <true/false>\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  -"
-            " Банит канал.\n.bcu deltimer <секунды/или 0>\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  -"
-            " Удаляет уведомление в считанные секунды. 0, чтобы отключить.\n.bcu"
-            " settings\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую конфигурацию"
-            " чата.\n.bcu db\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую базу"
-            " данных.\n.bcu clearall\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Очищает базу данных от"
+            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Переключает"
+            " BlockChannelUser для текущего чата.\n.bcu notify <true/false>\n"
+            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Переключает уведомление.\n.bcu ban"
+            " <true/false>\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Банит канал.\n.bcu deltimer"
+            " <секунды/или 0>\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Удаляет уведомление в"
+            " считанные секунды. 0, чтобы отключить.\n.bcu settings\n"
+            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую конфигурацию чата.\n.bcu"
+            " db\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую базу данных.\n.bcu"
+            " clearall\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Очищает базу данных от"
             " BlockChannelUser.\n"
         ),
         "_cmd_doc_bnd": (
-            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Переключает BlockNonDiscussion"
-            " для текущего чата.\n.bnd notify <true/false>\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  -"
-            " Переключает уведомление.\n.bnd mute <минут/или 0>\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  -"
-            " Заглушает пользователя на Х минут. 0 чтобы отключить.\n.bnd deltimer"
-            " <секунды/или 0>\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Удаляет уведомление в считанные"
-            " секунды. 0 чтобы отключить.\n.bnd settings\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  -"
-            " Показывает текущую конфигурацию чата.\n.bnd db\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  -"
-            " Показывает текущую базу данных.\n.bnd clearall\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  -"
-            " Очищает базу данных от BlockNonDiscussion.\n"
+            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Переключает"
+            " BlockNonDiscussion для текущего чата.\n.bnd notify <true/false>\n"
+            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Переключает уведомление.\n.bnd mute"
+            " <минут/или 0>\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Заглушает пользователя на Х"
+            " минут. 0 чтобы отключить.\n.bnd deltimer <секунды/или 0>\n"
+            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Удаляет уведомление в считанные секунды. 0"
+            " чтобы отключить.\n.bnd settings\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  -"
+            " Показывает текущую конфигурацию чата.\n.bnd db\n"
+            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую базу данных.\n.bnd"
+            " clearall\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Очищает базу данных от"
+            " BlockNonDiscussion.\n"
         ),
         "_cmd_doc_gl": (
-            "⁭⁫⁪⁫⁬⁭⁫⁪<chatid> <logchannelid>\n"
-            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Регистрирует групповой чат на данном канале.\n"
-            ".gl rem <chatid>\n"
-            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Удаляет данный чат из наблюдателя.\n"
-            ".gl db\n"
-            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показываеттекущую базу данных.\n"
-            ".gl settings\n"
-            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую конфигурацию чата.\n"
-            ".gl clearall\n"
-            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Очищает базу данных от Group/Channel Logger.\n"
+            "⁭⁫⁪⁫⁬⁭⁫⁪<chatid> <logchannelid>\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  -"
+            " Регистрирует групповой чат на данном канале.\n.gl rem <chatid>\n"
+            " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Удаляет данный чат из наблюдателя.\n.gl"
+            " db\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показываеттекущую базу данных.\n.gl"
+            " settings\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую конфигурацию"
+            " чата.\n.gl clearall\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Очищает базу данных"
+            " от Group/Channel Logger.\n"
         ),
+        "admin_tag": "Пользователь {} просит помощи.\n{}",
+        "admin_tag_reply": "\n\nПересылаемое сообщение от\{}:\n{}",
+        "admin_tag_reply_msg": "Спасибо, владелец этого бота был проинформирован.",
         "bcu_db_string": (
             "<b>[BlockChannelUser]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
             "\n\nНастройки чата:\n{}"
@@ -207,8 +215,8 @@ class ApodiktumAdminToolsMod(loader.Module):
             "<b>[BlockChannelUser]</b> Теперь этот модуль выключен во всех чатах</b>"
         ),
         "bnd_db_string": (
-            "<b>[BlockNonDiscussion]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
-            "\n\nНастройки чата:\n{}"
+            "<b>[BlockNonDiscussion]</b> Текущая база"
+            " данных:\n\nНаблюдающий:\n{}\n\nНастройки чата:\n{}"
         ),
         "bnd_settings": (
             "<b>[BlockNonDiscussion]</b> Текущие настройки в этом чате:\n{}"
@@ -253,6 +261,14 @@ class ApodiktumAdminToolsMod(loader.Module):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
+                "admin_tag",
+                ["@admin"],
+                doc=lambda: self.strings("_cfg_doc_admin_cst_tag"),
+                validator=loader.validators.Series(
+                    loader.validators.String(),
+                ),
+            ),
+            loader.ConfigValue(
                 "admin_tag_chats",
                 doc=lambda: self.strings("_cfg_doc_admin_tag_chats"),
                 validator=loader.validators.Series(
@@ -260,12 +276,16 @@ class ApodiktumAdminToolsMod(loader.Module):
                 ),
             ),
             loader.ConfigValue(
-                "admin_tag",
-                ["@admin"],
-                doc=lambda: self.strings("_cfg_doc_admin_cst_tag"),
-                validator=loader.validators.Series(
-                    loader.validators.String(),
-                ),
+                "ignore_admins",
+                True,
+                doc=lambda: self.strings("_cfg_doc_ignore_admins"),
+                validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
+                "tag_whitelist",
+                False,
+                doc=lambda: self.strings("_cfg_doc_whitelist"),
+                validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
                 "auto_migrate",
@@ -341,7 +361,10 @@ class ApodiktumAdminToolsMod(loader.Module):
 
         if message.is_private:
             await utils.answer(
-                message, self.apo_lib.utils.get_str("not_dc"), self.all_strings, message
+                message,
+                self.apo_lib.utils.get_str("not_dc"),
+                self.all_strings,
+                message,
             )
             return
 
@@ -456,7 +479,8 @@ class ApodiktumAdminToolsMod(loader.Module):
 
         if message.is_private:
             await utils.answer(
-                message, self.apo_lib.utils.get_str("not_dc", self.all_strings, message)
+                message,
+                self.apo_lib.utils.get_str("not_dc", self.all_strings, message),
             )
             return
 
@@ -553,7 +577,8 @@ class ApodiktumAdminToolsMod(loader.Module):
 
         if not args:
             return await utils.answer(
-                message, self.apo_lib.utils.get_str("error", self.all_strings, message)
+                message,
+                self.apo_lib.utils.get_str("error", self.all_strings, message),
             )
 
         if args[0] == "clearall":
@@ -585,11 +610,13 @@ class ApodiktumAdminToolsMod(loader.Module):
             )
         elif args[0] not in ["clearall", "settings"]:
             return await utils.answer(
-                message, self.apo_lib.utils.get_str("error", self.all_strings, message)
+                message,
+                self.apo_lib.utils.get_str("error", self.all_strings, message),
             )
         elif not args:
             return await utils.answer(
-                message, self.apo_lib.utils.get_str("error", self.all_strings, message)
+                message,
+                self.apo_lib.utils.get_str("error", self.all_strings, message),
             )
         if (
             args[0] == "rem"
@@ -608,11 +635,13 @@ class ApodiktumAdminToolsMod(loader.Module):
             self.apo_lib.utils.validate_tgid(args[1]) or chatid_str not in gl
         ):
             return await utils.answer(
-                message, self.apo_lib.utils.get_str("error", self.all_strings, message)
+                message,
+                self.apo_lib.utils.get_str("error", self.all_strings, message),
             )
         if not self.apo_lib.utils.validate_tgid(chatid_str):
             return await utils.answer(
-                message, self.apo_lib.utils.get_str("error", self.all_strings, message)
+                message,
+                self.apo_lib.utils.get_str("error", self.all_strings, message),
             )
         if chatid_str not in gl:
             if not self.apo_lib.utils.validate_tgid(
@@ -768,15 +797,26 @@ class ApodiktumAdminToolsMod(loader.Module):
         ):
             return
         if self.config["admin_tag"]:
-            for cst_tag in self.config["admin_tag"]:
-                if cst_tag in message.raw_text.split():
+            admin_tags = [x.lower() for x in self.config["admin_tag"]]
+            text_list = [x.lower() for x in message.raw_text.split()]
+            for cst_tag in admin_tags:
+                if cst_tag in text_list:
                     found = True
                     break
         if not found:
             return
+
+        if (
+            self.config["ignore_admins"]
+            and (await self._client.get_permissions(chat.id, user.id)).is_admin
+        ):
+            return
         admin_tag_string = self.apo_lib.utils.get_str(
             "admin_tag", self.all_strings, message
-        ).format(await self.apo_lib.utils.get_tag(user, True))
+        ).format(
+            await self.apo_lib.utils.get_tag(user, True),
+            await utils.get_message_link(message),
+        )
         if message.is_reply:
             reply = await message.get_reply_message()
             reply_user = await self._client.get_entity(reply.sender_id)
@@ -787,7 +827,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 reply.text,
             )
 
-        await utils.answer(
+        msg = await utils.answer(
             message,
             self.apo_lib.utils.get_str(
                 "admin_tag_reply_msg", self.all_strings, message
@@ -800,6 +840,9 @@ class ApodiktumAdminToolsMod(loader.Module):
             parse_mode="HTML",
             disable_web_page_preview=True,
         )
+        await asyncio.sleep(30)
+        await msg.delete()
+        return
 
     async def watcher(self, message: Message):
         self._global_queue += [message]
@@ -835,7 +878,13 @@ class ApodiktumAdminToolsMod(loader.Module):
             asyncio.get_event_loop().create_task(
                 self.p__bcu(chat, user, message, bcu, bcu_sets)
             )
-        if chat_id in self.config["admin_tag_chats"]:
+        if (
+            self.config["tag_whitelist"]
+            and chat_id not in self.config["admin_tag_chats"]
+        ) or (
+            not self.config["tag_whitelist"]
+            and chat_id in self.config["admin_tag_chats"]
+        ):
             chat = await self._client.get_entity(chat_id)
             user = await self._client.get_entity(user_id)
             asyncio.get_event_loop().create_task(self.p__admin(chat, user, message))

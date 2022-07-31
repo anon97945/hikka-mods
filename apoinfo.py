@@ -46,8 +46,8 @@ class ApodiktumInfoMod(loader.Module):
         "_cfg_cst_btn": "Custom button. Leave empty to remove button.",
         "_cfg_cst_frmt": "Custom fileformat for Banner.",
         "_cfg_cst_msg": (
-            "Custom message for info. May contain {me}, {version}, {build}, {prefix},"
-            " {platform}, {upd}, {uptime} keywords."
+            "Custom message for info. May contain {me}, {version}, {build},"
+            " {prefix}, {platform}, {upd}, {uptime} keywords."
         ),
         "_cfg_inline_banner": "Set `True` in order to disable an inline media banner.",
         "build": "Build",
@@ -69,13 +69,14 @@ class ApodiktumInfoMod(loader.Module):
         "_cfg_banner": "Setzen Sie `True`, um das Media Banner zu deaktivieren.",
         "_cfg_cst_bnr": "Benutzerdefiniertes Banner.",
         "_cfg_cst_btn": (
-            "Benutzerdefinierte Schaltfläche für Informationen. Leer lassen, um die"
-            " Schaltfläche zu entfernen."
+            "Benutzerdefinierte Schaltfläche für Informationen. Leer lassen, um"
+            " die Schaltfläche zu entfernen."
         ),
         "_cfg_cst_frmt": "Benutzerdefiniertes Dateiformat für das Banner.",
         "_cfg_cst_msg": (
-            "Benutzerdefinierte Nachricht für Info. Kann die Schlüsselwörter {me},"
-            " {version}, {build}, {prefix}, {platform}, {upd}, {uptime} enthalten."
+            "Benutzerdefinierte Nachricht für Info. Kann die Schlüsselwörter"
+            " {me}, {version}, {build}, {prefix}, {platform}, {upd}, {uptime}"
+            " enthalten."
         ),
         "_cfg_inline_banner": (
             "Setzen Sie `True`, um das Inline Media Banner zu deaktivieren."
@@ -101,8 +102,8 @@ class ApodiktumInfoMod(loader.Module):
         ),
         "_cfg_cst_frmt": "Кастомный формат файла для баннера.",
         "_cfg_cst_msg": (
-            "Кастомный текст сообщения в info. Может содержать ключевые слова {me},"
-            " {version}, {build}, {prefix}, {platform}, {upd}, {uptime}."
+            "Кастомный текст сообщения в info. Может содержать ключевые слова"
+            " {me}, {version}, {build}, {prefix}, {platform}, {upd}, {uptime}."
         ),
         "_cfg_inline_banner": (
             "Установите `True`, чтобы отключить встроенный медиа-баннер"
@@ -158,7 +159,10 @@ class ApodiktumInfoMod(loader.Module):
             ),
             loader.ConfigValue(
                 "custom_button1",
-                ["🔥 Apodiktum Hikka Modules 🔥", "https://t.me/apodiktum_modules"],
+                [
+                    "🔥 Apodiktum Hikka Modules 🔥",
+                    "https://t.me/apodiktum_modules",
+                ],
                 lambda: self.strings("_cfg_cst_btn"),
                 validator=loader.validators.Union(
                     loader.validators.Series(fixed_len=2),

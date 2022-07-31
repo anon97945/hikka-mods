@@ -70,7 +70,8 @@ class ApoLibTesterMod(loader.Module):
 
     async def hellocmd(self, message: Message):
         await utils.answer(
-            message, self.apo_lib.utils.get_str("greet", self.all_strings, message)
+            message,
+            self.apo_lib.utils.get_str("greet", self.all_strings, message),
         )
 
     async def lmsgcmd(self):

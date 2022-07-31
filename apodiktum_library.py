@@ -73,8 +73,8 @@ class ApodiktumLib(loader.Library):
             "Ob Debug als Info im Logger-Kanal protokolliert werden soll."
         ),
         "_cfg_doc_log_debug": (
-            "Ob deklarierte Debug-Meldungen als Info im Logger-Kanal protokolliert"
-            " werden sollen."
+            "Ob deklarierte Debug-Meldungen als Info im Logger-Kanal"
+            " protokolliert werden sollen."
         ),
     }
 
@@ -151,7 +151,10 @@ class ApodiktumLib(loader.Library):
 
         await self._refresh()
         self.utils.log(
-            logging.DEBUG, self.__class__.__name__, "Refresh done.", debug_msg=True
+            logging.DEBUG,
+            self.__class__.__name__,
+            "Refresh done.",
+            debug_msg=True,
         )
 
         self._acl_task = asyncio.ensure_future(
@@ -199,7 +202,8 @@ class ApodiktumLib(loader.Library):
         self.utils.log(
             logging.DEBUG,
             self.__class__.__name__,
-            f"Apodiktum Library v{__version__[0]}.{__version__[1]}.{__version__[2]} was"
+            "Apodiktum Library"
+            f" v{__version__[0]}.{__version__[1]}.{__version__[2]} was"
             " updated.",
         )
         self.allmodules._apodiktum_controller_init = False
@@ -331,7 +335,8 @@ class ApodiktumControllerLoader(loader.Module):
                 self.utils.log(
                     logging.DEBUG,
                     self._libclassname,
-                    f"ApoLibController not found, retrying in {delay} seconds...\nHikka"
+                    "ApoLibController not found, retrying in"
+                    f" {delay} seconds...\nHikka"
                     " fully loaded:"
                     f" {getattr(self.lib.lookup('Loader'), '_fully_loaded', False)}",
                     debug_msg=True,
@@ -1376,7 +1381,10 @@ class ApodiktumMigrator(loader.Module):
                 )
                 if await self._migrator_func():
                     self.utils.log(
-                        logging.DEBUG, self._name, "Migration done.", debug_msg=True
+                        logging.DEBUG,
+                        self._name,
+                        "Migration done.",
+                        debug_msg=True,
                     )
                     return True
             elif not full_migrated:
@@ -1438,7 +1446,10 @@ class ApodiktumMigrator(loader.Module):
                 )
                 if await self._migrator_func():
                     self.utils.log(
-                        logging.DEBUG, self._name, "Migration done.", debug_msg=True
+                        logging.DEBUG,
+                        self._name,
+                        "Migration done.",
+                        debug_msg=True,
                     )
                     return
             elif not auto_migrate and not full_migrated:
@@ -1446,8 +1457,8 @@ class ApodiktumMigrator(loader.Module):
                 self.utils.log(
                     logging.DEBUG,
                     self._name,
-                    f"Open migrations: {migrate} | auto_migrate: {auto_migrate} |"
-                    f" Forcehash done: {self.hashs}",
+                    f"Open migrations: {migrate} | auto_migrate:"
+                    f" {auto_migrate} | Forcehash done: {self.hashs}",
                     debug_msg=True,
                 )
                 return
@@ -1455,8 +1466,8 @@ class ApodiktumMigrator(loader.Module):
                 self.utils.log(
                     logging.DEBUG,
                     self._name,
-                    f"Open migrations: {migrate} | auto_migrate: {auto_migrate} | Skip"
-                    " migrate_handler.",
+                    f"Open migrations: {migrate} | auto_migrate:"
+                    f" {auto_migrate} | Skip migrate_handler.",
                     debug_msg=True,
                 )
                 return
@@ -1525,7 +1536,13 @@ class ApodiktumMigrator(loader.Module):
         return True
 
     async def _copy_config_init(
-        self, migration, old_classname, new_classname, old_name, new_name, category
+        self,
+        migration,
+        old_classname,
+        new_classname,
+        old_name,
+        new_name,
+        category,
     ):
         """
         !do not use this method directly!
@@ -1593,7 +1610,8 @@ class ApodiktumMigrator(loader.Module):
         !do not use this method directly!
         Gets the names of the module
         :param migration: The migration
-        :return: The old classname, the new classname, the old name, the new name"""
+        :return: The old classname, the new classname, the old name, the new name
+        """
         old_name = None
         old_classname = None
         new_name = None
@@ -1650,8 +1668,9 @@ class ApodiktumMigrator(loader.Module):
                             logging.DEBUG,
                             self._name,
                             f"{migration} | {category} | ({{old_value:"
-                            f" {str(old_value)}}} `==` {{new_value: {str(value)}}})"
-                            f" `and` {{key: {key}}} `==` {{cnfg_key: {cnfg_key}}}",
+                            f" {str(old_value)}}} `==` {{new_value:"
+                            f" {str(value)}}}) `and` {{key: {key}}} `==`"
+                            f" {{cnfg_key: {cnfg_key}}}",
                             debug_msg=True,
                         )
                         if value == old_value and key == cnfg_key:
@@ -1788,14 +1807,15 @@ class ApodiktumImporter(loader.Module):
 
     strings = {
         "heroku_install_failed": (
-            "\n♓️⚠️ This module requires additional libraries to be installed, which"
-            " can't be done on Heroku. Don't report it as bug, this can't be solved."
+            "\n♓️⚠️ This module requires additional libraries to be installed,"
+            " which can't be done on Heroku. Don't report it as bug, this can't"
+            " be solved."
         ),
         "requirements_failed": "\n🚫 Requirements installation failed",
         "requirements_failed_termux": (
             "\n🕶🚫 Requirements installation failed\nThe most common reason is"
-            " that Termux doesn't support many libraries. Don't report it as bug, this"
-            " can't be solved."
+            " that Termux doesn't support many libraries. Don't report it as"
+            " bug, this can't be solved."
         ),
         "requirements_installed": "\n✅ Requirements successfully installed",
         "requirements_installing": "\n🔄 Installing requirements:\n{}",
@@ -1808,15 +1828,15 @@ class ApodiktumImporter(loader.Module):
 
     strings_ru = {
         "heroku_install_failed": (
-            "\n♓️⚠️ Этому модулю требуются дополнительные библиотека, которые нельзя"
-            " установить на Heroku. Не сообщайте об этом как об ошибке, это не может"
-            " быть исправлено"
+            "\n♓️⚠️ Этому модулю требуются дополнительные библиотека, которые"
+            " нельзя установить на Heroku. Не сообщайте об этом как об ошибке,"
+            " это не может быть исправлено"
         ),
         "requirements_failed": "\n🚫 Ошибка установки зависимостей",
         "requirements_failed_termux": (
             "\n🕶🚫 Ошибка установки зависимостей\nНаиболее часто возникает из-за"
-            " того, что Termux не поддерживает многие библиотека. Не сообщайте об этом"
-            " как об ошибке, это не может быть исправлено."
+            " того, что Termux не поддерживает многие библиотека. Не сообщайте"
+            " об этом как об ошибке, это не может быть исправлено."
         ),
         "requirements_installed": "\n✅ Зависимости успешно установлены",
         "requirements_installing": "\n🔄 Устанавливаю зависимости:\n{}",
@@ -1863,7 +1883,9 @@ class ApodiktumImporter(loader.Module):
         self.imports = lib.importer
 
     async def _import_req(
-        self, requirements: list = None, did_requirements: Optional[bool] = False
+        self,
+        requirements: list = None,
+        did_requirements: Optional[bool] = False,
     ):
         USER_INSTALL = (
             "PIP_TARGET" not in os.environ and "VIRTUAL_ENV" not in os.environ

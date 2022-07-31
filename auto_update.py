@@ -124,13 +124,13 @@ class ApodiktumAutoUpdateMod(loader.Module):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "auto_update",
-                "True",
+                True,
                 doc=lambda: self.strings("_cfg_auto_update"),
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
                 "mark_read",
-                "True",
+                True,
                 doc=lambda: self.strings("_cfg_update_msg_read"),
                 validator=loader.validators.Boolean(),
             ),

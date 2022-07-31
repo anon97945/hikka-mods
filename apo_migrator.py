@@ -218,7 +218,10 @@ class ApodiktumMigratorMod(loader.Module):
                     self._db.set(new_name, key, self._db.get(old_name, key))
                     logger.info(
                         self.strings("_log_doc_migrated_db").format(
-                            typename, old_name, new_name, self._db.get(old_name, key)
+                            typename,
+                            old_name,
+                            new_name,
+                            self._db.get(old_name, key),
                         )
                     )
 

@@ -50,12 +50,12 @@ class ApodiktumAutoReactMod(loader.Module):
         "_cfg_doc_ignore_self": "Do not react to messages from yourself.",
         "_cfg_doc_raise_error": "Raise an error if the emoji is not valid.",
         "_cfg_doc_random_delay": (
-            "Randomizes the delay between reactions. Randomness is between 0 and the"
-            " global delay."
+            "Randomizes the delay between reactions. Randomness is between 0"
+            " and the global delay."
         ),
         "_cfg_doc_random_delay_chats": (
-            "List of random delay chats.\nIf the chat is in the list, a random delay is"
-            " used."
+            "List of random delay chats.\nIf the chat is in the list, a random"
+            " delay is used."
         ),
         "_cfg_doc_reactions": (
             "Setup AutoReact.\nYou can define alternative emojis to react with, when"
@@ -67,8 +67,10 @@ class ApodiktumAutoReactMod(loader.Module):
             " Channels:\nall|<channelid>|❤️|👍|🔥"
         ),
         "_cfg_doc_reactions_chance": (
-            "The chance of reacting to a message.\n0.0 is the chance of not reacting to"
-            " a message.\n1.0 is the chance of reacting to a message every time."
+            "The chance of reacting to a message.\n0.0 is the chance of not"
+            " reacting to"
+            " a message.\n1.0 is the chance of reacting to a message every"
+            " time."
             "Pattern:\n<userid/all>|<chatid/global>|<percentage(0.00-1)>\n\nExample:\n1234567|global|0.8"
         ),
         "_cfg_doc_shuffle_chats": "A list of chats where the emoji list is shuffled.",
@@ -81,16 +83,16 @@ class ApodiktumAutoReactMod(loader.Module):
     strings_ru = {
         "_cfg_doc_delay": "Задержка между реакциями передается в секундах",
         "_cfg_doc_delay_chats": (
-            "Список чатов с задержкой.\nЕсли чат находится в списке, то используется"
-            " задержка."
+            "Список чатов с задержкой.\nЕсли чат находится в списке, то"
+            " используется задержка."
         ),
         "_cfg_doc_ignore_self": "Не реагируйте на собственные сообщения",
         "_cfg_doc_raise_error": (
             "Вызывает ошибку, если эмодзи не является действительным."
         ),
         "_cfg_doc_random_delay": (
-            "Случайным образом изменяет задержку между реакциями. Случайность находится"
-            " в диапазоне от 0 до глобальной задержки."
+            "Случайным образом изменяет задержку между реакциями. Случайность"
+            " находится в диапазоне от 0 до глобальной задержки."
         ),
         "_cfg_doc_random_delay_chats": (
             "Список чатов со случайной задержкой.\nЕсли чат находится в списке,"
@@ -108,7 +110,8 @@ class ApodiktumAutoReactMod(loader.Module):
             " каналов:\nall|<channelid>|❤️|👍|🔥"
         ),
         "_cfg_doc_reactions_chance": (
-            "Шанс реакции на сообщение.\n0.0 - шанс не реагировать на сообщение.\n1.0 -"
+            "Шанс реакции на сообщение.\n0.0 - шанс не реагировать на"
+            " сообщение.\n1.0 -"
             " шанс реагировать на сообщение каждый раз."
             "Pattern:\n<userid/all>|<chatid/global>|<percentage(0.00-1)>\n\nПример:\n1234567|global|0.8"
         ),

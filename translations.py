@@ -49,10 +49,10 @@ class ApodiktumTranslationsMod(loader.Module):
     strings_de = {
         "_cfg_translation_chats": "Definiere Chats, wo die Übersetzung erzwungen wird.",
         "_cls_doc": (
-            "Dieses Modul verwaltet die Datenbank für unterstützte Module, um Sprachen"
-            " in Chats zu erzwingen.Für Entwickler:Wenn ihr es in eure Module"
-            " implementieren wollt oder mehr Sprachen haben wollt, könnt ihr mich unter"
-            " @apodiktum_modules fragen."
+            "Dieses Modul verwaltet die Datenbank für unterstützte Module, um"
+            " Sprachen in Chats zu erzwingen.Für Entwickler:Wenn ihr es in eure"
+            " Module implementieren wollt oder mehr Sprachen haben wollt, könnt"
+            " ihr mich unter @apodiktum_modules fragen."
         ),
         "_cmd_doc_ctranslations": (
             "Dadurch wird die Konfiguration für das Modul geöffnet."
@@ -62,10 +62,11 @@ class ApodiktumTranslationsMod(loader.Module):
     strings_ru = {
         "_cfg_translation_chats": "Задать чаты, где применяется перевод.",
         "_cls_doc": (
-            "Этот модуль обрабатывает db для поддерживаемых модулей для принудительного"
-            " использования языков в чатах.Для разработчиков:Если вы хотите внедрить"
-            " его в свои модули или хотите иметь больше языков, вы можете спросить меня"
-            " в @apodiktum_modules"
+            "Этот модуль обрабатывает db для поддерживаемых модулей для"
+            " принудительного использования языков в чатах.Для"
+            " разработчиков:Если вы хотите внедрить его в свои модули или"
+            " хотите иметь больше языков, вы можете спросить меня в"
+            " @apodiktum_modules"
         ),
         "_cmd_doc_ctranslations": "Это откроет конфиг для модуля.",
     }

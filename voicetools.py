@@ -326,8 +326,8 @@ class ApodiktumVoiceToolsMod(loader.Module):
             " Tonhöheneinstellung ein."
         ),
         "_cfg_speed_lvl": (
-            "Stellen Sie die gewünschte Geschwindigkeitsstufe für die automatische"
-            " Geschwindigkeit ein."
+            "Stellen Sie die gewünschte Geschwindigkeitsstufe für die"
+            " automatische Geschwindigkeit ein."
         ),
         "_cmd_doc_cvoicetoolscmd": (
             "Dadurch wird die Konfiguration für das Modul geöffnet."
@@ -394,8 +394,8 @@ class ApodiktumVoiceToolsMod(loader.Module):
 
     strings_ru = {
         "_cfg_gain_lvl": (
-            "Установите желаемый уровень усиления громкости для автоматического питча."
-            " (Высоты тона)"
+            "Установите желаемый уровень усиления громкости для автоматического"
+            " питча. (Высоты тона)"
         ),
         "_cfg_nr_lvl": "Установите желаемый уровень шумоподавления.",
         "_cfg_pitch_lvl": "Установите желаемый уровень высоты тона для автонастройки.",
@@ -421,8 +421,8 @@ class ApodiktumVoiceToolsMod(loader.Module):
         "auto_speed_off": "<b>❌ Speed.</b>",
         "auto_speed_on": "<b>✅ Speed.</b>",
         "current_auto": (
-            "<b>[VoiceTools]</b> Текущие авто-инструменты для работы с голосом в этом"
-            " чате:\n\n{}"
+            "<b>[VoiceTools]</b> Текущие авто-инструменты для работы с голосом"
+            " в этом чате:\n\n{}"
         ),
         "dalek_start": "<b>[VoiceTools]</b> Активирован автоматический голос «Далека».",
         "dalek_stopped": (
@@ -443,12 +443,12 @@ class ApodiktumVoiceToolsMod(loader.Module):
             " шумоподавления."
         ),
         "no_pitch": (
-            "<b>[VoiceTools]</b> Ваш ввод является неподдерживаемым уровнем высоты"
-            " тона."
+            "<b>[VoiceTools]</b> Ваш ввод является неподдерживаемым уровнем"
+            " высоты тона."
         ),
         "no_speed": (
-            "<b>[VoiceTools]</b> Ваш ввод является неподдерживаемым уровнем скорости"
-            " звука."
+            "<b>[VoiceTools]</b> Ваш ввод является неподдерживаемым уровнем"
+            " скорости звука."
         ),
         "norm_start": "<b>[VoiceTools]</b> Активирована автонормализация голоса.",
         "norm_stopped": "<b>[VoiceTools]</b> Деактивирована автонормализация голоса.",
@@ -472,8 +472,8 @@ class ApodiktumVoiceToolsMod(loader.Module):
             "<b>[VoiceTools]</b> Деактивирован автоматический «анонимный голос»"
         ),
         "vtauto_stopped": (
-            "<b>[VoiceTools]</b> Деактивированы все автоматические инструменты для"
-            " работы с голосом."
+            "<b>[VoiceTools]</b> Деактивированы все автоматические инструменты"
+            " для работы с голосом."
         ),
     }
 

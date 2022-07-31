@@ -40,16 +40,16 @@ class ApodiktumDonatorsMod(loader.Module):
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_cst_channel": "The Channel ID where the donations should be saved.",
         "_cfg_cst_custom_message": (
-            "The message send to the user after the subscription is added. Use <br> for"
-            " new line."
+            "The message send to the user after the subscription is added. Use"
+            " <br> for new line."
         ),
         "_cfg_cst_kickchannel": (
             "The channel ids to kick the user from after the subscription."
         ),
         "_cfg_cst_monthlyamount": "The monthly cost of the subscription.",
         "_cfg_cst_subscription_gift": (
-            "The gift to send to the user after the subscription. Will be attached to"
-            " custom_message. Use <br> for new line."
+            "The gift to send to the user after the subscription. Will be"
+            " attached to custom_message. Use <br> for new line."
         ),
         "_cfg_doc_log_kick": "Logs successful kicks from the chats.",
         "_log_doc_kicked": "Kicked {} from {}.",
@@ -74,18 +74,19 @@ class ApodiktumDonatorsMod(loader.Module):
     strings_de = {
         "_cfg_cst_channel": "Die Kanal-ID, wo die Spenden gespeichert werden sollen.",
         "_cfg_cst_custom_message": (
-            "Die Nachricht, die an den Benutzer gesendet wird, nachdem das Abonnement"
-            " hinzugefügt wurde. Benutze <br> für einen Zeilenumbruch."
+            "Die Nachricht, die an den Benutzer gesendet wird, nachdem das"
+            " Abonnement hinzugefügt wurde. Benutze <br> für einen"
+            " Zeilenumbruch."
         ),
         "_cfg_cst_kickchannel": (
-            "Die Kanal-IDs, aus denen der Benutzer nach dem Abonnement gekickt werden"
-            " soll."
+            "Die Kanal-IDs, aus denen der Benutzer nach dem Abonnement gekickt"
+            " werden soll."
         ),
         "_cfg_cst_monthlyamount": "Die monatlichen Kosten des Abonnements.",
         "_cfg_cst_subscription_gift": (
-            "Das Geschenk, das an den Benutzer gesendet wird, nachdem das Abonnement"
-            " hinzugefügt wurde. Wird an custom_message angehängt. Benutze <br> für"
-            " einen Zeilenumbruch."
+            "Das Geschenk, das an den Benutzer gesendet wird, nachdem das"
+            " Abonnement hinzugefügt wurde. Wird an custom_message angehängt."
+            " Benutze <br> für einen Zeilenumbruch."
         ),
         "_log_doc_kicked": "{} von {} gekickt.",
         "_log_doc_log_kicks": "Protokolliert die erfolgreichen Kicks aus den Chats.",
@@ -361,7 +362,16 @@ class ApodiktumDonatorsMod(loader.Module):
         )
 
     def _jk_strings(
-        self, today, uname, username, userid, amount, currency, dtype, rank, code
+        self,
+        today,
+        uname,
+        username,
+        userid,
+        amount,
+        currency,
+        dtype,
+        rank,
+        code,
     ):
         string_join = (
             "#Join\n"

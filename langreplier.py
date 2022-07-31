@@ -80,7 +80,7 @@ class ApodiktumLangReplierMod(loader.Module):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "active",
-                "True",
+                True,
                 doc=lambda: self.strings("_cfg_turned_on"),
                 validator=loader.validators.Boolean(),
             ),

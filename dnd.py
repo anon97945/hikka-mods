@@ -1,4 +1,4 @@
-__version__ = (0, 1, 47)
+__version__ = (0, 1, 48)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -35,7 +35,10 @@ import time
 from typing import Union
 
 from telethon.tl.functions.contacts import BlockRequest, UnblockRequest
-from telethon.tl.functions.messages import DeleteHistoryRequest, ReportSpamRequest
+from telethon.tl.functions.messages import (
+    DeleteHistoryRequest,
+    ReportSpamRequest,
+)
 from telethon.tl.types import Channel, Chat, Message, PeerUser, User
 from telethon.utils import get_display_name, get_peer_id
 
@@ -93,23 +96,24 @@ class ApodiktumDNDMod(loader.Module):
         "args_pmban": "ℹ️ <b>Example usage: </b><code>.pmbanlast 5</code>",
         "available_statuses": "<b>🦊 Available statuses:</b>\n\n",
         "banned": (
-            "😊 <b>Hey there •ᴗ•</b>\n<b>i am Unit «SIGMA»<b>, the <b>guardian</b> of"
-            " this account. You are <b>not approved</b>! You can contact my owner <b>in"
-            " a groupchat</b>, if you need help.\n<b>I need to ban you in terms of"
-            " security.</b>"
+            "😊 <b>Hey there •ᴗ•</b>\n<b>i am Unit «SIGMA»<b>, the"
+            " <b>guardian</b> of this account. You are <b>not approved</b>! You"
+            " can contact my owner <b>in a groupchat</b>, if you need"
+            " help.\n<b>I need to ban you in terms of security.</b>"
         ),
         "banned_log": (
-            "👮 <b>I banned {}.</b>\n\n<b>{}"
-            " Contact</b>\n<b>{} Started by you</b>\n<b>{} Active"
-            " conversation</b>\n\n<b>✊ Actions</b>\n\n<b>{} Reported spam</b>\n<b>{}"
-            " Deleted dialog</b>\n<b>{} Blocked</b>\n\n<b>ℹ️"
+            "👮 <b>I banned {}.</b>\n\n<b>{} Contact</b>\n<b>{} Started by"
+            " you</b>\n<b>{} Active conversation</b>\n\n<b>✊"
+            " Actions</b>\n\n<b>{} Reported spam</b>\n<b>{} Deleted"
+            " dialog</b>\n<b>{} Blocked</b>\n\n<b>ℹ️"
             " Message</b>\n<code>{}</code>"
         ),
         "blocked": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> blocked.</b>',
         "hello": (
-            "🔏 <b>Unit «SIGMA»</b> protects your personal messages from intrusions. It"
-            " will block everyone, who's trying to invade you.\n\nUse"
-            " <code>.pmbanlast</code> if you've already been pm-raided."
+            "🔏 <b>Unit «SIGMA»</b> protects your personal messages from"
+            " intrusions. It will block everyone, who's trying to invade"
+            " you.\n\nUse <code>.pmbanlast</code> if you've already been"
+            " pm-raided."
         ),
         "no_pchat": "<b>This command is only available in private chats.</b>",
         "no_reply": "ℹ️ <b>Reply to a message to block the user.</b>",
@@ -148,8 +152,8 @@ class ApodiktumDNDMod(loader.Module):
             "<ответ или username> - Запрещает пользователю писать вам в ЛС."
         ),
         "_cmd_doc_report": (
-            "<ответ> - Отправляет жалобу на пользователя на СПАМ. Использовать только"
-            " в ЛС."
+            "<ответ> - Отправляет жалобу на пользователя на СПАМ. Использовать"
+            " только в ЛС."
         ),
         "_cmd_doc_block": "<ответ> - Блокирует этого пользователя без предупреждения.",
         "_cmd_doc_unblock": "<ответ> - Разблокировать этого пользователя.",
@@ -167,8 +171,8 @@ class ApodiktumDNDMod(loader.Module):
             "Если включено, сообщение AFK будет содержать время его окончания"
         ),
         "_cfg_custom_msg": (
-            "Кастомное оповещение неодобренных пользователей. Оставьте пустым, чтобы"
-            " оставить по умолчанию."
+            "Кастомное оповещение неодобренных пользователей. Оставьте пустым,"
+            " чтобы оставить по умолчанию."
         ),
         "_cfg_delete_dialog": (
             "Если установлено true, диалог будет удалён после блокировки."
@@ -183,8 +187,8 @@ class ApodiktumDNDMod(loader.Module):
         "_cfg_photo": "Фото, которое отправляется вместе с уведомлением о блокировке",
         "_cfg_pmbl": "Если установлено true, PMBL активирован.",
         "_cfg_report_spam": (
-            "Если установлено true, после блокировки на пользователя будет отправлена"
-            " жалоба."
+            "Если установлено true, после блокировки на пользователя будет"
+            " отправлена жалоба."
         ),
         "_cmd_doc_pmbanlast": (
             "<число> - Блокирует и удаляет диалоги с большим кол-вом новых"
@@ -205,14 +209,14 @@ class ApodiktumDNDMod(loader.Module):
         "args_pmban": "ℹ️ <b>Пример использования: </b><code>.pmbanlast 5</code>",
         "available_statuses": "<b>🦊 Доступные статусы:</b>\n\n",
         "banned": (
-            "😊 <b>Привет •ᴗ•</b>\n<b>«SIGMA»<b>, <b>защитник</b> этого аккаунта. Вы"
-            " <b>не допущены к ЛС</b>! Вы можете связаться с моим владельцем<b>в"
-            " чате</b>, если Вам нужна помощь.\n<b>По правилам безопасности, я должен"
-            " заблокировать Вас.</b>"
+            "😊 <b>Привет •ᴗ•</b>\n<b>«SIGMA»<b>, <b>защитник</b> этого"
+            " аккаунта. Вы <b>не допущены к ЛС</b>! Вы можете связаться с моим"
+            " владельцем<b>в чате</b>, если Вам нужна помощь.\n<b>По правилам"
+            " безопасности, я должен заблокировать Вас.</b>"
         ),
         "banned_log": (
-            "👮 <b>Я заблокировал {}.</b>\n\n<b>{}"
-            " Контакт</b>\n<b>{} Начатый тобой</b>\n<b>{} Активный диалог</b>\n\n<b>✊"
+            "👮 <b>Я заблокировал {}.</b>\n\n<b>{} Контакт</b>\n<b>{} Начатый"
+            " тобой</b>\n<b>{} Активный диалог</b>\n\n<b>✊"
             " Действия</b>\n\n<b>{} Сообщить о спаме</b>\n<b>{} Удалить"
             " диалог</b>\n<b>{} Заблокировать</b>\n\n<b>ℹ️"
             " Сообщение</b>\n<code>{}</code>"
@@ -578,7 +582,8 @@ class ApodiktumDNDMod(loader.Module):
 
         self._unapprove(user.id)
         await utils.answer(
-            message, self.strings("unapproved").format(user.id, get_display_name(user))
+            message,
+            self.strings("unapproved").format(user.id, get_display_name(user)),
         )
 
     async def reportcmd(self, message: Message):
@@ -817,8 +822,7 @@ class ApodiktumDNDMod(loader.Module):
                     getattr(getattr(message, "sender", None), "username", None)
                     or message.peer_id
                 )
-                chat = await self._client.get_entity(chat_id)
-                is_pmbl = await self.p__pmbl(chat, peer, message)
+                is_pmbl = await self.p__pmbl(peer, message)
 
             if not is_pmbl:
                 user_id = await self.apo_lib.utils.get_user_id(message)
@@ -831,11 +835,10 @@ class ApodiktumDNDMod(loader.Module):
 
     async def p__pmbl(
         self,
-        chat: Union[Chat, int],
         peer,
         message: Union[None, Message] = None,
     ) -> bool:
-        cid = chat.id
+        cid = utils.get_chat_id(message)
         if cid in self._whitelist:
             return
 

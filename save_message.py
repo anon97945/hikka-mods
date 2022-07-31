@@ -97,7 +97,8 @@ class ApodiktumSaveMessageMod(loader.Module):
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
         msgs = await message.client.send_message(self._id, message=msgs)
         return await utils.answer(
-            message, self.apo_lib.utils.get_str("done", self.all_strings, message)
+            message,
+            self.apo_lib.utils.get_str("done", self.all_strings, message),
         )
 
     async def smhcmd(self, message: Message):
