@@ -1,4 +1,4 @@
-__version__ = (0, 1, 48)
+__version__ = (0, 2, 0)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -60,7 +60,7 @@ class ApodiktumDNDMod(loader.Module):
      ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
     -> Prevents people sending you unsolicited private messages.
     -> Prevents disturbing when you are unavailable.
-    Check the `.config apodiktum dnd`.
+    Check `.cdnd`.
     """
 
     strings = {
@@ -89,10 +89,12 @@ class ApodiktumDNDMod(loader.Module):
         "_log_msg_approved": "User approved in pm {}, filter: {}",
         "_log_msg_punished": "Intruder punished: {}",
         "_log_msg_unapproved": "User unapproved in pm {}.",
-        "afk_message": "{}",
-        "afk_message_gone": "\n\n<b><u>Gone since:</u></b>\n<code>{}</code>",
+        "afk_message": "{}\n",
         "afk_message_duration": "\n<b><u>Duration:</u></b>\n<code>{}</code>",
+        "afk_message_further": "\n<b><u>Further:</u></b>\n<code>{}</code>",
+        "afk_message_gone": "\n<b><u>Gone since:</u></b>\n<code>{}</code>",
         "approved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> approved in pm.</b>',
+        "args_incorrect": "<b>🚫 Args are incorrect.</b>",
         "args_pmban": "ℹ️ <b>Example usage: </b><code>.pmbanlast 5</code>",
         "available_statuses": "<b>🦊 Available statuses:</b>\n\n",
         "banned": (
@@ -119,7 +121,6 @@ class ApodiktumDNDMod(loader.Module):
         "no_reply": "ℹ️ <b>Reply to a message to block the user.</b>",
         "no_status": "<b>🚫 No status is active.</b>",
         "pm_reported": "⚠️ <b>You just got reported to spam !</b>",
-        "args_incorrect": "<b>🚫 Args are incorrect.</b>",
         "removed": "😶‍🌫️ <b>Removed {} last dialogs!</b>",
         "removing": "😶‍🌫️ <b>Removing {} last dialogs...</b>",
         "status_created": "<b>✅ Status {} created.</b>\n<code>{}</code>\nNotify: {}",
@@ -127,6 +128,7 @@ class ApodiktumDNDMod(loader.Module):
         "status_removed": "<b>✅ Status {} deleted.</b>",
         "status_set": "<b>✅ Status set\n</b><code>{}</code>\nNotify: {}",
         "status_set_duration": "\nDuration: {}",
+        "status_set_further": "\nFurther: {}",
         "status_unset": "<b>✅ Status removed.</b>",
         "unapproved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> unapproved in pm.</b>',
         "unblocked": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> unblocked.</b>',
@@ -138,31 +140,6 @@ class ApodiktumDNDMod(loader.Module):
     strings_de = {}
 
     strings_ru = {
-        "_cls_doc": (
-            "⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬ ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n"
-            "-> Запрещает людям отправлять вам нежелательные личные сообщения."
-            "-> Избавляет от беспокойства, когда вы недоступны."
-            "Смотрите `.config apodiktum dnd`."
-        ),
-        "_cmd_doc_allowpm": (
-            "<ответ или username> - Разрешает пользователю писать вам в ЛС."
-        ),
-        "_cmd_doc_cdnd": "Это откроет конфиг для модуля.",
-        "_cmd_doc_denypm": (
-            "<ответ или username> - Запрещает пользователю писать вам в ЛС."
-        ),
-        "_cmd_doc_report": (
-            "<ответ> - Отправляет жалобу на пользователя на СПАМ. Использовать"
-            " только в ЛС."
-        ),
-        "_cmd_doc_block": "<ответ> - Блокирует этого пользователя без предупреждения.",
-        "_cmd_doc_unblock": "<ответ> - Разблокировать этого пользователя.",
-        "_cmd_doc_delstatus": "<короткое_название> - Удаляет статус.",
-        "_cmd_doc_newstatus": (
-            "<короткое_название> <notif|0/1> <text>\n"
-            " - Новый статус\n"
-            " - Пример: .newstatus test 1 Привет!"
-        ),
         "_cfg_active_threshold": (
             "Какое количество Ваших сообщений необходимо, чтобы доверять пользователю."
         ),
@@ -190,22 +167,50 @@ class ApodiktumDNDMod(loader.Module):
             "Если установлено true, после блокировки на пользователя будет"
             " отправлена жалоба."
         ),
+        "_cls_doc": (
+            "⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬ ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n"
+            "-> Запрещает людям отправлять вам нежелательные личные сообщения."
+            "-> Избавляет от беспокойства, когда вы недоступны."
+            "Смотрите `.config apodiktum dnd`."
+        ),
+        "_cmd_doc_allowpm": (
+            "<ответ или username> - Разрешает пользователю писать вам в ЛС."
+        ),
+        "_cmd_doc_block": "<ответ> - Блокирует этого пользователя без предупреждения.",
+        "_cmd_doc_cdnd": "Это откроет конфиг для модуля.",
+        "_cmd_doc_delstatus": "<короткое_название> - Удаляет статус.",
+        "_cmd_doc_denypm": (
+            "<ответ или username> - Запрещает пользователю писать вам в ЛС."
+        ),
+        "_cmd_doc_newstatus": (
+            "<короткое_название> <notif|0/1> <text>\n"
+            " - Новый статус\n"
+            " - Пример: .newstatus test 1 Привет!"
+        ),
         "_cmd_doc_pmbanlast": (
             "<число> - Блокирует и удаляет диалоги с большим кол-вом новых"
             " пользователей."
         ),
+        "_cmd_doc_report": (
+            "<ответ> - Отправляет жалобу на пользователя на СПАМ. Использовать"
+            " только в ЛС."
+        ),
         "_cmd_doc_status": (
-            "<короткое название> [длительность|1s/m/h/d] - Установить статус"
+            "<короткое название> [необязательно длительность|1s/m/h/d] [необязательно"
+            " дополнительная информация] - Установить статус"
         ),
         "_cmd_doc_statuses": " - Показывает доступные статусы.",
+        "_cmd_doc_unblock": "<ответ> - Разблокировать этого пользователя.",
         "_cmd_doc_unstatus": " - Удаляет статус.",
         "_log_msg_approved": "Пользователь {} допущен в ЛС, фильтр: {}",
         "_log_msg_punished": "Нарушитель наказан: {}",
         "_log_msg_unapproved": "Пользователь {} не допущен к ЛС.",
-        "afk_message": "{}",
-        "afk_message_gone": "\n\n<b><u>Отсутствую:</u></b>\n<code>{}</code>",
+        "afk_message": "{}\n",
         "afk_message_duration": "\n<b><u>Буду AFK:</u></b>\n<code>{}</code>",
+        "afk_message_further": "\n<b><u>Подробнее:</u></b>\n<code>{}</code>",
+        "afk_message_gone": "\n<b><u>Отсутствую:</u></b>\n<code>{}</code>",
         "approved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> допущен к ЛС.</b>',
+        "args_incorrect": "<b>🚫 Аргументы некорректны.</b>",
         "args_pmban": "ℹ️ <b>Пример использования: </b><code>.pmbanlast 5</code>",
         "available_statuses": "<b>🦊 Доступные статусы:</b>\n\n",
         "banned": (
@@ -234,7 +239,6 @@ class ApodiktumDNDMod(loader.Module):
         ),
         "no_status": "<b>🚫 Нет активного статуса.</b>",
         "pm_reported": "⚠️ <b>Отправил жалобу на спам!</b>",
-        "args_incorrect": "<b>🚫 Аргументы некорректны.</b>",
         "removed": "😶‍🌫️ <b>Удалил {} последних диалогов!</b>",
         "removing": "😶‍🌫️ <b>Удаляю {} последних диалогов...</b>",
         "status_created": "<b>✅ Статус {} установлен.</b>\n<code>{}</code>\nNotify: {}",
@@ -242,6 +246,7 @@ class ApodiktumDNDMod(loader.Module):
         "status_removed": "<b>✅ Статус {} удалён.</b>",
         "status_set": "<b>✅ Статус установлен\n</b><code>{}</code>\nУведомления: {}",
         "status_set_duration": "\nПродолжительность: {}",
+        "status_set_further": "\nПодробнее: {}",
         "status_unset": "<b>✅ Статус удалён.</b>",
         "unapproved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> не допущен к ЛС.</b>',
         "unblocked": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> разблокирован.</b>',
@@ -442,6 +447,7 @@ class ApodiktumDNDMod(loader.Module):
         self.set("status", False)
         self.set("status_duration", "")
         self.set("gone", "")
+        self.set("further", "")
         self._ratelimit_afk = []
 
         for m in self._sent_messages:
@@ -646,17 +652,14 @@ class ApodiktumDNDMod(loader.Module):
 
     async def statuscmd(self, message: Message):
         """
-        <short_name> [optional duration|1s/m/h/d] - Set status.
+        <short_name> [optional duration|1s/m/h/d] [optional further information] - Set status.
         """
         status_duration = ""
         status = ""
         args = utils.get_args_raw(message)
-        t = ([_ for _ in args.split() if self.apo_lib.utils.convert_time(_)] or ["0"])[
-            0
-        ]
-        args = args.split()[0]
-        t = self.apo_lib.utils.convert_time(t)
-        if args not in self.get("texts", {}):
+        args = args.split(" ", 2)
+        t = self.apo_lib.utils.convert_time(args[1]) or 0 if len(args) > 1 else 0
+        if args[0] not in self.get("texts", {}):
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str(
@@ -667,9 +670,16 @@ class ApodiktumDNDMod(loader.Module):
             await message.delete()
             return
         await self._unstatus_func()
-        self.set("status", args)
+        self.set("status", args[0])
         self.set("gone", time.time())
+
+        if t and len(args) > 2:
+            self.set("further", args[2])
+        elif not t and len(args) > 1:
+            self.set("further", args[1])
+
         self._ratelimit_afk = []
+
         if t:
             with contextlib.suppress(Exception):
                 self._unstatus_task.cancel()
@@ -681,12 +691,17 @@ class ApodiktumDNDMod(loader.Module):
                 )
                 - datetime.datetime.now().replace(microsecond=0)
             ).total_seconds()
+
         status += self.apo_lib.utils.get_str(
             "status_set", self.all_strings, message
         ).format(
-            utils.escape_html(self.get("texts", {})[args]),
-            str(self.get("notif")[args]),
+            utils.escape_html(self.get("texts", {})[args[0]]),
+            str(self.get("notif")[args[0]]),
         )
+        if self.get("further"):
+            status += self.apo_lib.utils.get_str(
+                "status_set_further", self.all_strings, message
+            ).format(self.get("further"))
         if status_duration:
             status += self.apo_lib.utils.get_str(
                 "status_set_duration", self.all_strings, message
@@ -921,10 +936,15 @@ class ApodiktumDNDMod(loader.Module):
                 return
         diff = now - gone
         diff_sec = diff.total_seconds()
+        further = self.get("further") or ""
         if message.is_private or not self.config["afk_no_group"]:
             afk_string = self.apo_lib.utils.get_str(
                 "afk_message", self.all_strings, message
             ).format(self.get("texts", {"": ""})[self.get("status", "")])
+            if further:
+                afk_string += self.apo_lib.utils.get_str(
+                    "afk_message_further", self.all_strings, message
+                ).format(further)
             if self.config["afk_gone_time"]:
                 afk_string += (
                     f"{self.apo_lib.utils.get_str('afk_message_gone', self.all_strings, message).format(self.apo_lib.utils.time_formatter(diff_sec, short=True))}"

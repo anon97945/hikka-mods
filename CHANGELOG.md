@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.6
+### 📃 module updates:
+- dnd | added optional further informations
+
 ## 🆕 Version 2.0.5
 #### General:
 - black formatting
