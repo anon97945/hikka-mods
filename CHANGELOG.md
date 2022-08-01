@@ -1,6 +1,10 @@
 # 📝 Apodiktum Modules Changelog:
 
 ## 🆕 Version 2.0.6
+#### General:
+- changed copyright banner
+
+## 🆕 Version 2.0.6
 ### 📃 module updates:
 - dnd | added optional further informations
 
