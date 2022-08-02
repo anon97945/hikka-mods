@@ -1,4 +1,4 @@
-__version__ = (0, 2, 2)
+__version__ = (0, 2, 3)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -260,8 +260,6 @@ class ApodiktumDNDMod(loader.Module):
         "strings_de": strings_de,
         "strings_ru": strings_ru,
     }
-
-    _global_queue = []
 
     def __init__(self):
         self.config = loader.ModuleConfig(

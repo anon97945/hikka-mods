@@ -1,6 +1,10 @@
 # 📝 Apodiktum Modules Changelog:
 
-## 🆕 Version 2.0.6
+## 🆕 Version 2.0.8
+### 📃 module updates:
+- admintools | added debug message for global_queue_handler
+
+## 🆕 Version 2.0.7
 #### General:
 - changed copyright banner
 

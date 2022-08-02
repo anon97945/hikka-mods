@@ -1,4 +1,4 @@
-__version__ = (1, 0, 33)
+__version__ = (1, 0, 34)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -851,7 +851,10 @@ class ApodiktumAdminToolsMod(loader.Module):
     async def _global_queue_handler(self):
         while True:
             while self._global_queue:
-                await self._global_queue_handler_process(self._global_queue.pop(0))
+                try:
+                    await self._global_queue_handler_process(self._global_queue.pop(0))
+                except Exception as exc:  # skipcq: PYL-W0703
+                    logger.exception(f"global_queue_handler_process error:\n{str(exc)}")
             await asyncio.sleep(0)
 
     async def _global_queue_handler_process(self, message: Message):
