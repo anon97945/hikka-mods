@@ -1,4 +1,4 @@
-__version__ = (1, 0, 18)
+__version__ = (1, 0, 19)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -16,12 +16,13 @@ __version__ = (1, 0, 18)
 
 # meta developer: @apodiktum_modules
 # meta banner: https://t.me/file_dumbster/11
-# meta pic: https://i.ibb.co/4jLTywZ/apo-modules.jpg
+# meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
 # scope: hikka_min 1.2.11
 
 import asyncio
+import contextlib
 import logging
 
 from telethon.tl.types import Message
@@ -38,7 +39,7 @@ async def buttonhandler(bmsg, chatid, caption1, caption2, data_btn1, data_btn2):
     bmsg = await bmsg.client.get_messages(chatid, ids=bmsg.id)
     buttons = bmsg.buttons
     if (
-        caption1 in bmsg.message or caption2 in bmsg.message
+        caption1 in bmsg.message and caption2 in bmsg.message
     ) and bmsg.buttons is not None:
         for row in buttons:
             for button in row:
@@ -66,16 +67,15 @@ class ApodiktumAutoUpdateMod(loader.Module):
         "_cfg_auto_update_delay": (
             "Choose a delay to wait to start the automatic update."
         ),
+        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_update_msg_read": "Whether to mark the message as read or not.",
-        "_cfg_update_skip": "The update was skipped due to {}.\n{}",
+        "skip_old": "The update was skipped due to a newer update.",
+        "skip_update": "The update was skipped due to {}.\n{}",
         "updating": (
             "Hikka Userbot will be automatically updated in {} seconds.\n\n"
             "Changelog:\n{}"
         ),
-        "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
     }
-
-    strings_en = {}
 
     strings_de = {
         "_cfg_auto_update": (
@@ -87,10 +87,11 @@ class ApodiktumAutoUpdateMod(loader.Module):
         "_cfg_update_msg_read": (
             "Ob die Nachricht als gelesen markiert werden soll oder nicht."
         ),
-        "_cfg_update_skip": "Das Update wurde wegen {} übersprungen.\n{}",
         "_cmd_doc_cautoupdate": (
             "Dadurch wird die Konfiguration für das Modul geöffnet."
         ),
+        "skip_old": "Das Update wurde aufgrund eines neueren Updates übersprungen.",
+        "skip_update": "Das Update wurde wegen {} übersprungen.\n{}",
         "updating": (
             "Hikka Userbot wird in {} Sekunden automatisch aktualisiert.\n\n"
             "Changelog:\n{}"
@@ -105,7 +106,10 @@ class ApodiktumAutoUpdateMod(loader.Module):
         "_cfg_update_msg_read": (
             "Будет ли отмечать сообщение обновления как прочтённое или нет."
         ),
-        "_cfg_update_skip": "Обновление было пропущено из-за {}.\n{}",
+        "skip_old": (
+            "Обновление было пропущено в связи с появлением более новой версии."
+        ),
+        "skip_update": "Обновление было пропущено из-за {}.\n{}",
         "_cmd_doc_cautoupdate": "Это откроет конфиг для модуля.",
         "updating": (
             "Хикка будет автоматически обновлена через {} секунд.\n\n"
@@ -179,7 +183,7 @@ class ApodiktumAutoUpdateMod(loader.Module):
         last_commit = message.raw_text.splitlines()[5].lower()
         for x in skip_update:
             if x.lower() in last_commit and "revert" not in last_commit:
-                logger.info(self.strings("_cfg_update_skip").format(x, last_commit))
+                logger.info(self.strings("skip_update").format(x, last_commit))
                 return True
         return False
 
@@ -194,15 +198,20 @@ class ApodiktumAutoUpdateMod(loader.Module):
                     and await buttonhandler(
                         message,
                         self.inline.bot_id,
-                        "🌘 Hikka Update available!",
-                        "🌘 Доступно обновление Hikka!",
+                        "🌘",
+                        "🔮",
                         "hikka_update",
                         "hikka_upd_ignore",
                     )
                 ):
                     if await self._check_skip(message):
                         return
-                    return await self._autoupdate(message)
+                    with contextlib.suppress(Exception):
+                        self._autoupdate_task.cancel()
+                        logger.info(self.strings("skip_old"))
+                    self._autoupdate_task = asyncio.ensure_future(
+                        self._autoupdate(message)
+                    )
 
     async def client_ready(self, client, db):
         self._db = db
@@ -224,12 +233,16 @@ class ApodiktumAutoUpdateMod(loader.Module):
             and await buttonhandler(
                 message,
                 self.inline.bot_id,
-                "🌘 Hikka Update available!",
-                "🌘 Доступно обновление Hikka!",
+                "🌘",
+                "🔮",
                 "hikka_update",
                 "hikka_upd_ignore",
             )
         ):
             if await self._check_skip(message):
                 return
-            return await self._autoupdate(message)
+            with contextlib.suppress(Exception):
+                self._autoupdate_task.cancel()
+                logger.info(self.strings("skip_old"))
+            self._autoupdate_task = asyncio.ensure_future(self._autoupdate(message))
+            return

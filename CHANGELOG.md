@@ -1,5 +1,10 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.9
+### 📃 module updates:
+- auto_update | added skip message
+- auto_update | multilang support
+
 ## 🆕 Version 2.0.8
 ### 📃 module updates:
 - admintools | added debug message for global_queue_handler

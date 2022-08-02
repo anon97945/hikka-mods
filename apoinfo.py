@@ -16,7 +16,7 @@ __version__ = (0, 1, 29)
 
 # meta developer: @apodiktum_modules
 # meta banner: https://t.me/file_dumbster/11
-# meta pic: https://i.ibb.co/4jLTywZ/apo-modules.jpg
+# meta pic: https://t.me/file_dumbster/13
 
 # scope: inline
 # scope: hikka_only
