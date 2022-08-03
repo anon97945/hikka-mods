@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.10
+### 📃 module updates:
+- admintools | send messages as bot
+
 ## 🆕 Version 2.0.9
 ### 📃 module updates:
 - auto_update | added skip message

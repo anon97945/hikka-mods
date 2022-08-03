@@ -25,12 +25,7 @@ import asyncio
 import logging
 from typing import Union
 
-from telethon.tl.types import (
-    Channel,
-    Chat,
-    Message,
-    User,
-)
+from telethon.tl.types import Channel, Chat, Message, User
 
 from .. import loader, utils
 
@@ -706,7 +701,9 @@ class ApodiktumAdminToolsMod(loader.Module):
         if bcu_sets[chatid_str].get("notify") is True:
             if await self.apo_lib.utils.check_inlinebot(chat.id):
                 msg = await self.inline.bot.send_message(
-                    f"-100{chat.id}",
+                    chat.id
+                    if str(chat.id).startswith("-100")
+                    else int(f"-100{chat.id}"),
                     self.apo_lib.utils.get_str(
                         "bcu_triggered", self.all_strings, message
                     ).format(usertag),
@@ -722,7 +719,10 @@ class ApodiktumAdminToolsMod(loader.Module):
             if bcu_sets[chatid_str].get("deltimer") != "0":
                 del_duration = int(bcu_sets[chatid_str].get("deltimer"))
                 await asyncio.sleep(del_duration)
-                await self.apo_lib.utils.delete_message(msg)
+                await self._client.delete_messages(
+                    chat.id,
+                    getattr(msg, "id", None) or getattr(msg, "message_id", None),
+                )
         return
 
     async def p__bnd(
@@ -755,7 +755,9 @@ class ApodiktumAdminToolsMod(loader.Module):
             if bnd_sets[chatid_str].get("notify") is True:
                 if await self.apo_lib.utils.check_inlinebot(chat.id):
                     msg = await self.inline.bot.send_message(
-                        f"-100{chat.id}",
+                        chat.id
+                        if str(chat.id).startswith("-100")
+                        else int(f"-100{chat.id}"),
                         self.apo_lib.utils.get_str(
                             "bnd_triggered", self.all_strings, message
                         ).format(usertag, link),
@@ -771,7 +773,10 @@ class ApodiktumAdminToolsMod(loader.Module):
                 if bnd_sets[chatid_str].get("deltimer") != "0":
                     DELTIMER = int(bnd_sets[chatid_str].get("deltimer"))
                     await asyncio.sleep(DELTIMER)
-                    await self.apo_lib.utils.delete_message(msg)
+                    await self._client.delete_messages(
+                        chat.id,
+                        getattr(msg, "id", None) or getattr(msg, "message_id", None),
+                    )
         return
 
     async def p__gl(
@@ -824,7 +829,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         chat = await self._client.get_entity(chat_id)
         if not chat.admin_rights:
             return
-
+        if str(message.from_id).startswith("-100"):
+            return
         if (
             self.config["ignore_admins"]
             and (await self._client.get_permissions(chat_id, user_id)).is_admin
@@ -848,7 +854,7 @@ class ApodiktumAdminToolsMod(loader.Module):
 
         if await self.apo_lib.utils.check_inlinebot(chat.id):
             msg = await self.inline.bot.send_message(
-                f"-100{chat.id}",
+                chat_id if str(chat.id).startswith("-100") else int(f"-100{chat.id}"),
                 self.apo_lib.utils.get_str(
                     "admin_tag_reply_msg", self.all_strings, message
                 ),
@@ -870,8 +876,10 @@ class ApodiktumAdminToolsMod(loader.Module):
             disable_web_page_preview=True,
         )
         await asyncio.sleep(30)
-        await msg.delete()
-        return
+        await self._client.delete_messages(
+            chat.id,
+            getattr(msg, "id", None) or getattr(msg, "message_id", None),
+        )
 
     async def watcher(self, message: Message):
         self._global_queue += [message]
