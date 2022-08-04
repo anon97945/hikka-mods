@@ -1,4 +1,4 @@
-__version__ = (1, 0, 35)
+__version__ = (1, 0, 36)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -719,10 +719,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             if bcu_sets[chatid_str].get("deltimer") != "0":
                 del_duration = int(bcu_sets[chatid_str].get("deltimer"))
                 await asyncio.sleep(del_duration)
-                await self._client.delete_messages(
-                    chat.id,
-                    getattr(msg, "id", None) or getattr(msg, "message_id", None),
-                )
+                await self.apo_lib.utils.delete_message(message)
         return
 
     async def p__bnd(
@@ -773,10 +770,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 if bnd_sets[chatid_str].get("deltimer") != "0":
                     DELTIMER = int(bnd_sets[chatid_str].get("deltimer"))
                     await asyncio.sleep(DELTIMER)
-                    await self._client.delete_messages(
-                        chat.id,
-                        getattr(msg, "id", None) or getattr(msg, "message_id", None),
-                    )
+                    await self.apo_lib.utils.delete_message(message)
         return
 
     async def p__gl(
@@ -876,10 +870,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             disable_web_page_preview=True,
         )
         await asyncio.sleep(30)
-        await self._client.delete_messages(
-            chat.id,
-            getattr(msg, "id", None) or getattr(msg, "message_id", None),
-        )
+        await self.apo_lib.utils.delete_message(message)
 
     async def watcher(self, message: Message):
         self._global_queue += [message]

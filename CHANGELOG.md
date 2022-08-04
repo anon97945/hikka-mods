@@ -1,8 +1,12 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.11
+### 📃 module updates:
+- admintools | delete messages via bot
+
 ## 🆕 Version 2.0.10
 ### 📃 module updates:
-- admintools | send messages as bot
+- admintools | send messages via bot
 
 ## 🆕 Version 2.0.9
 ### 📃 module updates:
