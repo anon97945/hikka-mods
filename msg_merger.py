@@ -1,4 +1,4 @@
-__version__ = (0, 0, 40)
+__version__ = (0, 0, 41)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 0, 40)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 
 
 import logging
@@ -41,7 +41,7 @@ class ApodiktumMsgMergerMod(loader.Module):
     """
 
     strings = {
-        "name": "Apo MsgMerger",
+        "name": "Apo-MsgMerger",
         "developer": "@anon97945",
         "_cfg_active": "Whether the module is turned on (or not).",
         "_cfg_blacklist_chats": "The list of chats that the module will watch(or not).",
@@ -84,6 +84,15 @@ class ApodiktumMsgMergerMod(loader.Module):
         "strings_en": strings,
         "strings_de": strings_de,
         "strings_ru": strings_ru,
+    }
+
+    changes = {
+        "migration1": {
+            "name": {
+                "old": "Apo MsgMerger",
+                "new": "Apo-MsgMerger",
+            },
+        },
     }
 
     def __init__(self):
@@ -210,14 +219,18 @@ class ApodiktumMsgMergerMod(loader.Module):
             ),
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
+        await self.apo_lib.migrator.auto_migrate_handler(
+            self.__class__.__name__,
+            self.strings("name"),
+            self.changes,
+            self.config["auto_migrate"],
+        )
 
     async def cmsgmergercmd(self, message: Message):
         """
@@ -262,13 +275,11 @@ class ApodiktumMsgMergerMod(loader.Module):
             await utils.answer(message, self.strings("undo_merge_fail"))
         self.merged_msgs.clear()
 
-    async def watcher(self, message):
+    @loader.watcher("out", "only_messages", "editable", "no_commands")
+    async def watcher(self, message: Message):
         if (
             not self.config["active"]
-            or not isinstance(message, Message)
-            or message.sender_id != self.tg_id
             or message.via_bot
-            or message.fwd_from
             or (
                 message.media
                 and not getattr(message.media, "webpage", False)
@@ -277,7 +288,6 @@ class ApodiktumMsgMergerMod(loader.Module):
                     and self.apo_lib.utils.get_entityurls(message)
                 )
             )
-            or utils.remove_html(message.text)[0] == self.get_prefix()
         ):
             return
 

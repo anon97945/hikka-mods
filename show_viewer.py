@@ -1,4 +1,4 @@
-__version__ = (0, 0, 23)
+__version__ = (0, 0, 24)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 0, 23)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 
 import logging
 
@@ -60,6 +60,8 @@ class ApodiktumShowViewsMod(loader.Module):
         "strings_ru": strings_ru,
     }
 
+    changes = {}
+
     def __init__(self):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
@@ -79,14 +81,18 @@ class ApodiktumShowViewsMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
+        await self.apo_lib.migrator.auto_migrate_handler(
+            self.__class__.__name__,
+            self.strings("name"),
+            self.changes,
+            self.config["auto_migrate"],
+        )
 
     async def svcmd(self, message: Message):
         """

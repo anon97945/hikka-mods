@@ -1,4 +1,4 @@
-__version__ = (0, 1, 19)
+__version__ = (0, 1, 20)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 1, 19)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 # requires: alphabet-detector googletrans==4.0.0-rc1
 
 import asyncio
@@ -166,9 +166,7 @@ class ApodiktumLangReplierMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
@@ -218,16 +216,11 @@ class ApodiktumLangReplierMod(loader.Module):
             await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
 
-    async def watcher(self, message):
+    @loader.watcher("only_messages", "in", "only_pm", "only_groups", "only_channels")
+    async def watcher(self, message: Message):
         full_lang = ""
         delay = 15
-        if (
-            not isinstance(message, Message)
-            or not self.config["active"]
-            or not message.mentioned
-            or message.is_private
-            or message.sender_id == self.tg_id
-        ):
+        if not self.config["active"] or not message.mentioned:
             return
         user_id = message.sender_id
         chat_id = utils.get_chat_id(message)

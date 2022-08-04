@@ -1,4 +1,4 @@
-__version__ = (0, 0, 31)
+__version__ = (0, 0, 32)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 0, 31)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 
 import asyncio
 import logging
@@ -39,7 +39,7 @@ class ApodiktumLCRMod(loader.Module):
     """
 
     strings = {
-        "name": "Apo LoginCodeReciever",
+        "name": "Apo-LoginCodeReciever",
         "developer": "@anon97945",
         "_cfg_timeout": "<b>Define a time to wait for the Code.</b>",
         "error": "<b>No Login code in the message found.</b>",
@@ -89,6 +89,15 @@ class ApodiktumLCRMod(loader.Module):
         "strings_ru": strings_ru,
     }
 
+    changes = {
+        "migration1": {
+            "name": {
+                "old": "Apo LoginCodeReciever",
+                "new": "Apo-LoginCodeReciever",
+            },
+        },
+    }
+
     def __init__(self):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
@@ -106,15 +115,18 @@ class ApodiktumLCRMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
-        self._me = await client.get_me(True)
+        await self.apo_lib.migrator.auto_migrate_handler(
+            self.__class__.__name__,
+            self.strings("name"),
+            self.changes,
+            self.config["auto_migrate"],
+        )
 
     @loader.owner
     async def lcrcmd(self, message: Message):

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 24)
+__version__ = (0, 0, 26)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,8 +19,8 @@ __version__ = (0, 0, 24)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
-# requires: pygments requests emoji
+# scope: hikka_min 1.3.0
+# requires: pygments requests emoji pillow
 
 import logging
 import os
@@ -29,23 +29,11 @@ from io import BytesIO
 import pygments
 from pygments.formatters import ImageFormatter
 from pygments.lexers import Python3Lexer
-from requests import get
 from telethon.tl.types import Message
 
 from .. import loader, utils
 
 logger = logging.getLogger(__name__)
-
-
-async def _filefromurl(message):
-    urll = message.raw_text.split()
-    for url in urll:
-        if "://" in url:
-            text = get(url).text
-            file = BytesIO(bytes(text, "utf-8"))
-            file.name = url.split("/")[-1]
-            return file, file.name
-    return False
 
 
 @loader.tds
@@ -55,7 +43,7 @@ class ApodiktumPyPNGMod(loader.Module):
     """
 
     strings = {
-        "name": "Apo PyPNG",
+        "name": "Apo-PyPNG",
         "developer": "@anon97945",
         "no_file": "<b>Reply to file.py or url</b>",
         "no_url": "<b>No url in reply found.</b>",
@@ -87,9 +75,7 @@ class ApodiktumPyPNGMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
@@ -98,30 +84,42 @@ class ApodiktumPyPNGMod(loader.Module):
 
     async def pypngcmd(self, message: Message):
         """
-        reply to url or py file
+        url/(reply to url or py file)
         """
         await utils.answer(
             message,
             self.apo_lib.utils.get_str("py2png", self.all_strings, message),
         )
-        reply = await message.get_reply_message()
+        reply = await message.get_reply_message() if message.is_reply else None
         file = BytesIO()
         pngfile = BytesIO()
-        if not reply:
+        args = utils.get_args_raw(message)
+        if not message.is_reply and not args:
             return await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("no_file", self.all_strings, message),
             )
-        if reply.file:
-            await message.client.download_file(reply, file)
-            file.name = reply.file.name
-        elif res := await _filefromurl(reply):
-            file, file.name = res
-        else:
-            return await utils.answer(
-                message,
-                self.apo_lib.utils.get_str("no_url", self.all_strings, message),
-            )
+        if message.is_reply:
+            if len(self.apo_lib.utils.get_urls(reply.raw_text)) > 0:
+                url = self.apo_lib.utils.get_urls(reply.raw_text)[0]
+            else:
+                url = None
+            if url:
+                if reply.file:
+                    await message.client.download_file(reply, file)
+                    file.name = reply.file.name
+                elif res := await self.apo_lib.utils.get_file_from_url(url):
+                    file, file.name = res
+        if not getattr(file, "name", None):
+            if args and len(self.apo_lib.utils.get_urls(args)) > 0:
+                file, file.name = await self.apo_lib.utils.get_file_from_url(
+                    self.apo_lib.utils.get_urls(args)[0]
+                )
+            else:
+                return await utils.answer(
+                    message,
+                    self.apo_lib.utils.get_str("no_url", self.all_strings, message),
+                )
         file.seek(0)
         byte_str = file.read()
         text = byte_str.decode("utf-8")

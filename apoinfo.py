@@ -1,4 +1,4 @@
-__version__ = (0, 1, 29)
+__version__ = (0, 1, 20)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -20,7 +20,7 @@ __version__ = (0, 1, 29)
 
 # scope: inline
 # scope: hikka_only
-# scope: hikka_min 1.2.10
+# scope: hikka_min 1.3.0
 
 import logging
 
@@ -41,6 +41,8 @@ class ApodiktumInfoMod(loader.Module):
     """
 
     strings = {
+        "name": "Apo-Info",
+        "developer": "@anon97945",
         "_cfg_banner": "Set `True` in order to disable an media banner.",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_cst_bnr": "Custom Banner.",
@@ -53,8 +55,6 @@ class ApodiktumInfoMod(loader.Module):
         "_cfg_inline_banner": "Set `True` in order to disable an inline media banner.",
         "build": "Build",
         "description": "ℹ This will not compromise any sensitive info.",
-        "developer": "@anon97945",
-        "name": "Apo Info",
         "owner": "Owner",
         "prefix": "Prefix",
         "send_info": "Send userbot info.",
@@ -127,6 +127,15 @@ class ApodiktumInfoMod(loader.Module):
         "strings_en": strings,
         "strings_de": strings_de,
         "strings_ru": strings_ru,
+    }
+
+    changes = {
+        "migration1": {
+            "name": {
+                "old": "Apo Info",
+                "new": "Apo-Info",
+            },
+        },
     }
 
     def __init__(self):
@@ -277,14 +286,18 @@ class ApodiktumInfoMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self, client, _):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
+        await self.apo_lib.migrator.auto_migrate_handler(
+            self.__class__.__name__,
+            self.strings("name"),
+            self.changes,
+            self.config["auto_migrate"],
+        )
         self._me = await client.get_me()
 
     def _render_info(self) -> str:

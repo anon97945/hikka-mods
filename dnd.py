@@ -1,4 +1,4 @@
-__version__ = (0, 2, 4)
+__version__ = (0, 2, 5)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 2, 4)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 
 # █ █ ▀ █▄▀ ▄▀█ █▀█ ▀    ▄▀█ ▀█▀ ▄▀█ █▀▄▀█ ▄▀█
 # █▀█ █ █ █ █▀█ █▀▄ █ ▄  █▀█  █  █▀█ █ ▀ █ █▀█
@@ -40,7 +40,7 @@ from telethon.tl.functions.messages import (
     DeleteHistoryRequest,
     ReportSpamRequest,
 )
-from telethon.tl.types import Channel, Chat, Message, PeerUser, User
+from telethon.tl.types import Channel, Message, PeerUser, User
 from telethon.utils import get_display_name, get_peer_id
 
 from .. import loader, utils
@@ -65,7 +65,7 @@ class ApodiktumDNDMod(loader.Module):
     """
 
     strings = {
-        "name": "Apo DND",
+        "name": "Apo-DND",
         "developer": "@anon97945",
         "_cfg_active_threshold": (
             "What number of your messages is required to trust peer."
@@ -261,6 +261,15 @@ class ApodiktumDNDMod(loader.Module):
         "strings_ru": strings_ru,
     }
 
+    changes = {
+        "migration1": {
+            "name": {
+                "old": "Apo DND",
+                "new": "Apo-DND",
+            },
+        },
+    }
+
     def __init__(self):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
@@ -335,14 +344,18 @@ class ApodiktumDNDMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
+        await self.apo_lib.migrator.auto_migrate_handler(
+            self.__class__.__name__,
+            self.strings("name"),
+            self.changes,
+            self.config["auto_migrate"],
+        )
         self._ratelimit_afk = []
         self._ratelimit_pmbl = []
         self._ratelimit_pmbl_threshold = 10
@@ -537,7 +550,7 @@ class ApodiktumDNDMod(loader.Module):
                 user = await self._client.get_entity(reply.sender_id) if reply else None
 
         if not user:
-            chat = await message.get_chat()
+            chat = await self._client.get_entity(utils.get_chat_id(message))
             if not isinstance(chat, User):
                 await utils.answer(
                     message,
@@ -573,7 +586,7 @@ class ApodiktumDNDMod(loader.Module):
                 user = await self._client.get_entity(reply.sender_id) if reply else None
 
         if not user:
-            chat = await message.get_chat()
+            chat = await self._client.get_entity(utils.get_chat_id(message))
             if not isinstance(chat, User):
                 await utils.answer(
                     message,
@@ -811,19 +824,15 @@ class ApodiktumDNDMod(loader.Module):
 
         await utils.answer(message, res)
 
+    @loader.watcher("only_messages", "in")
     async def watcher(self, message: Message):
         is_pmbl = False
         chat_id = utils.get_chat_id(message)
-        if (
-            not isinstance(message, Message)
-            or getattr(message, "out", False)
-            or chat_id
-            in {
-                1271266957,  # @replies
-                777000,  # Telegram Notifications
-                self.tg_id,  # Self
-            }
-        ):
+        if chat_id in {
+            1271266957,  # @replies
+            777000,  # Telegram Notifications
+            self.tg_id,  # Self
+        }:
             return
         try:
             if (
@@ -843,7 +852,7 @@ class ApodiktumDNDMod(loader.Module):
                 await self.p__afk(chat_id, user_id, message)
             return
         except ValueError as exc:  # skipcq: PYL-W0703
-            logger.debug(exc)
+            self.apo_lib.utils.log(logging.DEBUG, __name__, exc)
 
     async def p__pmbl(
         self,

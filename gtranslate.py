@@ -1,4 +1,4 @@
-__version__ = (0, 0, 67)
+__version__ = (0, 0, 68)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 0, 67)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 # requires: googletrans==4.0.0-rc1
 
 import logging
@@ -48,7 +48,7 @@ class ApodiktumGTranslateMod(loader.Module):
     """
 
     strings = {
-        "name": "Apo GoogleTranslator",
+        "name": "Apo-GoogleTranslator",
         "developer": "@anon97945",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_lang_msg": "Language to translate to by default.",
@@ -106,6 +106,15 @@ class ApodiktumGTranslateMod(loader.Module):
         "strings_ru": strings_ru,
     }
 
+    changes = {
+        "migration1": {
+            "name": {
+                "old": "Apo GoogleTranslator",
+                "new": "Apo-GoogleTranslator",
+            },
+        },
+    }
+
     def __init__(self):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
@@ -129,15 +138,12 @@ class ApodiktumGTranslateMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
-        self._me = await client.get_me()
         self.tr = googletrans.Translator()
 
     async def cgtranslatecmd(self, message: Message):

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 31)
+__version__ = (0, 0, 32)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 0, 31)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 # requires: heroku3
 
 import asyncio
@@ -43,7 +43,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
     """
 
     strings = {
-        "name": "Apo HerokuManager",
+        "name": "Apo-HerokuManager",
         "developer": "@anon97945",
         "args_error": "<b>[🦸🏼‍♂️ Hero!ku]</b> Too many args are given.",
         "dyno_usage": (
@@ -193,12 +193,10 @@ class ApodiktumHerokuManagerMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
+    async def client_ready(self):
         platform = utils.get_named_platform()
         if "Heroku" not in platform:
             raise loader.LoadError(self.strings("wrong_platform").format(platform))
-        self._db = db
-        self._client = client
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,

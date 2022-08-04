@@ -1,4 +1,4 @@
-__version__ = (0, 1, 26)
+__version__ = (0, 1, 28)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 1, 26)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 
 import asyncio
 import contextlib
@@ -48,7 +48,7 @@ class ApodiktumPurgeMod(loader.Module):
     """
 
     strings = {
-        "name": "Apo Purge",
+        "name": "Apo-Purge",
         "developer": "@anon97945",
         "_cfg_log_edit": "Log `edit` as info.",
         "_cfg_log_purge": "Log purge `count` as info.",
@@ -199,6 +199,15 @@ class ApodiktumPurgeMod(loader.Module):
         "strings_ru": strings_ru,
     }
 
+    changes = {
+        "migration1": {
+            "name": {
+                "old": "Apo Purge",
+                "new": "Apo-Purge",
+            },
+        },
+    }
+
     def __init__(self):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
@@ -234,14 +243,18 @@ class ApodiktumPurgeMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
+        await self.apo_lib.migrator.auto_migrate_handler(
+            self.__class__.__name__,
+            self.strings("name"),
+            self.changes,
+            self.config["auto_migrate"],
+        )
 
     @staticmethod
     async def _purge_user_messages(chat, user_id, purge_count, message):
@@ -311,7 +324,8 @@ class ApodiktumPurgeMod(loader.Module):
         chat = message.chat
         if message.reply_to_msg_id is not None:
             can_delete = bool(
-                (
+                message.is_private
+                or (
                     (chat.admin_rights or chat.creator)
                     and chat.admin_rights.delete_messages
                     or chat.admin_rights
@@ -351,7 +365,8 @@ class ApodiktumPurgeMod(loader.Module):
         chat = message.chat
         if message.reply_to_msg_id is not None:
             can_delete = bool(
-                (
+                message.is_private
+                or (
                     (chat.admin_rights or chat.creator)
                     and chat.admin_rights.delete_messages
                     or chat.admin_rights

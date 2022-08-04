@@ -1,5 +1,15 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.13
+#### General:
+- scope: hikka_min 1.3.0
+- refactored code for 1.3.0
+- renamed modules to `Apo-Modulename`
+
+### 📃 module updates:
+- admintools | can now be deactivated in a chat even without admin perms
+- purge | fixed apurge, spurge for private chats
+
 ## 🆕 Version 2.0.12
 ### 📃 module updates:
 - dnd | reduced api requests
@@ -155,7 +165,7 @@
 
 ## 🆕 Version 1.0.0
 ### ℹ️ General:
-- scoped to hikka_min 1.2.11
+- scope: hikka_min 1.2.11
 - deepsource fixes
 
 ### 📦 apodiktum_library:

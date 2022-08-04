@@ -1,4 +1,4 @@
-__version__ = (0, 0, 35)
+__version__ = (0, 0, 37)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 0, 35)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 
 import logging
 from io import BytesIO
@@ -39,7 +39,7 @@ class ApodiktumPMLogMod(loader.Module):
     """
 
     strings = {
-        "name": "Apo PMLogger",
+        "name": "Apo-PMLog",
         "developer": "@anon97945",
         "_cfg_bots": "Whether to log bots or not.",
         "_cfg_log_group": "Group or channel ID where to send the PMs.",
@@ -94,6 +94,15 @@ class ApodiktumPMLogMod(loader.Module):
         "strings_ru": strings_ru,
     }
 
+    changes = {
+        "migration1": {
+            "name": {
+                "old": "Apo PMLogger",
+                "new": "Apo-PMLog",
+            },
+        },
+    }
+
     def __init__(self):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
@@ -135,15 +144,18 @@ class ApodiktumPMLogMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
-        self._id = (await client.get_me(True)).user_id
+        await self.apo_lib.migrator.auto_migrate_handler(
+            self.__class__.__name__,
+            self.strings("name"),
+            self.changes,
+            self.config["auto_migrate"],
+        )
 
     async def cpmlogcmd(self, message: Message):
         """
@@ -154,29 +166,20 @@ class ApodiktumPMLogMod(loader.Module):
             await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
 
+    @loader.watcher("only_messages", "only_pm")
     async def watcher(self, message: Message):
-        if not message.is_private or not isinstance(message, Message):
-            return
         pmlog_whitelist = self.config["whitelist"]
         pmlog_bot = self.config["log_bots"]
         pmlog_group = self.config["log_group"]
         pmlog_destr = self.config["log_self_destr"]
-        chat = await message.get_chat()
-        if chat.bot and not pmlog_bot or chat.id == self._id or pmlog_group is None:
+        chat = await self._client.get_entity(utils.get_chat_id(message))
+        if chat.bot and not pmlog_bot or chat.id == self.tg_id or pmlog_group is None:
             return
         chatidindb = utils.get_chat_id(message) in (self.config["logs_list"] or [])
         if pmlog_whitelist and chatidindb or not pmlog_whitelist and not chatidindb:
             return
         if pmlog_group:
-            if chat.username:
-                name = f"@{chat.username}"
-            elif chat.last_name:
-                name = f"{chat.first_name} {chat.last_name}"
-            else:
-                name = chat.first_name
-            user_id = str(chat.id)
-            user_url = await self.apo_lib.utils.get_tag_link(chat)
-            link = "Chat: <a href='" + user_url + "'>" + name + "</a>\nID: " + user_id
+            link = f"Chat: {await self.apo_lib.utils.get_tag(chat)}\n#ID_{chat.id}"
             try:
                 await message.forward_to(pmlog_group)
                 await message.client.send_message(pmlog_group, link)
@@ -185,7 +188,7 @@ class ApodiktumPMLogMod(loader.Module):
                 if not message.file or not pmlog_destr:
                     return
                 file = BytesIO()
-                caption = message.text + "\n\n" + link
+                caption = f"{message.text}\n\n{link}"
                 await message.client.download_file(message, file)
                 file.name = (
                     message.file.name or f"{message.file.media.id}{message.file.ext}"

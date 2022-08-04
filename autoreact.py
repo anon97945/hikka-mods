@@ -1,4 +1,4 @@
-__version__ = (0, 1, 23)
+__version__ = (0, 1, 24)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 1, 23)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 
 import asyncio
 import logging
@@ -41,7 +41,7 @@ class ApodiktumAutoReactMod(loader.Module):
     """
 
     strings = {
-        "name": "Apo AutoReact",
+        "name": "Apo-AutoReact",
         "developer": "@anon97945",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_doc_delay": "The delay between reactions are send in seconds.",
@@ -130,6 +130,15 @@ class ApodiktumAutoReactMod(loader.Module):
         "strings_ru": strings_ru,
     }
 
+    changes = {
+        "migration1": {
+            "name": {
+                "old": "Apo AutoReact",
+                "new": "Apo-AutoReact",
+            },
+        },
+    }
+
     def __init__(self):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
@@ -207,14 +216,18 @@ class ApodiktumAutoReactMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
+        await self.apo_lib.migrator.auto_migrate_handler(
+            self.__class__.__name__,
+            self.strings("name"),
+            self.changes,
+            self.config["auto_migrate"],
+        )
 
     async def cautoreactcmd(self, message: Message):
         """
@@ -225,9 +238,8 @@ class ApodiktumAutoReactMod(loader.Module):
             await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
 
+    @loader.watcher("only_messages")
     async def watcher(self, message: Message):
-        if not isinstance(message, Message):
-            return
         if not self.config["reaction_active"]:
             return
         reactions = self.config["reactions"]

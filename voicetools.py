@@ -1,4 +1,4 @@
-__version__ = (1, 0, 26)
+__version__ = (1, 0, 27)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (1, 0, 26)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 # requires: numpy scipy noisereduce soundfile pyrubberband
 
 import logging
@@ -256,7 +256,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
     """
 
     strings = {
-        "name": "Apo VoiceTools",
+        "name": "Apo-VoiceTools",
         "developer": "@anon97945",
         "_cfg_gain_lvl": "Set the desired volume gain level for auto normalize.",
         "_cfg_nr_lvl": "Set the desired noisereduction level.",
@@ -485,6 +485,15 @@ class ApodiktumVoiceToolsMod(loader.Module):
         "strings_ru": strings_ru,
     }
 
+    changes = {
+        "migration1": {
+            "name": {
+                "old": "Apo Voicetools",
+                "new": "Apo-Voicetools",
+            },
+        },
+    }
+
     def __init__(self):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
@@ -520,15 +529,19 @@ class ApodiktumVoiceToolsMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
+        self._classname = self.__class__.__name__
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
-        self._id = (await client.get_me(True)).user_id
+        await self.apo_lib.migrator.auto_migrate_handler(
+            self.__class__.__name__,
+            self.strings("name"),
+            self.changes,
+            self.config["auto_migrate"],
+        )
 
     async def cvoicetoolscmd(self, message: Message):
         """
@@ -1179,19 +1192,19 @@ class ApodiktumVoiceToolsMod(loader.Module):
 
     async def vtautodalekcmd(self, message):
         """Turns on AutoDalekVoice for your own Voicemessages in the chat"""
-        dalek_chats = self._db.get(__name__, "dalek_watcher", [])
+        dalek_chats = self._db.get(self._classname, "dalek_watcher", [])
         chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str not in dalek_chats:
             dalek_chats.append(chatid_str)
-            self._db.set(__name__, "dalek_watcher", dalek_chats)
+            self._db.set(self._classname, "dalek_watcher", dalek_chats)
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("dalek_start", self.all_strings, message),
             )
         else:
             dalek_chats.remove(chatid_str)
-            self._db.set(__name__, "dalek_watcher", dalek_chats)
+            self._db.set(self._classname, "dalek_watcher", dalek_chats)
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("dalek_stopped", self.all_strings, message),
@@ -1199,19 +1212,19 @@ class ApodiktumVoiceToolsMod(loader.Module):
 
     async def vtautoanoncmd(self, message):
         """Turns on AutoAnonVoice for your own Voicemessages in the chat"""
-        vcanon_chats = self._db.get(__name__, "vcanon_watcher", [])
+        vcanon_chats = self._db.get(self._classname, "vcanon_watcher", [])
         chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str not in vcanon_chats:
             vcanon_chats.append(chatid_str)
-            self._db.set(__name__, "vcanon_watcher", vcanon_chats)
+            self._db.set(self._classname, "vcanon_watcher", vcanon_chats)
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("vcanon_start", self.all_strings, message),
             )
         else:
             vcanon_chats.remove(chatid_str)
-            self._db.set(__name__, "vcanon_watcher", vcanon_chats)
+            self._db.set(self._classname, "vcanon_watcher", vcanon_chats)
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("vcanon_stopped", self.all_strings, message),
@@ -1219,19 +1232,19 @@ class ApodiktumVoiceToolsMod(loader.Module):
 
     async def vtautonrcmd(self, message):
         """Turns on AutoNoiseReduce for your own Voicemessages in the chat"""
-        nr_chats = self._db.get(__name__, "nr_watcher", [])
+        nr_chats = self._db.get(self._classname, "nr_watcher", [])
         chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str not in nr_chats:
             nr_chats.append(chatid_str)
-            self._db.set(__name__, "nr_watcher", nr_chats)
+            self._db.set(self._classname, "nr_watcher", nr_chats)
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("nr_start", self.all_strings, message),
             )
         else:
             nr_chats.remove(chatid_str)
-            self._db.set(__name__, "nr_watcher", nr_chats)
+            self._db.set(self._classname, "nr_watcher", nr_chats)
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("nr_stopped", self.all_strings, message),
@@ -1239,19 +1252,19 @@ class ApodiktumVoiceToolsMod(loader.Module):
 
     async def vtautonormcmd(self, message):
         """Turns on AutoVoiceNormalizer for your own Voicemessages in the chat"""
-        norm_chats = self._db.get(__name__, "norm_watcher", [])
+        norm_chats = self._db.get(self._classname, "norm_watcher", [])
         chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str not in norm_chats:
             norm_chats.append(chatid_str)
-            self._db.set(__name__, "norm_watcher", norm_chats)
+            self._db.set(self._classname, "norm_watcher", norm_chats)
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("norm_start", self.all_strings, message),
             )
         else:
             norm_chats.remove(chatid_str)
-            self._db.set(__name__, "norm_watcher", norm_chats)
+            self._db.set(self._classname, "norm_watcher", norm_chats)
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("norm_stopped", self.all_strings, message),
@@ -1259,19 +1272,19 @@ class ApodiktumVoiceToolsMod(loader.Module):
 
     async def vtautospeedcmd(self, message):
         """Turns on AutoSpeed for your own Voicemessages in the chat"""
-        speed_chats = self._db.get(__name__, "speed_watcher", [])
+        speed_chats = self._db.get(self._classname, "speed_watcher", [])
         chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str not in speed_chats:
             speed_chats.append(chatid_str)
-            self._db.set(__name__, "speed_watcher", speed_chats)
+            self._db.set(self._classname, "speed_watcher", speed_chats)
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("speed_start", self.all_strings, message),
             )
         else:
             speed_chats.remove(chatid_str)
-            self._db.set(__name__, "speed_watcher", speed_chats)
+            self._db.set(self._classname, "speed_watcher", speed_chats)
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("speed_stopped", self.all_strings, message),
@@ -1279,19 +1292,19 @@ class ApodiktumVoiceToolsMod(loader.Module):
 
     async def vtautopitchcmd(self, message):
         """Turns on AutoVoiceNormalizer for your own Voicemessages in the chat"""
-        pitch_chats = self._db.get(__name__, "pitch_watcher", [])
+        pitch_chats = self._db.get(self._classname, "pitch_watcher", [])
         chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str not in pitch_chats:
             pitch_chats.append(chatid_str)
-            self._db.set(__name__, "pitch_watcher", pitch_chats)
+            self._db.set(self._classname, "pitch_watcher", pitch_chats)
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("pitch_start", self.all_strings, message),
             )
         else:
             pitch_chats.remove(chatid_str)
-            self._db.set(__name__, "pitch_watcher", pitch_chats)
+            self._db.set(self._classname, "pitch_watcher", pitch_chats)
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("pitch_stopped", self.all_strings, message),
@@ -1299,19 +1312,19 @@ class ApodiktumVoiceToolsMod(loader.Module):
 
     async def vtautogaincmd(self, message):
         """Turns on AutoVolumeGain for your own Voicemessages in the chat"""
-        gain_chats = self._db.get(__name__, "gain_watcher", [])
+        gain_chats = self._db.get(self._classname, "gain_watcher", [])
         chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str not in gain_chats:
             gain_chats.append(chatid_str)
-            self._db.set(__name__, "gain_watcher", gain_chats)
+            self._db.set(self._classname, "gain_watcher", gain_chats)
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("gain_start", self.all_strings, message),
             )
         else:
             gain_chats.remove(chatid_str)
-            self._db.set(__name__, "gain_watcher", gain_chats)
+            self._db.set(self._classname, "gain_watcher", gain_chats)
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("gain_stopped", self.all_strings, message),
@@ -1320,13 +1333,13 @@ class ApodiktumVoiceToolsMod(loader.Module):
     async def vtautocmd(self, message):
         """Displays all enabled AutoVoice settings in the chat"""
         current = ""
-        norm_chats = self._db.get(__name__, "norm_watcher", [])
-        nr_chats = self._db.get(__name__, "nr_watcher", [])
-        dalek_chats = self._db.get(__name__, "dalek_watcher", [])
-        pitch_chats = self._db.get(__name__, "pitch_watcher", [])
-        vcanon_chats = self._db.get(__name__, "vcanon_watcher", [])
-        speed_chats = self._db.get(__name__, "speed_watcher", [])
-        gain_chats = self._db.get(__name__, "gain_watcher", [])
+        norm_chats = self._db.get(self._classname, "norm_watcher", [])
+        nr_chats = self._db.get(self._classname, "nr_watcher", [])
+        dalek_chats = self._db.get(self._classname, "dalek_watcher", [])
+        pitch_chats = self._db.get(self._classname, "pitch_watcher", [])
+        vcanon_chats = self._db.get(self._classname, "vcanon_watcher", [])
+        speed_chats = self._db.get(self._classname, "speed_watcher", [])
+        gain_chats = self._db.get(self._classname, "gain_watcher", [])
         chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str in vcanon_chats:
@@ -1428,56 +1441,56 @@ class ApodiktumVoiceToolsMod(loader.Module):
 
     async def vtautostopcmd(self, message):
         """Turns off AutoVoice for your own Voicemessages in the chat"""
-        norm_chats = self._db.get(__name__, "norm_watcher", [])
-        nr_chats = self._db.get(__name__, "nr_watcher", [])
-        dalek_chats = self._db.get(__name__, "dalek_watcher", [])
-        pitch_chats = self._db.get(__name__, "pitch_watcher", [])
-        vcanon_chats = self._db.get(__name__, "vcanon_watcher", [])
-        speed_chats = self._db.get(__name__, "speed_watcher", [])
-        gain_chats = self._db.get(__name__, "gain_watcher", [])
+        norm_chats = self._db.get(self._classname, "norm_watcher", [])
+        nr_chats = self._db.get(self._classname, "nr_watcher", [])
+        dalek_chats = self._db.get(self._classname, "dalek_watcher", [])
+        pitch_chats = self._db.get(self._classname, "pitch_watcher", [])
+        vcanon_chats = self._db.get(self._classname, "vcanon_watcher", [])
+        speed_chats = self._db.get(self._classname, "speed_watcher", [])
+        gain_chats = self._db.get(self._classname, "gain_watcher", [])
         chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
         if chatid_str in norm_chats:
             norm_chats.remove(chatid_str)
-            self._db.set(__name__, "norm_watcher", norm_chats)
+            self._db.set(self._classname, "norm_watcher", norm_chats)
         if chatid_str in nr_chats:
             nr_chats.remove(chatid_str)
-            self._db.set(__name__, "nr_watcher", nr_chats)
+            self._db.set(self._classname, "nr_watcher", nr_chats)
         if chatid_str in dalek_chats:
             dalek_chats.remove(chatid_str)
-            self._db.set(__name__, "dalek_watcher", dalek_chats)
+            self._db.set(self._classname, "dalek_watcher", dalek_chats)
         if chatid_str in pitch_chats:
             pitch_chats.remove(chatid_str)
-            self._db.set(__name__, "pitch_watcher", pitch_chats)
+            self._db.set(self._classname, "pitch_watcher", pitch_chats)
         if chatid_str in vcanon_chats:
             vcanon_chats.remove(chatid_str)
-            self._db.set(__name__, "vcanon_watcher", vcanon_chats)
+            self._db.set(self._classname, "vcanon_watcher", vcanon_chats)
         if chatid_str in speed_chats:
             speed_chats.remove(chatid_str)
-            self._db.set(__name__, "speed_watcher", speed_chats)
+            self._db.set(self._classname, "speed_watcher", speed_chats)
         if chatid_str in gain_chats:
             gain_chats.remove(chatid_str)
-            self._db.set(__name__, "gain_watcher", gain_chats)
+            self._db.set(self._classname, "gain_watcher", gain_chats)
         await utils.answer(
             message,
             self.apo_lib.utils.get_str("vtauto_stopped", self.all_strings, message),
         )
 
+    @loader.watcher("out", "only_audios", "only_messages")
     async def watcher(self, message: Message):
         chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
-        norm_chats = self._db.get(__name__, "norm_watcher", [])
-        nr_chats = self._db.get(__name__, "nr_watcher", [])
-        dalek_chats = self._db.get(__name__, "dalek_watcher", [])
-        pitch_chats = self._db.get(__name__, "pitch_watcher", [])
-        vcanon_chats = self._db.get(__name__, "vcanon_watcher", [])
-        speed_chats = self._db.get(__name__, "speed_watcher", [])
-        gain_chats = self._db.get(__name__, "gain_watcher", [])
-        chat = await message.get_chat()
+        norm_chats = self._db.get(self._classname, "norm_watcher", [])
+        nr_chats = self._db.get(self._classname, "nr_watcher", [])
+        dalek_chats = self._db.get(self._classname, "dalek_watcher", [])
+        pitch_chats = self._db.get(self._classname, "pitch_watcher", [])
+        vcanon_chats = self._db.get(self._classname, "vcanon_watcher", [])
+        speed_chats = self._db.get(self._classname, "speed_watcher", [])
+        gain_chats = self._db.get(self._classname, "gain_watcher", [])
+        chat = await self._client.get_entity(utils.get_chat_id(message))
         chattype = await getchattype(message)
         if (
-            not isinstance(message, Message)
-            or chatid_str not in nr_chats
+            chatid_str not in nr_chats
             and chatid_str not in dalek_chats
             and chatid_str not in norm_chats
             and chatid_str not in pitch_chats
@@ -1488,7 +1501,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
             return
         if (
             chattype != "channel"
-            and message.sender_id != self._id
+            and message.sender_id != self.tg_id
             or chattype == "channel"
             and not chat.admin_rights.delete_messages
         ):
@@ -1506,7 +1519,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         if chatid_str in vcanon_chats:
             nr_lvl = 0.8
             pitch_lvl = -4.5
-        msgs = await message.forward_to(self._id)
+        msgs = await message.forward_to(self.tg_id)
         await message.client.delete_messages(chatid, message)
         file = BytesIO()
         file.name = msgs.file.name
@@ -1519,7 +1532,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         else:
             filename_new = filename.replace(ext, "")
         file.seek(0)
-        await message.client.delete_messages(self._id, msgs)
+        await message.client.delete_messages(self.tg_id, msgs)
         file.name = filename_new + ext
         fn, fe = os.path.splitext(file.name)
         file.seek(0)

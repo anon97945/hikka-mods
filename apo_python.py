@@ -1,4 +1,4 @@
-__version__ = (0, 0, 7)
+__version__ = (0, 0, 11)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -24,14 +24,14 @@ __version__ = (0, 0, 7)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 
 import contextlib
 import itertools
 import logging
-import os
 import sys
 from types import ModuleType
+import os
 from typing import Any
 
 import telethon
@@ -40,20 +40,9 @@ from telethon.errors.rpcerrorlist import MessageIdInvalidError
 from telethon.tl.types import Message
 
 from .. import loader, main, utils
-from ..inline.types import InlineCall
 from ..log import HikkaException
 
 logger = logging.getLogger(__name__)
-
-
-class FakeDbException(Exception):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
-class FakeDb:
-    def __getattr__(self, *args, **kwargs):
-        raise FakeDbException("Database read-write permission required")
 
 
 @loader.tds
@@ -64,37 +53,17 @@ class ApodiktumPythonMod(loader.Module):
         "name": "Apo-Python",
         "eval": "<b>🎬 Code:</b>\n<code>{}</code>\n<b>🪄 Result:</b>\n<code>{}</code>",
         "err": "<b>🎬 Code:</b>\n<code>{}</code>\n\n<b>🚫 Error:</b>\n{}",
-        "db_permission": (
-            "⚠️ <b>Do not use </b><code>db.set</code><b>,"
-            " </b><code>db.get</code><b> and other db operations. You have core"
-            " modules to control anything you want</b>\n\n<i>Theses commands"
-            " may <b><u>crash</u></b> your userbot or even make it"
-            " <b><u>unusable</u></b>! Do it on your own risk</i>\n\n<i>If you"
-            " issue any errors after allowing this option, <b><u>you will not"
-            " get any help in support chat</u></b>!</i>"
-        ),
     }
 
     strings_ru = {
         "eval": "<b>🎬 Код:</b>\n<code>{}</code>\n<b>🪄 Результат:</b>\n<code>{}</code>",
         "err": "<b>🎬 Код:</b>\n<code>{}</code>\n\n<b>🚫 Ошибка:</b>\n{}",
-        "db_permission": (
-            "⚠️ <b>Не используй </b><code>db.set</code><b>,"
-            " </b><code>db.get</code><b> и другие операции с базой данных. У"
-            " тебя есть встроенные модуля для управления ей</b>\n\n<i>Эти"
-            " команды могут <b><u>нарушить работу</u></b> юзербота, или вообще"
-            " <b><u>сломать</u></b> его! Используй эти команды на свой страх и"
-            " риск</i>\n\n<i>Если появятся какие-либо проблемы, вызванные после"
-            " этой команды, <b><u>ты не получишь помощи в чате</u></b>!</i>"
-        ),
         "_cmd_doc_eval": "Алиас для команды .e",
         "_cmd_doc_e": "Выполняет Python кодировка",
         "_cls_doc": "Выполняет Python код",
     }
 
-    async def client_ready(self, client, db):
-        self._client = client
-        self._db = db
+    async def client_ready(self, client, _):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
@@ -104,40 +73,20 @@ class ApodiktumPythonMod(loader.Module):
 
     @loader.owner
     async def aevalcmd(self, message: Message):
-        """Alias for .ae command"""
-        await self.aecmd(message)
-
-    async def inline__allow(self, call: InlineCall):
-        await call.answer("Now you can access db through .e command", show_alert=True)
-        self._db.set(main.__name__, "enable_db_eval", True)
-        await call.delete()
+        """Alias for .e command"""
+        await self.ecmd(message)
 
     @loader.owner
     async def aecmd(self, message: Message):
         """Evaluates python code"""
         ret = self.strings("eval")
         try:
-            it = await meval(
+            result = await meval(
                 utils.get_args_raw(message),
                 globals(),
                 **await self.getattrs(message),
             )
-        except FakeDbException:
-            await self.inline.form(
-                self.strings("db_permission"),
-                message=message,
-                reply_markup=[
-                    [
-                        {
-                            "text": "✅ Allow",
-                            "callback": self.inline__allow,
-                        },
-                        {"text": "🚫 Cancel", "action": "close"},
-                    ]
-                ],
-            )
-            return
-        except Exception:
+        except Exception:  # skipcq: PYL-W0703
             item = HikkaException.from_exc_info(*sys.exc_info())
             exc = (
                 "\n<b>🪐 Full stack:</b>\n\n"
@@ -170,13 +119,15 @@ class ApodiktumPythonMod(loader.Module):
 
             return
 
+        if callable(getattr(result, "stringify", None)):
+            with contextlib.suppress(Exception):
+                result = str(result.stringify())
+
+        result = str(result)
+
         ret = ret.format(
             utils.escape_html(utils.get_args_raw(message)),
-            utils.escape_html(
-                str(it.stringify())
-                if hasattr(it, "stringify") and callable(it.stringify)
-                else str(it)
-            ),
+            utils.escape_html(result),
         )
 
         ret = ret.replace(str(self._phone), "📵")
@@ -219,42 +170,28 @@ class ApodiktumPythonMod(loader.Module):
                 "m": message,
                 "lookup": self.lookup,
                 "self": self,
+                "db": self.db,
             },
-            **(
-                {
-                    "db": self._db,
-                }
-                if self._db.get(main.__name__, "enable_db_eval", False)
-                else {
-                    "db": FakeDb(),
-                }
-            ),
         }
 
     def get_sub(self, obj: Any, _depth: int = 1) -> dict:
         """Get all callable capitalised objects in an object recursively, ignoring _*"""
-        return {
-            **dict(
-                filter(
+        return dict(
+            filter(
+                lambda x: x[0][0] != "_"
+                and x[0][0].upper() == x[0][0]
+                and callable(x[1]),
+                obj.__dict__.items(),
+            )
+        ) | itertools.chain.from_iterable(
+            [
+                self.get_sub(y[1], _depth + 1).items()
+                for y in filter(
                     lambda x: x[0][0] != "_"
-                    and x[0][0].upper() == x[0][0]
-                    and callable(x[1]),
+                    and isinstance(x[1], ModuleType)
+                    and x[1] != obj
+                    and x[1].__package__.rsplit(".", _depth)[0] == "telethon.tl",
                     obj.__dict__.items(),
                 )
-            ),
-            **dict(
-                itertools.chain.from_iterable(
-                    [
-                        self.get_sub(y[1], _depth + 1).items()
-                        for y in filter(
-                            lambda x: x[0][0] != "_"
-                            and isinstance(x[1], ModuleType)
-                            and x[1] != obj
-                            and x[1].__package__.rsplit(".", _depth)[0]
-                            == "telethon.tl",
-                            obj.__dict__.items(),
-                        )
-                    ]
-                )
-            ),
-        }
+            ]
+        )

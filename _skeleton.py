@@ -1,4 +1,4 @@
-__version__ = (0, 0, 15)
+__version__ = (0, 0, 16)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 0, 15)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 
 import logging
 
@@ -30,14 +30,6 @@ from .. import loader, utils
 logger = logging.getLogger(__name__)
 
 
-def represents_int(s: str) -> bool:
-    try:
-        loader.validators.Integer().validate(s)
-        return True
-    except loader.validators.ValidationError:
-        return False
-
-
 @loader.tds
 class ApodiktumSkeletonMod(loader.Module):
     """
@@ -45,7 +37,7 @@ class ApodiktumSkeletonMod(loader.Module):
     """
 
     strings = {
-        "name": "Apo Skeleton",
+        "name": "Apo-Skeleton",
         "developer": "@anon97945",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_skel_bool": "This is a skeleton boolean config.",
@@ -97,6 +89,15 @@ class ApodiktumSkeletonMod(loader.Module):
         "strings_ru": strings_ru,
     }
 
+    changes = {
+        "migration1": {
+            "name": {
+                "old": "Apo Skeleton",
+                "new": "Apo-Skeleton",
+            },
+        },
+    }
+
     def __init__(self):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
@@ -131,14 +132,18 @@ class ApodiktumSkeletonMod(loader.Module):
             ),  # for MigratorClas
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
+        await self.apo_lib.migrator.auto_migrate_handler(
+            self.__class__.__name__,
+            self.strings("name"),
+            self.changes,
+            self.config["auto_migrate"],
+        )
 
     async def on_unload(self):
         return
@@ -176,7 +181,7 @@ class ApodiktumSkeletonMod(loader.Module):
                 self.apo_lib.utils.get_str("no_args", self.all_strings, message),
             )
             return
-        if not represents_int(args[0]):
+        if not self.apo_lib.utils.validate_integer(args[0]):
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("no_int", self.all_strings, message),

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 25)
+__version__ = (0, 0, 26)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 0, 25)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 
 import logging
 
@@ -37,7 +37,7 @@ class ApodiktumSaveMessageMod(loader.Module):
     """
 
     strings = {
-        "name": "Apo SaveMessage",
+        "name": "Apo-SaveMessage",
         "developer": "@anon97945",
         "done": "<b>Forward to saved complete.</b>",
         "invalid_link": "<b>Invalid link.</b>",
@@ -63,6 +63,15 @@ class ApodiktumSaveMessageMod(loader.Module):
         "strings_ru": strings_ru,
     }
 
+    changes = {
+        "migration1": {
+            "name": {
+                "old": "Apo SaveMessage",
+                "new": "Apo-SaveMessage",
+            },
+        },
+    }
+
     def __init__(self):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
@@ -74,15 +83,18 @@ class ApodiktumSaveMessageMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
-        self._id = (await client.get_me(True)).user_id
+        await self.apo_lib.migrator.auto_migrate_handler(
+            self.__class__.__name__,
+            self.strings("name"),
+            self.changes,
+            self.config["auto_migrate"],
+        )
 
     async def smcmd(self, message: Message):
         """<messagelink> to forward message/media to SavedMessages."""
@@ -96,7 +108,7 @@ class ApodiktumSaveMessageMod(loader.Module):
             )
         channel_id, msg_id = self.apo_lib.utils.get_ids_from_tglink(args)
         msgs = await message.client.get_messages(channel_id, ids=msg_id)
-        msgs = await message.client.send_message(self._id, message=msgs)
+        msgs = await message.client.send_message(self.tg_id, message=msgs)
         return await utils.answer(
             message,
             self.apo_lib.utils.get_str("done", self.all_strings, message),

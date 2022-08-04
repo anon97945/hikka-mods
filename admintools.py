@@ -1,4 +1,4 @@
-__version__ = (1, 0, 36)
+__version__ = (1, 0, 51)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (1, 0, 36)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 
 import asyncio
 import logging
@@ -39,7 +39,7 @@ class ApodiktumAdminToolsMod(loader.Module):
     """
 
     strings = {
-        "name": "Apo AdminTools",
+        "name": "Apo-AdminTools",
         "developer": "@anon97945",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_doc_admin_tag_chats": "React to @admin in given chats.",
@@ -52,8 +52,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         "admin_tag_reply": "\n\nThe corresponding message from {} is:\n{}",
         "admin_tag_reply_msg": "Thanks, the owner of this Bot got informed.",
         "bcu_db_string": (
-            "<b>[BlockChannelUser]</b> Current Database:\n\nWatcher:\n{}"
-            "\n\nChatsettings:\n{}"
+            "<b>[BlockChannelUser]</b> Current Database:\n\nWatcher:\n<code>{}</code>"
+            "\n\nChatsettings:\n<code>{}</code>"
         ),
         "bcu_settings": (
             "<b>[BlockChannelUser]</b> Current settings in this chat"
@@ -66,11 +66,12 @@ class ApodiktumAdminToolsMod(loader.Module):
             "<b>[BlockChannelUser]</b> The module is now turned off in all chats.</b>"
         ),
         "bnd_db_string": (
-            "<b>[BlockNonDiscussion]</b> Current Database:\n\nWatcher:\n{}"
-            "\n\nChatsettings:\n{}"
+            "<b>[BlockNonDiscussion]</b> Current Database:\n\nWatcher:\n<code>{}</code>"
+            "\n\nChatsettings:\n<code>{}</code>"
         ),
         "bnd_settings": (
-            "<b>[BlockNonDiscussion]</b> Current settings in this chat are:\n{}"
+            "<b>[BlockNonDiscussion]</b> Current settings in this chat"
+            " are:\n<code>{}</code>"
         ),
         "bnd_start": "<b>[BlockNonDiscussion]</b> Activated in this chat.</b>",
         "bnd_stopped": "<b>[BlockNonDiscussion]</b> Deactivated in this chat.</b>",
@@ -87,7 +88,9 @@ class ApodiktumAdminToolsMod(loader.Module):
             "<b>[Grouplogger]</b> Current Database:\n\nWatcher:\n{}"
             "\n\nChatsettings:\n{}"
         ),
-        "gl_settings": "<b>[Grouplogger]</b> Current settings in this chat are:\n{}",
+        "gl_settings": (
+            "<b>[Grouplogger]</b> Current settings in this chat are:\n<code>{}</code>"
+        ),
         "gl_start": "<b>[Grouplogger]</b> Activated for the given chat.</b>",
         "gl_stopped": "<b>[Grouplogger]</b> Deactivated in this chat.</b>",
         "gl_turned_off": (
@@ -111,11 +114,12 @@ class ApodiktumAdminToolsMod(loader.Module):
         "admin_tag_reply": "\n\nDie entsprechende Nachricht von {} ist:\n{}",
         "admin_tag_reply_msg": "Danke, der Besitzer dieses Bots wurde informiert.",
         "bcu_db_string": (
-            "<b>[BlockChannelUser]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
+            "<b>[BlockChannelUser]</b> Aktuelle Datenbank:\n\nWatcher:\n<code>{}</code>"
             "\n\nChateinstellungen:\n{}"
         ),
         "bcu_settings": (
-            "<b>[BlockChannelUser]</b> Aktuelle Einstellungen in diesem Chat:\n{}"
+            "<b>[BlockChannelUser]</b> Aktuelle Einstellungen in diesem"
+            " Chat:\n<code>{}</code>"
         ),
         "bcu_start": "<b>[BlockChannelUser]</b> In diesem Chat aktiviert.</b>",
         "bcu_stopped": (
@@ -125,11 +129,11 @@ class ApodiktumAdminToolsMod(loader.Module):
         "bcu_turned_off": "<b>[BlockChannelUser]</b> In allen Chats ausgeschaltet.</b>",
         "bnd_db_string": (
             "<b>[BlockNonDiscussion - Settings]</b> Aktuelle"
-            " Datenbank:\n\nWatcher:\n{}\n\nChateinstellungen:\n{}"
+            " Datenbank:\n\nWatcher:\n<code>{}</code>\n\nChateinstellungen:\n<code>{}</code>"
         ),
         "bnd_settings": (
             "<b>[BlockNonDiscussion - Settings]</b> Aktuelle Einstellungen in"
-            " diesem Chat:\n{}"
+            " diesem Chat:\n<code>{}</code>"
         ),
         "bnd_start": "<b>[BlockNonDiscussion]</b> In diesem Chat aktiviert.</b>",
         "bnd_stopped": (
@@ -145,11 +149,12 @@ class ApodiktumAdminToolsMod(loader.Module):
         ),
         "error": "<b>Dein Befehl war falsch.</b>",
         "gl_db_string": (
-            "<b>[Grouplogger]</b> Aktuelle Datenbank:\n\nWatcher:\n{}"
-            "\n\nChateinstellungen:\n{}"
+            "<b>[Grouplogger]</b> Aktuelle Datenbank:\n\nWatcher:\n<code>{}</code>"
+            "\n\nChateinstellungen:\n<code>{}</code>"
         ),
         "gl_settings": (
-            "<b>[Grouplogger]</b> Aktuelle Einstellungen in diesem Chat:\n{}"
+            "<b>[Grouplogger]</b> Aktuelle Einstellungen in diesem"
+            " Chat:\n<code>{}</code>"
         ),
         "gl_start": "<b>[Grouplogger]</b> In gewähltem Chat aktiviert.</b>",
         "gl_stopped": "<b>[Grouplogger]</b> Der Chat wurde aus der Liste entfernt.</b>",
@@ -200,10 +205,13 @@ class ApodiktumAdminToolsMod(loader.Module):
         "admin_tag_reply": "\n\nПересылаемое сообщение от\n{}:\n{}",
         "admin_tag_reply_msg": "Спасибо, владелец этого бота был проинформирован.",
         "bcu_db_string": (
-            "<b>[BlockChannelUser]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
-            "\n\nНастройки чата:\n{}"
+            "<b>[BlockChannelUser]</b> Текущая база"
+            " данных:\n\nНаблюдающий:\n<code>{}</code>\n\nНастройки"
+            " чата:\n<code>{}</code>"
         ),
-        "bcu_settings": "<b>[BlockChannelUser]</b> Текущие настройки в этом чате:\n{}",
+        "bcu_settings": (
+            "<b>[BlockChannelUser]</b> Текущие настройки в этом чате:\n<code>{}</code>"
+        ),
         "bcu_start": "<b>[BlockChannelUser]</b> Активировано в этом чате</b>",
         "bcu_stopped": "<b>[BlockChannelUser]</b> Деактивировано в этом чате</b>",
         "bcu_triggered": "{}, ты не можешь писать тут от имени канала.",
@@ -212,10 +220,12 @@ class ApodiktumAdminToolsMod(loader.Module):
         ),
         "bnd_db_string": (
             "<b>[BlockNonDiscussion]</b> Текущая база"
-            " данных:\n\nНаблюдающий:\n{}\n\nНастройки чата:\n{}"
+            " данных:\n\nНаблюдающий:\n<code>{}</code>\n\nНастройки"
+            " чата:\n<code>{}</code>"
         ),
         "bnd_settings": (
-            "<b>[BlockNonDiscussion]</b> Текущие настройки в этом чате:\n{}"
+            "<b>[BlockNonDiscussion]</b> Текущие настройки в этом"
+            " чате:\n<code>{}</code>"
         ),
         "bnd_start": "<b>[BlockNonDiscussion]</b> Активировано в этом чате</b>",
         "bnd_stopped": "<b>[BlockNonDiscussion]</b> Деактивировано в этом чате</b>",
@@ -229,10 +239,12 @@ class ApodiktumAdminToolsMod(loader.Module):
         ),
         "error": "<b>Неверная команда</b>",
         "gl_db_string": (
-            "<b>[Grouplogger]</b> Текущая база данных:\n\nНаблюдающий:\n{}"
-            "\n\nНастройки чата:\n{}"
+            "<b>[Grouplogger]</b> Текущая база данных:\n\nНаблюдающий:\n<code>{}</code>"
+            "\n\nНастройки чата:\n<code>{}</code>"
         ),
-        "gl_settings": "<b>[Grouplogger]</b> Текущие настройки в этом чате:\n{}",
+        "gl_settings": (
+            "<b>[Grouplogger]</b> Текущие настройки в этом чате:\n<code>{}</code>"
+        ),
         "gl_start": "<b>[Grouplogger]</b> Активирован в выбранном чате.</b>",
         "gl_stopped": "<b>[Grouplogger]</b> Деактивировано в этом чате.</b>",
         "gl_turned_off": (
@@ -251,7 +263,14 @@ class ApodiktumAdminToolsMod(loader.Module):
         "strings_ru": strings_ru,
     }
 
-    _global_queue = []
+    changes = {
+        "migration1": {
+            "name": {
+                "old": "Apo AdminTools",
+                "new": "Apo-AdminTools",
+            },
+        },
+    }
 
     def __init__(self):
         self._ratelimit = []
@@ -291,19 +310,19 @@ class ApodiktumAdminToolsMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
+        self._classname = self.__class__.__name__
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
-        self._pt_task = asyncio.ensure_future(self._global_queue_handler())
-
-    async def on_unload(self):
-        self._pt_task.cancel()
-        return
+        await self.apo_lib.migrator.auto_migrate_handler(
+            self.__class__.__name__,
+            self.strings("name"),
+            self.changes,
+            self.config["auto_migrate"],
+        )
 
     async def cadmintoolscmd(self, message: Message):
         """
@@ -331,8 +350,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         .bnd clearall
          ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Clears the db of BlockNonDiscussion.
         """
-        bnd = self.get("bnd", [])
-        sets = self.get("bnd_sets", {})
+        bnd = self._db.get(self._classname, "bnd", [])
+        sets = self._db.get(self._classname, "bnd_sets", {})
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
         chat = await self._client.get_entity(message.chat)
@@ -340,8 +359,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         chatid_str = str(chatid)
 
         if args and args[0] == "clearall":
-            self.set("bnd", [])
-            self.set("bnd_sets", {})
+            self._db.set(self._classname, "bnd", [])
+            self._db.set(self._classname, "bnd_sets", {})
             return await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("bnd_turned_off", self.all_strings, message),
@@ -369,7 +388,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             and not chat.admin_rights.delete_messages
             or not chat.admin_rights
             and not chat.creator
-        ):
+        ) and (args or chatid_str not in bnd):
             return await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("permerror", self.all_strings, message),
@@ -382,16 +401,16 @@ class ApodiktumAdminToolsMod(loader.Module):
                 sets[chatid_str].setdefault("notify", True)
                 sets[chatid_str].setdefault("mute", 1)
                 sets[chatid_str].setdefault("deltimer", 60)
-                self.set("bnd", bnd)
-                self.set("bnd_sets", sets)
+                self._db.set(self._classname, "bnd", bnd)
+                self._db.set(self._classname, "bnd_sets", sets)
                 return await utils.answer(
                     message,
                     self.apo_lib.utils.get_str("bnd_start", self.all_strings, message),
                 )
             bnd.remove(chatid_str)
             sets.pop(chatid_str)
-            self.set("bnd", bnd)
-            self.set("bnd_sets", sets)
+            self._db.set(self._classname, "bnd", bnd)
+            self._db.set(self._classname, "bnd_sets", sets)
             return await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("bnd_stopped", self.all_strings, message),
@@ -423,8 +442,8 @@ class ApodiktumAdminToolsMod(loader.Module):
                 sets[chatid_str].update({"deltimer": args[1]})
             elif args[0] != "settings" and chatid_str in bnd:
                 return
-            self.set("bnd", bnd)
-            self.set("bnd_sets", sets)
+            self._db.set(self._classname, "bnd", bnd)
+            self._db.set(self._classname, "bnd_sets", sets)
             return await utils.answer(
                 message,
                 self.apo_lib.utils.get_str(
@@ -449,8 +468,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         .bcu clearall
          ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Clears the db of BlockChannelUser.
         """
-        bcu = self.get("bcu", [])
-        sets = self.get("bcu_sets", {})
+        bcu = self._db.get(self._classname, "bcu", [])
+        sets = self._db.get(self._classname, "bcu_sets", {})
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
         chat = await self._client.get_entity(message.chat)
@@ -458,8 +477,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         chatid_str = str(chatid)
 
         if args and args[0] == "clearall":
-            self.set("bcu", [])
-            self.set("bcu_sets", {})
+            self._db.set(self._classname, "bcu", [])
+            self._db.set(self._classname, "bcu_sets", {})
             return await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("bcu_turned_off", self.all_strings, message),
@@ -485,7 +504,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             and not chat.admin_rights.delete_messages
             or not chat.admin_rights
             and not chat.creator
-        ):
+        ) and (args or chatid_str not in bcu):
             return await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("permerror", self.all_strings, message),
@@ -498,16 +517,16 @@ class ApodiktumAdminToolsMod(loader.Module):
                 sets[chatid_str].setdefault("notify", True)
                 sets[chatid_str].setdefault("ban", True)
                 sets[chatid_str].setdefault("deltimer", 60)
-                self.set("bcu", bcu)
-                self.set("bcu_sets", sets)
+                self._db.set(self._classname, "bcu", bcu)
+                self._db.set(self._classname, "bcu_sets", sets)
                 return await utils.answer(
                     message,
                     self.apo_lib.utils.get_str("bcu_start", self.all_strings, message),
                 )
             bcu.remove(chatid_str)
             sets.pop(chatid_str)
-            self.set("bcu", bcu)
-            self.set("bcu_sets", sets)
+            self._db.set(self._classname, "bcu", bcu)
+            self._db.set(self._classname, "bcu_sets", sets)
             return await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("bcu_stopped", self.all_strings, message),
@@ -541,8 +560,8 @@ class ApodiktumAdminToolsMod(loader.Module):
                 sets[chatid_str].update({"deltimer": args[1]})
             elif args[0] != "settings" and chatid_str in bcu:
                 return
-            self.set("bcu", bcu)
-            self.set("bcu_sets", sets)
+            self._db.set(self._classname, "bcu", bcu)
+            self._db.set(self._classname, "bcu_sets", sets)
             return await utils.answer(
                 message,
                 self.apo_lib.utils.get_str(
@@ -563,8 +582,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         .gl clearall
          ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Clears the db of Group/Channel Logger.
         """
-        gl = self.get("gl", [])
-        sets = self.get("gl_sets", {})
+        gl = self._db.get(self._classname, "gl", [])
+        sets = self._db.get(self._classname, "gl_sets", {})
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
         chat = await self._client.get_entity(message.chat)
@@ -578,8 +597,8 @@ class ApodiktumAdminToolsMod(loader.Module):
             )
 
         if args[0] == "clearall":
-            self.set("gl", [])
-            self.set("gl_sets", {})
+            self._db.set(self._classname, "gl", [])
+            self._db.set(self._classname, "gl_sets", {})
             return await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("gl_turned_off", self.all_strings, message),
@@ -621,8 +640,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         ):
             gl.remove(chatid_str)
             sets.pop(chatid_str)
-            self.set("gl", gl)
-            self.set("gl_sets", sets)
+            self._db.set(self._classname, "gl", gl)
+            self._db.set(self._classname, "gl_sets", sets)
             return await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("gl_stopped", self.all_strings, message),
@@ -650,8 +669,8 @@ class ApodiktumAdminToolsMod(loader.Module):
             gl.append(chatid_str)
             sets.setdefault(chatid_str, {})
             sets[chatid_str].setdefault("logchannel", args[1])
-            self.set("gl", gl)
-            self.set("gl_sets", sets)
+            self._db.set(self._classname, "gl", gl)
+            self._db.set(self._classname, "gl_sets", sets)
             return await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("gl_start", self.all_strings, message),
@@ -667,8 +686,8 @@ class ApodiktumAdminToolsMod(loader.Module):
             sets[chatid_str].update({"logchannel": args[1]})
         elif args[0] != "settings" and chatid_str in gl:
             return
-        self.set("gl", gl)
-        self.set("gl_sets", sets)
+        self._db.set(self._classname, "gl", gl)
+        self._db.set(self._classname, "gl_sets", sets)
         return await utils.answer(
             message,
             self.apo_lib.utils.get_str("gl_settings", self.all_strings, message).format(
@@ -695,6 +714,7 @@ class ApodiktumAdminToolsMod(loader.Module):
 
         if await self.apo_lib.utils.is_linkedchannel(chat.id, user.id):
             return
+        reply = await self.apo_lib.utils.get_start_msg(message)
         await self.apo_lib.utils.delete_message(message)
         if bcu_sets[chatid_str].get("ban") is True:
             await self.apo_lib.utils.ban(chat.id, user.id)
@@ -708,6 +728,9 @@ class ApodiktumAdminToolsMod(loader.Module):
                         "bcu_triggered", self.all_strings, message
                     ).format(usertag),
                     parse_mode="HTML",
+                    disable_web_page_preview=True,
+                    reply_to_message_id=getattr(reply, "id", None),
+                    allow_sending_without_reply=True,
                 )
             else:
                 msg = await utils.answer(
@@ -719,7 +742,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             if bcu_sets[chatid_str].get("deltimer") != "0":
                 del_duration = int(bcu_sets[chatid_str].get("deltimer"))
                 await asyncio.sleep(del_duration)
-                await self.apo_lib.utils.delete_message(message)
+                await self.apo_lib.utils.delete_message(msg)
         return
 
     async def p__bnd(
@@ -729,9 +752,14 @@ class ApodiktumAdminToolsMod(loader.Module):
         message: Union[None, Message] = None,
         bnd: list = None,
         bnd_sets: dict = None,
-    ) -> bool:
+    ) -> bool:  # sourcery skip: low-code-quality
         chatid_str = str(chat.id)
-        if message.is_private or chatid_str not in bnd or not isinstance(user, User):
+        if (
+            message.is_private
+            or chatid_str not in bnd
+            or not isinstance(user, User)
+            or message.sender_id == self.tg_id
+        ):
             return
         if (chat.admin_rights or chat.creator) and (
             not chat.admin_rights.delete_messages or not chat.admin_rights
@@ -739,8 +767,8 @@ class ApodiktumAdminToolsMod(loader.Module):
             return
         usertag = await self.apo_lib.utils.get_tag(user, True)
         link = await self.apo_lib.utils.get_invite_link(chat)
-
         if not await self.apo_lib.utils.is_member(chat.id, user.id):
+            reply = await self.apo_lib.utils.get_start_msg(message)
             await self.apo_lib.utils.delete_message(message, True)
             if (
                 chat.admin_rights.ban_users
@@ -759,6 +787,9 @@ class ApodiktumAdminToolsMod(loader.Module):
                             "bnd_triggered", self.all_strings, message
                         ).format(usertag, link),
                         parse_mode="HTML",
+                        disable_web_page_preview=True,
+                        reply_to_message_id=getattr(reply, "id", None),
+                        allow_sending_without_reply=True,
                     )
                 else:
                     msg = await utils.answer(
@@ -770,7 +801,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 if bnd_sets[chatid_str].get("deltimer") != "0":
                     DELTIMER = int(bnd_sets[chatid_str].get("deltimer"))
                     await asyncio.sleep(DELTIMER)
-                    await self.apo_lib.utils.delete_message(message)
+                    await self.apo_lib.utils.delete_message(msg)
         return
 
     async def p__gl(
@@ -853,7 +884,9 @@ class ApodiktumAdminToolsMod(loader.Module):
                     "admin_tag_reply_msg", self.all_strings, message
                 ),
                 parse_mode="HTML",
+                disable_web_page_preview=True,
                 reply_to_message_id=message.id,
+                allow_sending_without_reply=True,
             )
         else:
             msg = await utils.answer(
@@ -870,33 +903,18 @@ class ApodiktumAdminToolsMod(loader.Module):
             disable_web_page_preview=True,
         )
         await asyncio.sleep(30)
-        await self.apo_lib.utils.delete_message(message)
+        await self.apo_lib.utils.delete_message(msg)
 
+    @loader.watcher("only_messages", "only_groups", "only_channels")
     async def watcher(self, message: Message):
-        self._global_queue += [message]
-
-    async def _global_queue_handler(self):
-        while True:
-            while self._global_queue:
-                try:
-                    await self._global_queue_handler_process(self._global_queue.pop(0))
-                except Exception as exc:  # skipcq: PYL-W0703
-                    logger.exception(f"global_queue_handler_process error:\n{str(exc)}")
-            await asyncio.sleep(0)
-
-    async def _global_queue_handler_process(self, message: Message):
-        if not isinstance(
-            getattr(message, "chat", 0), (Chat, Channel)
-        ) or not isinstance(message, Message):
-            return
         chat_id = utils.get_chat_id(message)
         user_id = await self.apo_lib.utils.get_user_id(message, strip=True)
-        bnd = self.get("bnd", [])
-        bnd_sets = self.get("bnd_sets", {})
-        bcu = self.get("bcu", [])
-        bcu_sets = self.get("bcu_sets", {})
-        gl = self.get("gl", [])
-        gl_sets = self.get("gl_sets", {})
+        bnd = self._db.get(self._classname, "bnd", [])
+        bnd_sets = self._db.get(self._classname, "bnd_sets", {})
+        bcu = self._db.get(self._classname, "bcu", [])
+        bcu_sets = self._db.get(self._classname, "bcu_sets", {})
+        gl = self._db.get(self._classname, "gl", [])
+        gl_sets = self._db.get(self._classname, "gl_sets", {})
         if str(chat_id) in bnd or str(chat_id) in bcu or str(chat_id) in gl:
             chat = await self._client.get_entity(chat_id)
             user = await self._client.get_entity(user_id)

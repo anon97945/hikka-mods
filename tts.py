@@ -1,4 +1,4 @@
-__version__ = (0, 1, 88)
+__version__ = (0, 1, 89)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -20,7 +20,7 @@ __version__ = (0, 1, 88)
 
 # scope: libsndfile1 gcc ffmpeg rubberband-cli
 # scope: hikka_only
-# scope: hikka_min 1.2.11
+# scope: hikka_min 1.3.0
 
 # requires: gtts pydub soundfile pyrubberband numpy AudioSegment wave
 
@@ -128,7 +128,7 @@ async def speedup(bytes_io_file, fn, fe, speed):
 @loader.tds
 class ApodiktumTTSMod(loader.Module):
     strings = {
-        "name": "Apo TextToSpeech",
+        "name": "Apo-TextToSpeech",
         "developer": "@anon97945",
         "_cfg_tts_lang": "Set your language code for the TTS here.",
         "_cfg_tts_speed": "Set the desired speech speed.",
@@ -183,6 +183,15 @@ class ApodiktumTTSMod(loader.Module):
         "strings_ru": strings_ru,
     }
 
+    changes = {
+        "migration1": {
+            "name": {
+                "old": "Apo TextToSpeech",
+                "new": "Apo-TextToSpeech",
+            },
+        },
+    }
+
     def __init__(self):
         self._ratelimit = []
         self.config = loader.ModuleConfig(
@@ -205,14 +214,18 @@ class ApodiktumTTSMod(loader.Module):
             ),  # for MigratorClass
         )
 
-    async def client_ready(self, client, db):
-        self._db = db
-        self._client = client
+    async def client_ready(self):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
+        await self.apo_lib.migrator.auto_migrate_handler(
+            self.__class__.__name__,
+            self.strings("name"),
+            self.changes,
+            self.config["auto_migrate"],
+        )
 
     async def cttscmd(self, message: Message):
         """
