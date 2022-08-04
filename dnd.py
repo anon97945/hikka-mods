@@ -1,4 +1,4 @@
-__version__ = (0, 2, 3)
+__version__ = (0, 2, 4)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -840,9 +840,7 @@ class ApodiktumDNDMod(loader.Module):
 
             if not is_pmbl:
                 user_id = await self.apo_lib.utils.get_user_id(message)
-                chat = await self._client.get_entity(chat_id)
-                user = await self._client.get_entity(user_id)
-                await self.p__afk(chat, user, message)
+                await self.p__afk(chat_id, user_id, message)
             return
         except ValueError as exc:  # skipcq: PYL-W0703
             logger.debug(exc)
@@ -905,23 +903,26 @@ class ApodiktumDNDMod(loader.Module):
 
     async def p__afk(
         self,
-        chat: Union[Chat, int],
-        user: Union[User, int],
+        chat_id: int,
+        user_id: int,
         message: Union[None, Message] = None,
     ) -> bool:
-        if not isinstance(message, Message) or not self.get("status", False):
+        if (
+            not isinstance(message, Message)
+            or not self.get("status", False)
+            or chat_id in self._ratelimit_afk
+        ):
             return
         if getattr(message.to_id, "user_id", None) == self.tg_id:
+            user = await self._client.get_entity(user_id)
             if (
-                user.id in self._ratelimit_afk
+                user_id in self._ratelimit_afk
                 or user.is_self
                 or user.bot
                 or user.verified
             ):
                 return
         elif not message.mentioned:
-            return
-        if chat.id in self._ratelimit_afk:
             return
         now = datetime.datetime.now().replace(microsecond=0)
         gone = datetime.datetime.fromtimestamp(self.get("gone")).replace(microsecond=0)
@@ -968,4 +969,4 @@ class ApodiktumDNDMod(loader.Module):
                 clear_mentions=True,
             )
 
-        self._ratelimit_afk += [chat.id]
+        self._ratelimit_afk += [chat_id]

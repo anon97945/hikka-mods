@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.12
+### 📃 module updates:
+- dnd | reduced api requests
+
 ## 🆕 Version 2.0.11
 ### 📃 module updates:
 - admintools | delete messages via bot
