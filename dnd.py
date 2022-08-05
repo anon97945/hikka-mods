@@ -20,9 +20,6 @@ __version__ = (0, 2, 5)
 #              © Copyright 2022
 #
 #          https://t.me/hikariatama
-#
-# 🔒 Licensed under the GNU AGPLv3
-# 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
 # meta developer: @apodiktum_modules
 # meta banner: https://t.me/file_dumbster/11
