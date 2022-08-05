@@ -1,4 +1,4 @@
-__version__ = (0, 0, 32)
+__version__ = (0, 0, 33)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -20,7 +20,6 @@ __version__ = (0, 0, 32)
 
 # scope: hikka_only
 # scope: hikka_min 1.3.0
-# requires: heroku3
 
 import asyncio
 import logging
@@ -195,7 +194,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
 
     async def client_ready(self):
         platform = utils.get_named_platform()
-        if "Heroku" not in platform:
+        if "DYNO" not in os.environ:
             raise loader.LoadError(self.strings("wrong_platform").format(platform))
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
@@ -216,10 +215,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
         self._herokuid = self._heroku.account().id
 
     async def herousagecmd(self, message: Message):
-        """
-        ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
-        ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Get Heroku Dyno Usage.
-        """
+        """⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Get Heroku Dyno Usage."""
         msg = await utils.answer(
             message,
             self.apo_lib.utils.get_str("get_usage", self.all_strings, message),
@@ -282,11 +278,10 @@ class ApodiktumHerokuManagerMod(loader.Module):
     @loader.owner
     async def herosetcmd(self, message: Message):
         """
-        ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
-        ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Set Heroku Settings Variable.
-        ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .heroset <variable> <some settings>
+        ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬Set Heroku Settings Variable.
+        - Example: .heroset <variable> <some settings>
         """
-        args = utils.get_args_raw(message.message)
+        args = utils.get_args_raw(message)
         if args := str(args).split():
             heroku_var = self._heroku_app.config()
             msg = await utils.answer(
@@ -310,7 +305,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
                 )
             heroku_var[args[0]] = " ".join(args[1:])
             return
-        return await utils.answer(
+        await utils.answer(
             message,
             self.apo_lib.utils.get_str("no_var", self.all_strings, message),
         )
@@ -318,11 +313,10 @@ class ApodiktumHerokuManagerMod(loader.Module):
     @loader.owner
     async def herogetcmd(self, message: Message):
         """
-        ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
-        ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ Get Heroku Settings Variable.
-        ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .heroget <variable>
+        Get Heroku Settings Variable.
+        - Example: .heroget <variable>
         """
-        args = utils.get_args_raw(message.message)
+        args = utils.get_args_raw(message)
         if args := str(args).split():
             if len(args) > 1:
                 return await utils.answer(
@@ -356,11 +350,10 @@ class ApodiktumHerokuManagerMod(loader.Module):
     @loader.owner
     async def herogetallcmd(self, message: Message):
         """
-        ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
-        ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ Get All Heroku Settings Variable. This may leak API!
-        ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .herogetall --force
+        Get All Heroku Settings Variable. This may leak API!
+        - Example: .herogetall --force
         """
-        args = utils.get_args_raw(message.message)
+        args = utils.get_args_raw(message)
         args = str(args).split()
         if args and args[0] == "--force":
             if len(args) > 1:
@@ -391,39 +384,41 @@ class ApodiktumHerokuManagerMod(loader.Module):
     @loader.owner
     async def herodelcmd(self, message: Message):
         """
-        ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
-        ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ Delete Heroku Settings Variable.
-        ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪ ⁭ ⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬   - Example: .herodel <variable>
+        Delete Heroku Settings Variable.
+        - Example: .herodel <variable>
         """
-        args = utils.get_args_raw(message.message)
-        if args := str(args).split():
-            if len(args) > 1:
-                return await utils.answer(
-                    message,
-                    self.apo_lib.utils.get_str("args_error", self.all_strings, message),
-                )
-            heroku_var = self._heroku_app.config()
-            msg = await utils.answer(
+        args = utils.get_args_raw(message)
+        if not (args := str(args).split()):
+            await utils.answer(
                 message,
-                self.apo_lib.utils.get_str("get_var", self.all_strings, message),
+                self.apo_lib.utils.get_str("no_var", self.all_strings, message),
             )
-            await asyncio.sleep(1.5)
-            if args[0] in heroku_var:
-                msg = await utils.answer(
-                    msg,
-                    self.apo_lib.utils.get_str(
-                        "var_deleted", self.all_strings, message
-                    ).format(args[0]),
-                )
-                del heroku_var[args[0]]
-                return
+            return
+
+        if len(args) > 1:
             return await utils.answer(
                 message,
+                self.apo_lib.utils.get_str("args_error", self.all_strings, message),
+            )
+        heroku_var = self._heroku_app.config()
+        msg = await utils.answer(
+            message,
+            self.apo_lib.utils.get_str("get_var", self.all_strings, message),
+        )
+        await asyncio.sleep(1.5)
+        if args[0] in heroku_var:
+            msg = await utils.answer(
+                msg,
                 self.apo_lib.utils.get_str(
-                    "var_not_exists", self.all_strings, message
+                    "var_deleted", self.all_strings, message
                 ).format(args[0]),
             )
-        return await utils.answer(
+            del heroku_var[args[0]]
+            return
+
+        await utils.answer(
             message,
-            self.apo_lib.utils.get_str("no_var", self.all_strings, message),
+            self.apo_lib.utils.get_str(
+                "var_not_exists", self.all_strings, message
+            ).format(args[0]),
         )

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 26)
+__version__ = (0, 0, 27)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -107,9 +107,9 @@ class ApodiktumSaveMessageMod(loader.Module):
                 self.apo_lib.utils.get_str("invalid_link", self.all_strings, message),
             )
         channel_id, msg_id = self.apo_lib.utils.get_ids_from_tglink(args)
-        msgs = await message.client.get_messages(channel_id, ids=msg_id)
-        msgs = await message.client.send_message(self.tg_id, message=msgs)
-        return await utils.answer(
+        msgs = await self._client.get_messages(channel_id, ids=msg_id)
+        msgs = await self._client.send_message(self.tg_id, message=msgs)
+        await utils.answer(
             message,
             self.apo_lib.utils.get_str("done", self.all_strings, message),
         )
@@ -119,14 +119,18 @@ class ApodiktumSaveMessageMod(loader.Module):
         args = utils.get_args_raw(message).lower()
         if not args:
             return
+
         if not self.apo_lib.utils.get_ids_from_tglink(args):
             return await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("invalid_link", self.all_strings, message),
             )
+
         channel_id, msg_id = self.apo_lib.utils.get_ids_from_tglink(args)
-        msgs = await message.client.get_messages(channel_id, ids=msg_id)
-        msgs = await message.client.send_message(
-            utils.get_chat_id(message), message=msgs
+        msgs = await self._client.get_messages(channel_id, ids=msg_id)
+        msgs = await self._client.send_message(
+            utils.get_chat_id(message),
+            message=msgs,
         )
-        return await message.delete()
+
+        await message.delete()

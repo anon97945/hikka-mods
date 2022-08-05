@@ -1,4 +1,4 @@
-__version__ = (0, 0, 32)
+__version__ = (0, 0, 33)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -71,7 +71,7 @@ class ApodiktumLCRMod(loader.Module):
     }
 
     strings_ru = {
-        "_cfg_timeout": "<b>Определите время ожидания кода.</b>",
+        "_cfg_timeout": "<b>Время ожидания кода.</b>",
         "error": "<b>Код входа не найден в сообщении.</b>",
         "no_self": "<b>Вы не можете использовать это на себе.</b>",
         "not_group": "Эта команда только для групп.",
@@ -130,11 +130,13 @@ class ApodiktumLCRMod(loader.Module):
 
     @loader.owner
     async def lcrcmd(self, message: Message):
-        """Available commands:
+        """
+        Available commands:
         .lcr
           - waiting for the login code from TG service chat, use in private.
         .lcr group --force
-          - waiting for the login code from TG service chat, use in group."""
+          - waiting for the login code from TG service chat, use in group.
+        """
 
         user_msg = utils.get_args_raw(message)
         chatid = utils.get_chat_id(message)
@@ -158,7 +160,7 @@ class ApodiktumLCRMod(loader.Module):
                 message,
                 self.apo_lib.utils.get_str("not_group", self.all_strings, message),
             )
-        async with message.client.conversation(tgacc) as conv:
+        async with self._client.conversation(tgacc) as conv:
             try:
                 msgs = await utils.answer(
                     message,
@@ -170,7 +172,7 @@ class ApodiktumLCRMod(loader.Module):
                 )
                 logincode = await logincode
                 logincodemsg = " ".join(
-                    (await message.client.get_messages(tgacc, 1))[0].message
+                    (await self._client.get_messages(tgacc, 1))[0].message
                 )
                 if (
                     logincodemsg is not None
@@ -178,19 +180,17 @@ class ApodiktumLCRMod(loader.Module):
                 ):
                     logincode = True
                 if logincode:
-                    await message.client.send_read_acknowledge(
-                        tgacc, clear_mentions=True
-                    )
-                    await message.client.delete_messages(chatid, msgs)
-                    return await message.client.send_message(chatid, logincodemsg)
-                await message.client.delete_messages(chatid, msgs)
-                return await message.client.send_message(
+                    await self._client.send_read_acknowledge(tgacc, clear_mentions=True)
+                    await self._client.delete_messages(chatid, msgs)
+                    return await self._client.send_message(chatid, logincodemsg)
+                await self._client.delete_messages(chatid, msgs)
+                return await self._client.send_message(
                     chatid,
                     self.apo_lib.utils.get_str("error", self.all_strings, message),
                 )
             except asyncio.TimeoutError:
-                await message.client.delete_messages(chatid, msgs)
-                return await message.client.send_message(
+                await self._client.delete_messages(chatid, msgs)
+                return await self._client.send_message(
                     chatid,
                     self.apo_lib.utils.get_str(
                         "timeouterror", self.all_strings, message

@@ -1,4 +1,4 @@
-__version__ = (1, 0, 52)
+__version__ = (1, 0, 53)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -23,7 +23,7 @@ __version__ = (1, 0, 52)
 
 import asyncio
 import logging
-from typing import Union
+from typing import Optional, Union
 
 from telethon.tl.types import Channel, Chat, Message, User
 
@@ -194,9 +194,9 @@ class ApodiktumAdminToolsMod(loader.Module):
         ),
         "_cmd_doc_gl": (
             "⁭⁫⁪⁫⁬⁭⁫⁪<chatid> <logchannelid>\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  -"
-            " Регистрирует групповой чат на данном канале.\n.gl rem <chatid>\n"
+            " Регистрирует чат логирования для выбранного канала.\n.gl rem <chatid>\n"
             " ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Удаляет данный чат из наблюдателя.\n.gl"
-            " db\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показываеттекущую базу данных.\n.gl"
+            " db\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую базу данных.\n.gl"
             " settings\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Показывает текущую конфигурацию"
             " чата.\n.gl clearall\n ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Очищает базу данных"
             " от Group/Channel Logger.\n"
@@ -251,9 +251,9 @@ class ApodiktumAdminToolsMod(loader.Module):
             "<b>[Grouplogger]</b> Теперь этот модуль выключен во всех чатах.</b>"
         ),
         "no_id": "<b>Ты ввёл не телеграм айди.</b>",
-        "no_int": "<b>Ваш ввод не является целочисленным типом (int)</b>",
+        "no_int": "<b>Введенное значение не является целым числом (int)</b>",
         "not_dc": "<b>Это не групповой чат</b>",
-        "permerror": "<b>Вы не имеете права на удаление сообщений в этом чате</b>",
+        "permerror": "<b>У вас недосточно прав для удаление сообщений в этом чате</b>",
     }
 
     all_strings = {
@@ -371,7 +371,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 message,
                 self.apo_lib.utils.get_str(
                     "bnd_db_string", self.all_strings, message
-                ).format(str(bnd), str(sets)),
+                ).format(bnd, sets),
             )
 
         if message.is_private:
@@ -470,9 +470,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         """
         bcu = self._db.get(self._classname, "bcu", [])
         sets = self._db.get(self._classname, "bcu_sets", {})
-        args = utils.get_args_raw(message).lower()
-        args = str(args).split()
-        chat = await self._client.get_entity(message.chat)
+        args = utils.get_args_raw(message).lower().split()
+        chat = await self._client.get_entity(message.peer_id)
         chatid = chat.id
         chatid_str = str(chatid)
 
@@ -489,7 +488,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 message,
                 self.apo_lib.utils.get_str(
                     "bcu_db_string", self.all_strings, message
-                ).format(str(bcu), str(sets)),
+                ).format(bcu, sets),
             )
 
         if message.is_private:
@@ -584,10 +583,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         """
         gl = self._db.get(self._classname, "gl", [])
         sets = self._db.get(self._classname, "gl_sets", {})
-        args = utils.get_args_raw(message).lower()
-        args = str(args).split()
-        chat = await self._client.get_entity(message.chat)
-        chatid = chat.id
+        args = utils.get_args_raw(message).lower().split()
+        chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)
 
         if not args:
@@ -691,7 +688,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         return await utils.answer(
             message,
             self.apo_lib.utils.get_str("gl_settings", self.all_strings, message).format(
-                str(sets[chatid_str])
+                sets[chatid_str]
             ),
         )
 
@@ -699,25 +696,30 @@ class ApodiktumAdminToolsMod(loader.Module):
         self,
         chat: Chat,
         user: User,
-        message: Union[None, Message] = None,
+        message: Optional[Message] = None,
         bcu: list = None,
         bcu_sets: dict = None,
     ) -> bool:
         chatid_str = str(chat.id)
-        if message.is_private or chatid_str not in bcu or not isinstance(user, Channel):
-            return
-        if (chat.admin_rights or chat.creator) and (
-            not chat.admin_rights.delete_messages or not chat.admin_rights
+        if (
+            message.is_private
+            or chatid_str not in bcu
+            or not isinstance(user, Channel)
+            or (chat.admin_rights or chat.creator)
+            and (not chat.admin_rights.delete_messages or not chat.admin_rights)
         ):
             return
         usertag = await self.apo_lib.utils.get_tag(user, True)
 
         if await self.apo_lib.utils.is_linkedchannel(chat.id, user.id):
             return
-        if message.is_reply:
-            reply = await self.apo_lib.utils.get_first_msg(message)
-        else:
-            reply = None
+
+        reply = (
+            await self.apo_lib.utils.get_first_msg(message)
+            if message.is_reply
+            else None
+        )
+
         if reply and not isinstance(
             await self._client.get_entity(reply.sender_id), Channel
         ):
@@ -765,11 +767,9 @@ class ApodiktumAdminToolsMod(loader.Module):
             message.is_private
             or chatid_str not in bnd
             or not isinstance(user, User)
-            or message.sender_id == self.tg_id
-        ):
-            return
-        if (chat.admin_rights or chat.creator) and (
-            not chat.admin_rights.delete_messages or not chat.admin_rights
+            or message.out
+            or (chat.admin_rights or chat.creator)
+            and (not chat.admin_rights.delete_messages or not chat.admin_rights)
         ):
             return
         usertag = await self.apo_lib.utils.get_tag(user, True)
@@ -822,7 +822,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         self,
         chat: Chat,
         user: User,
-        message: Union[None, Message] = None,
+        message: Optional[Message] = None,
         gl: list = None,
         gl_sets: dict = None,
     ) -> bool:
@@ -837,32 +837,29 @@ class ApodiktumAdminToolsMod(loader.Module):
         )
         try:
             await message.forward_to(logchan_id)
-            await message.client.send_message(logchan_id, link)
+            await self._client.send_message(logchan_id, link)
             return
         except Exception as exc:  # skipcq: PYL-W0703
             if "FORWARDS_RESTRICTED" in str(exc):
-                msgs = await message.client.get_messages(chat.id, ids=message.id)
-                await message.client.send_message(logchan_id, message=msgs)
-                await message.client.send_message(logchan_id, link)
+                msgs = await self._client.get_messages(chat.id, ids=message.id)
+                await self._client.send_message(logchan_id, message=msgs)
+                await self._client.send_message(logchan_id, link)
             return
 
     async def p__admin(
         self,
         chat_id: int,
         user_id: int,
-        message: Union[None, Message] = None,
+        message: Optional[Message] = None,
     ) -> bool:
-        found = False
-        if message.is_private or message.sender_id == self.tg_id:
+        if message.is_private or message.out:
             return
-        if self.config["admin_tag"]:
-            admin_tags = [x.lower() for x in self.config["admin_tag"]]
-            text_list = [x.lower() for x in message.raw_text.split()]
-            for cst_tag in admin_tags:
-                if cst_tag in text_list:
-                    found = True
-                    break
-        if not found:
+
+        text_list = [x.lower() for x in message.raw_text.split()]
+
+        if all(
+            cst_tag.lower() not in text_list for cst_tag in self.config["admin_tag"]
+        ):
             return
 
         chat = await self._client.get_entity(chat_id)
@@ -932,15 +929,9 @@ class ApodiktumAdminToolsMod(loader.Module):
         if str(chat_id) in bnd or str(chat_id) in bcu or str(chat_id) in gl:
             chat = await self._client.get_entity(chat_id)
             user = await self._client.get_entity(user_id)
-            asyncio.get_event_loop().create_task(
-                self.p__gl(chat, user, message, gl, gl_sets)
-            )
-            asyncio.get_event_loop().create_task(
-                self.p__bnd(chat, user, message, bnd, bnd_sets)
-            )
-            asyncio.get_event_loop().create_task(
-                self.p__bcu(chat, user, message, bcu, bcu_sets)
-            )
+            asyncio.ensure_future(self.p__gl(chat, user, message, gl, gl_sets))
+            asyncio.ensure_future(self.p__bnd(chat, user, message, bnd, bnd_sets))
+            asyncio.ensure_future(self.p__bcu(chat, user, message, bcu, bcu_sets))
         if (
             self.config["tag_whitelist"]
             and chat_id not in self.config["admin_tag_chats"]
@@ -948,7 +939,5 @@ class ApodiktumAdminToolsMod(loader.Module):
             not self.config["tag_whitelist"]
             and chat_id in self.config["admin_tag_chats"]
         ):
-            asyncio.get_event_loop().create_task(
-                self.p__admin(chat_id, user_id, message)
-            )
+            asyncio.ensure_future(self.p__admin(chat_id, user_id, message))
         return

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 37)
+__version__ = (0, 0, 38)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -74,16 +74,14 @@ class ApodiktumPMLogMod(loader.Module):
     }
 
     strings_ru = {
-        "_cfg_bots": "Регистрировать ботов или нет",
+        "_cfg_bots": "Логировать ли ботов или нет",
         "_cfg_log_group": "Айди группы или канала для отправки личных сообщений.",
         "_cfg_loglist": "Добавьте айди Telegram, чтобы зарегистрировать их",
         "_cfg_selfdestructive": (
             "Должны ли самоуничтожающиеся медиафайлы регистрироваться или нет."
             " Это нарушает «Условия использования Telegram» (ToS)"
         ),
-        "_cfg_whitelist": (
-            "Является ли список для исключённых (True) или включённых чатов (False)."
-        ),
+        "_cfg_whitelist": "Использовать белый список (True) или черный (False).",
         "_cmd_doc_cpmlog": "Это откроет конфиг для модуля.",
     }
 
@@ -173,27 +171,38 @@ class ApodiktumPMLogMod(loader.Module):
         pmlog_group = self.config["log_group"]
         pmlog_destr = self.config["log_self_destr"]
         chat = await self._client.get_entity(utils.get_chat_id(message))
-        if chat.bot and not pmlog_bot or chat.id == self.tg_id or pmlog_group is None:
+
+        if chat.bot and not pmlog_bot or not pmlog_group or chat.id == self.tg_id:
             return
+
         chatidindb = utils.get_chat_id(message) in (self.config["logs_list"] or [])
-        if pmlog_whitelist and chatidindb or not pmlog_whitelist and not chatidindb:
+
+        if (
+            pmlog_whitelist
+            and chatidindb
+            or not pmlog_whitelist
+            and not chatidindb
+            or not pmlog_group
+        ):
             return
-        if pmlog_group:
-            link = f"Chat: {await self.apo_lib.utils.get_tag(chat)}\n#ID_{chat.id}"
-            try:
-                await message.forward_to(pmlog_group)
-                await message.client.send_message(pmlog_group, link)
+
+        link = f"Chat: {await self.apo_lib.utils.get_tag(chat)}\n#ID_{chat.id}"
+        try:
+            await message.forward_to(pmlog_group)
+            await self._client.send_message(pmlog_group, link)
+        except MessageIdInvalidError:
+            if not message.file or not pmlog_destr:
                 return
-            except MessageIdInvalidError:
-                if not message.file or not pmlog_destr:
-                    return
-                file = BytesIO()
-                caption = f"{message.text}\n\n{link}"
-                await message.client.download_file(message, file)
-                file.name = (
-                    message.file.name or f"{message.file.media.id}{message.file.ext}"
-                )
-                file.seek(0)
-                await message.client.send_file(
-                    pmlog_group, file, force_document=True, caption=caption
-                )
+            file = BytesIO()
+            caption = f"{utils.escape_html(message.text)}\n\n{link}"
+            await self._client.download_file(message, file)
+            file.name = (
+                message.file.name or f"{message.file.media.id}{message.file.ext}"
+            )
+            file.seek(0)
+            await self._client.send_file(
+                pmlog_group,
+                file,
+                force_document=True,
+                caption=caption,
+            )

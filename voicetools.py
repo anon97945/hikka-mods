@@ -1,4 +1,4 @@
-__version__ = (1, 0, 27)
+__version__ = (1, 0, 28)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -18,14 +18,15 @@ __version__ = (1, 0, 27)
 # meta banner: https://t.me/file_dumbster/11
 # meta pic: https://t.me/file_dumbster/13
 
+# scope: ffmpeg
 # scope: hikka_only
 # scope: hikka_min 1.3.0
 # requires: numpy scipy noisereduce soundfile pyrubberband
 
+import asyncio
+import io
 import logging
 import os
-import subprocess
-from io import BytesIO
 
 import noisereduce as nr
 import numpy as np
@@ -40,18 +41,18 @@ from .. import loader, utils
 logger = logging.getLogger(__name__)
 
 
-async def getchattype(message):
-    chattype = ""
+async def getchattype(message: Message) -> str:
     if message.is_group:
-        chattype = "supergroup" if message.is_channel else "smallgroup"
-    elif message.is_channel:
-        chattype = "channel"
-    elif message.is_private:
-        chattype = "private"
-    return chattype
+        return "supergroup" if message.is_channel else "smallgroup"
+
+    if message.is_channel:
+        return "channel"
+
+    if message.is_private:
+        return "private"
 
 
-def represents_nr(nr_lvl):
+def represents_nr(nr_lvl: str) -> bool:
     try:
         float(nr_lvl)
         return 0.01 <= float(nr_lvl) <= 1
@@ -59,7 +60,7 @@ def represents_nr(nr_lvl):
         return False
 
 
-def represents_pitch(pitch_lvl):
+def represents_pitch(pitch_lvl: str) -> bool:
     try:
         float(pitch_lvl)
         return -18 <= float(pitch_lvl) <= 18
@@ -67,7 +68,7 @@ def represents_pitch(pitch_lvl):
         return False
 
 
-def represents_speed(s):
+def represents_speed(s: str) -> bool:
     try:
         float(s)
         return 0.25 <= float(s) <= 3
@@ -75,7 +76,7 @@ def represents_speed(s):
         return False
 
 
-def represents_gain(s):
+def represents_gain(s: str) -> bool:
     try:
         float(s)
         return -10 <= float(s) <= 10
@@ -83,107 +84,130 @@ def represents_gain(s):
         return False
 
 
-async def audiohandler(bytes_io_file, fn, fe, new_fe, ac, codec):
-    # return bytes_io_file, fn, fe, new_fe
+async def audiohandler(
+    bytes_io_file: io.self._client,
+    filename: str,
+    file_ext: str,
+    new_file_ext: str,
+    channels: int,
+    codec: str,
+) -> tuple:
     bytes_io_file.seek(0)
-    bytes_io_file.name = fn + fe
-    out = fn + new_fe
-    if fe != new_fe:
-        new_fe_nodot = new_fe[1:]
-        with open(fn + fe, "wb") as f:
+    bytes_io_file.name = filename + file_ext
+    out = filename + new_file_ext
+    if file_ext != new_file_ext:
+        new_fe_nodot = new_file_ext[1:]
+
+        with open(filename + file_ext, "wb") as f:
             f.write(bytes_io_file.getbuffer())
+
         bytes_io_file.seek(0)
-        subprocess.call(
-            [
-                "ffmpeg",
-                "-y",
-                "-i",
-                fn + fe,
-                "-c:a",
-                codec,
-                "-f",
-                new_fe_nodot,
-                "-ar",
-                "48000",
-                "-b:a",
-                "320k",
-                "-ac",
-                ac,
-                out,
-            ]
+
+        sproc = await asyncio.create_subprocess_shell(
+            f"ffmpeg -y -i {filename + file_ext} -c:a {codec} -f {new_fe_nodot} -ar"
+            f" 48000 -b:a 320k -ac {channels} {out}",
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            cwd=utils.get_base_dir(),
         )
+
+        await sproc.communicate()
+
         with open(out, "rb") as f:
-            bytes_io_file = BytesIO(f.read())
+            bytes_io_file = io.BytesIO(f.read())
+
         bytes_io_file.seek(0)
-        _, new_fe = os.path.splitext(out)
+        _, new_file_ext = os.path.splitext(out)
+
     if os.path.exists(out):
         os.remove(out)
-    if os.path.exists(fn + fe):
-        os.remove(fn + fe)
-    return bytes_io_file, fn, new_fe
+
+    if os.path.exists(filename + file_ext):
+        os.remove(filename + file_ext)
+
+    return bytes_io_file, filename, new_file_ext
 
 
-async def audiopitcher(bytes_io_file, fn, fe, pitch_lvl):
-    # return bytes_io_file, fn, fe, pitch_lvl
+async def audiopitcher(
+    bytes_io_file: io.BytesIO,
+    filename: str,
+    file_ext: str,
+    pitch_lvl: float,
+) -> tuple:
     bytes_io_file.seek(0)
-    bytes_io_file.name = fn + fe
-    format_ext = fe[1:]
+    bytes_io_file.name = filename + file_ext
+    format_ext = file_ext[1:]
     y, sr = soundfile.read(bytes_io_file)
     y_shift = pyrubberband.pitch_shift(y, sr, pitch_lvl)
     bytes_io_file.seek(0)
     soundfile.write(bytes_io_file, y_shift, sr, format=format_ext)
     bytes_io_file.seek(0)
-    bytes_io_file.name = fn + fe
-    return bytes_io_file, fn, fe
+    bytes_io_file.name = filename + file_ext
+    return bytes_io_file, filename, file_ext
 
 
-async def audiodenoiser(bytes_io_file, fn, fe, nr_lvl):
-    # return bytes_io_file, fn, fe, nr_lvl
+async def audiodenoiser(
+    bytes_io_file: io.BytesIO,
+    filename: str,
+    file_ext: str,
+    nr_lvl: float,
+) -> tuple:
     bytes_io_file.seek(0)
-    bytes_io_file.name = fn + fe
+    bytes_io_file.name = filename + file_ext
     rate, data = wavfile.read(bytes_io_file)
     reduced_noise = nr.reduce_noise(
-        y=data, sr=rate, prop_decrease=nr_lvl, stationary=False
+        y=data,
+        sr=rate,
+        prop_decrease=nr_lvl,
+        stationary=False,
     )
     wavfile.write(bytes_io_file, rate, reduced_noise)
-    fn, fe = os.path.splitext(bytes_io_file.name)
-    fn, fe = os.path.splitext(bytes_io_file.name)
-    return bytes_io_file, fn, fe
+    filename, file_ext = os.path.splitext(bytes_io_file.name)
+    return bytes_io_file, filename, file_ext
 
 
-async def audionormalizer(bytes_io_file, fn, fe, gain):
-    # return bytes_io_file, fn, fe
+async def audionormalizer(
+    bytes_io_file: io.BytesIO,
+    filename: str,
+    file_ext: str,
+    gain: float,
+) -> tuple:
     bytes_io_file.seek(0)
-    bytes_io_file.name = fn + fe
-    format_ext = fe[1:]
+    bytes_io_file.name = filename + file_ext
+    format_ext = file_ext[1:]
     rawsound = AudioSegment.from_file(bytes_io_file, format_ext)
     normalizedsound = effects.normalize(rawsound)
     normalizedsound = normalizedsound + gain
     bytes_io_file.seek(0)
     normalizedsound.export(bytes_io_file, format=format_ext)
-    bytes_io_file.name = fn + fe
-    fn, fe = os.path.splitext(bytes_io_file.name)
-    return bytes_io_file, fn, fe
+    bytes_io_file.name = filename + file_ext
+    filename, file_ext = os.path.splitext(bytes_io_file.name)
+    return bytes_io_file, filename, file_ext
 
 
-async def audiospeedup(bytes_io_file, fn, fe, speed):
+async def audiospeedup(
+    bytes_io_file: io.BytesIO,
+    filename: str,
+    file_ext: str,
+    speed: float,
+) -> tuple:
     bytes_io_file.seek(0)
-    bytes_io_file.name = fn + fe
-    format_ext = fe[1:]
+    bytes_io_file.name = filename + file_ext
+    format_ext = file_ext[1:]
     y, sr = soundfile.read(bytes_io_file)
     y_stretch = pyrubberband.time_stretch(y, sr, speed)
     bytes_io_file.seek(0)
     soundfile.write(bytes_io_file, y_stretch, sr, format=format_ext)
     bytes_io_file.seek(0)
-    bytes_io_file.name = fn + fe
-    return bytes_io_file, fn, fe
+    bytes_io_file.name = filename + file_ext
+    return bytes_io_file, filename, file_ext
 
 
-async def dalekvoice(bytes_io_file, fn, fe):
-    # return bytes_io_file, fn, fe
+async def dalekvoice(bytes_io_file: io.BytesIO, filename: str, file_ext: str) -> tuple:
     bytes_io_file.seek(0)
-    bytes_io_file.name = fn + fe
-    format_ext = fe[1:]
+    bytes_io_file.name = filename + file_ext
+    format_ext = file_ext[1:]
 
     sound = AudioSegment.from_wav(bytes_io_file)
     sound = sound.set_channels(2)
@@ -195,7 +219,7 @@ async def dalekvoice(bytes_io_file, fn, fe):
     LOOKUP_SAMPLES = 1024
     MOD_F = 50
 
-    def diode_lookup(n_samples):
+    def diode_lookup(n_samples: int) -> np.ndarray:
         result = np.zeros((n_samples,))
         for i in range(n_samples):
             v = float(i - float(n_samples) / 2) / (n_samples / 2)
@@ -228,9 +252,9 @@ async def dalekvoice(bytes_io_file, fn, fe):
     result /= np.max(np.abs(result))
     result *= scaler
     wavfile.write(bytes_io_file, rate, result.astype(np.int16))
-    bytes_io_file.name = fn + fe
-    fn, fe = os.path.splitext(bytes_io_file.name)
-    return bytes_io_file, fn, fe
+    bytes_io_file.name = filename + file_ext
+    filename, file_ext = os.path.splitext(bytes_io_file.name)
+    return bytes_io_file, filename, file_ext
 
 
 class Waveshaper:
@@ -238,7 +262,7 @@ class Waveshaper:
         self.curve = curve
         self.n_bins = self.curve.shape[0]
 
-    def transform(self, samples):
+    def transform(self, samples: int) -> np.ndarray:
         # normalize to 0 < samples < 2
         max_val = np.max(np.abs(samples))
         if max_val >= 1.0:
@@ -440,15 +464,15 @@ class ApodiktumVoiceToolsMod(loader.Module):
         ),
         "makewaves_txt": "<b>[VoiceTools] Речевые волны применяются.</b>",
         "no_nr": (
-            "<b>[VoiceTools]</b> Ваш ввод является неподдерживаемым уровнем"
+            "<b>[VoiceTools]</b> Введенное значение не является поддерживаемым уровнем"
             " шумоподавления."
         ),
         "no_pitch": (
-            "<b>[VoiceTools]</b> Ваш ввод является неподдерживаемым уровнем"
+            "<b>[VoiceTools]</b> Введенное значение не является поддерживаемым уровнем"
             " высоты тона."
         ),
         "no_speed": (
-            "<b>[VoiceTools]</b> Ваш ввод является неподдерживаемым уровнем"
+            "<b>[VoiceTools]</b> Введенное значение не является поддерживаемым уровнем"
             " скорости звука."
         ),
         "norm_start": "<b>[VoiceTools]</b> Активирована автонормализация голоса.",
@@ -574,47 +598,53 @@ class ApodiktumVoiceToolsMod(loader.Module):
             filename_new = filename.replace(ext, "")
         gain_lvl = 0
         nr_lvl = self.config["nr_lvl"]
-        file = BytesIO()
+        file = io.BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(
             message=message,
             text=self.apo_lib.utils.get_str("downloading", self.all_strings, message),
             reply_markup={"text": "\u0020\u2800", "callback": "empty"},
         )
-        await message.client.download_file(replymsg, file)
+        await self._client.download_file(replymsg, file)
         file.name = filename_new + ext
-        fn, fe = os.path.splitext(file.name)
+        filename, file_ext = os.path.splitext(file.name)
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiohandler_txt", self.all_strings, message),
         )
-        file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".wav", "1", "pcm_s16le"
+        )
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiodenoiser_txt", self.all_strings, message),
         )
-        file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
+        file, filename, file_ext = await audiodenoiser(file, filename, file_ext, nr_lvl)
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiovolume_txt", self.all_strings, message),
         )
-        file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
+        file, filename, file_ext = await audionormalizer(
+            file, filename, file_ext, gain_lvl
+        )
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("dalekvoice_txt", self.all_strings, message),
         )
-        file, fn, fe = await dalekvoice(file, fn, fe)
+        file, filename, file_ext = await dalekvoice(file, filename, file_ext)
         file.seek(0)
         if SendAsVoice:
             inline_msg = await utils.answer(
                 inline_msg,
                 self.apo_lib.utils.get_str("makewaves_txt", self.all_strings, message),
             )
-            file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
+            file, filename, file_ext = await audiohandler(
+                file, filename, file_ext, ".ogg", "2", "libopus"
+            )
         else:
             inline_msg = await utils.answer(
                 inline_msg,
@@ -622,14 +652,16 @@ class ApodiktumVoiceToolsMod(loader.Module):
                     "audiohandler_txt", self.all_strings, message
                 ),
             )
-            file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
+            file, filename, file_ext = await audiohandler(
+                file, filename, file_ext, ext, "1", "libmp3lame"
+            )
         file.seek(0)
-        file.name = fn + fe
+        file.name = filename + file_ext
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("uploading", self.all_strings, message),
         )
-        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await self._client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtanoncmd(self, message):
@@ -653,7 +685,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         else:
             filename_new = filename.replace(ext, "")
         gain_lvl = 0
-        file = BytesIO()
+        file = io.BytesIO()
         file.name = replymsg.file.name
         nr_lvl = 0.8
         pitch_lvl = -4.5
@@ -662,42 +694,50 @@ class ApodiktumVoiceToolsMod(loader.Module):
             text=self.apo_lib.utils.get_str("downloading", self.all_strings, message),
             reply_markup={"text": "\u0020\u2800", "callback": "empty"},
         )
-        await message.client.download_file(replymsg, file)
+        await self._client.download_file(replymsg, file)
         file.name = filename_new + ext
-        fn, fe = os.path.splitext(file.name)
+        filename, file_ext = os.path.splitext(file.name)
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiohandler_txt", self.all_strings, message),
         )
-        file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".wav", "1", "pcm_s16le"
+        )
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiodenoiser_txt", self.all_strings, message),
         )
-        file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
+        file, filename, file_ext = await audiodenoiser(file, filename, file_ext, nr_lvl)
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiovolume_txt", self.all_strings, message),
         )
-        file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
+        file, filename, file_ext = await audionormalizer(
+            file, filename, file_ext, gain_lvl
+        )
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("dalekvoice_txt", self.all_strings, message),
         )
-        file, fn, fe = await dalekvoice(file, fn, fe)
+        file, filename, file_ext = await dalekvoice(file, filename, file_ext)
         file.seek(0)
-        file, fn, fe = await audiopitcher(file, fn, fe, pitch_lvl)
+        file, filename, file_ext = await audiopitcher(
+            file, filename, file_ext, pitch_lvl
+        )
         file.seek(0)
         if SendAsVoice:
             inline_msg = await utils.answer(
                 inline_msg,
                 self.apo_lib.utils.get_str("makewaves_txt", self.all_strings, message),
             )
-            file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
+            file, filename, file_ext = await audiohandler(
+                file, filename, file_ext, ".ogg", "2", "libopus"
+            )
         else:
             inline_msg = await utils.answer(
                 inline_msg,
@@ -705,14 +745,16 @@ class ApodiktumVoiceToolsMod(loader.Module):
                     "audiohandler_txt", self.all_strings, message
                 ),
             )
-            file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
+            file, filename, file_ext = await audiohandler(
+                file, filename, file_ext, ext, "1", "libmp3lame"
+            )
         file.seek(0)
-        file.name = fn + fe
+        file.name = filename + file_ext
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("uploading", self.all_strings, message),
         )
-        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await self._client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtpitchcmd(self, message):
@@ -744,43 +786,53 @@ class ApodiktumVoiceToolsMod(loader.Module):
         else:
             filename_new = filename.replace(ext, "")
         gain_lvl = 0
-        file = BytesIO()
+        file = io.BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(
             message=message,
             text=self.apo_lib.utils.get_str("downloading", self.all_strings, message),
             reply_markup={"text": "\u0020\u2800", "callback": "empty"},
         )
-        await message.client.download_file(replymsg, file)
+        await self._client.download_file(replymsg, file)
         file.name = filename_new + ext
-        fn, fe = os.path.splitext(file.name)
+        filename, file_ext = os.path.splitext(file.name)
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiohandler_txt", self.all_strings, message),
         )
-        file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".mp3", "1", "libmp3lame"
+        )
         file.seek(0)
-        file, fn, fe = await audiohandler(file, fn, fe, ".flac", "1", "flac")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".flac", "1", "flac"
+        )
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("pitch_txt", self.all_strings, message),
         )
-        file, fn, fe = await audiopitcher(file, fn, fe, float(pitch_lvl))
+        file, filename, file_ext = await audiopitcher(
+            file, filename, file_ext, float(pitch_lvl)
+        )
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiovolume_txt", self.all_strings, message),
         )
-        file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
+        file, filename, file_ext = await audionormalizer(
+            file, filename, file_ext, gain_lvl
+        )
         file.seek(0)
         if SendAsVoice:
             inline_msg = await utils.answer(
                 inline_msg,
                 self.apo_lib.utils.get_str("makewaves_txt", self.all_strings, message),
             )
-            file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
+            file, filename, file_ext = await audiohandler(
+                file, filename, file_ext, ".ogg", "2", "libopus"
+            )
         else:
             inline_msg = await utils.answer(
                 inline_msg,
@@ -788,14 +840,16 @@ class ApodiktumVoiceToolsMod(loader.Module):
                     "audiohandler_txt", self.all_strings, message
                 ),
             )
-            file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
+            file, filename, file_ext = await audiohandler(
+                file, filename, file_ext, ext, "1", "libmp3lame"
+            )
         file.seek(0)
-        file.name = fn + fe
+        file.name = filename + file_ext
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("uploading", self.all_strings, message),
         )
-        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await self._client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtspeedcmd(self, message):
@@ -827,43 +881,53 @@ class ApodiktumVoiceToolsMod(loader.Module):
         else:
             filename_new = filename.replace(ext, "")
         gain_lvl = 0
-        file = BytesIO()
+        file = io.BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(
             message=message,
             text=self.apo_lib.utils.get_str("downloading", self.all_strings, message),
             reply_markup={"text": "\u0020\u2800", "callback": "empty"},
         )
-        await message.client.download_file(replymsg, file)
+        await self._client.download_file(replymsg, file)
         file.name = filename_new + ext
-        fn, fe = os.path.splitext(file.name)
+        filename, file_ext = os.path.splitext(file.name)
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiohandler_txt", self.all_strings, message),
         )
-        file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".mp3", "1", "libmp3lame"
+        )
         file.seek(0)
-        file, fn, fe = await audiohandler(file, fn, fe, ".flac", "1", "flac")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".flac", "1", "flac"
+        )
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("speed_txt", self.all_strings, message),
         )
-        file, fn, fe = await audiospeedup(file, fn, fe, float(speed_lvl))
+        file, filename, file_ext = await audiospeedup(
+            file, filename, file_ext, float(speed_lvl)
+        )
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiovolume_txt", self.all_strings, message),
         )
-        file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
+        file, filename, file_ext = await audionormalizer(
+            file, filename, file_ext, gain_lvl
+        )
         file.seek(0)
         if SendAsVoice:
             inline_msg = await utils.answer(
                 inline_msg,
                 self.apo_lib.utils.get_str("makewaves_txt", self.all_strings, message),
             )
-            file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
+            file, filename, file_ext = await audiohandler(
+                file, filename, file_ext, ".ogg", "2", "libopus"
+            )
         else:
             inline_msg = await utils.answer(
                 inline_msg,
@@ -871,14 +935,16 @@ class ApodiktumVoiceToolsMod(loader.Module):
                     "audiohandler_txt", self.all_strings, message
                 ),
             )
-            file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
+            file, filename, file_ext = await audiohandler(
+                file, filename, file_ext, ext, "1", "libmp3lame"
+            )
         file.seek(0)
-        file.name = fn + fe
+        file.name = filename + file_ext
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("uploading", self.all_strings, message),
         )
-        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await self._client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtgaincmd(self, message):
@@ -909,37 +975,45 @@ class ApodiktumVoiceToolsMod(loader.Module):
             filename_new = filename.replace(".ogg", "")
         else:
             filename_new = filename.replace(ext, "")
-        file = BytesIO()
+        file = io.BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(
             message=message,
             text=self.apo_lib.utils.get_str("downloading", self.all_strings, message),
             reply_markup={"text": "\u0020\u2800", "callback": "empty"},
         )
-        await message.client.download_file(replymsg, file)
+        await self._client.download_file(replymsg, file)
         file.name = filename_new + ext
-        fn, fe = os.path.splitext(file.name)
+        filename, file_ext = os.path.splitext(file.name)
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiohandler_txt", self.all_strings, message),
         )
-        file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".mp3", "1", "libmp3lame"
+        )
         file.seek(0)
-        file, fn, fe = await audiohandler(file, fn, fe, ".flac", "1", "flac")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".flac", "1", "flac"
+        )
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiovolume_txt", self.all_strings, message),
         )
-        file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
+        file, filename, file_ext = await audionormalizer(
+            file, filename, file_ext, gain_lvl
+        )
         file.seek(0)
         if SendAsVoice:
             inline_msg = await utils.answer(
                 inline_msg,
                 self.apo_lib.utils.get_str("makewaves_txt", self.all_strings, message),
             )
-            file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
+            file, filename, file_ext = await audiohandler(
+                file, filename, file_ext, ".ogg", "2", "libopus"
+            )
         else:
             inline_msg = await utils.answer(
                 inline_msg,
@@ -947,14 +1021,16 @@ class ApodiktumVoiceToolsMod(loader.Module):
                     "audiohandler_txt", self.all_strings, message
                 ),
             )
-            file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
+            file, filename, file_ext = await audiohandler(
+                file, filename, file_ext, ext, "1", "libmp3lame"
+            )
         file.seek(0)
-        file.name = fn + fe
+        file.name = filename + file_ext
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("uploading", self.all_strings, message),
         )
-        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await self._client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtenhcmd(self, message):
@@ -981,43 +1057,51 @@ class ApodiktumVoiceToolsMod(loader.Module):
             filename_new = filename.replace(".ogg", "")
         else:
             filename_new = filename.replace(ext, "")
-        file = BytesIO()
+        file = io.BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(
             message=message,
             text=self.apo_lib.utils.get_str("downloading", self.all_strings, message),
             reply_markup={"text": "\u0020\u2800", "callback": "empty"},
         )
-        await message.client.download_file(replymsg, file)
+        await self._client.download_file(replymsg, file)
         file.name = filename_new + ext
-        fn, fe = os.path.splitext(file.name)
+        filename, file_ext = os.path.splitext(file.name)
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiohandler_txt", self.all_strings, message),
         )
-        file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".mp3", "1", "libmp3lame"
+        )
         file.seek(0)
-        file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".wav", "1", "pcm_s16le"
+        )
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiodenoiser_txt", self.all_strings, message),
         )
-        file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
+        file, filename, file_ext = await audiodenoiser(file, filename, file_ext, nr_lvl)
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiovolume_txt", self.all_strings, message),
         )
-        file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
+        file, filename, file_ext = await audionormalizer(
+            file, filename, file_ext, gain_lvl
+        )
         file.seek(0)
         if SendAsVoice:
             inline_msg = await utils.answer(
                 inline_msg,
                 self.apo_lib.utils.get_str("makewaves_txt", self.all_strings, message),
             )
-            file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
+            file, filename, file_ext = await audiohandler(
+                file, filename, file_ext, ".ogg", "2", "libopus"
+            )
         else:
             inline_msg = await utils.answer(
                 inline_msg,
@@ -1025,14 +1109,16 @@ class ApodiktumVoiceToolsMod(loader.Module):
                     "audiohandler_txt", self.all_strings, message
                 ),
             )
-            file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
+            file, filename, file_ext = await audiohandler(
+                file, filename, file_ext, ext, "1", "libmp3lame"
+            )
         file.seek(0)
-        file.name = fn + fe
+        file.name = filename + file_ext
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("uploading", self.all_strings, message),
         )
-        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await self._client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtnormcmd(self, message):
@@ -1056,37 +1142,45 @@ class ApodiktumVoiceToolsMod(loader.Module):
         else:
             filename_new = filename.replace(ext, "")
         gain_lvl = 0
-        file = BytesIO()
+        file = io.BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(
             message=message,
             text=self.apo_lib.utils.get_str("downloading", self.all_strings, message),
             reply_markup={"text": "\u0020\u2800", "callback": "empty"},
         )
-        await message.client.download_file(replymsg, file)
+        await self._client.download_file(replymsg, file)
         file.name = filename_new + ext
-        fn, fe = os.path.splitext(file.name)
+        filename, file_ext = os.path.splitext(file.name)
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiohandler_txt", self.all_strings, message),
         )
-        file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".mp3", "1", "libmp3lame"
+        )
         file.seek(0)
-        file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".wav", "1", "pcm_s16le"
+        )
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiovolume_txt", self.all_strings, message),
         )
-        file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
+        file, filename, file_ext = await audionormalizer(
+            file, filename, file_ext, gain_lvl
+        )
         file.seek(0)
         if SendAsVoice:
             inline_msg = await utils.answer(
                 inline_msg,
                 self.apo_lib.utils.get_str("makewaves_txt", self.all_strings, message),
             )
-            file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
+            file, filename, file_ext = await audiohandler(
+                file, filename, file_ext, ".ogg", "2", "libopus"
+            )
         else:
             inline_msg = await utils.answer(
                 inline_msg,
@@ -1094,14 +1188,16 @@ class ApodiktumVoiceToolsMod(loader.Module):
                     "audiohandler_txt", self.all_strings, message
                 ),
             )
-            file, fn, fe = await audiohandler(file, fn, fe, ext, "1", "libmp3lame")
+            file, filename, file_ext = await audiohandler(
+                file, filename, file_ext, ext, "1", "libmp3lame"
+            )
         file.seek(0)
-        file.name = fn + fe
+        file.name = filename + file_ext
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("uploading", self.all_strings, message),
         )
-        await message.client.send_file(chatid, file, voice_note=SendAsVoice)
+        await self._client.send_file(chatid, file, voice_note=SendAsVoice)
         await inline_msg.delete()
 
     async def vtmp3cmd(self, message: Message):
@@ -1122,29 +1218,31 @@ class ApodiktumVoiceToolsMod(loader.Module):
             filename_new = filename.replace(".ogg", "")
         else:
             filename_new = filename.replace(ext, "")
-        file = BytesIO()
+        file = io.BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(
             message=message,
             text=self.apo_lib.utils.get_str("downloading", self.all_strings, message),
             reply_markup={"text": "\u0020\u2800", "callback": "empty"},
         )
-        await message.client.download_file(replymsg, file)
+        await self._client.download_file(replymsg, file)
         file.name = filename_new + ext
-        fn, fe = os.path.splitext(file.name)
+        filename, file_ext = os.path.splitext(file.name)
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("audiohandler_txt", self.all_strings, message),
         )
-        file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".mp3", "1", "libmp3lame"
+        )
         file.seek(0)
-        file.name = fn + fe
+        file.name = filename + file_ext
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("uploading", self.all_strings, message),
         )
-        await message.client.send_file(chatid, file, voice_note=False)
+        await self._client.send_file(chatid, file, voice_note=False)
         await inline_msg.delete()
 
     async def vtspeechcmd(self, message):
@@ -1165,29 +1263,31 @@ class ApodiktumVoiceToolsMod(loader.Module):
             filename_new = filename.replace(".ogg", "")
         else:
             filename_new = filename.replace(ext, "")
-        file = BytesIO()
+        file = io.BytesIO()
         file.name = replymsg.file.name
         inline_msg = await self.inline.form(
             message=message,
             text=self.apo_lib.utils.get_str("downloading", self.all_strings, message),
             reply_markup={"text": "\u0020\u2800", "callback": "empty"},
         )
-        await message.client.download_file(replymsg, file)
+        await self._client.download_file(replymsg, file)
         file.name = filename_new + ext
-        fn, fe = os.path.splitext(file.name)
+        filename, file_ext = os.path.splitext(file.name)
         file.seek(0)
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("makewaves_txt", self.all_strings, message),
         )
-        file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".ogg", "2", "libopus"
+        )
         file.seek(0)
-        file.name = fn + fe
+        file.name = filename + file_ext
         inline_msg = await utils.answer(
             inline_msg,
             self.apo_lib.utils.get_str("uploading", self.all_strings, message),
         )
-        await message.client.send_file(chatid, file, voice_note=True)
+        await self._client.send_file(chatid, file, voice_note=True)
         await inline_msg.delete()
 
     async def vtautodalekcmd(self, message):
@@ -1520,10 +1620,10 @@ class ApodiktumVoiceToolsMod(loader.Module):
             nr_lvl = 0.8
             pitch_lvl = -4.5
         msgs = await message.forward_to(self.tg_id)
-        await message.client.delete_messages(chatid, message)
-        file = BytesIO()
+        await self._client.delete_messages(chatid, message)
+        file = io.BytesIO()
         file.name = msgs.file.name
-        await message.client.download_file(msgs, file)
+        await self._client.download_file(msgs, file)
         filename = msgs.file.name or "voice"
         ext = msgs.file.ext
         if ext == ".oga":
@@ -1532,20 +1632,26 @@ class ApodiktumVoiceToolsMod(loader.Module):
         else:
             filename_new = filename.replace(ext, "")
         file.seek(0)
-        await message.client.delete_messages(self.tg_id, msgs)
+        await self._client.delete_messages(self.tg_id, msgs)
         file.name = filename_new + ext
-        fn, fe = os.path.splitext(file.name)
+        filename, file_ext = os.path.splitext(file.name)
         file.seek(0)
-        file, fn, fe = await audiohandler(file, fn, fe, ".mp3", "1", "libmp3lame")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".mp3", "1", "libmp3lame"
+        )
         file.seek(0)
-        file, fn, fe = await audiohandler(file, fn, fe, ".wav", "1", "pcm_s16le")
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".wav", "1", "pcm_s16le"
+        )
         file.seek(0)
         if (
             chatid_str in nr_chats
             or chatid_str in vcanon_chats
             or chatid_str in dalek_chats
         ):
-            file, fn, fe = await audiodenoiser(file, fn, fe, nr_lvl)
+            file, filename, file_ext = await audiodenoiser(
+                file, filename, file_ext, nr_lvl
+            )
             file.seek(0)
         if (
             chatid_str in norm_chats
@@ -1553,23 +1659,29 @@ class ApodiktumVoiceToolsMod(loader.Module):
             or chatid_str in dalek_chats
             or chatid_str in gain_chats
         ):
-            file, fn, fe = await audionormalizer(file, fn, fe, gain_lvl)
+            file, filename, file_ext = await audionormalizer(
+                file, filename, file_ext, gain_lvl
+            )
             file.seek(0)
         if chatid_str in dalek_chats or chatid_str in vcanon_chats:
-            file, fn, fe = await dalekvoice(file, fn, fe)
+            file, filename, file_ext = await dalekvoice(file, filename, file_ext)
             file.seek(0)
         if chatid_str in pitch_chats or chatid_str in vcanon_chats:
-            file, fn, fe = await audiopitcher(file, fn, fe, pitch_lvl)
+            file, filename, file_ext = await audiopitcher(
+                file, filename, file_ext, pitch_lvl
+            )
             file.seek(0)
         if chatid_str in speed_chats:
-            file, fn, fe = await audiospeedup(file, fn, fe, speed_lvl)
-            file.seek(0)
-        file, fn, fe = await audiohandler(file, fn, fe, ".ogg", "2", "libopus")
-        file.seek(0)
-        file.name = fn + fe
-        if reply:
-            await message.client.send_file(
-                chatid, file, voice_note=True, reply_to=reply
+            file, filename, file_ext = await audiospeedup(
+                file, filename, file_ext, speed_lvl
             )
+            file.seek(0)
+        file, filename, file_ext = await audiohandler(
+            file, filename, file_ext, ".ogg", "2", "libopus"
+        )
+        file.seek(0)
+        file.name = filename + file_ext
+        if reply:
+            await self._client.send_file(chatid, file, voice_note=True, reply_to=reply)
         else:
-            await message.client.send_file(chatid, file, voice_note=True)
+            await self._client.send_file(chatid, file, voice_note=True)

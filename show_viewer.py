@@ -1,4 +1,4 @@
-__version__ = (0, 0, 24)
+__version__ = (0, 0, 25)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -66,7 +66,7 @@ class ApodiktumShowViewsMod(loader.Module):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "channel",
-                "None",
+                None,
                 lambda: self.strings("_cfg_cst_channel"),
                 validator=loader.validators.Union(
                     loader.validators.TelegramID(),
@@ -115,14 +115,20 @@ class ApodiktumShowViewsMod(loader.Module):
                 self.apo_lib.utils.get_str("no_args", self.all_strings, message),
             )
             return
+
         await message.delete()
-        if message.is_reply and msg.sender_id == self.tg_id:
+
+        if message.is_reply and msg.out:
             await msg.delete()
-        if msg:
-            msg = await message.client.send_message(self.config["channel"], msg)
-        else:
-            msg = await message.client.send_message(self.config["channel"], args)
+
+        msg = (
+            await self._client.send_message(self.config["channel"], msg)
+            if msg
+            else await self._client.send_message(self.config["channel"], args)
+        )
+
         await msg.forward_to(chat_id)
+
         if msg.out:
             await msg.delete()
 
@@ -138,7 +144,9 @@ class ApodiktumShowViewsMod(loader.Module):
                 self.apo_lib.utils.get_str("no_reply", self.all_strings, message),
             )
             return
+
         view_count = msg.views
+
         await utils.answer(
             message,
             self.apo_lib.utils.get_str("views", self.all_strings, message).format(

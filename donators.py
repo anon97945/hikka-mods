@@ -1,4 +1,4 @@
-__version__ = (0, 0, 24)
+__version__ = (0, 0, 25)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -414,13 +414,15 @@ class ApodiktumDonatorsMod(loader.Module):
         )
         return string_join, string_kick
 
+    @loader.watcher("only_messages")
     async def watcher(self, message: Message):
-        if not isinstance(message, Message) or not self.config["logchannel"]:
+        if (
+            not self.config["logchannel"]
+            or utils.get_chat_id(message) != self.config["logchannel"]
+            or "#kick" not in message.raw_text.lower()
+        ):
             return
-        if utils.get_chat_id(message) != self.config["logchannel"]:
-            return
-        if "#kick" not in message.raw_text.lower():
-            return
+
         msg_lines = message.raw_text.splitlines()
         for text in msg_lines:
             if "#ID_" in text:

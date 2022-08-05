@@ -1,4 +1,4 @@
-__version__ = (0, 2, 5)
+__version__ = (0, 2, 6)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -11,15 +11,8 @@ __version__ = (0, 2, 5)
 #     https://t.me/apodiktum_modules
 #      https://github.com/anon97945
 #
-# 🔒 Licensed under the GNU GPLv3
-# 🌐 https://www.gnu.org/licenses/gpl-3.0.html
-
-# meta developer: @apodiktum_modules
-# meta banner: https://t.me/file_dumbster/11
-# meta pic: https://t.me/file_dumbster/13
-
-# scope: hikka_only
-# scope: hikka_min 1.3.0
+# 🔒 Licensed under the GNU AGPLv3
+# 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
 # █ █ ▀ █▄▀ ▄▀█ █▀█ ▀    ▄▀█ ▀█▀ ▄▀█ █▀▄▀█ ▄▀█
 # █▀█ █ █ █ █▀█ █▀▄ █ ▄  █▀█  █  █▀█ █ ▀ █ █▀█
@@ -27,6 +20,13 @@ __version__ = (0, 2, 5)
 #              © Copyright 2022
 #
 #          https://t.me/hikariatama
+
+# meta developer: @apodiktum_modules
+# meta banner: https://t.me/file_dumbster/11
+# meta pic: https://t.me/file_dumbster/13
+
+# scope: hikka_only
+# scope: hikka_min 1.3.0
 
 import asyncio
 import contextlib
@@ -166,7 +166,7 @@ class ApodiktumDNDMod(loader.Module):
         "_cfg_pmbl": "Если установлено true, PMBL активирован.",
         "_cfg_report_spam": (
             "Если установлено true, после блокировки на пользователя будет"
-            " отправлена жалоба."
+            " отправлена жалоба о спаме."
         ),
         "_cls_doc": (
             "⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬ ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n"

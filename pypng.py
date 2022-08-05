@@ -1,4 +1,4 @@
-__version__ = (0, 0, 26)
+__version__ = (0, 0, 27)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -20,7 +20,7 @@ __version__ = (0, 0, 26)
 
 # scope: hikka_only
 # scope: hikka_min 1.3.0
-# requires: pygments requests emoji pillow
+# requires: pygments emoji pillow
 
 import logging
 import os
@@ -106,7 +106,7 @@ class ApodiktumPyPNGMod(loader.Module):
                 url = None
             if url:
                 if reply.file:
-                    await message.client.download_file(reply, file)
+                    await self._client.download_file(reply, file)
                     file.name = reply.file.name
                 elif res := await self.apo_lib.utils.get_file_from_url(url):
                     file, file.name = res
@@ -131,7 +131,10 @@ class ApodiktumPyPNGMod(loader.Module):
         )
         pngfile.name = f"{os.path.splitext(file.name)[0]}.png"
         pngfile.seek(0)
-        await message.client.send_file(
-            message.to_id, pngfile, force_document=True, reply_to=reply
+        await self._client.send_file(
+            message.peer_id,
+            pngfile,
+            force_document=True,
+            reply_to=reply,
         )
         await message.delete()

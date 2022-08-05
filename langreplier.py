@@ -1,4 +1,4 @@
-__version__ = (0, 1, 20)
+__version__ = (0, 1, 21)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -218,16 +218,23 @@ class ApodiktumLangReplierMod(loader.Module):
 
     @loader.watcher("only_messages", "in", "only_pm", "only_groups", "only_channels")
     async def watcher(self, message: Message):
-        full_lang = ""
-        delay = 15
-        if not self.config["active"] or not message.mentioned:
-            return
-        user_id = message.sender_id
-        chat_id = utils.get_chat_id(message)
-        if (self.config["whitelist"] and chat_id not in self.config["chatlist"]) or (
-            not self.config["whitelist"] and chat_id in self.config["chatlist"]
+        if (
+            not self.config["active"]
+            or not message.mentioned
+            or (
+                self.config["whitelist"]
+                and utils.get_chat_id(message) not in self.config["chatlist"]
+            )
+            or (
+                not self.config["whitelist"]
+                and utils.get_chat_id(message) in self.config["chatlist"]
+            )
         ):
             return
+
+        full_lang = ""
+        delay = 15
+        user_id = message.sender_id
         allowed_alphabet, alphabet, detected_alphabet = self._is_alphabet(message)
         respond = not allowed_alphabet
         if self.apo_lib.utils.is_emoji(message.raw_text):
@@ -242,16 +249,16 @@ class ApodiktumLangReplierMod(loader.Module):
             allowed_lang, full_lang, lang_code = await self._check_lang(message)
             if not allowed_lang:
                 respond = True
-        if not respond:
-            return
-        if (
+        if not respond or (
             user_id in self._fw_protect
             and len(list(filter(lambda x: x > time.time(), self._fw_protect[user_id])))
             >= self._fw_protect_limit
         ):
             return
+
         if user_id not in self._fw_protect:
             self._fw_protect[user_id] = []
+
         self._fw_protect[user_id] += [time.time() + 5 * 60]
         if self.config["auto_translate"]:
             text = message.raw_text.lower()
@@ -262,6 +269,7 @@ class ApodiktumLangReplierMod(loader.Module):
                 )
             ).text
             delay = 30
+
         if self.config["check_language"] and full_lang:
             if self.config["auto_translate"]:
                 msg = await message.reply(
@@ -298,6 +306,6 @@ class ApodiktumLangReplierMod(loader.Module):
                 msg = await message.reply(
                     self.config["custom_message"].format(alphabet).replace("<br>", "\n")
                 )
+
         await asyncio.sleep(delay)
         await msg.delete()
-        return

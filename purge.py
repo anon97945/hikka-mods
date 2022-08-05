@@ -1,4 +1,4 @@
-__version__ = (0, 1, 28)
+__version__ = (0, 1, 29)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -26,6 +26,7 @@ import contextlib
 import logging
 
 from telethon.tl.types import Message
+from telethon.hints import EntityLike
 
 from .. import loader, utils
 
@@ -185,10 +186,10 @@ class ApodiktumPurgeMod(loader.Module):
         "err_purge_start": (
             "<b>Пожалуйста, ответьте на сообщение для начала очистки.</b>"
         ),
-        "no_int": "<b>Ваш ввод не является целочисленным типом (int)</b>",
-        "permerror": "<b>У вас нет прав на использование этой команды.</b>",
+        "no_int": "<b>Введенное значение не является целым числом (int)</b>",
+        "permerror": "<b>У вас недостаточно прав для использования этой команды.</b>",
         "purge_cmpl": "<b>Очистка завершена!</b>\nОчищено <code>{}</code> сообщений.",
-        "purge_success": "Очистка< {} сообщений завершена успешно.",
+        "purge_success": "Очистка {} сообщений завершена успешно.",
         "sd_success": "Сообщение после {} секунд успешно удалено.",
     }
 
@@ -256,18 +257,22 @@ class ApodiktumPurgeMod(loader.Module):
             self.config["auto_migrate"],
         )
 
-    @staticmethod
-    async def _purge_user_messages(chat, user_id, purge_count, message):
+    async def _purge_user_messages(
+        self,
+        chat: EntityLike,
+        user_id: int,
+        purge_count: int,
+    ) -> int:
         msgs = []
         msg_count = 0
-        itermsg = message.client.iter_messages(entity=chat)
+        itermsg = self._client.iter_messages(entity=chat)
         if purge_count == "all":
             async for msg in itermsg:
                 if msg.sender_id == user_id:
                     msgs += [msg.id]
                     msg_count += 1
                     if len(msgs) >= 99:
-                        await message.client.delete_messages(chat, msgs)
+                        await self._client.delete_messages(chat, msgs)
                         msgs.clear()
         else:
             i = 0
@@ -279,17 +284,26 @@ class ApodiktumPurgeMod(loader.Module):
                     msgs += [msg.id]
                     msg_count += 1
                     if len(msgs) >= 99:
-                        await message.client.delete_messages(chat, msgs)
+                        await self._client.delete_messages(chat, msgs)
                         msgs.clear()
+
         if msgs:
-            await message.client.delete_messages(chat, msgs)
+            await self._client.delete_messages(chat, msgs)
+
         return msg_count
 
-    @staticmethod
-    async def _purge_messages(chat, self_id, can_delete, message):
+    async def _purge_messages(
+        self,
+        chat: EntityLike,
+        self_id: int,
+        can_delete: bool,
+        message: Message,
+    ) -> int:
         msg_count = 0
-        itermsg = message.client.iter_messages(
-            entity=chat, min_id=message.reply_to_msg_id, reverse=True
+        itermsg = self._client.iter_messages(
+            entity=chat,
+            min_id=message.reply_to_msg_id,
+            reverse=True,
         )
         msgs = [message.reply_to_msg_id]
         async for msg in itermsg:
@@ -301,10 +315,10 @@ class ApodiktumPurgeMod(loader.Module):
                 if msg.id != message.id:
                     msg_count += 1
             if len(msgs) >= 99:
-                await message.client.delete_messages(chat, msgs)
+                await self._client.delete_messages(chat, msgs)
                 msgs.clear()
         if msgs:
-            await message.client.delete_messages(chat, msgs)
+            await self._client.delete_messages(chat, msgs)
         return msg_count
 
     async def cpurgecmd(self, message: Message):
@@ -345,17 +359,17 @@ class ApodiktumPurgeMod(loader.Module):
             )
             return
 
-        done = await message.client.send_message(
+        done = await self._client.send_message(
             chat.id,
             self.apo_lib.utils.get_str("purge_cmpl", self.all_strings, message).format(
-                str(msg_count)
+                msg_count
             ),
         )
         await asyncio.sleep(2)
         await done.delete()
+
         if self.config["log_purge"]:
-            return logger.info(self.strings("purge_success").format(str(msg_count)))
-        return
+            logger.info(self.strings("purge_success").format(str(msg_count)))
 
     async def spurgecmd(self, message: Message):
         """
@@ -375,20 +389,24 @@ class ApodiktumPurgeMod(loader.Module):
             )
 
             msg_count = await self._purge_messages(
-                chat, self.tg_id, can_delete, message
+                chat,
+                self.tg_id,
+                can_delete,
+                message,
             )
         else:
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str(
-                    "err_purge_start", self.all_strings, message
+                    "err_purge_start",
+                    self.all_strings,
+                    message,
                 ),
             )
             return
 
         if self.config["log_purge"]:
-            return logger.info(self.strings("purge_success").format(str(msg_count)))
-        return
+            logger.info(self.strings("purge_success").format(str(msg_count)))
 
     async def purgemecmd(self, message: Message):
         """
@@ -413,8 +431,8 @@ class ApodiktumPurgeMod(loader.Module):
         purge_count = "all" if len(args) == 1 and "all" in args else int(args[0])
         user_id = self.tg_id
         await message.delete()
-        msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
-        done = await message.client.send_message(
+        msg_count = await self._purge_user_messages(chat, user_id, purge_count)
+        done = await self._client.send_message(
             chat.id,
             self.apo_lib.utils.get_str("purge_cmpl", self.all_strings, message).format(
                 str(msg_count)
@@ -423,8 +441,7 @@ class ApodiktumPurgeMod(loader.Module):
         await asyncio.sleep(2)
         await done.delete()
         if self.config["log_purgeme"]:
-            return logger.info(self.strings("purge_success").format(str(msg_count)))
-        return
+            logger.info(self.strings("purge_success").format(str(msg_count)))
 
     async def spurgemecmd(self, message: Message):
         """
@@ -449,10 +466,9 @@ class ApodiktumPurgeMod(loader.Module):
         purge_count = "all" if len(args) == 1 and "all" in args else int(args[0])
         user_id = self.tg_id
         await message.delete()
-        msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
+        msg_count = await self._purge_user_messages(chat, user_id, purge_count)
         if self.config["log_purgeme"]:
-            return logger.info(self.strings("purge_success").format(str(msg_count)))
-        return
+            logger.info(self.strings("purge_success").format(str(msg_count)))
 
     async def purgeusercmd(self, message: Message):
         """
@@ -479,8 +495,8 @@ class ApodiktumPurgeMod(loader.Module):
             )
         purge_count = "all"
         await message.delete()
-        msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
-        done = await message.client.send_message(
+        msg_count = await self._purge_user_messages(chat, user_id, purge_count)
+        done = await self._client.send_message(
             chat.id,
             self.apo_lib.utils.get_str("purge_cmpl", self.all_strings, message).format(
                 str(msg_count)
@@ -489,8 +505,7 @@ class ApodiktumPurgeMod(loader.Module):
         await asyncio.sleep(2)
         await done.delete()
         if self.config["log_purgeme"]:
-            return logger.info(self.strings("purge_success").format(str(msg_count)))
-        return
+            logger.info(self.strings("purge_success").format(str(msg_count)))
 
     async def spurgeusercmd(self, message: Message):
         """
@@ -517,10 +532,9 @@ class ApodiktumPurgeMod(loader.Module):
             )
         purge_count = "all"
         await message.delete()
-        msg_count = await self._purge_user_messages(chat, user_id, purge_count, message)
+        msg_count = await self._purge_user_messages(chat, user_id, purge_count)
         if self.config["log_purgeme"]:
-            return logger.info(self.strings("purge_success").format(str(msg_count)))
-        return
+            logger.info(self.strings("purge_success").format(str(msg_count)))
 
     async def adelcmd(self, message: Message):
         """
@@ -547,28 +561,24 @@ class ApodiktumPurgeMod(loader.Module):
             )
             return
         i = 1
-        async for msg in message.client.iter_messages(chat):
-            if msg.sender_id == self.tg_id:
+        async for msg in self._client.iter_messages(chat):
+            if msg.out:
                 if i == 2:
                     old_msg = msg.raw_text
                     new_msg = args
                     await msg.edit(new_msg)
                     await message.delete()
                     break
-                i = i + 1
+                i += 1
         if self.config["log_edit"]:
-            return logger.info(
-                self.strings("edit_success").format(str(old_msg), str(new_msg))
-            )
-        return
+            logger.info(self.strings("edit_success").format(old_msg, new_msg))
 
     async def sdcmd(self, message: Message):
         """
         Make self-destructive messages. Also works for media when used in caption.
           - Usage: .sd <time> <text>
         """
-        args = utils.get_args_raw(message)
-        args = str(args).split()
+        args = utils.get_args_raw(message).split()
         if len(args) < 2:
             await utils.answer(
                 message,
@@ -586,6 +596,6 @@ class ApodiktumPurgeMod(loader.Module):
         msg = await utils.answer(message, text)
         await asyncio.sleep(counter)
         await msg.delete()
+
         if self.config["log_sd"]:
-            return logger.info(self.strings("sd_success").format(str(counter)))
-        return
+            logger.info(self.strings("sd_success").format(str(counter)))
