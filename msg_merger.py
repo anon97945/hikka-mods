@@ -27,7 +27,7 @@ import logging
 from datetime import datetime, timezone
 
 
-from telethon.errors import MessageIdInvalidError, MessageNotModifiedError
+from telethon.errors import MessageIdInvalidError
 from telethon.tl.types import Message
 
 from .. import loader, utils
