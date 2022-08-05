@@ -235,7 +235,6 @@ class ApodiktumLangReplierMod(loader.Module):
         full_lang = ""
         delay = 15
         user_id = message.sender_id
-        chat_id = utils.get_chat_id(message)
         allowed_alphabet, alphabet, detected_alphabet = self._is_alphabet(message)
         respond = not allowed_alphabet
         if self.apo_lib.utils.is_emoji(message.raw_text):
