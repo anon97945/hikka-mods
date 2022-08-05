@@ -1,4 +1,4 @@
-__version__ = (1, 0, 51)
+__version__ = (1, 0, 52)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -714,7 +714,14 @@ class ApodiktumAdminToolsMod(loader.Module):
 
         if await self.apo_lib.utils.is_linkedchannel(chat.id, user.id):
             return
-        reply = await self.apo_lib.utils.get_start_msg(message)
+        if message.is_reply:
+            reply = await self.apo_lib.utils.get_first_msg(message)
+        else:
+            reply = None
+        if reply and not isinstance(
+            await self._client.get_entity(reply.sender_id), Channel
+        ):
+            reply = None
         await self.apo_lib.utils.delete_message(message)
         if bcu_sets[chatid_str].get("ban") is True:
             await self.apo_lib.utils.ban(chat.id, user.id)
@@ -768,7 +775,14 @@ class ApodiktumAdminToolsMod(loader.Module):
         usertag = await self.apo_lib.utils.get_tag(user, True)
         link = await self.apo_lib.utils.get_invite_link(chat)
         if not await self.apo_lib.utils.is_member(chat.id, user.id):
-            reply = await self.apo_lib.utils.get_start_msg(message)
+            if message.is_reply:
+                reply = await self.apo_lib.utils.get_first_msg(message)
+            else:
+                reply = None
+            if reply and not isinstance(
+                await self._client.get_entity(reply.sender_id), Channel
+            ):
+                reply = None
             await self.apo_lib.utils.delete_message(message, True)
             if (
                 chat.admin_rights.ban_users

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 11)
+__version__ = (0, 0, 12)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -175,23 +175,30 @@ class ApodiktumPythonMod(loader.Module):
         }
 
     def get_sub(self, obj: Any, _depth: int = 1) -> dict:
+        # sourcery skip: remove-redundant-constructor-in-dict-union, use-dictionary-union
         """Get all callable capitalised objects in an object recursively, ignoring _*"""
-        return dict(
-            filter(
-                lambda x: x[0][0] != "_"
-                and x[0][0].upper() == x[0][0]
-                and callable(x[1]),
-                obj.__dict__.items(),
-            )
-        ) | itertools.chain.from_iterable(
-            [
-                self.get_sub(y[1], _depth + 1).items()
-                for y in filter(
+        return {
+            **dict(
+                filter(
                     lambda x: x[0][0] != "_"
-                    and isinstance(x[1], ModuleType)
-                    and x[1] != obj
-                    and x[1].__package__.rsplit(".", _depth)[0] == "telethon.tl",
+                    and x[0][0].upper() == x[0][0]
+                    and callable(x[1]),
                     obj.__dict__.items(),
                 )
-            ]
-        )
+            ),
+            **dict(
+                itertools.chain.from_iterable(
+                    [
+                        self.get_sub(y[1], _depth + 1).items()
+                        for y in filter(
+                            lambda x: x[0][0] != "_"
+                            and isinstance(x[1], ModuleType)
+                            and x[1] != obj
+                            and x[1].__package__.rsplit(".", _depth)[0]
+                            == "telethon.tl",
+                            obj.__dict__.items(),
+                        )
+                    ]
+                )
+            ),
+        }
