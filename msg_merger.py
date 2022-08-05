@@ -22,6 +22,7 @@ __version__ = (0, 0, 41)
 # scope: hikka_min 1.3.0
 
 
+import contextlib
 import logging
 from datetime import datetime, timezone
 
@@ -298,27 +299,29 @@ class ApodiktumMsgMergerMod(loader.Module):
         ):
             return
         last_msg = None
-        if self.config["ignore_prefix"]:
-            for prefix in self.config["ignore_prefix"]:
-                ignore_prefix_len = len(utils.escape_html(prefix))
-                if utils.remove_html(message.text)[
-                    :ignore_prefix_len
-                ] == utils.escape_html(prefix):
-                    return
 
-        if self.config["skip_prefix"]:
-            for prefix in self.config["skip_prefix"]:
-                skip_prefix_len = len(utils.escape_html(prefix))
-                if utils.remove_html(message.text)[
-                    :skip_prefix_len
-                ] == utils.escape_html(prefix):
-                    text = message.text.replace(utils.escape_html(prefix), "", 1)
-                    if len(text) > 0:
-                        try:
-                            await message.edit(text)
-                            return
-                        except MessageNotModifiedError:
-                            return
+        if self.config["ignore_prefix"] and any(
+            message.raw_text.startswith(prefix)
+            for prefix in self.config["ignore_prefix"]
+        ):
+            return
+
+        if self.config["skip_prefix"] and (
+            found_prefix := next(
+                (
+                    message.raw_text.startswith(prefix)
+                    for prefix in self.config["skip_prefix"]
+                ),
+                None,
+            )
+        ):
+            text = message.text.replace(utils.escape_html(found_prefix), "", 1)
+            if len(text) > 0:
+                with contextlib.suppress(Exception):
+                    if message.out:
+                        await message.edit(text)
+
+                return
 
         if (
             self.config["skip_length"]
@@ -378,13 +381,11 @@ class ApodiktumMsgMergerMod(loader.Module):
         ):
             return
 
-        if self.config["ignore_prefix"]:
-            for prefix in self.config["ignore_prefix"]:
-                ignore_prefix_len = len(utils.escape_html(prefix))
-                if utils.remove_html(last_msg.text)[
-                    :ignore_prefix_len
-                ] == utils.escape_html(prefix):
-                    return
+        if self.config["ignore_prefix"] and any(
+            last_msg.raw_text.startswith(prefix)
+            for prefix in self.config["ignore_prefix"]
+        ):
+            return
 
         if (
             self.config["edit_timeout"]

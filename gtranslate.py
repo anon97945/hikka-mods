@@ -30,7 +30,7 @@ from telethon.tl.types import Message
 from .. import loader, utils
 
 if googletrans.__version__ != "4.0.0-rc.1":
-    raise KeyError(
+    raise ImportError(  # This will force Hikka to attempt dependency re-installation
         f"The googletrans version is {googletrans.__version__}, not"
         ' "4.0.0-rc.1".It means the module cannot run properly. To fix this,'
         " reinstall googletrans==4.0.0-rc1..terminal pip install"

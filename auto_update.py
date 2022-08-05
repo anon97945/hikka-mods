@@ -33,7 +33,14 @@ logger = logging.getLogger(__name__)
 skip_update = ["[do not install]", "[unstable]", "[test]"]
 
 
-async def buttonhandler(bmsg, chatid, caption1, caption2, data_btn1, data_btn2):
+async def buttonhandler(
+    bmsg: Message,
+    chatid: int,
+    caption1: str,
+    caption2: str,
+    data_btn1: str,
+    data_btn2: str,
+) -> bool:
     fnd_btn1 = False
     fnd_btn2 = False
     bmsg = await bmsg.client.get_messages(chatid, ids=bmsg.id)
@@ -104,15 +111,15 @@ class ApodiktumAutoUpdateMod(loader.Module):
         ),
         "_cfg_auto_update_delay": "Выберите задержку для автоматического обновления.",
         "_cfg_update_msg_read": (
-            "Будет ли отмечать сообщение обновления как прочтённое или нет."
+            "Отмечать ли сообщение с обновлением как прочитанное или нет."
         ),
         "skip_old": (
             "Обновление было пропущено в связи с появлением более новой версии."
         ),
         "skip_update": "Обновление было пропущено из-за {}.\n{}",
-        "_cmd_doc_cautoupdate": "Это откроет конфиг для модуля.",
+        "_cmd_doc_cautoupdate": "Открыть конфиг модуля.",
         "updating": (
-            "Хикка будет автоматически обновлена через {} секунд.\n\n"
+            "Hikka будет автоматически обновлена через {} секунд.\n\n"
             "Список изменений:\n{}"
         ),
     }
@@ -185,24 +192,24 @@ class ApodiktumAutoUpdateMod(loader.Module):
             await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
 
-    async def _autoupdate(self, message):
-        changes = "\n".join(message.raw_text.splitlines()[5:])
+    async def _autoupdate(self, message: Message):
         if self.config["mark_read"]:
             await self._client.send_read_acknowledge(
-                message.chat_id,
+                message.peer_id,
                 clear_mentions=True,
             )
 
         logger.info(
-            self.strings("updating").format(self.config["update_delay"], changes)
+            self.strings("updating").format(
+                self.config["update_delay"],
+                "\n".join(message.raw_text.splitlines()[5:]),
+            )
         )
         await asyncio.sleep(self.config["update_delay"])
-        try:
+        with contextlib.suppress(Exception):
             return await message.click(0)
-        except Exception:
-            return
 
-    async def _check_skip(self, message):
+    async def _check_skip(self, message: Message) -> bool:
         last_commit = message.raw_text.splitlines()[5].lower()
         for x in skip_update:
             if x.lower() in last_commit and "revert" not in last_commit:
@@ -211,30 +218,30 @@ class ApodiktumAutoUpdateMod(loader.Module):
         return False
 
     async def _check_on_load(self):
-        if self.config["auto_update"]:
-            async for message in self.client.iter_messages(
-                entity=self.inline.bot_id, limit=5
+        if not self.config["auto_update"]:
+            return
+
+        async for message in self.client.iter_messages(
+            entity=self.inline.bot_id, limit=5
+        ):
+            if (
+                isinstance(message, Message)
+                and message.sender_id == self.inline.bot_id
+                and await buttonhandler(
+                    message,
+                    self.inline.bot_id,
+                    "🌘",
+                    "🔮",
+                    "hikka_update",
+                    "hikka_upd_ignore",
+                )
             ):
-                if (
-                    isinstance(message, Message)
-                    and message.sender_id == self.inline.bot_id
-                    and await buttonhandler(
-                        message,
-                        self.inline.bot_id,
-                        "🌘",
-                        "🔮",
-                        "hikka_update",
-                        "hikka_upd_ignore",
-                    )
-                ):
-                    if await self._check_skip(message):
-                        return
-                    with contextlib.suppress(Exception):
-                        self._autoupdate_task.cancel()
-                        logger.info(self.strings("skip_old"))
-                    self._autoupdate_task = asyncio.ensure_future(
-                        self._autoupdate(message)
-                    )
+                if await self._check_skip(message):
+                    return
+                with contextlib.suppress(Exception):
+                    self._autoupdate_task.cancel()
+                    logger.info(self.strings("skip_old"))
+                self._autoupdate_task = asyncio.ensure_future(self._autoupdate(message))
 
     @loader.watcher("in", "only_inline", "only_messages", "only_pm")
     async def watcher(self, message: Message):

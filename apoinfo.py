@@ -144,6 +144,7 @@ class ApodiktumInfoMod(loader.Module):
                 "custom_banner",
                 "https://t.me/file_dumbster/6",
                 lambda: self.strings("_cfg_cst_bnr"),
+                validator=loader.validators.Link(),
             ),
             loader.ConfigValue(
                 "custom_format",
@@ -181,7 +182,7 @@ class ApodiktumInfoMod(loader.Module):
             ),
             loader.ConfigValue(
                 "custom_button2",
-                "None",
+                None,
                 lambda: self.strings("_cfg_cst_btn"),
                 validator=loader.validators.Union(
                     loader.validators.Series(fixed_len=2),
@@ -190,7 +191,7 @@ class ApodiktumInfoMod(loader.Module):
             ),
             loader.ConfigValue(
                 "custom_button3",
-                "None",
+                None,
                 lambda: self.strings("_cfg_cst_btn"),
                 validator=loader.validators.Union(
                     loader.validators.Series(fixed_len=2),
@@ -226,7 +227,7 @@ class ApodiktumInfoMod(loader.Module):
             ),
             loader.ConfigValue(
                 "custom_button7",
-                "None",
+                None,
                 lambda: self.strings("_cfg_cst_btn"),
                 validator=loader.validators.Union(
                     loader.validators.Series(fixed_len=2),
@@ -235,7 +236,7 @@ class ApodiktumInfoMod(loader.Module):
             ),
             loader.ConfigValue(
                 "custom_button8",
-                "None",
+                None,
                 lambda: self.strings("_cfg_cst_btn"),
                 validator=loader.validators.Union(
                     loader.validators.Series(fixed_len=2),
@@ -244,7 +245,7 @@ class ApodiktumInfoMod(loader.Module):
             ),
             loader.ConfigValue(
                 "custom_button9",
-                "None",
+                None,
                 lambda: self.strings("_cfg_cst_btn"),
                 validator=loader.validators.Union(
                     loader.validators.Series(fixed_len=2),
@@ -253,7 +254,7 @@ class ApodiktumInfoMod(loader.Module):
             ),
             loader.ConfigValue(
                 "custom_button10",
-                "None",
+                None,
                 lambda: self.strings("_cfg_cst_btn"),
                 validator=loader.validators.Union(
                     loader.validators.Series(fixed_len=2),
@@ -262,7 +263,7 @@ class ApodiktumInfoMod(loader.Module):
             ),
             loader.ConfigValue(
                 "custom_button11",
-                "None",
+                None,
                 lambda: self.strings("_cfg_cst_btn"),
                 validator=loader.validators.Union(
                     loader.validators.Series(fixed_len=2),
@@ -271,7 +272,7 @@ class ApodiktumInfoMod(loader.Module):
             ),
             loader.ConfigValue(
                 "custom_button12",
-                "None",
+                None,
                 lambda: self.strings("_cfg_cst_btn"),
                 validator=loader.validators.Union(
                     loader.validators.Series(fixed_len=2),
@@ -348,7 +349,7 @@ class ApodiktumInfoMod(loader.Module):
             )
         )
 
-    def _get_mark(self, btn_count):
+    def _get_mark(self, btn_count: int) -> dict:
         btn_count = str(btn_count)
         return (
             {
@@ -360,7 +361,7 @@ class ApodiktumInfoMod(loader.Module):
         )
 
     @loader.inline_everyone
-    async def apoinfo_inline_handler(self, query: InlineQuery) -> dict:
+    async def apoinfo_inline_handler(self, _) -> dict:
         """Send userbot info"""
         m = {x: self._get_mark(x) for x in range(13)}
         btns = [

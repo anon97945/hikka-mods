@@ -11,13 +11,16 @@ __version__ = (0, 0, 12)
 #     https://t.me/apodiktum_modules
 #      https://github.com/anon97945
 #
-# 🔒 Licensed under the GNU GPLv3
-# 🌐 https://www.gnu.org/licenses/gpl-3.0.html
+# 🔒 Licensed under the GNU AGPLv3
+# 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
 #             █ █ ▀ █▄▀ ▄▀█ █▀█ ▀
 #             █▀█ █ █ █ █▀█ █▀▄ █
 #              © Copyright 2022
 #           https://t.me/hikariatama
+#
+# 🔒 Licensed under the GNU AGPLv3
+# 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 
 # meta developer: @apodiktum_modules
 # meta banner: https://t.me/file_dumbster/11
@@ -58,8 +61,8 @@ class ApodiktumPythonMod(loader.Module):
     strings_ru = {
         "eval": "<b>🎬 Код:</b>\n<code>{}</code>\n<b>🪄 Результат:</b>\n<code>{}</code>",
         "err": "<b>🎬 Код:</b>\n<code>{}</code>\n\n<b>🚫 Ошибка:</b>\n{}",
-        "_cmd_doc_eval": "Алиас для команды .e",
-        "_cmd_doc_e": "Выполняет Python кодировка",
+        "_cmd_doc_aeval": "Алиас для команды .e",
+        "_cmd_doc_ae": "Выполнить Python код",
         "_cls_doc": "Выполняет Python код",
     }
 

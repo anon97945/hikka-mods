@@ -18,15 +18,19 @@ __version__ = (0, 1, 89)
 # meta banner: https://t.me/file_dumbster/11
 # meta pic: https://t.me/file_dumbster/13
 
-# scope: libsndfile1 gcc ffmpeg rubberband-cli
+# scope: ffmpeg
 # scope: hikka_only
 # scope: hikka_min 1.3.0
 
 # requires: gtts pydub soundfile pyrubberband numpy AudioSegment wave
+# apt-requirements: libsndfile1 gcc ffmpeg rubberband-cli
+# ⚠️ Execute:
+# sudo libsndfile1 gcc ffmpeg rubberband-cli -y
+# In order for this module to work properly
 
+import io
 import logging
 import os
-from io import BytesIO
 from subprocess import PIPE, Popen
 
 import pyrubberband
@@ -40,23 +44,29 @@ from .. import loader, utils
 logger = logging.getLogger(__name__)
 
 
-async def audionormalizer(bytes_io_file, fn, fe):
-    # return bytes_io_file, fn, fe
+async def audionormalizer(
+    bytes_io_file: io.BytesIO,
+    filename: str,
+    file_ext: str,
+) -> tuple:
     bytes_io_file.seek(0)
-    bytes_io_file.name = fn + fe
+    bytes_io_file.name = filename + file_ext
     rawsound = AudioSegment.from_file(bytes_io_file, "wav")
     normalizedsound = effects.normalize(rawsound)
     bytes_io_file.seek(0)
     normalizedsound.export(bytes_io_file, format="wav")
-    bytes_io_file.name = f"{fn}.wav"
-    fn, fe = os.path.splitext(bytes_io_file.name)
-    return bytes_io_file, fn, fe
+    bytes_io_file.name = f"{filename}.wav"
+    filename, file_ext = os.path.splitext(bytes_io_file.name)
+    return bytes_io_file, filename, file_ext
 
 
-async def audiohandler(bytes_io_file, fn, fe):
-    # return bytes_io_file, fn, fe
+async def audiohandler(
+    bytes_io_file: io.BytesIO,
+    filename: str,
+    file_ext: str,
+) -> tuple:
     bytes_io_file.seek(0)
-    bytes_io_file.name = fn + fe
+    bytes_io_file.name = filename + file_ext
     content = bytes_io_file.getvalue()
     cmd = [
         "ffmpeg",
@@ -74,15 +84,18 @@ async def audiohandler(bytes_io_file, fn, fe):
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, bufsize=-1)
     out, _ = p.communicate(input=content)
     p.stdin.close()
-    bytes_io_file.name = f"{fn}.wav"
-    fn, fe = os.path.splitext(bytes_io_file.name)
-    return BytesIO(out), fn, fe if out.startswith(b"RIFF\xff\xff\xff") else None
+    bytes_io_file.name = f"{filename}.wav"
+    filename, file_ext = os.path.splitext(bytes_io_file.name)
+    return (
+        io.BytesIO(out),
+        filename,
+        file_ext if out.startswith(b"RIFF\xff\xff\xff") else None,
+    )
 
 
-async def makewaves(bytes_io_file, fn, fe):
-    # return bytes_io_file, fn, fe
+async def makewaves(bytes_io_file: io.BytesIO, filename: str, file_ext: str) -> tuple:
     bytes_io_file.seek(0)
-    bytes_io_file.name = fn + fe
+    bytes_io_file.name = filename + file_ext
     content = bytes_io_file.getvalue()
     cmd = [
         "ffmpeg",
@@ -100,12 +113,12 @@ async def makewaves(bytes_io_file, fn, fe):
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, bufsize=-1)
     out, _ = p.communicate(input=content)
     p.stdin.close()
-    bytes_io_file.name = f"{fn}.ogg"
-    fn, fe = os.path.splitext(bytes_io_file.name)
-    return BytesIO(out), fn, fe
+    bytes_io_file.name = f"{filename}.ogg"
+    filename, file_ext = os.path.splitext(bytes_io_file.name)
+    return io.BytesIO(out), filename, file_ext
 
 
-def represents_speed(s):
+def represents_speed(s: str) -> bool:
     try:
         float(s)
         return 0.25 <= float(s) <= 3
@@ -113,16 +126,21 @@ def represents_speed(s):
         return False
 
 
-async def speedup(bytes_io_file, fn, fe, speed):
+async def speedup(
+    bytes_io_file: io.BytesIO,
+    filename: str,
+    file_ext: str,
+    speed: float,
+) -> tuple:
     bytes_io_file.seek(0)
-    bytes_io_file.name = fn + fe
+    bytes_io_file.name = filename + file_ext
     y, sr = soundfile.read(bytes_io_file)
     y_stretch = pyrubberband.time_stretch(y, sr, speed)
     bytes_io_file.seek(0)
     soundfile.write(bytes_io_file, y_stretch, sr, format="wav")
     bytes_io_file.seek(0)
-    bytes_io_file.name = f"{fn}.wav"
-    return bytes_io_file, fn, fe
+    bytes_io_file.name = f"{filename}.wav"
+    return bytes_io_file, filename, file_ext
 
 
 @loader.tds
@@ -202,7 +220,7 @@ class ApodiktumTTSMod(loader.Module):
             ),
             loader.ConfigValue(
                 "tts_speed",
-                "1",
+                1,
                 doc=lambda: self.strings("_cfg_tts_speed"),
                 validator=loader.validators.Float(minimum=0.25, maximum=3),
             ),
@@ -239,8 +257,8 @@ class ApodiktumTTSMod(loader.Module):
     async def ttscmd(self, message: Message):
         """Convert text to speech with Google APIs"""
         speed = self.config["tts_speed"]
-        text = utils.get_args_raw(message.message)
-        if len(text) == 0:
+        text = utils.get_args_raw(message)
+        if not text:
             if message.is_reply:
                 text = (await message.get_reply_message()).message
             else:
@@ -256,20 +274,22 @@ class ApodiktumTTSMod(loader.Module):
             self.apo_lib.utils.get_str("processing", self.all_strings, message),
         )
         tts = await utils.run_sync(gTTS, text, lang=self.config["tts_lang"])
-        voice = BytesIO()
+        voice = io.BytesIO()
         await utils.run_sync(tts.write_to_fp, voice)
         voice.seek(0)
         voice.name = "voice.mp3"
-        fn, fe = os.path.splitext(voice.name)
-        voice, fn, fe = await audiohandler(voice, fn, fe)
+        filename, file_ext = os.path.splitext(voice.name)
+        voice, filename, file_ext = await audiohandler(voice, filename, file_ext)
         voice.seek(0)
-        voice, fn, fe = await speedup(voice, fn, fe, float(speed))
+        voice, filename, file_ext = await speedup(
+            voice, filename, file_ext, float(speed)
+        )
         voice.seek(0)
-        voice, fn, fe = await audionormalizer(voice, fn, fe)
+        voice, filename, file_ext = await audionormalizer(voice, filename, file_ext)
         voice.seek(0)
-        voice, fn, fe = await makewaves(voice, fn, fe)
+        voice, filename, file_ext = await makewaves(voice, filename, file_ext)
         voice.seek(0)
-        voice.name = fn + fe
+        voice.name = filename + file_ext
         await utils.answer(msg, voice, voice_note=True)
         if msg.out:
             await msg.delete()
@@ -307,21 +327,23 @@ class ApodiktumTTSMod(loader.Module):
             self.apo_lib.utils.get_str("processing", self.all_strings, message),
         )
         ext = replymsg.file.ext
-        voice = BytesIO()
+        voice = io.BytesIO()
         voice.name = replymsg.file.name
         await replymsg.client.download_file(replymsg, voice)
         voice.name = f"voice{ext}"
-        fn, fe = os.path.splitext(voice.name)
+        filename, file_ext = os.path.splitext(voice.name)
         voice.seek(0)
-        voice, fn, fe = await audiohandler(voice, fn, fe)
+        voice, filename, file_ext = await audiohandler(voice, filename, file_ext)
         voice.seek(0)
-        voice, fn, fe = await speedup(voice, fn, fe, float(speed))
+        voice, filename, file_ext = await speedup(
+            voice, filename, file_ext, float(speed)
+        )
         voice.seek(0)
-        voice, fn, fe = await audionormalizer(voice, fn, fe)
+        voice, filename, file_ext = await audionormalizer(voice, filename, file_ext)
         voice.seek(0)
-        voice, fn, fe = await makewaves(voice, fn, fe)
+        voice, filename, file_ext = await makewaves(voice, filename, file_ext)
         voice.seek(0)
-        voice.name = fn + fe
+        voice.name = filename + file_ext
         await utils.answer(msg, voice, voice_note=True)
         if msg.out:
             await msg.delete()
