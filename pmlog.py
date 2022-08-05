@@ -164,7 +164,7 @@ class ApodiktumPMLogMod(loader.Module):
             await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
 
-    @loader.watcher("only_messages", "only_pm", "in")
+    @loader.watcher("only_messages", "only_pm")
     async def watcher(self, message: Message):
         pmlog_whitelist = self.config["whitelist"]
         pmlog_bot = self.config["log_bots"]
@@ -172,7 +172,7 @@ class ApodiktumPMLogMod(loader.Module):
         pmlog_destr = self.config["log_self_destr"]
         chat = await self._client.get_entity(utils.get_chat_id(message))
 
-        if chat.bot and not pmlog_bot or not pmlog_group:
+        if chat.bot and not pmlog_bot or not pmlog_group or chat.id == self.tg_id:
             return
 
         chatidindb = utils.get_chat_id(message) in (self.config["logs_list"] or [])
