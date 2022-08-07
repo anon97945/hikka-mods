@@ -1,4 +1,4 @@
-__version__ = (0, 0, 42)
+__version__ = (0, 1, 0)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -309,8 +309,9 @@ class ApodiktumMsgMergerMod(loader.Module):
         if self.config["skip_prefix"] and (
             found_prefix := next(
                 (
-                    message.raw_text.startswith(prefix)
+                    prefix
                     for prefix in self.config["skip_prefix"]
+                    if message.raw_text.startswith(prefix)
                 ),
                 None,
             )
@@ -318,9 +319,7 @@ class ApodiktumMsgMergerMod(loader.Module):
             text = message.text.replace(utils.escape_html(found_prefix), "", 1)
             if len(text) > 0:
                 with contextlib.suppress(Exception):
-                    if message.out:
-                        await message.edit(text)
-
+                    await message.edit(text)
                 return
 
         if (
