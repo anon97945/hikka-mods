@@ -1,5 +1,12 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.15
+### 📃 module updates:
+- admintools | added block double links which will block each duplicated link for x seconds
+- admintools | added blockstickerspam which will only accept one sticker per x seconds per user
+- admintools | added permissions cache
+- admintools | added ratelimit to notify messages
+
 ## 🆕 Version 2.0.14
 ### 📃 module updates:
 - admintools | send msg as reply if possible
