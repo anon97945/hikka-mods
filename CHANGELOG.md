@@ -1,10 +1,15 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.16
+### 📃 module updates:
+- admintools | added `GetFullChannelRequest` cache
+- admintools | added `BlockGifSpam` which will only accept one sticker per x seconds per user
+
 ## 🆕 Version 2.0.15
 ### 📃 module updates:
-- admintools | added block double links which will block each duplicated link for x seconds
-- admintools | added blockstickerspam which will only accept one sticker per x seconds per user
-- admintools | added permissions cache
+- admintools | added `BlockDoubleLinks` which will block each duplicated link for x seconds
+- admintools | added `BlockStickerSpam` which will only accept one sticker per x seconds per user
+- admintools | added `get_permissions` cache
 - admintools | added ratelimit to notify messages
 - admintools | reduced api requests
 
