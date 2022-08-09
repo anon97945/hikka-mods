@@ -1,5 +1,12 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.17
+### 📃 module updates:
+- admintools | added `.bf` (blockflood) which will count messages of a user until limit (this is still `beta`)
+- admintools | anonymous chat admin will be ignored
+- admintools | changed `int` in db to `str`. json cant use `int keys`
+- admintools | next update may have a command rework, also punishment rework
+
 ## 🆕 Version 2.0.16
 ### 📃 module updates:
 - admintools | added `GetFullChannelRequest` cache
