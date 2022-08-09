@@ -1,5 +1,10 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.18
+### 📃 module updates:
+- apolib_controller | added `.vapolib` to get the version of the last loaded apodiktum_library
+- dnd | added `use_bio` config (`Default: True`). This will set the afk message also as bio and will replace it with the old bio after `unstatus`
+
 ## 🆕 Version 2.0.17
 ### 📃 module updates:
 - admintools | added `.bf` (blockflood) which will count messages of a user until limit (this is still `beta`)

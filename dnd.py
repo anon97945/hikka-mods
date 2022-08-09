@@ -1,4 +1,4 @@
-__version__ = (0, 2, 6)
+__version__ = (0, 3, 0)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -35,11 +35,10 @@ import logging
 import time
 from typing import Union
 
+from telethon.tl.functions.account import UpdateProfileRequest
 from telethon.tl.functions.contacts import BlockRequest, UnblockRequest
-from telethon.tl.functions.messages import (
-    DeleteHistoryRequest,
-    ReportSpamRequest,
-)
+from telethon.tl.functions.messages import DeleteHistoryRequest, ReportSpamRequest
+from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.types import Channel, Message, PeerUser, User
 from telethon.utils import get_display_name, get_peer_id
 
@@ -78,6 +77,7 @@ class ApodiktumDNDMod(loader.Module):
         "_cfg_custom_msg": (
             "Custom message to notify untrusted peers. Leave empty for default one."
         ),
+        "_cfg_use_bio": "Show AFK message in bio.",
         "_cfg_delete_dialog": "If set to true, dialog will be deleted after banning.",
         "_cfg_gone": (
             "If set to true, the AFK message will include the time you were gone."
@@ -297,6 +297,12 @@ class ApodiktumDNDMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
+                "afk_show_duration",
+                True,
+                doc=lambda: self.strings("_cfg_afk_show_duration"),
+                validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
                 "custom_message",
                 doc=lambda: self.strings("_cfg_custom_msg"),
             ),
@@ -331,9 +337,9 @@ class ApodiktumDNDMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
-                "afk_show_duration",
+                "use_bio",
                 True,
-                doc=lambda: self.strings("_cfg_afk_show_duration"),
+                doc=lambda: self.strings("_cfg_use_bio"),
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
@@ -461,6 +467,10 @@ class ApodiktumDNDMod(loader.Module):
         self.set("gone", "")
         self.set("further", "")
         self._ratelimit_afk = []
+
+        if self.get("old_bio"):
+            await self._client(UpdateProfileRequest(about=self.get("old_bio")))
+            self.set("old_bio", None)
 
         for m in self._sent_messages:
             try:
@@ -681,10 +691,13 @@ class ApodiktumDNDMod(loader.Module):
             await asyncio.sleep(3)
             await message.delete()
             return
-        await self._unstatus_func()
+        if self.get("status"):
+            await self._unstatus_func()
+        if self.config["use_bio"] and not self.get("old_bio"):
+            full = await self._client(GetFullUserRequest("me"))
+            self.set("old_bio", getattr(full.full_user, "about", None))
         self.set("status", args[0])
         self.set("gone", time.time())
-
         if t and len(args) > 2:
             self.set("further", args[2])
         elif not t and len(args) > 1:
@@ -718,6 +731,10 @@ class ApodiktumDNDMod(loader.Module):
             status += self.apo_lib.utils.get_str(
                 "status_set_duration", self.all_strings, message
             ).format(self.apo_lib.utils.time_formatter(status_duration, short=True))
+        if self.config["use_bio"]:
+            bio = utils.escape_html(self.get("texts", {})[args[0]])
+            await self.client(UpdateProfileRequest(about=bio[:70]))
+
         msg = await utils.answer(message, status)
         self._sent_messages += [msg]
 

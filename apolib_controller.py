@@ -1,4 +1,4 @@
-__version__ = (0, 1, 6)
+__version__ = (0, 1, 8)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -45,6 +45,7 @@ class ApodiktumLibControllerMod(loader.Module):
         "lang_removed": "<b>Forced chat language removed!</b>",
         "lang_saved": "{} <b>forced chat language saved!</b>",
         "no_lang": "No forced language in this chat.",
+        "version_str": "📦 <b>Last installed Apodiktum Library was <code>{}</code>.</b>",
     }
 
     strings_en = {}
@@ -92,9 +93,25 @@ class ApodiktumLibControllerMod(loader.Module):
             )
         )
 
+    async def vapolibcmd(self, message: Message):
+        """
+        shows the current version of the apodiktum_library.
+        """
+        lib_version = self._lib_db.get("version", "unknown")
+        if lib_version != "unknown":
+            version_str = f"v{lib_version[0]}.{lib_version[1]}.{lib_version[2]}"
+        else:
+            version_str = lib_version
+        await utils.answer(
+            message,
+            self.apo_lib.utils.get_str("version_str", self.all_strings, message).format(
+                version_str
+            ),
+        )
+
     async def fclcmd(self, message: Message):
         """
-        force language of supported modules in this chat.
+        <langcode> | force language of supported modules in this chat.
         """
         args = utils.get_args_raw(message)
         chat_id = utils.get_chat_id(message)
@@ -142,7 +159,7 @@ class ApodiktumLibControllerMod(loader.Module):
 
     async def remfclcmd(self, message: Message):
         """
-        remove force language of supported modules in this chat.
+        remove force language in this chat.
         """
         chat_id = utils.get_chat_id(message)
         chatid_str = str(chat_id)
