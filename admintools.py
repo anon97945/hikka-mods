@@ -1237,8 +1237,8 @@ class ApodiktumAdminToolsMod(loader.Module):
             duration = bnd_sets[str(chat.id)].get("mute")
             await self.apo_lib.utils.mute(chat.id, user.id, duration)
         if bnd_sets[str(chat.id)].get("notify") is True and (
-            not self._ratelimit_notify.get("bnd").get(user.id)
-            or self._ratelimit_notify.get("bnd").get(user.id) < time.time()
+            not self._ratelimit_notify["bnd"].get(user.id)
+            or self._ratelimit_notify["bnd"].get(user.id) < time.time()
         ):
             for key, value in list(self._ratelimit_notify["bnd"].items()):
                 if value < time.time():
@@ -1311,8 +1311,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         if bcu_sets[str(chat.id)].get("ban") is True:
             await self.apo_lib.utils.ban(chat.id, user.id)
         if bcu_sets[str(chat.id)].get("notify") is True and (
-            not self._ratelimit_notify.get("bcu").get(user.id)
-            or self._ratelimit_notify.get("bcu").get(user.id) < time.time()
+            not self._ratelimit_notify["bcu"].get(user.id)
+            or self._ratelimit_notify["bcu"].get(user.id) < time.time()
         ):
             for key, value in list(self._ratelimit_notify["bcu"].items()):
                 if value < time.time():
@@ -1403,7 +1403,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         message: Message,
         bf_sets: dict,
     ):  # sourcery skip: low-code-quality
-        self._antiflood.pop(chat.id) if self._antiflood.get(chat.id) else None
+        with contextlib.suppress(Exception):
+            self._antiflood.pop(chat.id)
         await self.apo_lib.utils.delete_message(message, True)
         if (
             chat.admin_rights.ban_users
@@ -1413,8 +1414,8 @@ class ApodiktumAdminToolsMod(loader.Module):
             duration = bf_sets[str(chat.id)].get("mute")
             await self.apo_lib.utils.mute(chat.id, user.id, duration)
         if bf_sets[str(chat.id)].get("notify") is True and (
-            not self._ratelimit_notify.get("bf").get(user.id)
-            or self._ratelimit_notify.get("bf").get(user.id) < time.time()
+            not self._ratelimit_notify["bf"].get(user.id)
+            or self._ratelimit_notify["bf"].get(user.id) < time.time()
         ):
             for key, value in list(self._ratelimit_notify["bf"].items()):
                 if value < time.time():
@@ -1483,7 +1484,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         if (
             self._ratelimit_bdl.get(chat.id)
             and url in self._ratelimit_bdl.get(chat.id)
-            and self._ratelimit_bdl.get(chat.id).get(url) > time.time()
+            and self._ratelimit_bdl[chat.id].get(url) > time.time()
         ):
             self._msg_handler = {message.id: "p__bnd"}
             asyncio.ensure_future(self.apo_lib.utils.delete_message(message, True))
@@ -1521,7 +1522,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         if (
             self._ratelimit_bss.get(chat.id)
             and user.id in self._ratelimit_bss.get(chat.id)
-            and self._ratelimit_bss.get(chat.id).get(user.id) > time.time()
+            and self._ratelimit_bss[chat.id].get(user.id) > time.time()
         ):
             self._msg_handler = {message.id: "p__bss"}
             asyncio.ensure_future(self.apo_lib.utils.delete_message(message, True))
@@ -1563,7 +1564,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         if (
             self._ratelimit_bgs.get(chat.id)
             and user.id in self._ratelimit_bgs.get(chat.id)
-            and self._ratelimit_bgs.get(chat.id).get(user.id) > time.time()
+            and self._ratelimit_bgs[chat.id].get(user.id) > time.time()
         ):
             self._msg_handler = {message.id: "p__bgs"}
             asyncio.ensure_future(self.apo_lib.utils.delete_message(message, True))
