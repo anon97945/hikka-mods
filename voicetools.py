@@ -1,4 +1,4 @@
-__version__ = (1, 0, 28)
+__version__ = (1, 0, 29)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -85,7 +85,7 @@ def represents_gain(s: str) -> bool:
 
 
 async def audiohandler(
-    bytes_io_file: io.self._client,
+    bytes_io_file: io.BytesIO,
     filename: str,
     file_ext: str,
     new_file_ext: str,
@@ -109,7 +109,6 @@ async def audiohandler(
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
-            cwd=utils.get_base_dir(),
         )
 
         await sproc.communicate()
