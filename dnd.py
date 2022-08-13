@@ -1,4 +1,4 @@
-__version__ = (0, 3, 0)
+__version__ = (0, 3, 1)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -127,9 +127,9 @@ class ApodiktumDNDMod(loader.Module):
         "status_created": "<b>✅ Status {} created.</b>\n<code>{}</code>\nNotify: {}",
         "status_not_found": "<b>🚫 Status not found.</b>",
         "status_removed": "<b>✅ Status {} deleted.</b>",
-        "status_set": "<b>✅ Status set\n</b><code>{}</code>\nNotify: {}",
-        "status_set_duration": "\nDuration: {}",
-        "status_set_further": "\nFurther: {}",
+        "status_set": "<b>✅ Status set\n</b><code>{}</code>\nNotify: <code>{}</code>",
+        "status_set_duration": "\nDuration: <code>{}</code>",
+        "status_set_further": "\nFurther: <code>{}</code>",
         "status_unset": "<b>✅ Status removed.</b>",
         "unapproved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> unapproved in pm.</b>',
         "unblocked": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> unblocked.</b>',
@@ -168,6 +168,7 @@ class ApodiktumDNDMod(loader.Module):
             "Если установлено true, после блокировки на пользователя будет"
             " отправлена жалоба о спаме."
         ),
+        "_cfg_use_bio": "Показывать сообщение об отсутствии в профиле.",
         "_cls_doc": (
             "⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬ ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬\n"
             "-> Запрещает людям отправлять вам нежелательные личные сообщения."
@@ -245,9 +246,11 @@ class ApodiktumDNDMod(loader.Module):
         "status_created": "<b>✅ Статус {} установлен.</b>\n<code>{}</code>\nNotify: {}",
         "status_not_found": "<b>🚫 Статус не найден.</b>",
         "status_removed": "<b>✅ Статус {} удалён.</b>",
-        "status_set": "<b>✅ Статус установлен\n</b><code>{}</code>\nУведомления: {}",
-        "status_set_duration": "\nПродолжительность: {}",
-        "status_set_further": "\nПодробнее: {}",
+        "status_set": (
+            "<b>✅ Статус установлен\n</b><code>{}</code>\nУведомления: <code>{}</code>"
+        ),
+        "status_set_duration": "\nПродолжительность: <code>{}</code>",
+        "status_set_further": "\nПодробнее: <code>{}</code>",
         "status_unset": "<b>✅ Статус удалён.</b>",
         "unapproved": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> не допущен к ЛС.</b>',
         "unblocked": '😶‍🌫️ <b><a href="tg://user?id={}">{}</a> разблокирован.</b>',
@@ -733,6 +736,10 @@ class ApodiktumDNDMod(loader.Module):
             ).format(self.apo_lib.utils.time_formatter(status_duration, short=True))
         if self.config["use_bio"]:
             bio = utils.escape_html(self.get("texts", {})[args[0]])
+            if self.get("further"):
+                bio += (
+                    f" | {utils.remove_html(self.apo_lib.utils.get_str('afk_message_further', self.all_strings, message).format(self.get('further')))}"
+                )
             await self.client(UpdateProfileRequest(about=bio[:70]))
 
         msg = await utils.answer(message, status)

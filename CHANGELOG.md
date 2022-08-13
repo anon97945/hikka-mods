@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.19
+### 📃 module updates:
+- dnd | now also `supports` further in `bio`
+
 ## 🆕 Version 2.0.18
 ### 📃 module updates:
 - apolib_controller | added `.vapolib` to get the version of the last loaded apodiktum_library
