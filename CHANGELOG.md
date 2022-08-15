@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.20
+### 📃 module updates:
+- auto_update | fix watcher
+
 ## 🆕 Version 2.0.19
 ### 📃 module updates:
 - dnd | now also `supports` further in `bio`

@@ -1,4 +1,4 @@
-__version__ = (1, 0, 21)
+__version__ = (1, 0, 22)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -31,32 +31,6 @@ from .. import loader, utils
 
 logger = logging.getLogger(__name__)
 skip_update = ["[do not install]", "[unstable]", "[test]"]
-
-
-async def buttonhandler(
-    bmsg: Message,
-    chatid: int,
-    caption1: str,
-    caption2: str,
-    data_btn1: str,
-    data_btn2: str,
-) -> bool:
-    fnd_btn1 = False
-    fnd_btn2 = False
-    bmsg = await bmsg.client.get_messages(chatid, ids=bmsg.id)
-    buttons = bmsg.buttons
-    if (
-        caption1 in bmsg.message and caption2 in bmsg.message
-    ) and bmsg.buttons is not None:
-        for row in buttons:
-            for button in row:
-                if data_btn1 in str(button.data):
-                    fnd_btn1 = True
-                if data_btn2 in str(button.data):
-                    fnd_btn2 = True
-                if fnd_btn1 and fnd_btn2:
-                    return True
-    return False
 
 
 @loader.tds
@@ -192,6 +166,32 @@ class ApodiktumAutoUpdateMod(loader.Module):
             await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
 
+    @staticmethod
+    async def _buttonhandler(
+        bmsg: Message,
+        chatid: int,
+        caption1: str,
+        caption2: str,
+        data_btn1: str,
+        data_btn2: str,
+    ) -> bool:
+        fnd_btn1 = False
+        fnd_btn2 = False
+        bmsg = await bmsg.client.get_messages(chatid, ids=bmsg.id)
+        buttons = bmsg.buttons
+        if (
+            caption1 in bmsg.message and caption2 in bmsg.message
+        ) and bmsg.buttons is not None:
+            for row in buttons:
+                for button in row:
+                    if data_btn1 in str(button.data):
+                        fnd_btn1 = True
+                    if data_btn2 in str(button.data):
+                        fnd_btn2 = True
+                    if fnd_btn1 and fnd_btn2:
+                        return True
+        return False
+
     async def _autoupdate(self, message: Message):
         if self.config["mark_read"]:
             await self._client.send_read_acknowledge(
@@ -227,7 +227,7 @@ class ApodiktumAutoUpdateMod(loader.Module):
             if (
                 isinstance(message, Message)
                 and message.sender_id == self.inline.bot_id
-                and await buttonhandler(
+                and await self._buttonhandler(
                     message,
                     self.inline.bot_id,
                     "🌘",
@@ -243,13 +243,13 @@ class ApodiktumAutoUpdateMod(loader.Module):
                     logger.info(self.strings("skip_old"))
                 self._autoupdate_task = asyncio.ensure_future(self._autoupdate(message))
 
-    @loader.watcher("in", "only_inline", "only_messages", "only_pm")
+    @loader.watcher("in", "only_messages", "only_pm")
     async def watcher(self, message: Message):
         if (
             self.config["auto_update"]
             and utils.get_chat_id(message) == self.inline.bot_id
             and message.sender_id == self.inline.bot_id
-            and await buttonhandler(
+            and await self._buttonhandler(
                 message,
                 self.inline.bot_id,
                 "🌘",
