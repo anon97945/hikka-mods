@@ -1,4 +1,4 @@
-__version__ = (1, 1, 4)
+__version__ = (1, 1, 6)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,14 +19,14 @@ __version__ = (1, 1, 4)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.3.0
+# scope: hikka_min 1.3.3
 
 import asyncio
 import contextlib
 import logging
 import time
 
-from telethon.tl.types import Channel, Chat, Message, User
+from telethon.tl.types import Channel, Chat, Message, User, MessageEntityCustomEmoji
 
 from .. import loader, utils
 
@@ -52,12 +52,16 @@ class ApodiktumAdminToolsMod(loader.Module):
         "admin_tag": "The User {} asked for help.\n{}",
         "admin_tag_reply": "\n\nThe corresponding message from {} is:",
         "admin_tag_reply_msg": "Thanks, the owner of this Bot got informed.",
+        "bce": "BlockCustomEmojis",
+        "bce_triggered": "{}, you can't use custom emojis in this chat.",
         "bcu": "BlockChannelUser",
-        "bcu_triggered": "{}, you can't write as a channel here.",
-        "bf_triggered": "{}, floodlimit exceeded.",
+        "bcu_triggered": "{}, you can't write as a channel in this chat.",
         "bdl": "BlockDoubleLinks",
-        "bgs": "BlockGifSpam",
+        "bdl_triggered": "{}, you need to wait before you can send this link again.",
         "bf": "BlockFlood",
+        "bf_triggered": "{}, floodlimit exceeded.",
+        "bgs": "BlockGifSpam",
+        "bgs_triggered": "{}, you need to wait before you can send more gifs.",
         "bnd": "BlockNonDiscussion",
         "bnd_triggered": (
             "{}, the comments are limited to discussiongroup members, "
@@ -65,9 +69,9 @@ class ApodiktumAdminToolsMod(loader.Module):
             "\n\n👉🏻 {}\n\nRespectfully, the admins."
         ),
         "bss": "BlockStickerSpam",
+        "bss_triggered": "{}, you need to wait before you can send more stickers.",
         "error": "<b>Your command was wrong.</b>",
         "gl": "GroupLogger",
-        "refresh_chat": "<b>[AdminTools]</b> Chat cache refreshed.",
         "no_id": "<b>Your input was no TG ID.</b>",
         "no_int": "<b>Your input was no Integer.</b>",
         "not_dc": "<b>This is no Groupchat.</b>",
@@ -82,6 +86,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         "prot_start": "<b>[{}]</b> Activated in this chat.</b>",
         "prot_stopped": "<b>[{}]</b> Deactivated in this chat.</b>",
         "prot_turned_off": "<b>[{}]</b> The module is now turned off in all chats.</b>",
+        "refresh_chat": "<b>[AdminTools]</b> Chat cache refreshed.",
     }
 
     strings_en = {}
@@ -253,17 +258,15 @@ class ApodiktumAdminToolsMod(loader.Module):
         )
         self._db_migrator()
         self._pt_task = asyncio.ensure_future(self._global_queue_handler())
-        self._antiflood = {}
-        self._ratelimit_bdl = {}
-        self._ratelimit_bss = {}
-        self._ratelimit_bgs = {}
+        self._ratelimit_p_count = {"bgs": {}, "bss": {}, "bf": {}}
         self._ratelimit_notify = {
-            "bnd": {},
+            "bce": {},
             "bcu": {},
-            "bgs": {},
-            "bss": {},
             "bdl": {},
             "bf": {},
+            "bgs": {},
+            "bnd": {},
+            "bss": {},
         }
         self._msg_handler = {}
 
@@ -285,7 +288,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         Refresh the chat cache in the current chat.
         """
         chat_id = utils.get_chat_id(message)
-        await self.apo_lib.utils.get_fullchannel(chat_id, force_refresh=True)
+        await self._client.get_fullchannel(chat_id, force=True)
         return await utils.answer(
             message,
             self.apo_lib.utils.get_str("refresh_chat", self.all_strings, message),
@@ -942,6 +945,133 @@ class ApodiktumAdminToolsMod(loader.Module):
                 ),
             )
 
+    async def bcecmd(self, message: Message):
+        """
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Toggles BlockCustomEmojis for the current chat.
+        .bce timeout <seconds>
+           - Sets the timeout for the sticker spam.
+        .bce notify <true/false>
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Toggles the notification message.
+        .bce deltimer <seconds/or 0>
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Deletes the notification message in seconds. 0 to disable.
+        .bce settings
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Shows the current configuration of the chat.
+        .bce db
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Shows the current database.
+        .bce clearall
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Clears the db of BlockChannelUser.
+        """
+        bce = self._db.get(self._classname, "bce", [])
+        sets = self._db.get(self._classname, "bce_sets", {})
+        args = utils.get_args_raw(message).lower().split()
+        chat = await self._client.get_entity(message.peer_id)
+        chat_id_str = str(chat.id)
+
+        if args and args[0] == "clearall":
+            self._db.set(self._classname, "bce", [])
+            self._db.set(self._classname, "bces_sets", {})
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str(
+                    "prot_turned_off", self.all_strings, message
+                ).format(self.apo_lib.utils.get_str("bce", self.all_strings, message)),
+            )
+
+        if args and args[0] == "db":
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str(
+                    "prot_db_string", self.all_strings, message
+                ).format(
+                    self.apo_lib.utils.get_str("bce", self.all_strings, message),
+                    bce,
+                    sets,
+                ),
+            )
+
+        if message.is_private:
+            await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("not_dc", self.all_strings, message),
+            )
+            return
+
+        if (
+            (chat.admin_rights or chat.creator)
+            and not chat.admin_rights.delete_messages
+            or not chat.admin_rights
+            and not chat.creator
+        ) and (args or chat_id_str not in bce):
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str("permerror", self.all_strings, message),
+            )
+
+        if not args:
+            if chat_id_str not in bce:
+                bce.append(chat_id_str)
+                sets.setdefault(chat_id_str, {})
+                sets[chat_id_str].setdefault("notify", True)
+                sets[chat_id_str].setdefault("mute", 1)
+                sets[chat_id_str].setdefault("deltimer", 60)
+                self._db.set(self._classname, "bce", bce)
+                self._db.set(self._classname, "bce_sets", sets)
+                return await utils.answer(
+                    message,
+                    self.apo_lib.utils.get_str(
+                        "prot_start", self.all_strings, message
+                    ).format(
+                        self.apo_lib.utils.get_str("bce", self.all_strings, message)
+                    ),
+                )
+            bce.remove(chat_id_str)
+            self._db.set(self._classname, "bce", bce)
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str(
+                    "prot_stopped", self.all_strings, message
+                ).format(self.apo_lib.utils.get_str("bce", self.all_strings, message)),
+            )
+
+        if chat_id_str in bce:
+            if args[0] == "notify" and args[1] is not None:
+                if not isinstance(self.apo_lib.utils.validate_boolean(args[1]), bool):
+                    return await utils.answer(
+                        message,
+                        self.apo_lib.utils.get_str("error", self.all_strings, message),
+                    )
+                sets[chat_id_str].update(
+                    {"notify": self.apo_lib.utils.validate_boolean(args[1])}
+                )
+            elif args[0] == "mute" and args[1] is not None and chat_id_str in bce:
+                if not self.apo_lib.utils.validate_integer(args[1]):
+                    return await utils.answer(
+                        message,
+                        self.apo_lib.utils.get_str("no_int", self.all_strings, message),
+                    )
+                sets[chat_id_str].update({"mute": int(args[1])})
+            elif args[0] == "deltimer" and args[1] is not None and chat_id_str in bce:
+                if not self.apo_lib.utils.validate_integer(args[1]):
+                    return await utils.answer(
+                        message,
+                        self.apo_lib.utils.get_str("no_int", self.all_strings, message),
+                    )
+                sets[chat_id_str].update({"deltimer": int(args[1])})
+            elif args[0] != "settings" and chat_id_str in bce:
+                return
+            self._db.set(self._classname, "bce", bce)
+            self._db.set(self._classname, "bce_sets", sets)
+            return await utils.answer(
+                message,
+                self.apo_lib.utils.get_str(
+                    "prot_settings", self.all_strings, message
+                ).format(
+                    self.apo_lib.utils.get_str("bce", self.all_strings, message),
+                    sets[chat_id_str],
+                ),
+            )
+
     async def bgscmd(self, message: Message):
         """
          ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬
@@ -1225,65 +1355,6 @@ class ApodiktumAdminToolsMod(loader.Module):
         asyncio.ensure_future(self.p__bnd(chat, user, message, bnd_sets))
         return
 
-    async def p__bnd(
-        self, chat: Chat, user: User, message: Message, bnd_sets: dict
-    ):  # sourcery skip: low-code-quality
-        await self.apo_lib.utils.delete_message(message, True)
-        if (
-            chat.admin_rights.ban_users
-            and bnd_sets[str(chat.id)].get("mute") is not None
-            and bnd_sets[str(chat.id)].get("mute") != 0
-        ):
-            duration = bnd_sets[str(chat.id)].get("mute")
-            await self.apo_lib.utils.mute(chat.id, user.id, duration)
-        if bnd_sets[str(chat.id)].get("notify") is True and (
-            not self._ratelimit_notify["bnd"].get(user.id)
-            or self._ratelimit_notify["bnd"].get(user.id) < time.time()
-        ):
-            for key, value in list(self._ratelimit_notify["bnd"].items()):
-                if value < time.time():
-                    self._ratelimit_notify["bnd"].pop(key)
-            self._ratelimit_notify["bnd"].update(
-                {
-                    user.id: time.time() + bnd_sets[str(chat.id)].get("deltimer")
-                    if bnd_sets[str(chat.id)].get("deltimer") != 0
-                    else time.time() + 15
-                }
-            )
-            usertag = await self.apo_lib.utils.get_tag(user, True)
-            link = await self.apo_lib.utils.get_invite_link(chat)
-            if message.is_reply:
-                reply = await self.apo_lib.utils.get_first_msg(message)
-            else:
-                reply = None
-            if reply and not isinstance(
-                await self._client.get_entity(reply.sender_id), Channel
-            ):
-                reply = None
-            if await self.apo_lib.utils.check_inlinebot(chat.id):
-                msg = await self.inline.bot.send_message(
-                    chat.id
-                    if str(chat.id).startswith("-100")
-                    else int(f"-100{chat.id}"),
-                    self.apo_lib.utils.get_str(
-                        "bnd_triggered", self.all_strings, message
-                    ).format(usertag, link),
-                    parse_mode="HTML",
-                    disable_web_page_preview=True,
-                    reply_to_message_id=getattr(reply, "id", None),
-                    allow_sending_without_reply=True,
-                )
-            else:
-                msg = await utils.answer(
-                    message,
-                    self.apo_lib.utils.get_str(
-                        "bnd_triggered", self.all_strings, message
-                    ).format(usertag, link),
-                )
-            if bnd_sets[str(chat.id)].get("deltimer") != 0:
-                deltimer = bnd_sets[str(chat.id)].get("deltimer")
-                await self.apo_lib.utils.delete_message(msg, deltimer=deltimer)
-
     async def p__bcu_handler(
         self,
         chat: Chat,
@@ -1303,60 +1374,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         if str(chat.id) not in bcu or message.id in self._msg_handler:
             return
         self._msg_handler = {message.id: "p__bcu"}
-        asyncio.ensure_future(self.p__bcu(chat, user, message, bcu_sets))
+        asyncio.ensure_future(self.punish_handler(chat, user, message, "bcu", bcu_sets))
         return
-
-    async def p__bcu(self, chat, user, message, bcu_sets):
-        await self.apo_lib.utils.delete_message(message)
-        if bcu_sets[str(chat.id)].get("ban") is True:
-            await self.apo_lib.utils.ban(chat.id, user.id)
-        if bcu_sets[str(chat.id)].get("notify") is True and (
-            not self._ratelimit_notify["bcu"].get(user.id)
-            or self._ratelimit_notify["bcu"].get(user.id) < time.time()
-        ):
-            for key, value in list(self._ratelimit_notify["bcu"].items()):
-                if value < time.time():
-                    self._ratelimit_notify["bcu"].pop(key)
-            self._ratelimit_notify["bcu"].update(
-                {
-                    user.id: time.time() + bcu_sets[str(chat.id)].get("deltimer")
-                    if bcu_sets[str(chat.id)].get("deltimer") != 0
-                    else time.time() + 15
-                }
-            )
-            usertag = await self.apo_lib.utils.get_tag(user, True)
-            reply = (
-                await self.apo_lib.utils.get_first_msg(message)
-                if message.is_reply
-                else None
-            )
-            if reply and not isinstance(
-                await self._client.get_entity(reply.sender_id), Channel
-            ):
-                reply = None
-            if await self.apo_lib.utils.check_inlinebot(chat.id):
-                msg = await self.inline.bot.send_message(
-                    chat.id
-                    if str(chat.id).startswith("-100")
-                    else int(f"-100{chat.id}"),
-                    self.apo_lib.utils.get_str(
-                        "bcu_triggered", self.all_strings, message
-                    ).format(usertag),
-                    parse_mode="HTML",
-                    disable_web_page_preview=True,
-                    reply_to_message_id=getattr(reply, "id", None),
-                    allow_sending_without_reply=True,
-                )
-            else:
-                msg = await utils.answer(
-                    message,
-                    self.apo_lib.utils.get_str(
-                        "bcu_triggered", self.all_strings, message
-                    ).format(usertag),
-                )
-            if bcu_sets[str(chat.id)].get("deltimer") != 0:
-                deltimer = bcu_sets[str(chat.id)].get("deltimer")
-                await self.apo_lib.utils.delete_message(msg, deltimer=deltimer)
 
     async def p__bf_handler(
         self,
@@ -1367,7 +1386,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         bf_sets: dict,
     ):  # sourcery skip: low-code-quality
         """
-        Block users which are not members of the group.
+        Block users who sends x messages in a row.
         :param chat: Chat object.
         :param user: User object.
         :param message: Message object.
@@ -1377,93 +1396,62 @@ class ApodiktumAdminToolsMod(loader.Module):
         if str(chat.id) not in bf:
             return
         if (
-            self._antiflood.get(chat.id)
-            and self._antiflood[chat.id][0] == user.id
-            and self._antiflood[chat.id][1] >= bf_sets[str(chat.id)].get("limit")
+            self._ratelimit_p_count["bf"].get(chat.id)
+            and self._ratelimit_p_count["bf"][chat.id][0] == user.id
+            and self._ratelimit_p_count["bf"][chat.id][1]
+            >= bf_sets[str(chat.id)].get("limit")
         ):
-            asyncio.ensure_future(self.p__bf(chat, user, message, bf_sets))
+            asyncio.ensure_future(
+                self.punish_handler(chat, user, message, "bf", bf_sets)
+            )
         else:
-            self._antiflood.update(
+            self._ratelimit_p_count["bf"].update(
                 {
                     chat.id: [
                         user.id,
                         (
-                            self._antiflood[chat.id][1] + 1
-                            if self._antiflood.get(chat.id)
+                            self._ratelimit_p_count["bf"][chat.id][1] + 1
+                            if self._ratelimit_p_count["bf"].get(chat.id)
                             else 1
                         ),
                     ]
                 }
             )
 
-    async def p__bf(
+    async def p__bce_handler(
         self,
         chat: Chat,
         user: User,
         message: Message,
-        bf_sets: dict,
+        bce: list,
+        bce_sets: dict,
     ):  # sourcery skip: low-code-quality
-        with contextlib.suppress(Exception):
-            self._antiflood.pop(chat.id)
-        await self.apo_lib.utils.delete_message(message, True)
+        """
+        Block Custom Emojis in the chat.
+        :param chat: Chat object.
+        :param user: User object.
+        :param message: Message object.
+        :param bce: List of watched groups.
+        :param bce_sets: Dictionary of group IDs and their settings.
+        """
         if (
-            chat.admin_rights.ban_users
-            and bf_sets[str(chat.id)].get("mute") is not None
-            and bf_sets[str(chat.id)].get("mute") != 0
-        ):
-            duration = bf_sets[str(chat.id)].get("mute")
-            await self.apo_lib.utils.mute(chat.id, user.id, duration)
-        if bf_sets[str(chat.id)].get("notify") is True and (
-            not self._ratelimit_notify["bf"].get(user.id)
-            or self._ratelimit_notify["bf"].get(user.id) < time.time()
-        ):
-            for key, value in list(self._ratelimit_notify["bf"].items()):
-                if value < time.time():
-                    self._ratelimit_notify["bf"].pop(key)
-            self._ratelimit_notify["bf"].update(
-                {
-                    user.id: time.time() + bf_sets[str(chat.id)].get("deltimer")
-                    if bf_sets[str(chat.id)].get("deltimer") != 0
-                    else time.time() + 15
-                }
+            str(chat.id) not in bce
+            or not any(
+                bool(ent)
+                for ent, _ in message.get_entities_text()
+                if isinstance(ent, MessageEntityCustomEmoji)
             )
-            usertag = await self.apo_lib.utils.get_tag(user, True)
-            link = await self.apo_lib.utils.get_invite_link(chat)
-            if message.is_reply:
-                reply = await self.apo_lib.utils.get_first_msg(message)
-            else:
-                reply = None
-            if reply and not isinstance(
-                await self._client.get_entity(reply.sender_id), Channel
-            ):
-                reply = None
-            if await self.apo_lib.utils.check_inlinebot(chat.id):
-                msg = await self.inline.bot.send_message(
-                    chat.id
-                    if str(chat.id).startswith("-100")
-                    else int(f"-100{chat.id}"),
-                    self.apo_lib.utils.get_str(
-                        "bf_triggered", self.all_strings, message
-                    ).format(usertag, link),
-                    parse_mode="HTML",
-                    disable_web_page_preview=True,
-                    reply_to_message_id=getattr(reply, "id", None),
-                    allow_sending_without_reply=True,
-                )
-            else:
-                msg = await utils.answer(
-                    message,
-                    self.apo_lib.utils.get_str(
-                        "bf_triggered", self.all_strings, message
-                    ).format(usertag, link),
-                )
-            if bf_sets[str(chat.id)].get("deltimer") != 0:
-                deltimer = bf_sets[str(chat.id)].get("deltimer")
-                await self.apo_lib.utils.delete_message(msg, deltimer=deltimer)
+            or message.id in self._msg_handler
+        ):
+            return
+        self._msg_handler = {message.id: "p__bce"}
+        asyncio.ensure_future(self.punish_handler(chat, user, message, "bce", bce_sets))
+        return
 
-    async def p__bdl(
+    async def p__bdl_handler(
         self,
         chat: Chat,
+        user: User,
         message: Message,
         bdl: list,
         bdl_sets: dict,
@@ -1478,26 +1466,12 @@ class ApodiktumAdminToolsMod(loader.Module):
         if str(chat.id) not in bdl or message.id in self._msg_handler:
             return
         url = self.apo_lib.utils.get_all_urls(message.text, rem_duplicates=True)
-        url = url[0] if len(url) > 0 else None
+        url = url[0].lower() if len(url) > 0 else None
         if not url:
             return
-        if (
-            self._ratelimit_bdl.get(chat.id)
-            and url in self._ratelimit_bdl.get(chat.id)
-            and self._ratelimit_bdl[chat.id].get(url) > time.time()
-        ):
-            self._msg_handler = {message.id: "p__bnd"}
-            asyncio.ensure_future(self.apo_lib.utils.delete_message(message, True))
-            if self._ratelimit_bdl.get(chat.id):
-                for key, value in list(self._ratelimit_bdl[chat.id].items()):
-                    if value < time.time():
-                        self._ratelimit_bdl[chat.id].pop(key)
-        else:
-            self._ratelimit_bdl.update(
-                {chat.id: {url: time.time() + bdl_sets[str(chat.id)].get("timeout")}}
-            )
+        await self.p_ratelimit_handler(chat, user, message, "bdl", bdl_sets)
 
-    async def p__bss(
+    async def p__bss_handler(
         self,
         chat: Chat,
         user: User,
@@ -1519,27 +1493,9 @@ class ApodiktumAdminToolsMod(loader.Module):
             or message.id in self._msg_handler
         ):
             return
-        if (
-            self._ratelimit_bss.get(chat.id)
-            and user.id in self._ratelimit_bss.get(chat.id)
-            and self._ratelimit_bss[chat.id].get(user.id) > time.time()
-        ):
-            self._msg_handler = {message.id: "p__bss"}
-            asyncio.ensure_future(self.apo_lib.utils.delete_message(message, True))
-            if self._ratelimit_bss.get(chat.id):
-                for key, value in list(self._ratelimit_bss[chat.id].items()):
-                    if value < time.time():
-                        self._ratelimit_bss[chat.id].pop(key)
-        else:
-            self._ratelimit_bss.update(
-                {
-                    chat.id: {
-                        user.id: time.time() + bss_sets[str(chat.id)].get("timeout")
-                    }
-                }
-            )
+        await self.p_ratelimit_handler(chat, user, message, "bss", bss_sets)
 
-    async def p__bgs(
+    async def p__bgs_handler(
         self,
         chat: Chat,
         user: User,
@@ -1561,25 +1517,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             or message.id in self._msg_handler
         ):
             return
-        if (
-            self._ratelimit_bgs.get(chat.id)
-            and user.id in self._ratelimit_bgs.get(chat.id)
-            and self._ratelimit_bgs[chat.id].get(user.id) > time.time()
-        ):
-            self._msg_handler = {message.id: "p__bgs"}
-            asyncio.ensure_future(self.apo_lib.utils.delete_message(message, True))
-            if self._ratelimit_bgs.get(chat.id):
-                for key, value in list(self._ratelimit_bgs[chat.id].items()):
-                    if value < time.time():
-                        self._ratelimit_bgs[chat.id].pop(key)
-        else:
-            self._ratelimit_bgs.update(
-                {
-                    chat.id: {
-                        user.id: time.time() + bgs_sets[str(chat.id)].get("timeout")
-                    }
-                }
-            )
+        await self.p_ratelimit_handler(chat, user, message, "bgs", bgs_sets)
 
     async def p__gl(
         self,
@@ -1726,10 +1664,13 @@ class ApodiktumAdminToolsMod(loader.Module):
         bnd_sets = self._db.get(self._classname, "bnd_sets", {})
         bss = self._db.get(self._classname, "bss", [])
         bss_sets = self._db.get(self._classname, "bss_sets", {})
+        bce = self._db.get(self._classname, "bce", [])
+        bce_sets = self._db.get(self._classname, "bce_sets", {})
         if (
             user_id in [chat_id, self.inline.bot_id]
             or (
                 chat_id_str in bnd
+                or chat_id_str in bce
                 or chat_id_str in bcu
                 or chat_id_str in bdl
                 or chat_id_str in bf
@@ -1770,9 +1711,10 @@ class ApodiktumAdminToolsMod(loader.Module):
                 await self.p__bnd_handler(chat, user, message, bnd, bnd_sets)
             if isinstance(user, Channel):
                 await self.p__bcu_handler(chat, user, message, bcu, bcu_sets)
-            await self.p__bdl(chat, message, bdl, bdl_sets)
-            await self.p__bss(chat, user, message, bss, bss_sets)
-            await self.p__bgs(chat, user, message, bgs, bgs_sets)
+            await self.p__bdl_handler(chat, user, message, bdl, bdl_sets)
+            await self.p__bss_handler(chat, user, message, bss, bss_sets)
+            await self.p__bgs_handler(chat, user, message, bgs, bgs_sets)
+            await self.p__bce_handler(chat, user, message, bce, bce_sets)
             await self.p__admin_handler(chat, user, message)
         with contextlib.suppress(Exception):
             self._msg_handler.pop(message.id)
@@ -1792,10 +1734,10 @@ class ApodiktumAdminToolsMod(loader.Module):
             asyncio.ensure_future(self.p__gl(chat, user, message, gl, gl_sets))
         if (
             chat_id_str in bf
-            and self._antiflood.get(chat_id)
-            and self._antiflood[chat_id][0] != user_id
+            and self._ratelimit_p_count["bf"].get(chat_id)
+            and self._ratelimit_p_count["bf"][chat_id][0] != user_id
         ):
-            self._antiflood.pop(chat_id)
+            self._ratelimit_p_count["bf"].pop(chat_id)
         return
 
     def _db_migrator(self):
@@ -1825,3 +1767,107 @@ class ApodiktumAdminToolsMod(loader.Module):
         with contextlib.suppress(Exception):
             self._db[self._classname].pop("migrated")
         self._db.set(self._classname, "migrate", True)
+
+    async def punish_handler(
+        self,
+        chat: Chat,
+        user: User,
+        message: Message,
+        module_short: str,
+        module_sets: dict,
+    ):  # sourcery skip: low-code-quality
+        await self.apo_lib.utils.delete_message(message, True)
+        if (
+            chat.admin_rights.ban_users
+            and module_sets[str(chat.id)].get("mute") is not None
+            and module_sets[str(chat.id)].get("mute") != 0
+        ):
+            duration = module_sets[str(chat.id)].get("mute")
+            await self.apo_lib.utils.mute(chat.id, user.id, duration)
+        if module_sets[str(chat.id)].get("ban") is True:
+            await self.apo_lib.utils.ban(chat.id, user.id)
+        if module_sets[str(chat.id)].get("notify") is True and (
+            not self._ratelimit_notify[module_short].get(user.id)
+            or self._ratelimit_notify[module_short].get(user.id) < time.time()
+        ):
+            for key, value in list(self._ratelimit_notify[module_short].items()):
+                if value < time.time():
+                    self._ratelimit_notify[module_short].pop(key)
+            self._ratelimit_notify[module_short].update(
+                {
+                    user.id: time.time() + module_sets[str(chat.id)].get("deltimer")
+                    if module_sets[str(chat.id)].get("deltimer") != 0
+                    else time.time() + 15
+                }
+            )
+            usertag = await self.apo_lib.utils.get_tag(user, True)
+            link = (
+                await self.apo_lib.utils.get_invite_link(chat)
+                if module_short == "bnd"
+                else None
+            )
+            if message.is_reply:
+                reply = await self.apo_lib.utils.get_first_msg(message)
+            else:
+                reply = None
+            if reply and not isinstance(
+                await self._client.get_entity(reply.sender_id), Channel
+            ):
+                reply = None
+            if await self.apo_lib.utils.check_inlinebot(chat.id):
+                msg = await self.inline.bot.send_message(
+                    chat.id
+                    if str(chat.id).startswith("-100")
+                    else int(f"-100{chat.id}"),
+                    self.apo_lib.utils.get_str(
+                        f"{module_short}_triggered", self.all_strings, message
+                    ).format(usertag, link),
+                    parse_mode="HTML",
+                    disable_web_page_preview=True,
+                    reply_to_message_id=getattr(reply, "id", None),
+                    allow_sending_without_reply=True,
+                )
+            else:
+                msg = await utils.answer(
+                    message,
+                    self.apo_lib.utils.get_str(
+                        f"{module_short}_triggered", self.all_strings, message
+                    ).format(usertag, link),
+                )
+            if module_sets[str(chat.id)].get("deltimer") != 0:
+                deltimer = module_sets[str(chat.id)].get("deltimer")
+                await self.apo_lib.utils.delete_message(msg, deltimer=deltimer)
+
+    async def p_ratelimit_handler(self, chat, user, message, module_short, module_sets):
+        if (
+            self._ratelimit_p_count[module_short].get(chat.id)
+            and user.id in self._ratelimit_p_count[module_short].get(chat.id)
+            and (
+                not self._ratelimit_p_count[module_short][chat.id].get(user.id)[1]
+                or self._ratelimit_p_count[module_short][chat.id].get(user.id)[1]
+                >= module_short[str(chat.id)].get("limit")
+            )
+            and self._ratelimit_p_count[module_short][chat.id].get(user.id)[0]
+            > time.time()
+        ):
+            self._msg_handler = {message.id: f"p__{module_short}"}
+            asyncio.ensure_future(
+                self.punish_handler(chat, user, message, module_short, module_sets)
+            )
+            if self._ratelimit_p_count[module_short].get(chat.id):
+                for key, value in list(
+                    self._ratelimit_p_count[module_short][chat.id].items()
+                ):
+                    if value < time.time():
+                        self._ratelimit_p_count[module_short][chat.id].pop(key)
+        else:
+            self._ratelimit_p_count[module_short].update(
+                {
+                    chat.id: {
+                        user.id: [
+                            time.time() + module_sets[str(chat.id)].get("timeout"),
+                            module_sets[str(chat.id)].get("Limit"),
+                        ]
+                    }
+                }
+            )

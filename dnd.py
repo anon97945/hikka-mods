@@ -1,4 +1,4 @@
-__version__ = (0, 3, 1)
+__version__ = (0, 3, 2)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -26,7 +26,7 @@ __version__ = (0, 3, 1)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.3.0
+# scope: hikka_min 1.3.3
 
 import asyncio
 import contextlib
@@ -69,7 +69,6 @@ class ApodiktumDNDMod(loader.Module):
         "_cfg_active_threshold": (
             "What number of your messages is required to trust peer."
         ),
-        "_cfg_afk_no_grp": "If set to true, AFK will not reply in groups.",
         "_cfg_afk_show_duration": (
             "If set to true, AFK message will include the the automatic removal time."
         ),
@@ -77,8 +76,12 @@ class ApodiktumDNDMod(loader.Module):
         "_cfg_custom_msg": (
             "Custom message to notify untrusted peers. Leave empty for default one."
         ),
-        "_cfg_use_bio": "Show AFK message in bio.",
         "_cfg_delete_dialog": "If set to true, dialog will be deleted after banning.",
+        "_cfg_doc_afk_group_list": "React to Tags from chats in this list.",
+        "_cfg_doc_whitelist": (
+            "Whether the `afk_group_list`-list is a for excluded(True) or"
+            " included(False) chats."
+        ),
         "_cfg_gone": (
             "If set to true, the AFK message will include the time you were gone."
         ),
@@ -87,6 +90,7 @@ class ApodiktumDNDMod(loader.Module):
         "_cfg_photo": "Photo, which is sent along with banned notification.",
         "_cfg_pmbl": "If set to true, PMBL is active.",
         "_cfg_report_spam": "If set to true, user will be reported after banning.",
+        "_cfg_use_bio": "Show AFK message in bio.",
         "_log_msg_approved": "User approved in pm {}, filter: {}",
         "_log_msg_punished": "Intruder punished: {}",
         "_log_msg_unapproved": "User unapproved in pm {}.",
@@ -144,7 +148,6 @@ class ApodiktumDNDMod(loader.Module):
         "_cfg_active_threshold": (
             "Какое количество Ваших сообщений необходимо, чтобы доверять пользователю."
         ),
-        "_cfg_afk_no_grp": "Если установлено True, AFK не будет отвечать в группах.",
         "_cfg_afk_show_duration": (
             "Если включено, сообщение AFK будет содержать время его окончания"
         ),
@@ -294,15 +297,22 @@ class ApodiktumDNDMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
-                "afk_no_group",
-                True,
-                doc=lambda: self.strings("_cfg_afk_no_grp"),
-                validator=loader.validators.Boolean(),
+                "afk_group_list",
+                doc=lambda: self.strings("_cfg_doc_afk_group_list"),
+                validator=loader.validators.Series(
+                    loader.validators.TelegramID(),
+                ),
             ),
             loader.ConfigValue(
                 "afk_show_duration",
                 True,
                 doc=lambda: self.strings("_cfg_afk_show_duration"),
+                validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
+                "afk_tag_whitelist",
+                True,
+                doc=lambda: self.strings("_cfg_doc_whitelist"),
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
@@ -681,7 +691,7 @@ class ApodiktumDNDMod(loader.Module):
         """
         status_duration = ""
         status = ""
-        args = utils.get_args_raw(message)
+        args = utils.get_args_raw(message.text)
         args = args.split(" ", 2)
         t = self.apo_lib.utils.convert_time(args[1]) or 0 if len(args) > 1 else 0
         if args[0] not in self.get("texts", {}):
@@ -702,8 +712,27 @@ class ApodiktumDNDMod(loader.Module):
         self.set("status", args[0])
         self.set("gone", time.time())
         if t and len(args) > 2:
+            args = list(
+                map(
+                    lambda x: x.replace(
+                        "<emoji document_id=", "</code><emoji document_id="
+                    ),
+                    args,
+                )
+            )
+            args = list(map(lambda x: x.replace("</emoji>", "</emoji><code>"), args))
             self.set("further", args[2])
         elif not t and len(args) > 1:
+            args[1:] = [" ".join(args[1:])]
+            args = list(
+                map(
+                    lambda x: x.replace(
+                        "<emoji document_id=", "</code><emoji document_id="
+                    ),
+                    args,
+                )
+            )
+            args = list(map(lambda x: x.replace("</emoji>", "</emoji><code>"), args))
             self.set("further", args[1])
 
         self._ratelimit_afk = []
@@ -738,9 +767,10 @@ class ApodiktumDNDMod(loader.Module):
             bio = utils.escape_html(self.get("texts", {})[args[0]])
             if self.get("further"):
                 bio += (
-                    f" | {utils.remove_html(self.apo_lib.utils.get_str('afk_message_further', self.all_strings, message).format(self.get('further')))}"
+                    f" | {self.apo_lib.utils.rem_customemoji_html(utils.remove_html(self.apo_lib.utils.get_str('afk_message_further', self.all_strings, message).format(self.get('further'))))}"
                 )
-            await self.client(UpdateProfileRequest(about=bio[:70]))
+            bio_len = 140 if (await self._client.get_me()).premium else 70
+            await self.client(UpdateProfileRequest(about=bio[:bio_len]))
 
         msg = await utils.answer(message, status)
         self._sent_messages += [msg]
@@ -871,7 +901,17 @@ class ApodiktumDNDMod(loader.Module):
                 )
                 is_pmbl = await self.p__pmbl(peer, message)
 
-            if not is_pmbl:
+            if not is_pmbl and (
+                message.is_private
+                or (
+                    self.config["afk_tag_whitelist"]
+                    and chat_id in self.config["afk_group_list"]
+                )
+                or (
+                    not self.config["afk_tag_whitelist"]
+                    and chat_id not in self.config["afk_group_list"]
+                )
+            ):
                 user_id = await self.apo_lib.utils.get_user_id(message)
                 await self.p__afk(chat_id, user_id, message)
             return
@@ -957,6 +997,7 @@ class ApodiktumDNDMod(loader.Module):
                 return
         elif not message.mentioned:
             return
+
         now = datetime.datetime.now().replace(microsecond=0)
         gone = datetime.datetime.fromtimestamp(self.get("gone")).replace(microsecond=0)
         if self.get("status_duration"):
@@ -970,31 +1011,30 @@ class ApodiktumDNDMod(loader.Module):
         diff = now - gone
         diff_sec = diff.total_seconds()
         further = self.get("further") or ""
-        if message.is_private or not self.config["afk_no_group"]:
-            afk_string = self.apo_lib.utils.get_str(
-                "afk_message", self.all_strings, message
-            ).format(self.get("texts", {"": ""})[self.get("status", "")])
-            if further:
-                afk_string += self.apo_lib.utils.get_str(
-                    "afk_message_further", self.all_strings, message
-                ).format(further)
-            if self.config["afk_gone_time"]:
-                afk_string += (
-                    f"{self.apo_lib.utils.get_str('afk_message_gone', self.all_strings, message).format(self.apo_lib.utils.time_formatter(diff_sec, short=True))}"
-                )
-            if not self.config["afk_gone_time"] and self.config["afk_show_duration"]:
-                afk_string += "\n"
-            if self.config["afk_show_duration"] and self.get("status_duration"):
-                afk_string += (
-                    f"{self.apo_lib.utils.get_str('afk_message_duration', self.all_strings, message).format(self.apo_lib.utils.time_formatter(status_len_sec, short=True))}"
-                )
-
-            m = await utils.answer(
-                message,
-                afk_string,
+        afk_string = self.apo_lib.utils.get_str(
+            "afk_message", self.all_strings, message
+        ).format(self.get("texts", {"": ""})[self.get("status", "")])
+        if further:
+            afk_string += self.apo_lib.utils.get_str(
+                "afk_message_further", self.all_strings, message
+            ).format(further)
+        if self.config["afk_gone_time"]:
+            afk_string += (
+                f"{self.apo_lib.utils.get_str('afk_message_gone', self.all_strings, message).format(self.apo_lib.utils.time_formatter(diff_sec, short=True))}"
+            )
+        if not self.config["afk_gone_time"] and self.config["afk_show_duration"]:
+            afk_string += "\n"
+        if self.config["afk_show_duration"] and self.get("status_duration"):
+            afk_string += (
+                f"{self.apo_lib.utils.get_str('afk_message_duration', self.all_strings, message).format(self.apo_lib.utils.time_formatter(status_len_sec, short=True))}"
             )
 
-            self._sent_messages += [m]
+        m = await utils.answer(
+            message,
+            afk_string,
+        )
+
+        self._sent_messages += [m]
 
         if not self.get("notif", {"": False})[self.get("status", "")]:
             await self._client.send_read_acknowledge(

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 13)
+__version__ = (0, 0, 14)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -24,7 +24,7 @@ __version__ = (0, 0, 13)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.3.0
+# scope: hikka_min 1.3.3
 
 import contextlib
 import itertools

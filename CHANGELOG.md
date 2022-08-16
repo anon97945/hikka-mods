@@ -1,12 +1,21 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.21
+### 📃 module updates:
+- admintools | added `BlockCustomEmojis`
+- admintools | rework of `punish handler`, now also supports notify for each
+- dnd | now can black/whitelist chats for afk response. check `config`
+- dnd | now supports `custom emojis`
+- dnd | now supports `premium` further `bio length`
+- dnd | removed config `afk_no_group` use `afk_group_list` and `afk_tag_whitelist`
+
 ## 🆕 Version 2.0.20
 ### 📃 module updates:
 - auto_update | fix watcher
 
 ## 🆕 Version 2.0.19
 ### 📃 module updates:
-- dnd | now also `supports` further in `bio`
+- dnd | now also supports further in `bio`
 
 ## 🆕 Version 2.0.18
 ### 📃 module updates:
@@ -39,7 +48,7 @@
 
 ## 🆕 Version 2.0.13
 #### General:
-- scope: hikka_min 1.3.0
+- scope: hikka_min 1.3.3
 - refactored code for 1.3.0
 - renamed modules to `Apo-Modulename`
 
