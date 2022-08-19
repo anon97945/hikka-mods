@@ -1,4 +1,4 @@
-__version__ = (0, 1, 25)
+__version__ = (0, 1, 27)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 1, 25)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.3.0
+# scope: hikka_min 1.3.3
 
 import asyncio
 import logging
@@ -304,14 +304,20 @@ class ApodiktumAutoReactMod(loader.Module):
             return True
         except ReactionInvalidError:
             if self.config["raise_error"]:
-                logger.info(f"ReactionInvalidError: {emoji_reaction} in chat {chatid}")
+                self.apo_lib.utils.log(
+                    logging.INFO,
+                    __name__,
+                    f"ReactionInvalidError: {emoji_reaction} in chat {chatid}",
+                )
             return False
         except Exception as exc:  # skipcq: PYL-W0703
             if self.config["raise_error"]:
                 if "PREMIUM_ACCOUNT_REQUIRED" in str(exc):
-                    logger.info(
-                        f"PREMIUM_ACCOUNT_REQUIRED: {emoji_reaction} in chat {chatid}"
+                    self.apo_lib.utils.log(
+                        logging.INFO,
+                        __name__,
+                        f"PREMIUM_ACCOUNT_REQUIRED: {emoji_reaction} in chat {chatid}",
                     )
                 else:
-                    logger.info(f"Error: {exc}")
+                    self.apo_lib.utils.log(logging.INFO, __name__, f"Error: {exc}")
             return False

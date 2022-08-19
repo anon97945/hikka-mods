@@ -1,4 +1,4 @@
-__version__ = (0, 0, 25)
+__version__ = (0, 0, 27)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 0, 25)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.3.0
+# scope: hikka_min 1.3.3
 
 import logging
 from datetime import date, timedelta
@@ -434,5 +434,9 @@ class ApodiktumDonatorsMod(loader.Module):
                     kchannel,
                     userid,
                 )
-                logger.info(self.strings("_log_doc_kicked").format(userid, kchannel))
+                self.apo_lib.utils.log(
+                    logging.INFO,
+                    __name__,
+                    self.strings("_log_doc_kicked").format(userid, kchannel),
+                )
         await message.react("👍")

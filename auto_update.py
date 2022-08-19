@@ -1,4 +1,4 @@
-__version__ = (1, 0, 22)
+__version__ = (1, 0, 24)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (1, 0, 22)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.3.0
+# scope: hikka_min 1.3.3
 
 import asyncio
 import contextlib
@@ -199,11 +199,13 @@ class ApodiktumAutoUpdateMod(loader.Module):
                 clear_mentions=True,
             )
 
-        logger.info(
+        self.apo_lib.utils.log(
+            logging.INFO,
+            __name__,
             self.strings("updating").format(
                 self.config["update_delay"],
                 "\n".join(message.raw_text.splitlines()[5:]),
-            )
+            ),
         )
         await asyncio.sleep(self.config["update_delay"])
         with contextlib.suppress(Exception):
@@ -213,7 +215,11 @@ class ApodiktumAutoUpdateMod(loader.Module):
         last_commit = message.raw_text.splitlines()[5].lower()
         for x in skip_update:
             if x.lower() in last_commit and "revert" not in last_commit:
-                logger.info(self.strings("skip_update").format(x, last_commit))
+                self.apo_lib.utils.log(
+                    logging.INFO,
+                    __name__,
+                    self.strings("skip_update").format(x, last_commit),
+                )
                 return True
         return False
 
@@ -240,7 +246,9 @@ class ApodiktumAutoUpdateMod(loader.Module):
                     return
                 with contextlib.suppress(Exception):
                     self._autoupdate_task.cancel()
-                    logger.info(self.strings("skip_old"))
+                    self.apo_lib.utils.log(
+                        logging.INFO, __name__, self.strings("skip_old")
+                    )
                 self._autoupdate_task = asyncio.ensure_future(self._autoupdate(message))
 
     @loader.watcher("in", "only_messages", "only_pm")
@@ -262,6 +270,6 @@ class ApodiktumAutoUpdateMod(loader.Module):
                 return
             with contextlib.suppress(Exception):
                 self._autoupdate_task.cancel()
-                logger.info(self.strings("skip_old"))
+                self.apo_lib.utils.log(logging.INFO, __name__, self.strings("skip_old"))
             self._autoupdate_task = asyncio.ensure_future(self._autoupdate(message))
             return

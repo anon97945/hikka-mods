@@ -1,4 +1,4 @@
-__version__ = (0, 1, 0)
+__version__ = (0, 1, 2)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 1, 0)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.3.0
+# scope: hikka_min 1.3.3
 
 
 import contextlib
@@ -462,5 +462,10 @@ class ApodiktumMsgMergerMod(loader.Module):
             }
             return
         except Exception as exc:
-            logger.debug(f"Edit failed on last_msg:\n{str(exc)}")
+            self.apo_lib.utils.log(
+                logging.DEBUG,
+                __name__,
+                f"Edit failed on last_msg:\n{str(exc)}",
+                debug_msg=True,
+            )
             return

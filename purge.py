@@ -1,4 +1,4 @@
-__version__ = (0, 1, 29)
+__version__ = (0, 1, 31)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -19,7 +19,7 @@ __version__ = (0, 1, 29)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.3.0
+# scope: hikka_min 1.3.3
 
 import asyncio
 import contextlib
@@ -369,7 +369,11 @@ class ApodiktumPurgeMod(loader.Module):
         await done.delete()
 
         if self.config["log_purge"]:
-            logger.info(self.strings("purge_success").format(str(msg_count)))
+            self.apo_lib.utils.log(
+                logging.INFO,
+                __name__,
+                self.strings("purge_success").format(str(msg_count)),
+            )
 
     async def spurgecmd(self, message: Message):
         """
@@ -406,7 +410,11 @@ class ApodiktumPurgeMod(loader.Module):
             return
 
         if self.config["log_purge"]:
-            logger.info(self.strings("purge_success").format(str(msg_count)))
+            self.apo_lib.utils.log(
+                logging.INFO,
+                __name__,
+                self.strings("purge_success").format(str(msg_count)),
+            )
 
     async def purgemecmd(self, message: Message):
         """
@@ -441,7 +449,11 @@ class ApodiktumPurgeMod(loader.Module):
         await asyncio.sleep(2)
         await done.delete()
         if self.config["log_purgeme"]:
-            logger.info(self.strings("purge_success").format(str(msg_count)))
+            self.apo_lib.utils.log(
+                logging.INFO,
+                __name__,
+                self.strings("purge_success").format(str(msg_count)),
+            )
 
     async def spurgemecmd(self, message: Message):
         """
@@ -468,7 +480,11 @@ class ApodiktumPurgeMod(loader.Module):
         await message.delete()
         msg_count = await self._purge_user_messages(chat, user_id, purge_count)
         if self.config["log_purgeme"]:
-            logger.info(self.strings("purge_success").format(str(msg_count)))
+            self.apo_lib.utils.log(
+                logging.INFO,
+                __name__,
+                self.strings("purge_success").format(str(msg_count)),
+            )
 
     async def purgeusercmd(self, message: Message):
         """
@@ -505,7 +521,11 @@ class ApodiktumPurgeMod(loader.Module):
         await asyncio.sleep(2)
         await done.delete()
         if self.config["log_purgeme"]:
-            logger.info(self.strings("purge_success").format(str(msg_count)))
+            self.apo_lib.utils.log(
+                logging.INFO,
+                __name__,
+                self.strings("purge_success").format(str(msg_count)),
+            )
 
     async def spurgeusercmd(self, message: Message):
         """
@@ -534,7 +554,11 @@ class ApodiktumPurgeMod(loader.Module):
         await message.delete()
         msg_count = await self._purge_user_messages(chat, user_id, purge_count)
         if self.config["log_purgeme"]:
-            logger.info(self.strings("purge_success").format(str(msg_count)))
+            self.apo_lib.utils.log(
+                logging.INFO,
+                __name__,
+                self.strings("purge_success").format(str(msg_count)),
+            )
 
     async def adelcmd(self, message: Message):
         """
@@ -571,7 +595,11 @@ class ApodiktumPurgeMod(loader.Module):
                     break
                 i += 1
         if self.config["log_edit"]:
-            logger.info(self.strings("edit_success").format(old_msg, new_msg))
+            self.apo_lib.utils.log(
+                logging.INFO,
+                __name__,
+                self.strings("edit_success").format(old_msg, new_msg),
+            )
 
     async def sdcmd(self, message: Message):
         """
@@ -598,4 +626,6 @@ class ApodiktumPurgeMod(loader.Module):
         await msg.delete()
 
         if self.config["log_sd"]:
-            logger.info(self.strings("sd_success").format(str(counter)))
+            self.apo_lib.utils.log(
+                logging.INFO, __name__, self.strings("sd_success").format(str(counter))
+            )
