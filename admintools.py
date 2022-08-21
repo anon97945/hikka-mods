@@ -258,7 +258,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         )
         self._db_migrator()
         self._pt_task = asyncio.ensure_future(self._global_queue_handler())
-        self._ratelimit_p_count = {"bgs": {}, "bss": {}, "bf": {}}
+        self._ratelimit_p_count = {"bdl": {}, "bf": {}, "bgs": {}, "bss": {}}
         self._ratelimit_notify = {
             "bce": {},
             "bcu": {},
@@ -1861,12 +1861,13 @@ class ApodiktumAdminToolsMod(loader.Module):
             asyncio.ensure_future(
                 self.punish_handler(chat, user, message, module_short, module_sets)
             )
-            if self._ratelimit_p_count[module_short].get(chat.id):
-                for key, value in list(
-                    self._ratelimit_p_count[module_short][chat.id].items()
-                ):
-                    if value < time.time():
-                        self._ratelimit_p_count[module_short][chat.id].pop(key)
+            if (
+                self._ratelimit_p_count[module_short].get(chat.id)
+                and user.id in self._ratelimit_p_count[module_short].get(chat.id)
+                and self._ratelimit_p_count[module_short][chat.id][user.id][0]
+                < time.time()
+            ):
+                self._ratelimit_p_count[module_short][chat.id].pop(user.id)
         else:
             self._ratelimit_p_count[module_short].update(
                 {

@@ -281,14 +281,7 @@ class ApodiktumMsgMergerMod(loader.Module):
         if (
             not self.config["active"]
             or message.via_bot
-            or (
-                message.media
-                and not getattr(message.media, "webpage", False)
-                or (
-                    not self.config["merge_urls"]
-                    and self.apo_lib.utils.get_entityurls(message)
-                )
-            )
+            or message.raw_text.startswith(self.self.get_prefix())
         ):
             return
 
@@ -325,6 +318,13 @@ class ApodiktumMsgMergerMod(loader.Module):
         if (
             self.config["skip_length"]
             and len(utils.remove_html(message.text)) >= self.config["skip_length"]
+        ) or (
+            message.media
+            and not getattr(message.media, "webpage", False)
+            or (
+                not self.config["merge_urls"]
+                and self.apo_lib.utils.get_entityurls(message)
+            )
         ):
             return
         try:

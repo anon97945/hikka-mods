@@ -1,5 +1,12 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.22
+### 📃 module updates:
+- admintools | fixed `BlockDoubleLink`
+- admintools | fixed `TypeError: '<' not supported between instances of 'list' and 'float'`
+- msg_merger | `skip_prefix` work in messages with links
+- msg_merger | ignore messages with `prefix`
+
 ## 🆕 Version 2.0.21
 ### 📃 module updates:
 - admintools | added `BlockCustomEmojis`
