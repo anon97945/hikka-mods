@@ -1,4 +1,4 @@
-__version__ = (1, 1, 9)
+__version__ = (1, 1, 10)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -100,12 +100,21 @@ class ApodiktumAdminToolsMod(loader.Module):
         "admin_tag": "Der Benutzer {} hat um Hilfe gebeten.\n{}",
         "admin_tag_reply": "\n\nDie entsprechende Nachricht von {} ist:",
         "admin_tag_reply_msg": "Danke, der Besitzer dieses Bots wurde informiert.",
-        "bcu_triggered": "{}, du kannst hier nicht als Kanal schreiben.",
+        "bce": "BlockCustomEmojis",
+        "bce_triggered": "{}, du kannst in diesem Chat keine custom emojis senden.",
+        "bcu_triggered": "{}, du kannst in diesem Chat nicht als Kanal schreiben.",
+        "bdl_triggered": (
+            "{}, der Link wurde bereits gesendet. Du musst warten bis er erneut"
+            " gesendet werden kann."
+        ),
+        "bf_triggered": "{}, floodlimit überschritten.",
+        "bgs_triggered": "{}, du musst warten bis du weitere Gifs senden kannst.",
         "bnd_triggered": (
             "{}, die Kommentarfunktion wurde auf die Chatmitglieder begrenzt, "
             "tritt bitte zuerst unserem Chat bei."
             "\n\n👉🏻 {}\n\nHochachtungsvoll, die Obrigkeit."
         ),
+        "bss_triggered": "{}, du musst warten bis du weitere Sticker senden kannst.",
         "error": "<b>Dein Befehl war falsch.</b>",
         "no_id": "<b>Ihre Eingabe war keine TG ID.</b>",
         "no_int": "<b>Ihre Eingabe war keine Integer.</b>",
@@ -258,7 +267,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         )
         self._db_migrator()
         self._pt_task = asyncio.ensure_future(self._global_queue_handler())
-        self._ratelimit_p_count = {"bgs": {}, "bss": {}, "bf": {}}
+        self._ratelimit_p_count = {"bdl": {}, "bf": {}, "bgs": {}, "bss": {}}
         self._ratelimit_notify = {
             "bce": {},
             "bcu": {},
@@ -1861,12 +1870,13 @@ class ApodiktumAdminToolsMod(loader.Module):
             asyncio.ensure_future(
                 self.punish_handler(chat, user, message, module_short, module_sets)
             )
-            if self._ratelimit_p_count[module_short].get(chat.id):
-                for key, value in list(
-                    self._ratelimit_p_count[module_short][chat.id].items()
-                ):
-                    if value < time.time():
-                        self._ratelimit_p_count[module_short][chat.id].pop(key)
+            if (
+                self._ratelimit_p_count[module_short].get(chat.id)
+                and user.id in self._ratelimit_p_count[module_short].get(chat.id)
+                and self._ratelimit_p_count[module_short][chat.id][user.id][0]
+                < time.time()
+            ):
+                self._ratelimit_p_count[module_short][chat.id].pop(user.id)
         else:
             self._ratelimit_p_count[module_short].update(
                 {

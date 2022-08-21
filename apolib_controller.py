@@ -1,4 +1,4 @@
-__version__ = (0, 1, 9)
+__version__ = (0, 1, 12)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -79,7 +79,7 @@ class ApodiktumLibControllerMod(loader.Module):
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
-        self._lib_classname = "ApodiktumLib"
+        self._lib_classname = self.apo_lib.__class__.__name__
         self._lib_db = self._db[self._lib_classname]
         self._chats_db = self._lib_db.setdefault("chats", {})
 
@@ -173,3 +173,7 @@ class ApodiktumLibControllerMod(loader.Module):
             message,
             self.apo_lib.utils.get_str("lang_removed", self.all_strings, message),
         )
+
+    @loader.watcher(only_messages=True)
+    async def watcher(self, message: Message):
+        await self.apo_lib.watcher_q.msg_reciever(message)
