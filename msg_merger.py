@@ -1,4 +1,4 @@
-__version__ = (0, 1, 3)
+__version__ = (0, 1, 5)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -232,6 +232,10 @@ class ApodiktumMsgMergerMod(loader.Module):
             self.changes,
             self.config["auto_migrate"],
         )
+        self.apo_lib.watcher_q.register(self.__class__.__name__)
+
+    async def on_unload(self):
+        self.apo_lib.watcher_q.unregister(self.__class__.__name__)
 
     async def cmsgmergercmd(self, message: Message):
         """
@@ -276,10 +280,12 @@ class ApodiktumMsgMergerMod(loader.Module):
             await utils.answer(message, self.strings("undo_merge_fail"))
         self.merged_msgs.clear()
 
-    @loader.watcher("out", "only_messages", "editable", "no_commands")
-    async def watcher(self, message: Message):
+    async def q_watcher(self, message: Message):
         if (
             not self.config["active"]
+            or not isinstance(message, Message)
+            or not message.out
+            or message.forward
             or message.via_bot
             or message.raw_text.startswith(self.get_prefix())
         ):
