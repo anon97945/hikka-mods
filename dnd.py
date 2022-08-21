@@ -1,4 +1,4 @@
-__version__ = (0, 3, 3)
+__version__ = (0, 3, 4)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -79,8 +79,8 @@ class ApodiktumDNDMod(loader.Module):
         "_cfg_delete_dialog": "If set to true, dialog will be deleted after banning.",
         "_cfg_doc_afk_group_list": "React to Tags from chats in this list.",
         "_cfg_doc_whitelist": (
-            "Whether the `afk_group_list`-list is a for excluded(True) or"
-            " included(False) chats."
+            "Whether the `afk_group_list`-list is for included(True) or"
+            " excluded(False) chats."
         ),
         "_cfg_gone": (
             "If set to true, the AFK message will include the time you were gone."

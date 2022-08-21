@@ -1,5 +1,10 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.23
+### 📃 module updates:
+- admintools | fix `whitelist` doc and `behavior`
+- dnd | fix `whitelist` doc and `behavior`
+
 ## 🆕 Version 2.0.22
 ### 📃 module updates:
 - admintools | fixed `BlockDoubleLink`

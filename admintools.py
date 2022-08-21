@@ -1,4 +1,4 @@
-__version__ = (1, 1, 10)
+__version__ = (1, 1, 11)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -46,8 +46,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         "_cfg_doc_admin_tag_chats": "React to @admin in given chats.",
         "_cfg_doc_ignore_admins": "Wheather to ignore tags from admins.",
         "_cfg_doc_whitelist": (
-            "Whether the `admin_tag_chats`-list is a for excluded(True) or"
-            " included(False) chats."
+            "Whether the `admin_tag_chats`-list is for included(True) or"
+            " excluded(False) chats."
         ),
         "admin_tag": "The User {} asked for help.\n{}",
         "admin_tag_reply": "\n\nThe corresponding message from {} is:",
@@ -1695,11 +1695,11 @@ class ApodiktumAdminToolsMod(loader.Module):
             or (
                 (
                     self.config["tag_whitelist"]
-                    and chat_id not in self.config["admin_tag_chats"]
+                    and chat_id in self.config["admin_tag_chats"]
                 )
                 or (
                     not self.config["tag_whitelist"]
-                    and chat_id in self.config["admin_tag_chats"]
+                    and chat_id not in self.config["admin_tag_chats"]
                 )
             )
         ):

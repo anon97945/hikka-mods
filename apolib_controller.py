@@ -1,4 +1,4 @@
-__version__ = (0, 1, 12)
+__version__ = (0, 1, 13)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -21,6 +21,7 @@ __version__ = (0, 1, 12)
 # scope: hikka_only
 # scope: hikka_min 1.3.3
 
+import contextlib
 import logging
 
 from telethon.tl.types import Message
@@ -176,4 +177,5 @@ class ApodiktumLibControllerMod(loader.Module):
 
     @loader.watcher(only_messages=True)
     async def watcher(self, message: Message):
-        await self.apo_lib.watcher_q.msg_reciever(message)
+        with contextlib.suppress(Exception):
+            await self.apo_lib.watcher_q.msg_reciever(message)
