@@ -1,5 +1,11 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.25
+### 📃 module updates:
+- admintools | using `apo_lib.watcher_q`
+- apo_python | updated to upstream
+- pmlog | using `apo_lib.watcher_q`
+
 ## 🆕 Version 2.0.24
 ### 📃 module updates:
 - msg_merger | using `q_watcher`

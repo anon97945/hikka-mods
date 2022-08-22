@@ -1,4 +1,4 @@
-__version__ = (0, 0, 39)
+__version__ = (0, 1, 0)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -154,6 +154,10 @@ class ApodiktumPMLogMod(loader.Module):
             self.changes,
             self.config["auto_migrate"],
         )
+        self.apo_lib.watcher_q.register(self.__class__.__name__)
+
+    async def on_unload(self):
+        self.apo_lib.watcher_q.unregister(self.__class__.__name__)
 
     async def cpmlogcmd(self, message: Message):
         """
@@ -164,8 +168,9 @@ class ApodiktumPMLogMod(loader.Module):
             await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
 
-    @loader.watcher("only_messages", "only_pm")
-    async def watcher(self, message: Message):
+    async def q_watcher(self, message: Message):
+        if not isinstance(message, Message) or not message.is_private:
+            return
         pmlog_whitelist = self.config["whitelist"]
         pmlog_bot = self.config["log_bots"]
         pmlog_group = self.config["log_group"]

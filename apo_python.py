@@ -1,4 +1,4 @@
-__version__ = (0, 0, 14)
+__version__ = (0, 0, 15)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -24,7 +24,7 @@ __version__ = (0, 0, 14)
 # meta pic: https://t.me/file_dumbster/13
 
 # scope: hikka_only
-# scope: hikka_min 1.3.3
+# scope: hikka_min 1.4.0
 
 import contextlib
 import itertools
@@ -51,33 +51,51 @@ class ApodiktumPythonMod(loader.Module):
 
     strings = {
         "name": "Apo-Python",
-        "eval": "<b>🎬 Code:</b>\n<code>{}</code>\n<b>🪄 Result:</b>\n<code>{}</code>",
-        "err": "<b>🎬 Code:</b>\n<code>{}</code>\n\n<b>🚫 Error:</b>\n{}",
+        "eval": (
+            "<emoji document_id='5431376038628171216'>🎬</emoji><b>"
+            " Code:</b>\n<code>{}</code>\n<emoji"
+            " document_id='5472164874886846699'>✨</emoji><b>"
+            " Result:</b>\n<code>{}</code>"
+        ),
+        "err": (
+            "<emoji document_id='5431376038628171216'>🎬</emoji><b>"
+            " Code:</b>\n<code>{}</code>\n\n<emoji"
+            " document_id='6323575131239089635'>🚫</emoji><b> Error:</b>\n{}"
+        ),
     }
 
     strings_ru = {
-        "eval": "<b>🎬 Код:</b>\n<code>{}</code>\n<b>🪄 Результат:</b>\n<code>{}</code>",
-        "err": "<b>🎬 Код:</b>\n<code>{}</code>\n\n<b>🚫 Ошибка:</b>\n{}",
-        "_cmd_doc_aeval": "Алиас для команды .e",
-        "_cmd_doc_ae": "Выполнить Python код",
+        "eval": (
+            "<emoji document_id='5431376038628171216'>🎬</emoji><b>"
+            " Код:</b>\n<code>{}</code>\n<emoji"
+            " document_id='5472164874886846699'>✨</emoji><b>"
+            " Результат:</b>\n<code>{}</code>"
+        ),
+        "err": (
+            "<emoji document_id='5431376038628171216'>🎬</emoji><b>"
+            " Код:</b>\n<code>{}</code>\n\n<emoji"
+            " document_id='6323575131239089635'>🚫</emoji><b> Ошибка:</b>\n{}"
+        ),
         "_cls_doc": "Выполняет Python код",
     }
 
-    async def client_ready(self, client, _):
+    async def client_ready(self):
         self.apo_lib = await self.import_lib(
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
-        self._phone = (await client.get_me()).phone
+        self._phone = (await self._client.get_me()).phone
 
     @loader.owner
-    async def aevalcmd(self, message: Message):
-        """Alias for .e command"""
-        await self.ecmd(message)
+    @loader.command()
+    async def aeval(self, message: Message):
+        """Alias for .ae command"""
+        await self.ae(message)
 
     @loader.owner
-    async def aecmd(self, message: Message):
+    @loader.command()
+    async def ae(self, message: Message):
         """Evaluates python code"""
         ret = self.strings("eval")
         try:
@@ -92,7 +110,7 @@ class ApodiktumPythonMod(loader.Module):
                 "\n<b>🪐 Full stack:</b>\n\n"
                 + "\n".join(item.full_stack.splitlines()[:-1])
                 + "\n\n"
-                + "😵 "
+                + "🚫 "
                 + item.full_stack.splitlines()[-1]
             )
             exc = exc.replace(str(self._phone), "📵")
@@ -175,7 +193,6 @@ class ApodiktumPythonMod(loader.Module):
         }
 
     def get_sub(self, obj: Any, _depth: int = 1) -> dict:
-        # sourcery skip: remove-redundant-constructor-in-dict-union, use-dictionary-union
         """Get all callable capitalised objects in an object recursively, ignoring _*"""
         return {
             **dict(

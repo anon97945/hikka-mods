@@ -1,4 +1,4 @@
-__version__ = (1, 1, 11)
+__version__ = (1, 2, 0)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -215,7 +215,6 @@ class ApodiktumAdminToolsMod(loader.Module):
 
     def __init__(self):
         self._ratelimit = []
-        self._global_queue = []
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "admin_tag",
@@ -265,8 +264,9 @@ class ApodiktumAdminToolsMod(loader.Module):
             self.changes,
             self.config["auto_migrate"],
         )
+        self.apo_lib.watcher_q.register(self.__class__.__name__, "q_watcher_logger")
+        self.apo_lib.watcher_q.register(self.__class__.__name__, "q_watcher_protection")
         self._db_migrator()
-        self._pt_task = asyncio.ensure_future(self._global_queue_handler())
         self._ratelimit_p_count = {"bdl": {}, "bf": {}, "bgs": {}, "bss": {}}
         self._ratelimit_notify = {
             "bce": {},
@@ -280,8 +280,10 @@ class ApodiktumAdminToolsMod(loader.Module):
         self._msg_handler = {}
 
     async def on_unload(self):
-        with contextlib.suppress(Exception):
-            self._pt_task.cancel()
+        self.apo_lib.watcher_q.unregister(self.__class__.__name__, "q_watcher_logger")
+        self.apo_lib.watcher_q.unregister(
+            self.__class__.__name__, "q_watcher_protection"
+        )
 
     async def cadmintoolscmd(self, message: Message):
         """
@@ -1645,26 +1647,22 @@ class ApodiktumAdminToolsMod(loader.Module):
         await asyncio.sleep(30)
         await self.apo_lib.utils.delete_message(msg)
 
-    @loader.watcher("only_messages", "only_groups", "only_channels", "in")
-    async def watcher_protections(self, message: Message):
-        self._global_queue += [message]
+    async def q_watcher_logger(self, message: Message):
+        await self._logger_queue_handler(message)
 
-    async def _global_queue_handler(self):
-        while True:
-            while self._global_queue:
-                try:
-                    await self._global_queue_handler_process(self._global_queue.pop(0))
-                except Exception as exc:  # skipcq: PYL-W0703
-                    self.apo_lib.utils.log(
-                        logging.DEBUG,
-                        __name__,
-                        f"Global queue handler error:\n{exc}",
-                        exc_info=True,
-                    )
-            await asyncio.sleep(0)
+    async def q_watcher_protection(self, message: Message):
+        await self._protection_queue_handler(message)
 
-    async def _global_queue_handler_process(self, message: Message):
-        # sourcery skip: low-code-quality
+    async def _protection_queue_handler(
+        self, message: Message
+    ):  # sourcery skip: low-code-quality
+        if (
+            not isinstance(message, Message)
+            or message.out
+            or not message.is_channel
+            or not message.is_group
+        ):
+            return
         chat_id = utils.get_chat_id(message)
         chat_id_str = str(chat_id)
         user_id = await self.apo_lib.utils.get_user_id(message)
@@ -1736,8 +1734,13 @@ class ApodiktumAdminToolsMod(loader.Module):
             self._msg_handler.pop(message.id)
         return
 
-    @loader.watcher("only_messages", "only_groups", "only_channels")
-    async def watcher_logger(self, message: Message):
+    async def _logger_queue_handler(self, message: Message):
+        if (
+            not isinstance(message, Message)
+            or not message.is_channel
+            or not message.is_group
+        ):
+            return
         chat_id = utils.get_chat_id(message)
         chat_id_str = str(chat_id)
         user_id = await self.apo_lib.utils.get_user_id(message)
@@ -1747,7 +1750,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         if chat_id_str in gl:
             chat = await self._client.get_entity(chat_id)
             user = await self._client.get_entity(user_id)
-            asyncio.ensure_future(self.p__gl(chat, user, message, gl, gl_sets))
+            await self.p__gl(chat, user, message, gl, gl_sets)
         if (
             chat_id_str in bf
             and self._ratelimit_p_count["bf"].get(chat_id)
