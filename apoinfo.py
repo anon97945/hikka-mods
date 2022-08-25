@@ -153,7 +153,12 @@ class ApodiktumInfoMod(loader.Module):
             ),
             loader.ConfigValue(
                 "custom_message",
+                None,
                 doc=lambda: self.strings("_cfg_cst_msg"),
+                validator=loader.validators.Union(
+                    loader.validators.String(),
+                    loader.validators.NoneType(),
+                ),
             ),
             loader.ConfigValue(
                 "disable_banner",

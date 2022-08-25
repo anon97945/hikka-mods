@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.26
+### 📃 module updates:
+- apolib_controller | added `qapolib` to see the current q_watcher queue and tasks
+
 ## 🆕 Version 2.0.25
 ### 📃 module updates:
 - admintools | using `apo_lib.watcher_q`
