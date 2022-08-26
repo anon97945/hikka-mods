@@ -1,4 +1,4 @@
-__version__ = (0, 1, 22)
+__version__ = (0, 1, 23)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -178,7 +178,7 @@ class ApodiktumLangReplierMod(loader.Module):
         self._tr = googletrans.Translator()
 
     def _is_alphabet(self, message):
-        text = message.raw_text
+        text = self.apo_lib.utils.raw_text(message)
         denied_alphabet = ""
         text.encode("utf-8")
         detected_alphabet = self._ad.detect_alphabet(text)
@@ -195,7 +195,7 @@ class ApodiktumLangReplierMod(loader.Module):
         return allowed_alphabet, denied_alphabet, detected_alphabet
 
     async def _check_lang(self, message):
-        text = message.raw_text
+        text = self.apo_lib.utils.raw_text(message)
         lang_code = (await utils.run_sync(self._tr.detect, text)).lang
         if lang_code in googletrans.LANGUAGES:
             full_lang = googletrans.LANGUAGES[lang_code]
@@ -237,12 +237,12 @@ class ApodiktumLangReplierMod(loader.Module):
         user_id = message.sender_id
         allowed_alphabet, alphabet, detected_alphabet = self._is_alphabet(message)
         respond = not allowed_alphabet
-        if self.apo_lib.utils.is_emoji(message.raw_text):
+        if self.apo_lib.utils.is_emoji(self.apo_lib.utils.raw_text(message)):
             return
         if (
             self.config["check_language"]
-            and len(message.raw_text.split()) >= 4
-            and len(message.raw_text) >= 12
+            and len(self.apo_lib.utils.raw_text(message).split()) >= 4
+            and len(self.apo_lib.utils.raw_text(message)) >= 12
             and detected_alphabet
             and not respond
         ) or (self.config["auto_translate"]):
@@ -261,7 +261,7 @@ class ApodiktumLangReplierMod(loader.Module):
 
         self._fw_protect[user_id] += [time.time() + 5 * 60]
         if self.config["auto_translate"]:
-            text = message.raw_text.lower()
+            text = self.apo_lib.utils.raw_text(message).lower()
             to_lang = self.config["auto_translate"]
             translated = (
                 await utils.run_sync(

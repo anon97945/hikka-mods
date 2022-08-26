@@ -1,4 +1,4 @@
-__version__ = (0, 0, 27)
+__version__ = (0, 0, 28)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -306,8 +306,7 @@ class ApodiktumDonatorsMod(loader.Module):
             )
         await msg.react("👍")
 
-    @staticmethod
-    async def _get_amounts(message: Message, logchannel: int):
+    async def _get_amounts(self, message: Message, logchannel: int):
         amounts = ""
         amounts_euro = []
         amounts_usd = []
@@ -315,8 +314,12 @@ class ApodiktumDonatorsMod(loader.Module):
         amounts_rub = []
         itermsg = message.client.iter_messages(entity=logchannel, limit=None)
         async for msg in itermsg:
-            if msg and isinstance(msg, Message) and "#join" in msg.raw_text.lower():
-                msg_lines = msg.raw_text.splitlines()
+            if (
+                msg
+                and isinstance(msg, Message)
+                and "#join" in self.apo_lib.utils.raw_text(msg).lower()
+            ):
+                msg_lines = self.apo_lib.utils.raw_text(msg).splitlines()
                 for lines in msg_lines:
                     if (
                         "€" in lines.lower()
@@ -419,11 +422,11 @@ class ApodiktumDonatorsMod(loader.Module):
         if (
             not self.config["logchannel"]
             or utils.get_chat_id(message) != self.config["logchannel"]
-            or "#kick" not in message.raw_text.lower()
+            or "#kick" not in self.apo_lib.utils.raw_text(message).lower()
         ):
             return
 
-        msg_lines = message.raw_text.splitlines()
+        msg_lines = self.apo_lib.utils.raw_text(message).splitlines()
         for text in msg_lines:
             if "#ID_" in text:
                 userid = int(text.replace("#ID_", ""))

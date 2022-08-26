@@ -1,4 +1,4 @@
-__version__ = (1, 0, 24)
+__version__ = (1, 0, 25)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -204,7 +204,7 @@ class ApodiktumAutoUpdateMod(loader.Module):
             __name__,
             self.strings("updating").format(
                 self.config["update_delay"],
-                "\n".join(message.raw_text.splitlines()[5:]),
+                "\n".join(self.apo_lib.utils.raw_text(message).splitlines()[5:]),
             ),
         )
         await asyncio.sleep(self.config["update_delay"])
@@ -212,7 +212,7 @@ class ApodiktumAutoUpdateMod(loader.Module):
             return await message.click(0)
 
     async def _check_skip(self, message: Message) -> bool:
-        last_commit = message.raw_text.splitlines()[5].lower()
+        last_commit = self.apo_lib.utils.raw_text(message).splitlines()[5].lower()
         for x in skip_update:
             if x.lower() in last_commit and "revert" not in last_commit:
                 self.apo_lib.utils.log(

@@ -1,5 +1,23 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.30
+### 📃 module updates:
+- dnd | now supports `custom emojis`
+
+## 🆕 Version 2.0.29
+### 📃 module updates:
+- dnd | fix `duration` display
+
+## 🆕 Version 2.0.28
+### 📃 module updates:
+- msg_merger | added `.merge` to merge manual
+- msg_merger | reduced `get_messages` requests
+
+## 🆕 Version 2.0.27
+### 📃 module updates:
+- dnd | added multitime string support e.g. `7h30m`
+- dnd | changed command `report` to `reportpm`
+
 ## 🆕 Version 2.0.26
 ### 📃 module updates:
 - apolib_controller | added `qapolib` to see the current q_watcher queue and tasks

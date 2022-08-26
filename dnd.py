@@ -1,4 +1,4 @@
-__version__ = (0, 3, 4)
+__version__ = (0, 3, 11)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -32,6 +32,7 @@ import asyncio
 import contextlib
 import datetime
 import logging
+import re
 import time
 from typing import Union
 
@@ -449,7 +450,7 @@ class ApodiktumDNDMod(loader.Module):
                     format_(self.config["report_spam"]),
                     format_(self.config["delete_dialog"]),
                     format_(True),
-                    utils.escape_html(message.raw_text[:3000]),
+                    self.apo_lib.utils.raw_text(message)[:3000],
                 ),
                 parse_mode="HTML",
                 disable_web_page_preview=True,
@@ -638,7 +639,7 @@ class ApodiktumDNDMod(loader.Module):
             self.strings("unapproved").format(user.id, get_display_name(user)),
         )
 
-    async def reportcmd(self, message: Message):
+    async def reportpmcmd(self, message: Message):
         """
         <reply> - Report the user to spam. Use only in PM.
         """
@@ -702,9 +703,15 @@ class ApodiktumDNDMod(loader.Module):
         """
         status_duration = ""
         status = ""
-        args = utils.get_args_raw(message.text)
+        t = ""
+        args = utils.get_args_raw(self.apo_lib.utils.raw_text(message, True))
         args = args.split(" ", 2)
-        t = self.apo_lib.utils.convert_time(args[1]) or 0 if len(args) > 1 else 0
+        t = sum(
+            self.apo_lib.utils.convert_time(time_str) or 0
+            for time_str in re.findall(
+                r"(\d+[a-zA-Z])", args[1] if len(args) > 1 else ""
+            )
+        )
         if args[0] not in self.get("texts", {}):
             await utils.answer(
                 message,
@@ -727,11 +734,12 @@ class ApodiktumDNDMod(loader.Module):
                 map(
                     lambda x: x.replace(
                         "<emoji document_id=", "</code><emoji document_id="
-                    ),
+                    ).replace("</emoji>", "</emoji><code>")
+                    if isinstance(x, str)
+                    else x,
                     args,
                 )
             )
-            args = list(map(lambda x: x.replace("</emoji>", "</emoji><code>"), args))
             self.set("further", args[2])
         elif not t and len(args) > 1:
             args[1:] = [" ".join(args[1:])]
@@ -739,11 +747,12 @@ class ApodiktumDNDMod(loader.Module):
                 map(
                     lambda x: x.replace(
                         "<emoji document_id=", "</code><emoji document_id="
-                    ),
+                    ).replace("</emoji>", "</emoji><code>")
+                    if isinstance(x, str)
+                    else x,
                     args,
                 )
             )
-            args = list(map(lambda x: x.replace("</emoji>", "</emoji><code>"), args))
             self.set("further", args[1])
 
         self._ratelimit_afk = []
@@ -759,11 +768,12 @@ class ApodiktumDNDMod(loader.Module):
                 )
                 - datetime.datetime.now().replace(microsecond=0)
             ).total_seconds()
-
         status += self.apo_lib.utils.get_str(
             "status_set", self.all_strings, message
         ).format(
-            utils.escape_html(self.get("texts", {})[args[0]]),
+            self.get("texts", {})[args[0]]
+            .replace("<emoji document_id=", "</code><emoji document_id=")
+            .replace("</emoji>", "</emoji><code>"),
             str(self.get("notif")[args[0]]),
         )
         if self.get("further"):
@@ -773,12 +783,12 @@ class ApodiktumDNDMod(loader.Module):
         if status_duration:
             status += self.apo_lib.utils.get_str(
                 "status_set_duration", self.all_strings, message
-            ).format(self.apo_lib.utils.time_formatter(status_duration, short=True))
+            ).format(self.apo_lib.utils.time_formatter(t, short=True))
         if self.config["use_bio"]:
-            bio = utils.escape_html(self.get("texts", {})[args[0]])
+            bio = self.get("texts", {})[args[0]]
             if self.get("further"):
                 bio += (
-                    f" | {self.apo_lib.utils.rem_customemoji_html(utils.remove_html(self.apo_lib.utils.get_str('afk_message_further', self.all_strings, message).format(self.get('further'))))}"
+                    f" | {self.apo_lib.utils.remove_html(self.apo_lib.utils.get_str('afk_message_further', self.all_strings, message).format(self.get('further')))}"
                 )
             bio_len = 140 if (await self._client.get_me()).premium else 70
             await self.client(UpdateProfileRequest(about=bio[:bio_len]))
@@ -814,9 +824,9 @@ class ApodiktumDNDMod(loader.Module):
         <short_name> <notif|0/1> <text> - New status.
         Example: .newstatus test 1 Hello!
         """
-        args = utils.get_args_raw(message)
+        args = utils.get_args_raw(self.apo_lib.utils.raw_text(message, True))
         args = args.split(" ", 2)
-        if len(args) < 3:
+        if len(args) < 3 or args[1] not in ["1", "true", "yes", "+"]:
             await utils.answer(
                 message,
                 self.apo_lib.utils.get_str("args_incorrect", self.all_strings, message),
@@ -832,14 +842,24 @@ class ApodiktumDNDMod(loader.Module):
 
         notif = self.get("notif", {})
         notif[args[0]] = args[1]
+        args = list(
+            map(
+                lambda x: x.replace(
+                    "<emoji document_id=", "</code><emoji document_id="
+                ).replace("</emoji>", "</emoji><code>")
+                if isinstance(x, str)
+                else x,
+                args,
+            )
+        )
         self.set("notif", notif)
         await utils.answer(
             message,
             self.apo_lib.utils.get_str(
                 "status_created", self.all_strings, message
             ).format(
-                utils.escape_html(args[0]),
-                utils.escape_html(args[2]),
+                args[0],
+                args[2],
                 args[1],
             ),
         )
@@ -871,7 +891,7 @@ class ApodiktumDNDMod(loader.Module):
             message,
             self.apo_lib.utils.get_str(
                 "status_removed", self.all_strings, message
-            ).format(utils.escape_html(args)),
+            ).format(args),
         )
 
     async def statusescmd(self, message: Message):

@@ -1,4 +1,4 @@
-__version__ = (1, 2, 0)
+__version__ = (1, 2, 1)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -1579,7 +1579,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         if (
             message.id in self._msg_handler
             or all(
-                cst_tag.lower() not in [x.lower() for x in message.raw_text.split()]
+                cst_tag.lower()
+                not in [x.lower() for x in self.apo_lib.utils.raw_text(message).split()]
                 for cst_tag in self.config["admin_tag"]
             )
             or (

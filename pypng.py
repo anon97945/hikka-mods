@@ -1,4 +1,4 @@
-__version__ = (0, 0, 28)
+__version__ = (0, 0, 29)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -100,8 +100,8 @@ class ApodiktumPyPNGMod(loader.Module):
                 self.apo_lib.utils.get_str("no_file", self.all_strings, message),
             )
         if message.is_reply:
-            if len(self.apo_lib.utils.get_urls(reply.raw_text)) > 0:
-                url = self.apo_lib.utils.get_urls(reply.raw_text)[0]
+            if len(self.apo_lib.utils.get_urls(self.apo_lib.utils.raw_text(reply))) > 0:
+                url = self.apo_lib.utils.get_urls(self.apo_lib.utils.raw_text(reply))[0]
             else:
                 url = None
             if url:

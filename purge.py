@@ -1,4 +1,4 @@
-__version__ = (0, 1, 31)
+__version__ = (0, 1, 32)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -588,7 +588,7 @@ class ApodiktumPurgeMod(loader.Module):
         async for msg in self._client.iter_messages(chat):
             if msg.out:
                 if i == 2:
-                    old_msg = msg.raw_text
+                    old_msg = self.apo_lib.utils.raw_text(msg)
                     new_msg = args
                     await msg.edit(new_msg)
                     await message.delete()

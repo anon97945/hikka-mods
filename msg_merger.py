@@ -1,4 +1,4 @@
-__version__ = (0, 1, 5)
+__version__ = (0, 1, 13)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -47,6 +47,7 @@ class ApodiktumMsgMergerMod(loader.Module):
         "_cfg_active": "Whether the module is turned on (or not).",
         "_cfg_blacklist_chats": "The list of chats that the module will watch(or not).",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
+        "_cfg_new_line_prefix": "The prefix which will be added to the new line.",
         "_cfg_edit_timeout": (
             "The maximum time in minuted to edit the message. 0 for no limit."
         ),
@@ -72,6 +73,7 @@ class ApodiktumMsgMergerMod(loader.Module):
             "Whether the chatlist includes(True) or excludes(False) the chat."
         ),
         "undo_merge_fail": "<b>Failed to unmerge the messages.</b>",
+        "nothing_to_merge": "<b>Nothing to merge.</b>",
     }
 
     strings_en = {}
@@ -239,16 +241,64 @@ class ApodiktumMsgMergerMod(loader.Module):
 
     async def cmsgmergercmd(self, message: Message):
         """
-        This will open the config for the module.
+        open the config of the module.
         """
         name = self.strings("name")
         await self.allmodules.commands["config"](
             await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
 
+    async def mergecmd(self, message: Message):
+        """
+        merge all messages of own until the last message of another user.
+        """
+        chat_id = utils.get_chat_id(message)
+        text = ""
+        del_msgs = []
+        merge_msgs = []
+        try:
+            msgs = await self._client.get_messages(chat_id, limit=100)
+            for i in range(-len(msgs), -1):
+                if (
+                    not isinstance(msgs[i], Message)
+                    or not msgs[i].out
+                    or msgs[i].forward
+                    or msgs[i].via_bot
+                    or msgs[i].sender_id != self.tg_id
+                    or (msgs[i].media and not getattr(msgs[i].media, "webpage", False))
+                    or (not self.config["merge_own_reply"] and msgs[i].is_reply)
+                ):
+                    break
+                if i != -len(msgs):
+                    del_msgs += [msgs[i].id]
+                    merge_msgs += [msgs[i]]
+            if merge_msgs:
+                for msg in reversed(merge_msgs):
+                    if text:
+                        text += "\n" * self.config["new_lines"]
+                    if self.config["new_line_pref"]:
+                        text += self.config["new_line_pref"]
+                    if (
+                        not text
+                        and self.apo_lib.utils.raw_text(msg).startswith(
+                            self.get_prefix()
+                        )
+                        and not self.config["new_line_pref"]
+                    ):
+                        text += ">"
+                    text += self.apo_lib.utils.raw_text(msg, True)
+                await self._client.delete_messages(chat_id, del_msgs)
+            if not text:
+                text = self.apo_lib.utils.get_str(
+                    "nothing_to_merge", self.all_strings, message
+                )
+            return await utils.answer(message, text)
+        except IndexError:
+            return
+
     async def unmergecmd(self, message: Message):
         """
-        This will unmerge the messages.
+        unmerge the messages.
         """
         chat_id = utils.get_chat_id(message)
         if utils.get_chat_id(message) in self.merged_msgs:
@@ -287,7 +337,7 @@ class ApodiktumMsgMergerMod(loader.Module):
             or not message.out
             or message.forward
             or message.via_bot
-            or message.raw_text.startswith(self.get_prefix())
+            or self.apo_lib.utils.raw_text(message).startswith(self.get_prefix())
         ):
             return
 
@@ -300,7 +350,7 @@ class ApodiktumMsgMergerMod(loader.Module):
         last_msg = None
 
         if self.config["ignore_prefix"] and any(
-            message.raw_text.startswith(prefix)
+            self.apo_lib.utils.raw_text(message).startswith(prefix)
             for prefix in self.config["ignore_prefix"]
         ):
             return
@@ -310,7 +360,7 @@ class ApodiktumMsgMergerMod(loader.Module):
                 (
                     prefix
                     for prefix in self.config["skip_prefix"]
-                    if message.raw_text.startswith(prefix)
+                    if self.apo_lib.utils.raw_text(message).startswith(prefix)
                 ),
                 None,
             )
@@ -323,7 +373,8 @@ class ApodiktumMsgMergerMod(loader.Module):
 
         if (
             self.config["skip_length"]
-            and len(utils.remove_html(message.text)) >= self.config["skip_length"]
+            and len(self.apo_lib.utils.remove_html(message.text))
+            >= self.config["skip_length"]
         ) or (
             message.media
             and not getattr(message.media, "webpage", False)
@@ -334,10 +385,10 @@ class ApodiktumMsgMergerMod(loader.Module):
         ):
             return
         try:
+            last_msg_iter = await self._client.get_messages(chat_id, limit=5)
             for i in range(-4, -1):
-                last_msg_iter = (await self._client.get_messages(chat_id, limit=5))[i]
-                if last_msg_iter.id != message.id:
-                    last_msg = last_msg_iter
+                if last_msg_iter[i].id != message.id:
+                    last_msg = last_msg_iter[i]
                     break
         except IndexError:
             return
@@ -352,8 +403,10 @@ class ApodiktumMsgMergerMod(loader.Module):
             (
                 self.config["skip_emoji"]
                 and (
-                    self.apo_lib.utils.is_emoji(message.raw_text)
-                    or self.apo_lib.utils.is_emoji(last_msg.raw_text)
+                    self.apo_lib.utils.is_emoji(self.apo_lib.utils.raw_text(message))
+                    or self.apo_lib.utils.is_emoji(
+                        self.apo_lib.utils.raw_text(last_msg)
+                    )
                 )
             )
             or (
@@ -382,12 +435,12 @@ class ApodiktumMsgMergerMod(loader.Module):
                     and self.apo_lib.utils.get_entityurls(last_msg)
                 )
             )
-            or utils.remove_html(last_msg.text)[0] == self.get_prefix()
+            or self.apo_lib.utils.remove_html(last_msg.text)[0] == self.get_prefix()
         ):
             return
 
         if self.config["ignore_prefix"] and any(
-            last_msg.raw_text.startswith(prefix)
+            self.apo_lib.utils.raw_text(last_msg).startswith(prefix)
             for prefix in self.config["ignore_prefix"]
         ):
             return
