@@ -1,4 +1,4 @@
-__version__ = (0, 3, 11)
+__version__ = (0, 3, 12)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -788,11 +788,11 @@ class ApodiktumDNDMod(loader.Module):
             bio = self.get("texts", {})[args[0]]
             if self.get("further"):
                 bio += (
-                    f" | {self.apo_lib.utils.remove_html(self.apo_lib.utils.get_str('afk_message_further', self.all_strings, message).format(self.get('further')))}"
+                    f" | {self.apo_lib.utils.get_str('afk_message_further', self.all_strings, message).format(self.get('further'))}"
                 )
+            bio = self.apo_lib.utils.remove_html(bio)
             bio_len = 140 if (await self._client.get_me()).premium else 70
             await self.client(UpdateProfileRequest(about=bio[:bio_len]))
-
         msg = await utils.answer(message, status)
         self._sent_messages += [msg]
 

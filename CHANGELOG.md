@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.31
+### 📃 module updates:
+- dnd | fix `custom emoji bio`
+
 ## 🆕 Version 2.0.30
 ### 📃 module updates:
 - dnd | now supports `custom emojis`
