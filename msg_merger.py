@@ -1,4 +1,4 @@
-__version__ = (0, 1, 13)
+__version__ = (0, 1, 14)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -66,6 +66,9 @@ class ApodiktumMsgMergerMod(loader.Module):
             "Whether to merge into the new(True) or old(False) message."
         ),
         "_cfg_skip_emoji": "Whether to skip the merging of messages with single emoji.",
+        "_cfg_skip_reactions": (
+            "Whether to skip the merging of messages with reactions."
+        ),
         "_cfg_skip_length": "The length of the message to skip the merging.",
         "_cfg_skip_prefix": "The prefix to skip the merging.",
         "_cfg_skip_reply": "Whether to skip the merging of messages with reply.",
@@ -209,6 +212,12 @@ class ApodiktumMsgMergerMod(loader.Module):
                 ),
             ),
             loader.ConfigValue(
+                "skip_reactions",
+                True,
+                doc=lambda: self.strings("_cfg_skip_reactions"),
+                validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
                 "skip_reply",
                 False,
                 doc=lambda: self.strings("_cfg_skip_reply"),
@@ -265,6 +274,7 @@ class ApodiktumMsgMergerMod(loader.Module):
                     or msgs[i].forward
                     or msgs[i].via_bot
                     or msgs[i].sender_id != self.tg_id
+                    or (self.config["skip_reactions"] and msgs[i].reactions)
                     or (msgs[i].media and not getattr(msgs[i].media, "webpage", False))
                     or (not self.config["merge_own_reply"] and msgs[i].is_reply)
                 ):
@@ -372,15 +382,19 @@ class ApodiktumMsgMergerMod(loader.Module):
                 return
 
         if (
-            self.config["skip_length"]
-            and len(self.apo_lib.utils.remove_html(message.text))
-            >= self.config["skip_length"]
-        ) or (
-            message.media
-            and not getattr(message.media, "webpage", False)
+            (
+                self.config["skip_length"]
+                and len(self.apo_lib.utils.remove_html(message.text))
+                >= self.config["skip_length"]
+            )
+            or (self.config["skip_reactions"] and message.reactions)
             or (
-                not self.config["merge_urls"]
-                and self.apo_lib.utils.get_entityurls(message)
+                message.media
+                and not getattr(message.media, "webpage", False)
+                or (
+                    not self.config["merge_urls"]
+                    and self.apo_lib.utils.get_entityurls(message)
+                )
             )
         ):
             return
@@ -427,6 +441,7 @@ class ApodiktumMsgMergerMod(loader.Module):
             or not isinstance(last_msg, Message)
             or last_msg.via_bot
             or last_msg.fwd_from
+            or (self.config["skip_reactions"] and last_msg.reactions)
             or (
                 last_msg.media
                 and not getattr(last_msg.media, "webpage", False)

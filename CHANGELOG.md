@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.32
+### 📃 module updates:
+- msg_merger | new config var `skip_reactions`
+
 ## 🆕 Version 2.0.31
 ### 📃 module updates:
 - dnd | fix `custom emoji bio`
