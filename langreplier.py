@@ -1,4 +1,4 @@
-__version__ = (0, 1, 23)
+__version__ = (0, 1, 24)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -216,10 +216,11 @@ class ApodiktumLangReplierMod(loader.Module):
             await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
 
-    @loader.watcher("only_messages", "in", "only_pm", "only_groups", "only_channels")
+    @loader.watcher("only_messages", "in")
     async def watcher(self, message: Message):
         if (
             not self.config["active"]
+            or message.is_private
             or not message.mentioned
             or (
                 self.config["whitelist"]

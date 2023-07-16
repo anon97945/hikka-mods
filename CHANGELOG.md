@@ -1,5 +1,18 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.33
+### 📕 new modules:
+- auto_delerror | Remove inline bot error messages in log channel including defined phrases
+
+### 📃 module updates:
+- admintools | added `.bnc` -> BlockNonComment will block all "non comment" messages.
+- dnd | fixed `.denypm <id>`
+- langreplier | fixed watcher
+- msg_merger | fix attempt for threads
+- pypng | fixed reply to file
+- voicetools | fixed watcher
+
+
 ## 🆕 Version 2.0.32
 ### 📃 module updates:
 - msg_merger | new config var `skip_reactions`

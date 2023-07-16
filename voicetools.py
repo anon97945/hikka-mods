@@ -1,4 +1,4 @@
-__version__ = (1, 0, 30)
+__version__ = (1, 0, 32)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -1575,7 +1575,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
             self.apo_lib.utils.get_str("vtauto_stopped", self.all_strings, message),
         )
 
-    @loader.watcher("out", "only_audios", "only_messages")
+    @loader.watcher("out", "only_media")
     async def watcher(self, message: Message):
         chatid = utils.get_chat_id(message)
         chatid_str = str(chatid)

@@ -1,4 +1,4 @@
-__version__ = (0, 0, 29)
+__version__ = (0, 0, 30)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -104,12 +104,11 @@ class ApodiktumPyPNGMod(loader.Module):
                 url = self.apo_lib.utils.get_urls(self.apo_lib.utils.raw_text(reply))[0]
             else:
                 url = None
+            if reply.file:
+                await self._client.download_file(reply, file)
+                file.name = reply.file.name
             if url:
-                if reply.file:
-                    await self._client.download_file(reply, file)
-                    file.name = reply.file.name
-                elif res := await self.apo_lib.utils.get_file_from_url(url):
-                    file, file.name = res
+                file, file.name = await self.apo_lib.utils.get_file_from_url(url)
         if not getattr(file, "name", None):
             if args and len(self.apo_lib.utils.get_urls(args)) > 0:
                 file, file.name = await self.apo_lib.utils.get_file_from_url(

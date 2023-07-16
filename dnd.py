@@ -611,11 +611,12 @@ class ApodiktumDNDMod(loader.Module):
         """
         args = utils.get_args_raw(message)
         reply = await message.get_reply_message()
-
         user = None
 
         try:
-            user = await self._client.get_entity(args)
+            user = await self._client.get_entity(int(args))
+            if not isinstance(user, User):
+                user = None
         except Exception:
             with contextlib.suppress(Exception):
                 user = await self._client.get_entity(reply.sender_id) if reply else None
