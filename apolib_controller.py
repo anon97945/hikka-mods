@@ -1,4 +1,4 @@
-__version__ = (0, 1, 14)
+__version__ = (0, 1, 15)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -134,8 +134,7 @@ class ApodiktumLibControllerMod(loader.Module):
         """
         shows the current version of the apodiktum_library.
         """
-        lib_version = getattr(self.allmodules, "_apodiktum_lib_version", None)
-        if lib_version:
+        if lib_version := getattr(self.allmodules, "_apodiktum_lib_version", None):
             version_str = f"v{lib_version[0]}.{lib_version[1]}.{lib_version[2]}"
         else:
             version_str = "v Unknown"

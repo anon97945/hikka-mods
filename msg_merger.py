@@ -1,4 +1,4 @@
-__version__ = (0, 1, 15)
+__version__ = (0, 1, 17)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -414,7 +414,10 @@ class ApodiktumMsgMergerMod(loader.Module):
         if (
             self.config["merge_own_reply"]
             and message.is_reply
-            and message.reply_to_msg_id != utils.get_topic(message)
+            and (
+                not message.reply_to_msg_id
+                or message.reply_to_msg_id != utils.get_topic(message)
+            )
         ):
             last_msg_reply = await message.get_reply_message()
             last_msg = last_msg_reply
@@ -434,22 +437,18 @@ class ApodiktumMsgMergerMod(loader.Module):
             or (
                 self.config["skip_reply"]
                 and not self.config["merge_own_reply"]
+                and (message.is_reply or last_msg.is_reply)
                 and (
-                    (
-                        message.is_reply
-                        and message.reply_to_msg_id != utils.get_topic(message)
-                    )
-                    or (
-                        last_msg.is_reply
-                        and message.reply_to_msg_id != utils.get_topic(message)
-                    )
+                    not message.reply_to_msg_id
+                    or message.reply_to_msg_id != utils.get_topic(message)
                 )
             )
             or (
                 last_msg.is_reply
+                and message.is_reply
                 and (
-                    message.is_reply
-                    and message.reply_to_msg_id != utils.get_topic(message)
+                    not message.reply_to_msg_id
+                    or message.reply_to_msg_id != utils.get_topic(message)
                 )
                 and not self.config["merge_own_reply"]
             )
@@ -490,7 +489,8 @@ class ApodiktumMsgMergerMod(loader.Module):
             self.config["merge_own_reply"]
             and (
                 not message.is_reply
-                or message.reply_to_msg_id == utils.get_topic(message)
+                or message.reply_to_msg_id
+                and message.reply_to_msg_id == utils.get_topic(message)
             )
             or not self.config["merge_own_reply"]
         ):
@@ -533,7 +533,10 @@ class ApodiktumMsgMergerMod(loader.Module):
                     )
                     or (
                         message.is_reply
-                        and message.reply_to_msg_id != utils.get_topic(message)
+                        and (
+                            not message.reply_to_msg_id
+                            or message.reply_to_msg_id != utils.get_topic(message)
+                        )
                     )
                 )
             ):
@@ -557,7 +560,10 @@ class ApodiktumMsgMergerMod(loader.Module):
                     and not self.config["reverse_merge"]
                     and (
                         message.is_reply
-                        and message.reply_to_msg_id != utils.get_topic(message)
+                        and (
+                            not message.reply_to_msg_id
+                            or message.reply_to_msg_id != utils.get_topic(message)
+                        )
                     )
                 ):
                     await message.edit(

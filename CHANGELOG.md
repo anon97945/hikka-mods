@@ -1,5 +1,10 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.35
+### 📃 module updates:
+- apolib_controller | code improvement
+- msg_merger | fix for reply merge bug
+
 ## 🆕 Version 2.0.34
 ### 📃 module updates:
 - admintools | fixed crash of queue
