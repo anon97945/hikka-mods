@@ -237,7 +237,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
                 message,
                 self.apo_lib.utils.get_str(
                     "usage_error", self.all_strings, message
-                ).format(str(r.reason)),
+                ).format(r.reason),
             )
         result = r.json()
         quota = result["account_quota"]
