@@ -1,5 +1,11 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.34
+### 📃 module updates:
+- admintools | fixed crash of queue
+- dnd | fixed afk reply
+- msg_merger | fix attempt for threads
+
 ## 🆕 Version 2.0.33
 ### 📕 new modules:
 - auto_delerror | Remove inline bot error messages in log channel including defined phrases

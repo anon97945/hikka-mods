@@ -1,10 +1,10 @@
-__version__ = (0, 3, 12)
+__version__ = (0, 3, 13)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
-#           © Copyright 2022
+#           © Copyright 2023
 #
 #        developed by @anon97945
 #
@@ -582,7 +582,7 @@ class ApodiktumDNDMod(loader.Module):
             user = await self._client.get_entity(args)
         except Exception:
             with contextlib.suppress(Exception):
-                user = await self._client.get_entity(reply.sender_id) if reply else None
+                user = await reply.get_sender() if reply else None
 
         if not user:
             chat = await self._client.get_entity(utils.get_chat_id(message))
@@ -619,7 +619,7 @@ class ApodiktumDNDMod(loader.Module):
                 user = None
         except Exception:
             with contextlib.suppress(Exception):
-                user = await self._client.get_entity(reply.sender_id) if reply else None
+                user = await reply.get_sender() if reply else None
 
         if not user:
             chat = await self._client.get_entity(utils.get_chat_id(message))
@@ -788,9 +788,7 @@ class ApodiktumDNDMod(loader.Module):
         if self.config["use_bio"]:
             bio = self.get("texts", {})[args[0]]
             if self.get("further"):
-                bio += (
-                    f" | {self.apo_lib.utils.get_str('afk_message_further', self.all_strings, message).format(self.get('further'))}"
-                )
+                bio += f" | {self.apo_lib.utils.get_str('afk_message_further', self.all_strings, message).format(self.get('further'))}"
             bio = self.apo_lib.utils.remove_html(bio)
             bio_len = 140 if (await self._client.get_me()).premium else 70
             await self.client(UpdateProfileRequest(about=bio[:bio_len]))
@@ -962,7 +960,7 @@ class ApodiktumDNDMod(loader.Module):
         contact, started_by_you, active_peer = None, None, None
 
         with contextlib.suppress(ValueError):
-            entity = await self._client.get_entity(peer)
+            entity = await message.get_sender()
             if entity.bot:
                 return self._approve(cid, "bot")
 
@@ -1021,7 +1019,7 @@ class ApodiktumDNDMod(loader.Module):
         ):
             return
         if getattr(message.to_id, "user_id", None) == self.tg_id:
-            user = await self._client.get_entity(user_id)
+            user = await message.get_sender()
             if (
                 user_id in self._ratelimit_afk
                 or user.is_self
@@ -1053,17 +1051,13 @@ class ApodiktumDNDMod(loader.Module):
                 "afk_message_further", self.all_strings, message
             ).format(further)
         if self.config["afk_gone_time"]:
-            afk_string += (
-                f"{self.apo_lib.utils.get_str('afk_message_gone', self.all_strings, message).format(self.apo_lib.utils.time_formatter(diff_sec, short=True))}"
-            )
+            afk_string += f"{self.apo_lib.utils.get_str('afk_message_gone', self.all_strings, message).format(self.apo_lib.utils.time_formatter(diff_sec, short=True))}"
         if not self.config["afk_gone_time"] and self.config["afk_show_duration"]:
             afk_string += "\n"
         if self.config["afk_show_duration"] and self.get("status_duration"):
-            afk_string += (
-                f"{self.apo_lib.utils.get_str('afk_message_duration', self.all_strings, message).format(self.apo_lib.utils.time_formatter(status_len_sec, short=True))}"
-            )
+            afk_string += f"{self.apo_lib.utils.get_str('afk_message_duration', self.all_strings, message).format(self.apo_lib.utils.time_formatter(status_len_sec, short=True))}"
 
-        m = await utils.answer(
+        m = await message.reply(
             message,
             afk_string,
         )

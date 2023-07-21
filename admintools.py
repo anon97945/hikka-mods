@@ -1,10 +1,10 @@
-__version__ = (1, 2, 2)
+__version__ = (1, 2, 3)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
-#           © Copyright 2022
+#           © Copyright 2023
 #
 #        developed by @anon97945
 #
@@ -1762,7 +1762,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         )
         if message.is_reply:
             reply = await message.get_reply_message()
-            reply_user = await self._client.get_entity(reply.sender_id)
+            reply_user = await reply.get_sender()
             admin_tag_string += self.apo_lib.utils.get_str(
                 "admin_tag_reply", self.all_strings, message
             ).format(
@@ -1806,10 +1806,24 @@ class ApodiktumAdminToolsMod(loader.Module):
         await self.apo_lib.utils.delete_message(msg)
 
     async def q_watcher_logger(self, message: Message):
-        await self._logger_queue_handler(message)
+        try:
+            await self._logger_queue_handler(message)
+        except Exception as exc:  # skipcq: PYL-W0703
+            self.apo_lib.utils.log(
+                logging.ERROR,
+                __name__,
+                f"Failed to proceed Queue in Chat ID: {message.chat_id}./n/nError:/n{exc}",
+            )
 
     async def q_watcher_protection(self, message: Message):
-        await self._protection_queue_handler(message)
+        try:
+            await self._protection_queue_handler(message)
+        except Exception as exc:  # skipcq: PYL-W0703
+            self.apo_lib.utils.log(
+                logging.ERROR,
+                __name__,
+                f"Failed to proceed Queue in Chat ID: {message.chat_id}./n/nError:/n{exc}",
+            )
 
     async def _protection_queue_handler(
         self, message: Message
@@ -1841,7 +1855,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         bss = self._db.get(self._classname, "bss", [])
         bss_sets = self._db.get(self._classname, "bss_sets", {})
         if (
-            user_id in [chat_id, self.inline.bot_id]
+            user_id not in [chat_id, self.inline.bot_id]
             or (
                 chat_id_str in bnd
                 or chat_id_str in bce
@@ -1863,7 +1877,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             )
         ):
             chat = await self._client.get_entity(chat_id)
-            user = await self._client.get_entity(user_id)
+            user = await message.get_sender()
             if (
                 (
                     (not chat.admin_rights or not chat.creator)
