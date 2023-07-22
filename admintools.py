@@ -1,4 +1,4 @@
-__version__ = (1, 2, 3)
+__version__ = (1, 2, 4)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -1812,7 +1812,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             self.apo_lib.utils.log(
                 logging.ERROR,
                 __name__,
-                f"Failed to proceed Queue in Chat ID: {message.chat_id}./n/nError:/n{exc}",
+                f"Failed to proceed Queue in Chat ID: {message.chat_id}.\n\nError:\n{exc}",
             )
 
     async def q_watcher_protection(self, message: Message):
@@ -1822,7 +1822,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             self.apo_lib.utils.log(
                 logging.ERROR,
                 __name__,
-                f"Failed to proceed Queue in Chat ID: {message.chat_id}./n/nError:/n{exc}",
+                f"Failed to proceed Queue in Chat ID: {message.chat_id}.\n\nError:\n{exc}",
             )
 
     async def _protection_queue_handler(

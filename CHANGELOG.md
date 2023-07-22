@@ -2,6 +2,9 @@
 
 ## 🆕 Version 2.0.35
 ### 📃 module updates:
+- admintools | fixed logger message
+## 🆕 Version 2.0.35
+### 📃 module updates:
 - apolib_controller | code improvement
 - msg_merger | fix for reply merge bug
 
