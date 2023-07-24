@@ -1,4 +1,4 @@
-__version__ = (0, 3, 13)
+__version__ = (0, 3, 14)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -1057,10 +1057,7 @@ class ApodiktumDNDMod(loader.Module):
         if self.config["afk_show_duration"] and self.get("status_duration"):
             afk_string += f"{self.apo_lib.utils.get_str('afk_message_duration', self.all_strings, message).format(self.apo_lib.utils.time_formatter(status_len_sec, short=True))}"
 
-        m = await message.reply(
-            message,
-            afk_string,
-        )
+        m = await message.reply(afk_string)
 
         self._sent_messages += [m]
 

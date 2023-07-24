@@ -1,8 +1,13 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.36
+### 📃 module updates:
+- dnd | fixed afk reply
+
 ## 🆕 Version 2.0.35
 ### 📃 module updates:
 - admintools | fixed logger message
+
 ## 🆕 Version 2.0.35
 ### 📃 module updates:
 - apolib_controller | code improvement
