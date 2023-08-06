@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.38
+### 📃 module updates:
+- admintools | fix bnd for non-creators
+
 ## 🆕 Version 2.0.37
 ### 📃 module updates:
 - admintools | fix admin tags whitelist

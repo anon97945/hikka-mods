@@ -1,4 +1,4 @@
-__version__ = (1, 2, 5)
+__version__ = (1, 2, 6)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -1867,7 +1867,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             user = await message.get_sender()
             if (
                 (
-                    (not chat.admin_rights or not chat.creator)
+                    (not chat.admin_rights and not chat.creator)
                     or not chat.admin_rights.delete_messages
                 )
                 or (
