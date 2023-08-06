@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.37
+### 📃 module updates:
+- admintools | fix admin tags whitelist
+
 ## 🆕 Version 2.0.36
 ### 📃 module updates:
 - dnd | fixed afk reply
