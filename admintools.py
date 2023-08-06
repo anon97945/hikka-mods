@@ -1854,27 +1854,14 @@ class ApodiktumAdminToolsMod(loader.Module):
         bnd_sets = self._db.get(self._classname, "bnd_sets", {})
         bss = self._db.get(self._classname, "bss", [])
         bss_sets = self._db.get(self._classname, "bss_sets", {})
-        if (
-            user_id not in [chat_id, self.inline.bot_id]
-            or (
-                chat_id_str in bnd
-                or chat_id_str in bce
-                or chat_id_str in bcu
-                or chat_id_str in bdl
-                or chat_id_str in bf
-                or chat_id_str in bnc
-                or chat_id_str in bss
-            )
-            or (
-                (
-                    self.config["tag_whitelist"]
-                    and chat_id in self.config["admin_tag_chats"]
-                )
-                or (
-                    not self.config["tag_whitelist"]
-                    and chat_id not in self.config["admin_tag_chats"]
-                )
-            )
+        if user_id not in [chat_id, self.inline.bot_id] or (
+            chat_id_str in bnd
+            or chat_id_str in bce
+            or chat_id_str in bcu
+            or chat_id_str in bdl
+            or chat_id_str in bf
+            or chat_id_str in bnc
+            or chat_id_str in bss
         ):
             chat = await self._client.get_entity(chat_id)
             user = await message.get_sender()
@@ -1905,6 +1892,14 @@ class ApodiktumAdminToolsMod(loader.Module):
             await self.p__bss_handler(chat, user, message, bss, bss_sets)
             await self.p__bgs_handler(chat, user, message, bgs, bgs_sets)
             await self.p__bce_handler(chat, user, message, bce, bce_sets)
+        if (
+            self.config["tag_whitelist"] and chat_id in self.config["admin_tag_chats"]
+        ) or (
+            not self.config["tag_whitelist"]
+            and chat_id not in self.config["admin_tag_chats"]
+        ):
+            chat = await self._client.get_entity(chat_id)
+            user = await message.get_sender()
             await self.p__admin_handler(chat, user, message)
         with contextlib.suppress(Exception):
             self._msg_handler.pop(message.id)
@@ -1925,7 +1920,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         bf = self._db.get(self._classname, "bf", [])
         if chat_id_str in gl:
             chat = await self._client.get_entity(chat_id)
-            user = await self._client.get_entity(user_id)
+            user = await message.get_sender()
             await self.p__gl(chat, user, message, gl, gl_sets)
         if (
             chat_id_str in bf
