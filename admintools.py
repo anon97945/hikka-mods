@@ -1,4 +1,4 @@
-__version__ = (1, 2, 6)
+__version__ = (1, 2, 7)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -2000,9 +2000,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 reply = await self.apo_lib.utils.get_first_msg(message)
             else:
                 reply = None
-            if reply and not isinstance(
-                await self._client.get_entity(reply.sender_id), Channel
-            ):
+            if reply and not isinstance(await reply.get_sender(), Channel):
                 reply = None
             if await self.apo_lib.utils.check_inlinebot(chat.id):
                 msg = await self.inline.bot.send_message(
