@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.40
+### 📃 module updates:
+- autoreact | Added all emoji reactions to the regex
+
 ## 🆕 Version 2.0.39
 ### 📃 module updates:
 - admintools | removed get_entity(x.sender_id)
