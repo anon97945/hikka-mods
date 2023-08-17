@@ -169,6 +169,17 @@ class ApodiktumPMLogMod(loader.Module):
         )
 
     async def q_watcher(self, message: Message):
+        try:
+            await self._queue_handler(message)
+        except Exception as exc:  # skipcq: PYL-W0703
+            self.apo_lib.utils.log(
+                logging.ERROR,
+                __name__,
+                exc,
+                exc_info=True,
+            )
+
+    async def _queue_handler(self, message: Message):
         if not isinstance(message, Message) or not message.is_private:
             return
         pmlog_whitelist = self.config["whitelist"]

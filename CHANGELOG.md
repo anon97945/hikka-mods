@@ -1,5 +1,10 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.41
+### 📃 module updates:
+- msg_merger | added try except q_watcher
+- pmlog | added try except q_watcher
+
 ## 🆕 Version 2.0.40
 ### 📃 module updates:
 - autoreact | Added all emoji reactions to the regex
