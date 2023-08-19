@@ -1,10 +1,10 @@
-__version__ = (0, 1, 15)
+__version__ = (0, 1, 16)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
-#           © Copyright 2022
+#           © Copyright 2023
 #
 #        developed by @anon97945
 #
@@ -112,13 +112,15 @@ class ApodiktumLibControllerMod(loader.Module):
 
     async def client_ready(self):
         self.apo_lib = await self.import_lib(
-            "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
+            "https://raw.githubusercontent.com/anon97945/hikka-libs/dev/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
         self._lib_classname = self.apo_lib.__class__.__name__
         self._lib_db = self._db[self._lib_classname]
         self._chats_db = self._lib_db.setdefault("chats", {})
+        if self.apo_lib._controllerloader.unload_controller:
+            self.apo_lib._controllerloader.unload_controller = False
 
     async def capolibcmd(self, message: Message):
         """
@@ -128,6 +130,17 @@ class ApodiktumLibControllerMod(loader.Module):
             await utils.answer(
                 message, f"{self.get_prefix()}config {self._lib_classname}"
             )
+        )
+
+    async def unloadapocontrollercmd(self, message: Message):
+        """
+        This will unload the module and prevent it from loading through apo_lib.
+        !!Beware that this will break all modules modules that depend on apo_lib q_watcher. Use this only if you know what you are doing!!
+        """
+        self.apo_lib._controllerloader.unload_controller = True
+        name = self.strings("name")
+        await self.allmodules.commands["unloadmod"](
+            await utils.answer(message, f"{self.get_prefix()}unloadmod {name}")
         )
 
     async def vapolibcmd(self, message: Message):

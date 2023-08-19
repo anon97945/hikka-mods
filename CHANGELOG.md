@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.42
+### 📃 module updates:
+- apolib_controller | added unloadapocontroller
+
 ## 🆕 Version 2.0.41
 ### 📃 module updates:
 - msg_merger | added try except q_watcher
