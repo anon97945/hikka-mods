@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.43
+### 📃 module updates:
+- auto_delerror | added new module
+
 ## 🆕 Version 2.0.42
 ### 📃 module updates:
 - apolib_controller | added unloadapocontroller
