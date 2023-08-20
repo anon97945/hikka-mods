@@ -1,4 +1,4 @@
-__version__ = (0, 1, 16)
+__version__ = (0, 1, 17)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -135,7 +135,7 @@ class ApodiktumLibControllerMod(loader.Module):
     async def unloadapocontrollercmd(self, message: Message):
         """
         This will unload the module and prevent it from loading through apo_lib.
-        !!Beware that this will break all modules modules that depend on apo_lib q_watcher. Use this only if you know what you are doing!!
+        !!Beware that this will break all modules that depend on apo_lib q_watcher. Use this only if you know what you are doing!!
         """
         self.apo_lib._controllerloader.unload_controller = True
         name = self.strings("name")
