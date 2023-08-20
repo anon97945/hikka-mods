@@ -1,4 +1,4 @@
-__version__ = (0, 0, 1)
+__version__ = (0, 0, 2)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -110,7 +110,7 @@ class ApodiktumAutoDelErrorMod(loader.Module):
         ):
             return
         if self.config["error_text"]:
-            logchan_id = int(str(self.lookup("tester")._logchat).replace("-100", ""))
+            logchan_id = int(str(self.lookup("tester").logchat).replace("-100", ""))
             if message.chat.id == logchan_id:
                 for error_text in self.config["error_text"]:
                     if error_text in message.raw_text:
