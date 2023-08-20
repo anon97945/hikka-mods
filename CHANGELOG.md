@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.45
+### 📃 module updates:
+- auto_delerror | fix module
+
 ## 🆕 Version 2.0.44
 ### 📃 module updates:
 - apolib_controller | typo
