@@ -1,6 +1,10 @@
 # 📝 Apodiktum Modules Changelog:
 
-## 🆕 Version 2.0.46
+## 🆕 Version 2.0.48
+### 📃 module updates:
+- admintools | added some debug msgs and fixed restricted logger
+
+## 🆕 Version 2.0.47
 ### 📃 module updates:
 - all modules | removed stats collect
 

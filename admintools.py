@@ -1,4 +1,4 @@
-__version__ = (1, 2, 8)
+__version__ = (1, 2, 9)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -1796,11 +1796,24 @@ class ApodiktumAdminToolsMod(loader.Module):
             disable_web_page_preview=True,
         )
         if reply:
-            await self.inline.bot.forward_message(
-                self.tg_id,
-                chat.id if str(chat.id).startswith("-100") else int(f"-100{chat.id}"),
-                message_id=reply.id,
-            )
+            try:
+                await self.inline.bot.forward_message(
+                    self.tg_id,
+                    chat.id
+                    if str(chat.id).startswith("-100")
+                    else int(f"-100{chat.id}"),
+                    message_id=reply.id,
+                )
+            except Exception as exc:  # skipcq: PYL-W0703
+                if "Message has protected content" in str(exc):
+                    msgs = await self._client.get_messages(chat.id, ids=reply.id)
+                    await self.inline.bot.send_message(
+                        self.tg_id,
+                        msgs.message,
+                        parse_mode="HTML",
+                        disable_web_page_preview=True,
+                    )
+
         await asyncio.sleep(30)
         await self.apo_lib.utils.delete_message(msg)
 
@@ -1811,7 +1824,8 @@ class ApodiktumAdminToolsMod(loader.Module):
             self.apo_lib.utils.log(
                 logging.ERROR,
                 __name__,
-                f"Failed to proceed Queue in Chat ID: {message.chat_id}.\n\nError:\n{exc}",
+                exc,
+                exc_info=True,
             )
 
     async def q_watcher_protection(self, message: Message):
@@ -1821,7 +1835,8 @@ class ApodiktumAdminToolsMod(loader.Module):
             self.apo_lib.utils.log(
                 logging.ERROR,
                 __name__,
-                f"Failed to proceed Queue in Chat ID: {message.chat_id}.\n\nError:\n{exc}",
+                exc,
+                exc_info=True,
             )
 
     async def _protection_queue_handler(
@@ -1863,7 +1878,19 @@ class ApodiktumAdminToolsMod(loader.Module):
             or chat_id_str in bss
         ):
             chat = await self._client.get_entity(chat_id)
+            self.apo_lib.utils.log(
+                logging.DEBUG,
+                __name__,
+                "Get_sender.",
+                debug_msg=True,
+            )
             user = await message.get_sender()
+            self.apo_lib.utils.log(
+                logging.DEBUG,
+                __name__,
+                "got sender. -> some ifs",
+                debug_msg=True,
+            )
             if (
                 (
                     (not chat.admin_rights and not chat.creator)
@@ -1871,16 +1898,22 @@ class ApodiktumAdminToolsMod(loader.Module):
                 )
                 or (
                     isinstance(user, User)
-                    and (perms := await self.apo_lib.utils.is_member(chat_id, user_id))
+                    and (perms := await self.apo_lib.utils.is_member(chat, user))
                     and perms.is_admin
                 )
                 or (
                     isinstance(user, Channel)
                     and not (perms := None)
-                    and await self.apo_lib.utils.is_linkedchannel(chat_id, user_id)
+                    and await self.apo_lib.utils.is_linkedchannel(chat, user)
                 )
             ):
                 return
+            self.apo_lib.utils.log(
+                logging.DEBUG,
+                __name__,
+                "survived ifs.",
+                debug_msg=True,
+            )
             await self.p__bf_handler(chat, user, message, bf, bf_sets)
             if isinstance(user, User) and not perms:
                 await self.p__bnd_handler(chat, user, message, bnd, bnd_sets)
@@ -1965,6 +1998,12 @@ class ApodiktumAdminToolsMod(loader.Module):
         module_short: str,
         module_sets: dict,
     ):  # sourcery skip: low-code-quality
+        self.apo_lib.utils.log(
+            logging.DEBUG,
+            __name__,
+            "Try to delete.",
+            debug_msg=True,
+        )
         await self.apo_lib.utils.delete_message(message, True)
         if (
             chat.admin_rights.ban_users
@@ -1989,11 +2028,42 @@ class ApodiktumAdminToolsMod(loader.Module):
                     else time.time() + 15
                 }
             )
+            await asyncio.sleep(5)
+            self.apo_lib.utils.log(
+                logging.DEBUG,
+                __name__,
+                "Debug try usertag link.",
+                debug_msg=True,
+            )
+            self.apo_lib.utils.log(
+                logging.DEBUG,
+                __name__,
+                f"{user}",
+                debug_msg=True,
+            )
             usertag = await self.apo_lib.utils.get_tag(user, True)
+            self.apo_lib.utils.log(
+                logging.DEBUG,
+                __name__,
+                "Debug try link.",
+                debug_msg=True,
+            )
             link = (
                 await self.apo_lib.utils.get_invite_link(chat)
                 if module_short == "bnd"
                 else None
+            )
+            self.apo_lib.utils.log(
+                logging.DEBUG,
+                __name__,
+                "Done.",
+                debug_msg=True,
+            )
+            self.apo_lib.utils.log(
+                logging.DEBUG,
+                __name__,
+                f"{user}",
+                debug_msg=True,
             )
             if message.is_reply:
                 reply = await self.apo_lib.utils.get_first_msg(message)
