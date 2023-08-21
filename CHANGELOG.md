@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.47
+### 📃 module updates:
+- apolib_controller | changed apodiktum_library url to master
+
 ## 🆕 Version 2.0.46
 ### 📃 module updates:
 - admintools | forward restricted, new error for q_watcher death, some debug tests

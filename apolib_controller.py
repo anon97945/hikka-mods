@@ -1,4 +1,4 @@
-__version__ = (0, 1, 17)
+__version__ = (0, 1, 18)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -112,7 +112,7 @@ class ApodiktumLibControllerMod(loader.Module):
 
     async def client_ready(self):
         self.apo_lib = await self.import_lib(
-            "https://raw.githubusercontent.com/anon97945/hikka-libs/dev/apodiktum_library.py",
+            "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
         self.apo_lib.apodiktum_module()
