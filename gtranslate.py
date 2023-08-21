@@ -1,10 +1,10 @@
-__version__ = (0, 0, 70)
+__version__ = (0, 0, 71)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
-#           © Copyright 2022
+#           © Copyright 2023
 #
 #        developed by @anon97945
 #
@@ -143,7 +143,6 @@ class ApodiktumGTranslateMod(loader.Module):
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
-        self.apo_lib.apodiktum_module()
         self.tr = googletrans.Translator()
 
     async def cgtranslatecmd(self, message: Message):

@@ -1,10 +1,10 @@
-__version__ = (0, 0, 28)
+__version__ = (0, 0, 29)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
-#           © Copyright 2022
+#           © Copyright 2023
 #
 #        developed by @anon97945
 #
@@ -187,7 +187,6 @@ class ApodiktumDonatorsMod(loader.Module):
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
-        self.apo_lib.apodiktum_module()
         await self.apo_lib.migrator.auto_migrate_handler(
             self.__class__.__name__,
             self.strings("name"),

@@ -1,4 +1,4 @@
-__version__ = (0, 1, 18)
+__version__ = (0, 1, 19)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -115,7 +115,6 @@ class ApodiktumLibControllerMod(loader.Module):
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
-        self.apo_lib.apodiktum_module()
         self._lib_classname = self.apo_lib.__class__.__name__
         self._lib_db = self._db[self._lib_classname]
         self._chats_db = self._lib_db.setdefault("chats", {})

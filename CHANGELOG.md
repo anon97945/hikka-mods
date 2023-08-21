@@ -2,6 +2,10 @@
 
 ## 🆕 Version 2.0.46
 ### 📃 module updates:
+- all modules | removed stats collect
+
+## 🆕 Version 2.0.46
+### 📃 module updates:
 - apolib_controller | changed apodiktum_library url to master
 
 ## 🆕 Version 2.0.45

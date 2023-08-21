@@ -1,10 +1,10 @@
-__version__ = (0, 0, 15)
+__version__ = (0, 0, 16)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
-#           © Copyright 2022
+#           © Copyright 2023
 #
 #        developed by @anon97945
 #
@@ -84,7 +84,6 @@ class ApodiktumPythonMod(loader.Module):
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
-        self.apo_lib.apodiktum_module()
         self._phone = (await self._client.get_me()).phone
 
     @loader.owner

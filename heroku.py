@@ -1,10 +1,10 @@
-__version__ = (0, 0, 34)
+__version__ = (0, 0, 35)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
-#           © Copyright 2022
+#           © Copyright 2023
 #
 #        developed by @anon97945
 #
@@ -200,7 +200,6 @@ class ApodiktumHerokuManagerMod(loader.Module):
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
-        self.apo_lib.apodiktum_module()
         self._init_heroku_vars()
 
     def _init_heroku_vars(self):
@@ -237,7 +236,7 @@ class ApodiktumHerokuManagerMod(loader.Module):
                 message,
                 self.apo_lib.utils.get_str(
                     "usage_error", self.all_strings, message
-                ).format(str(r.reason)),
+                ).format(r.reason),
             )
         result = r.json()
         quota = result["account_quota"]

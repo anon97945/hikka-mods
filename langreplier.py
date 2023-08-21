@@ -1,10 +1,10 @@
-__version__ = (0, 1, 24)
+__version__ = (0, 1, 25)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
-#           © Copyright 2022
+#           © Copyright 2023
 #
 #        developed by @anon97945
 #
@@ -171,7 +171,6 @@ class ApodiktumLangReplierMod(loader.Module):
             "https://raw.githubusercontent.com/anon97945/hikka-libs/master/apodiktum_library.py",
             suspend_on_error=True,
         )
-        self.apo_lib.apodiktum_module()
         self._fw_protect = {}
         self._fw_protect_limit = 3
         self._ad = AlphabetDetector()
