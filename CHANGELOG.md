@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.46
+### 📃 module updates:
+- apolib_controller | changed apodiktum_library url to master
+
 ## 🆕 Version 2.0.45
 ### 📃 module updates:
 - auto_delerror | fix module
