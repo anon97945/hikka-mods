@@ -1,4 +1,4 @@
-__version__ = (0, 1, 3)
+__version__ = (0, 1, 4)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -32,6 +32,7 @@ from telethon.tl.functions.channels import (
     GetForumTopicsRequest,
     CreateForumTopicRequest,
     ToggleForumRequest,
+    EditForumTopicRequest,
 )
 
 from .. import loader, utils
@@ -127,6 +128,12 @@ class ApodiktumPMLogMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
+                "realtime_names",
+                True,
+                doc=lambda: self.strings("_cfg_reatime_usernames"),
+                validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
                 "whitelist",
                 True,
                 doc=lambda: self.strings("_cfg_whitelist"),
@@ -188,12 +195,12 @@ class ApodiktumPMLogMod(loader.Module):
             )
             for topic in forum.topics:
                 if str(user.id) in topic.title:
-                    self._topic_cache[user.id] = topic.id
+                    self._topic_cache[user.id] = topic
                     break
         return user.id in self._topic_cache
 
-    async def _topic_handler(self, user: User):
-        if not await self._topic_cacher(user):
+    async def _topic_handler(self, user: User, message: Message):
+        if not await self._topic_cacher(user):  # create topic if not exists
             new_topic = await self._client(
                 CreateForumTopicRequest(
                     channel=self.c.id,
@@ -201,7 +208,25 @@ class ApodiktumPMLogMod(loader.Module):
                     icon_color=42,
                 )
             )
-            self._topic_cache[user.id] = new_topic.updates[0].id
+            self._topic_cache[user.id] = new_topic.updates[0]
+        if (
+            self.config["realtime_names"]
+            and self._topic_cache[user.id].title != f"{user.first_name} ({user.id})"
+        ):
+            await self._client(
+                EditForumTopicRequest(
+                    channel=self.c.id,
+                    topic_id=self._topic_cache[user.id].id,
+                    title=f"{user.first_name} ({user.id})",
+                )
+            )
+            self._topic_cache[user.id].title = f"{user.first_name} ({user.id})"
+            await message.client.send_message(
+                self.c.id,
+                f"New name:\n<code>{user.first_name} ({user.id})</code>\n\nOld name:\n<code>{self._topic_cache[user.id].title}</code>",
+                reply_to=self._topic_cache[user.id].id,
+            )
+        return True
 
     async def q_watcher(self, message: Message):
         try:
@@ -210,36 +235,35 @@ class ApodiktumPMLogMod(loader.Module):
             self.apo_lib.utils.log(
                 logging.ERROR,
                 __name__,
-                exc,
-                exc_info=True,
+                f"Error in {self.__class__.__name__}._queue_handler:\n{exc}",
             )
 
     async def _queue_handler(self, message: Message):
         if not isinstance(message, Message) or not message.is_private:
             return
-        pmlog_whitelist = self.config["whitelist"]
-        pmlog_bot = self.config["log_bots"]
-        pmlog_destr = self.config["log_self_destr"]
         user = await message.get_sender()
         if user.id == self.tg_id:
             user = await self._client.get_entity(utils.get_chat_id(message))
-        if user.bot and not pmlog_bot or user.id == self.tg_id:
+        if user.bot and not self.config["log_bots"] or user.id == self.tg_id:
             return
         chatidindb = utils.get_chat_id(message) in (self.config["log_list"] or [])
-        if pmlog_whitelist and chatidindb or not pmlog_whitelist and not chatidindb:
+        if (
+            self.config["whitelist"]
+            and chatidindb
+            or not self.config["whitelist"]
+            and not chatidindb
+        ):
             return
-        link = f"Chat: {await self.apo_lib.utils.get_tag(user)}\n#ID_{user.id}"
         try:
-            await self._topic_handler(user)
-            await message.forward_to(self.c.id, top_msg_id=self._topic_cache[user.id])
-            await message.client.send_message(
-                self.c.id, link, reply_to=self._topic_cache[user.id]
-            )
+            if await self._topic_handler(user, message):
+                await message.forward_to(
+                    self.c.id, top_msg_id=self._topic_cache[user.id].id
+                )
         except MessageIdInvalidError:
-            if not message.file or not pmlog_destr:
+            if not message.file or not self.config["log_self_destr"]:
                 return
             file = BytesIO()
-            caption = f"{utils.escape_html(message.text)}\n\n{link}"
+            caption = f"{utils.escape_html(message.text)}"
             await self._client.download_file(message, file)
             file.name = (
                 message.file.name or f"{message.file.media.id}{message.file.ext}"
@@ -250,5 +274,5 @@ class ApodiktumPMLogMod(loader.Module):
                 file,
                 force_document=True,
                 caption=caption,
-                reply_to=self._topic_cache[user.id],
+                reply_to=self._topic_cache[user.id].id,
             )

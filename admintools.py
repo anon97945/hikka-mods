@@ -1,4 +1,4 @@
-__version__ = (1, 2, 9)
+__version__ = (1, 2, 10)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -1824,8 +1824,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             self.apo_lib.utils.log(
                 logging.ERROR,
                 __name__,
-                exc,
-                exc_info=True,
+                f"Error in {self.__class__.__name__}._queue_handler:\n{exc}",
             )
 
     async def q_watcher_protection(self, message: Message):
@@ -1835,8 +1834,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             self.apo_lib.utils.log(
                 logging.ERROR,
                 __name__,
-                exc,
-                exc_info=True,
+                f"Error in {self.__class__.__name__}._queue_handler:\n{exc}",
             )
 
     async def _protection_queue_handler(

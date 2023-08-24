@@ -1,4 +1,4 @@
-__version__ = (0, 1, 19)
+__version__ = (0, 1, 20)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -346,8 +346,7 @@ class ApodiktumMsgMergerMod(loader.Module):
             self.apo_lib.utils.log(
                 logging.ERROR,
                 __name__,
-                exc,
-                exc_info=True,
+                f"Error in {self.__class__.__name__}._queue_handler:\n{exc}",
             )
 
     async def _queue_handler(self, message: Message):

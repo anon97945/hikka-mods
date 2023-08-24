@@ -1,5 +1,11 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.50
+### 📃 module updates:
+- admintools | changed crash handler
+- msg_merger | changed crash handler
+- pmlog | added realtime_names for topics
+
 ## 🆕 Version 2.0.49
 ### 📃 module updates:
 - pmlog | users are now logged now in seperate topics, fixed whielist
