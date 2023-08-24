@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.49
+### 📃 module updates:
+- pmlog | users are now logged now in seperate topics, fixed whielist
+
 ## 🆕 Version 2.0.48
 ### 📃 module updates:
 - admintools | added some debug msgs and fixed restricted logger

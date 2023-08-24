@@ -1,4 +1,4 @@
-__version__ = (0, 1, 1)
+__version__ = (0, 1, 3)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -22,10 +22,17 @@ __version__ = (0, 1, 1)
 # scope: hikka_min 1.3.3
 
 import logging
+from datetime import datetime
 from io import BytesIO
 
 from telethon.errors import MessageIdInvalidError
-from telethon.tl.types import Message
+from telethon.tl.types import Message, User
+
+from telethon.tl.functions.channels import (
+    GetForumTopicsRequest,
+    CreateForumTopicRequest,
+    ToggleForumRequest,
+)
 
 from .. import loader, utils
 
@@ -42,7 +49,6 @@ class ApodiktumPMLogMod(loader.Module):
         "name": "Apo-PMLog",
         "developer": "@anon97945",
         "_cfg_bots": "Whether to log bots or not.",
-        "_cfg_log_group": "Group or channel ID where to send the PMs.",
         "_cfg_loglist": "Add telegram id's to log them.",
         "_cfg_selfdestructive": (
             "Whether selfdestructive media should be logged or not. This"
@@ -58,9 +64,6 @@ class ApodiktumPMLogMod(loader.Module):
 
     strings_de = {
         "_cfg_bots": "Ob Bots geloggt werden sollen oder nicht.",
-        "_cfg_log_group": (
-            "Gruppen- oder Kanal-ID, an die die PMs gesendet werden sollen."
-        ),
         "_cfg_loglist": "Fügen Sie Telegram-IDs hinzu, um sie zu protokollieren.",
         "_cfg_selfdestructive": (
             "Ob selbstzerstörende Medien geloggt werden sollen oder nicht. Dies"
@@ -75,7 +78,6 @@ class ApodiktumPMLogMod(loader.Module):
 
     strings_ru = {
         "_cfg_bots": "Логировать ли ботов или нет",
-        "_cfg_log_group": "Айди группы или канала для отправки личных сообщений.",
         "_cfg_loglist": "Добавьте айди Telegram, чтобы зарегистрировать их",
         "_cfg_selfdestructive": (
             "Должны ли самоуничтожающиеся медиафайлы регистрироваться или нет."
@@ -111,12 +113,8 @@ class ApodiktumPMLogMod(loader.Module):
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
-                "log_group",
-                doc=lambda: self.strings("_cfg_log_group"),
-                validator=loader.validators.TelegramID(),
-            ),
-            loader.ConfigValue(
                 "log_list",
+                [777000],
                 doc=lambda: self.strings("_cfg_loglist"),
                 validator=loader.validators.Series(
                     validator=loader.validators.TelegramID()
@@ -154,6 +152,16 @@ class ApodiktumPMLogMod(loader.Module):
             self.config["auto_migrate"],
         )
         self.apo_lib.watcher_q.register(self.__class__.__name__)
+        self._topic_cache = {}
+        self.c, _ = await utils.asset_channel(
+            self._client,
+            "[Apo] PMLog",
+            "Chat for logged PMs. The ID's in the topic titles are the user ID's, don't remove them!",
+            silent=True,
+            invite_bot=False,
+        )
+        if not self.c.forum:
+            await self._client(ToggleForumRequest(self.c.id, True))
 
     async def on_unload(self):
         self.apo_lib.watcher_q.unregister(self.__class__.__name__)
@@ -166,6 +174,34 @@ class ApodiktumPMLogMod(loader.Module):
         await self.allmodules.commands["config"](
             await utils.answer(message, f"{self.get_prefix()}config {name}")
         )
+
+    async def _topic_cacher(self, user: User):
+        if user.id not in self._topic_cache:
+            forum = await self._client(
+                GetForumTopicsRequest(
+                    channel=self.c.id,
+                    offset_date=datetime.now(),
+                    offset_id=0,
+                    offset_topic=0,
+                    limit=0,
+                )
+            )
+            for topic in forum.topics:
+                if str(user.id) in topic.title:
+                    self._topic_cache[user.id] = topic.id
+                    break
+        return user.id in self._topic_cache
+
+    async def _topic_handler(self, user: User):
+        if not await self._topic_cacher(user):
+            new_topic = await self._client(
+                CreateForumTopicRequest(
+                    channel=self.c.id,
+                    title=f"{user.first_name} ({user.id})",
+                    icon_color=42,
+                )
+            )
+            self._topic_cache[user.id] = new_topic.updates[0].id
 
     async def q_watcher(self, message: Message):
         try:
@@ -183,28 +219,22 @@ class ApodiktumPMLogMod(loader.Module):
             return
         pmlog_whitelist = self.config["whitelist"]
         pmlog_bot = self.config["log_bots"]
-        pmlog_group = self.config["log_group"]
         pmlog_destr = self.config["log_self_destr"]
-        chat = await self._client.get_entity(utils.get_chat_id(message))
-
-        if chat.bot and not pmlog_bot or not pmlog_group or chat.id == self.tg_id:
+        user = await message.get_sender()
+        if user.id == self.tg_id:
+            user = await self._client.get_entity(utils.get_chat_id(message))
+        if user.bot and not pmlog_bot or user.id == self.tg_id:
             return
-
-        chatidindb = utils.get_chat_id(message) in (self.config["logs_list"] or [])
-
-        if (
-            pmlog_whitelist
-            and chatidindb
-            or not pmlog_whitelist
-            and not chatidindb
-            or not pmlog_group
-        ):
+        chatidindb = utils.get_chat_id(message) in (self.config["log_list"] or [])
+        if pmlog_whitelist and chatidindb or not pmlog_whitelist and not chatidindb:
             return
-
-        link = f"Chat: {await self.apo_lib.utils.get_tag(chat)}\n#ID_{chat.id}"
+        link = f"Chat: {await self.apo_lib.utils.get_tag(user)}\n#ID_{user.id}"
         try:
-            await message.forward_to(pmlog_group)
-            await self._client.send_message(pmlog_group, link)
+            await self._topic_handler(user)
+            await message.forward_to(self.c.id, top_msg_id=self._topic_cache[user.id])
+            await message.client.send_message(
+                self.c.id, link, reply_to=self._topic_cache[user.id]
+            )
         except MessageIdInvalidError:
             if not message.file or not pmlog_destr:
                 return
@@ -216,8 +246,9 @@ class ApodiktumPMLogMod(loader.Module):
             )
             file.seek(0)
             await self._client.send_file(
-                pmlog_group,
+                self.c.id,
                 file,
                 force_document=True,
                 caption=caption,
+                reply_to=self._topic_cache[user.id],
             )
