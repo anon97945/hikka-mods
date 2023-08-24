@@ -1,4 +1,4 @@
-__version__ = (0, 1, 4)
+__version__ = (0, 1, 5)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -199,16 +199,19 @@ class ApodiktumPMLogMod(loader.Module):
                     break
         return user.id in self._topic_cache
 
+    async def _topic_creator(self, user: User):
+        await self._client(
+            CreateForumTopicRequest(
+                channel=self.c.id,
+                title=f"{user.first_name} ({user.id})",
+                icon_color=42,
+            )
+        )
+        return await self._topic_cacher(user)
+
     async def _topic_handler(self, user: User, message: Message):
         if not await self._topic_cacher(user):  # create topic if not exists
-            new_topic = await self._client(
-                CreateForumTopicRequest(
-                    channel=self.c.id,
-                    title=f"{user.first_name} ({user.id})",
-                    icon_color=42,
-                )
-            )
-            self._topic_cache[user.id] = new_topic.updates[0]
+            await self._topic_creator(user)
         if (
             self.config["realtime_names"]
             and self._topic_cache[user.id].title != f"{user.first_name} ({user.id})"
@@ -232,6 +235,10 @@ class ApodiktumPMLogMod(loader.Module):
         try:
             await self._queue_handler(message)
         except Exception as exc:  # skipcq: PYL-W0703
+            if "topic was deleted" in str(exc):
+                self._topic_cache.pop(utils.get_chat_id(message))
+                await self._queue_handler(message)
+                return
             self.apo_lib.utils.log(
                 logging.ERROR,
                 __name__,

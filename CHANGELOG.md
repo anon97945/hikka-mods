@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.51
+### 📃 module updates:
+- pmlog | create new topic if deleted
+
 ## 🆕 Version 2.0.50
 ### 📃 module updates:
 - admintools | changed crash handler
