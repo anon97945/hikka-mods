@@ -1,5 +1,10 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.53
+### 📃 module updates:
+- apo_python | removed, library is adding itself to eval now
+- auto_delerror | changed validators
+
 ## 🆕 Version 2.0.52
 ### 📃 module updates:
 - _skeleton | added q_watcher example

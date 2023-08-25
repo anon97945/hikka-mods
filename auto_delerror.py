@@ -39,7 +39,7 @@ class ApodiktumAutoDelErrorMod(loader.Module):
     strings = {
         "name": "Apo-AutoDelError",
         "developer": "@anon97945",
-        "_cfg_additional_id": "Additional IDs to remove the error message from.",
+        "_cfg_additional_id": "Additional Telegram IDs to remove the error message from.",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
         "_cfg_error_text": "The text of the error message to remove.",
     }
@@ -65,12 +65,12 @@ class ApodiktumAutoDelErrorMod(loader.Module):
             loader.ConfigValue(
                 "additional_ids",
                 doc=lambda: self.strings("_cfg_additional_id"),
-                validator=loader.validators.Series(loader.validators.Integer()),
+                validator=loader.validators.Series(loader.validators.TelegramID()),
             ),
             loader.ConfigValue(
                 "error_text",
                 doc=lambda: self.strings("_cfg_error_text"),
-                validator=loader.validators.Series(),
+                validator=loader.validators.Series(loader.validators.String()),
             ),
             loader.ConfigValue(
                 "auto_migrate",

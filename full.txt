@@ -1,5 +1,4 @@
 admintools
-apo_python
 apoinfo
 apolib_controller
 auto_delerror
