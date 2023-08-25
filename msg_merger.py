@@ -1,4 +1,4 @@
-__version__ = (0, 1, 20)
+__version__ = (0, 1, 21)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -340,14 +340,7 @@ class ApodiktumMsgMergerMod(loader.Module):
         self.merged_msgs.clear()
 
     async def q_watcher(self, message: Message):
-        try:
-            await self._queue_handler(message)
-        except Exception as exc:  # skipcq: PYL-W0703
-            self.apo_lib.utils.log(
-                logging.ERROR,
-                __name__,
-                f"Error in {self.__class__.__name__}._queue_handler:\n{exc}",
-            )
+        await self._queue_handler(message)
 
     async def _queue_handler(self, message: Message):
         if (

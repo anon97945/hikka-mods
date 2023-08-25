@@ -1,5 +1,12 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.52
+### 📃 module updates:
+- _skeleton | added q_watcher example
+- admintools | fix bnc, removed try except
+- msg_merger | removed try except
+- pmlog | removed try except
+
 ## 🆕 Version 2.0.51
 ### 📃 module updates:
 - pmlog | create new topic if deleted

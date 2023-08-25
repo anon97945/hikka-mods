@@ -1,4 +1,4 @@
-__version__ = (0, 0, 18)
+__version__ = (0, 0, 19)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -143,8 +143,14 @@ class ApodiktumSkeletonMod(loader.Module):
             self.changes,
             self.config["auto_migrate"],
         )
+        self.apo_lib.watcher_q.register(
+            self.__class__.__name__, "q_watcher1"
+        )  # Register the q_watcher1; name is optional if you only have one watcher (q_watcher is the default name)
 
     async def on_unload(self):
+        self.apo_lib.watcher_q.unregister(
+            self.__class__.__name__, "q_watcher1"
+        )  # Unregister the q_watcher1; name is optional if you only have one watcher (q_watcher is the default name)
         return
 
     async def on_dlmod(self, client, _):
@@ -192,6 +198,28 @@ class ApodiktumSkeletonMod(loader.Module):
                 "skeleton_argmsg", self.all_strings, message
             ).format(args),
         )
+
+    async def q_watcher1(self, message: Message):
+        """
+        This is the watcher function. Name must be the same as the one you registered the q_watcher with
+        The watcher code can also be in the watcher function in between the try and except. But this is cleaner.
+        """
+        try:
+            await self._queue_handler(message)
+        except (
+            Exception
+        ) as exc:  # skipcq: PYL-W0703 # This is the exception handler. You can leave it out if you don't need it. Exception is needed or queue will crash.
+            self.apo_lib.utils.log(
+                logging.ERROR,
+                __name__,
+                f"Error in {self.__class__.__name__}._queue_handler:\n{exc}",
+            )
+
+    async def _queue_handler(self, message: Message):
+        """
+        This is a queue handler.
+        """
+        return
 
     async def watcher(self, message):
         """

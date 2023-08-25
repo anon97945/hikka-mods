@@ -1,4 +1,4 @@
-__version__ = (0, 1, 5)
+__version__ = (0, 1, 6)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -239,11 +239,6 @@ class ApodiktumPMLogMod(loader.Module):
                 self._topic_cache.pop(utils.get_chat_id(message))
                 await self._queue_handler(message)
                 return
-            self.apo_lib.utils.log(
-                logging.ERROR,
-                __name__,
-                f"Error in {self.__class__.__name__}._queue_handler:\n{exc}",
-            )
 
     async def _queue_handler(self, message: Message):
         if not isinstance(message, Message) or not message.is_private:

@@ -1,4 +1,4 @@
-__version__ = (1, 2, 10)
+__version__ = (1, 2, 11)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -63,6 +63,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         "bgs": "BlockGifSpam",
         "bgs_triggered": "{}, you need to wait before you can send more gifs.",
         "bnc": "BlockNonComment",
+        "bnc_triggered": "{}, you can only write comments in this chat.",
         "bnd": "BlockNonDiscussion",
         "bnd_triggered": (
             "{}, the comments are limited to discussiongroup members, "
@@ -101,9 +102,9 @@ class ApodiktumAdminToolsMod(loader.Module):
         "admin_tag": "Der Benutzer {} hat um Hilfe gebeten.\n{}",
         "admin_tag_reply": "\n\nDie entsprechende Nachricht von {} ist:",
         "admin_tag_reply_msg": "Danke, der Besitzer dieses Bots wurde informiert.",
-        "bce": "BlockCustomEmojis",
         "bce_triggered": "{}, du kannst in diesem Chat keine custom emojis senden.",
         "bcu_triggered": "{}, du kannst in diesem Chat nicht als Kanal schreiben.",
+        "bnc_triggered": "{}, du kannst in diesem Chat nur Kommentare schreiben.",
         "bdl_triggered": (
             "{}, der Link wurde bereits gesendet. Du musst warten bis er erneut"
             " gesendet werden kann."
@@ -176,6 +177,8 @@ class ApodiktumAdminToolsMod(loader.Module):
         "admin_tag_reply": "\n\nПересылаемое сообщение от\n{}:",
         "admin_tag_reply_msg": "Спасибо, владелец этого бота был проинформирован.",
         "bcu_triggered": "{}, ты не можешь писать тут от имени канала.",
+        "bce_triggered": "{}, ты не можешь использовать кастомные эмодзи в этом чате.",
+        "bnc_triggered": "{}, ты можешь писать только комментарии в этом чате.",
         "bnd_triggered": (
             "{}, комментарии ограничены для участников группы обсуждения, "
             "Пожалуйста, для начала присоединитесь к нашей группе обсуждения."
@@ -355,9 +358,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         if message.is_private:
             await utils.answer(
                 message,
-                self.apo_lib.utils.get_str("not_dc"),
-                self.all_strings,
-                message,
+                self.apo_lib.utils.get_str("not_dc", self.all_strings, message),
             )
             return
 
@@ -485,9 +486,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         if message.is_private:
             await utils.answer(
                 message,
-                self.apo_lib.utils.get_str("not_dc"),
-                self.all_strings,
-                message,
+                self.apo_lib.utils.get_str("not_dc", self.all_strings, message),
             )
             return
 
@@ -709,8 +708,8 @@ class ApodiktumAdminToolsMod(loader.Module):
          ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Toggles BlockNonComment for the current chat.
         .bnc notify <true/false>
          ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Toggles the notification message.
-        .bnc ban <true/false>
-         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Bans the channel.
+        .bnc mute <minutes/or 0>
+         ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Mutes the user for x minutes. 0 to disable.
         .bnc deltimer <seconds/or 0>
          ⁭⁫⁪⁫⁬⁭⁫⁪⁭⁫⁪⁫⁬⁭⁫⁪⁫⁬  - Deletes the notification message in seconds. 0 to disable.
         .bnc settings
@@ -722,8 +721,9 @@ class ApodiktumAdminToolsMod(loader.Module):
         """
         bnc = self._db.get(self._classname, "bnc", [])
         sets = self._db.get(self._classname, "bnc_sets", {})
-        args = utils.get_args_raw(message).lower().split()
-        chat = await self._client.get_entity(message.peer_id)
+        args = utils.get_args_raw(message).lower()
+        args = str(args).split()
+        chat = await self._client.get_entity(message.chat)
         chat_id_str = str(chat.id)
 
         if args and args[0] == "clearall":
@@ -771,7 +771,7 @@ class ApodiktumAdminToolsMod(loader.Module):
                 bnc.append(chat_id_str)
                 sets.setdefault(chat_id_str, {})
                 sets[chat_id_str].setdefault("notify", True)
-                sets[chat_id_str].setdefault("ban", True)
+                sets[chat_id_str].setdefault("mute", 1)
                 sets[chat_id_str].setdefault("deltimer", 60)
                 self._db.set(self._classname, "bnc", bnc)
                 self._db.set(self._classname, "bnc_sets", sets)
@@ -802,15 +802,13 @@ class ApodiktumAdminToolsMod(loader.Module):
                 sets[chat_id_str].update(
                     {"notify": self.apo_lib.utils.validate_boolean(args[1])}
                 )
-            elif args[0] == "ban" and args[1] is not None and chat_id_str in bnc:
-                if not isinstance(self.apo_lib.utils.validate_boolean(args[1]), bool):
+            elif args[0] == "mute" and args[1] is not None and chat_id_str in bnc:
+                if not self.apo_lib.utils.validate_integer(args[1]):
                     return await utils.answer(
                         message,
                         self.apo_lib.utils.get_str("no_int", self.all_strings, message),
                     )
-                sets[chat_id_str].update(
-                    {"ban": self.apo_lib.utils.validate_boolean(args[1])}
-                )
+                sets[chat_id_str].update({"mute": int(args[1])})
             elif args[0] == "deltimer" and args[1] is not None and chat_id_str in bnc:
                 if not self.apo_lib.utils.validate_integer(args[1]):
                     return await utils.answer(
@@ -1525,9 +1523,9 @@ class ApodiktumAdminToolsMod(loader.Module):
         message: Message,
         bnc: list,
         bnc_sets: dict,
-    ):
+    ):  # sourcery skip: low-code-quality
         """
-        Block Channel Users.
+        Block Non Comments.
         :param chat: Chat object.
         :param user: User object.
         :param message: Message object.
@@ -1537,7 +1535,13 @@ class ApodiktumAdminToolsMod(loader.Module):
         if (
             str(chat.id) not in bnc
             or message.id in self._msg_handler
-            or message.is_reply
+            or (
+                message.is_reply
+                and await self.apo_lib.utils.is_linkedchannel(
+                    message.chat_id,
+                    (await self.apo_lib.utils.get_first_msg(message)).sender_id,
+                )
+            )
         ):
             return
         self._msg_handler = {message.id: "p__bnc"}
@@ -1818,24 +1822,10 @@ class ApodiktumAdminToolsMod(loader.Module):
         await self.apo_lib.utils.delete_message(msg)
 
     async def q_watcher_logger(self, message: Message):
-        try:
-            await self._logger_queue_handler(message)
-        except Exception as exc:  # skipcq: PYL-W0703
-            self.apo_lib.utils.log(
-                logging.ERROR,
-                __name__,
-                f"Error in {self.__class__.__name__}._queue_handler:\n{exc}",
-            )
+        await self._logger_queue_handler(message)
 
     async def q_watcher_protection(self, message: Message):
-        try:
-            await self._protection_queue_handler(message)
-        except Exception as exc:  # skipcq: PYL-W0703
-            self.apo_lib.utils.log(
-                logging.ERROR,
-                __name__,
-                f"Error in {self.__class__.__name__}._queue_handler:\n{exc}",
-            )
+        await self._protection_queue_handler(message)
 
     async def _protection_queue_handler(
         self, message: Message
