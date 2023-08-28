@@ -1,5 +1,11 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.54
+### 📃 module updates:
+- _skeleton | rework q_watcher
+- mark_read | new module
+- msg_merger | changed default whitelist to false
+
 ## 🆕 Version 2.0.53
 ### 📃 module updates:
 - apo_python | removed, library is adding itself to eval now

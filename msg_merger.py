@@ -1,4 +1,4 @@
-__version__ = (0, 1, 21)
+__version__ = (0, 1, 22)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -225,7 +225,7 @@ class ApodiktumMsgMergerMod(loader.Module):
             ),
             loader.ConfigValue(
                 "whitelist",
-                True,
+                False,
                 doc=lambda: self.strings("_cfg_whitelist"),
                 validator=loader.validators.Boolean(),
             ),

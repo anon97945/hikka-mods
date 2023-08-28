@@ -10,6 +10,7 @@ gtranslate
 heroku
 langreplier
 lcr
+mark_read
 msg_merger
 pmlog
 purge
