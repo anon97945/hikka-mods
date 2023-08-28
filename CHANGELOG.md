@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.55
+### 📃 module updates:
+- mark_read | typo
+
 ## 🆕 Version 2.0.54
 ### 📃 module updates:
 - _skeleton | rework q_watcher

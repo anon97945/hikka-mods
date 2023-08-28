@@ -1,4 +1,4 @@
-__version__ = (0, 1, 0)
+__version__ = (0, 1, 1)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -137,7 +137,7 @@ class ApodiktumMarkReadMod(loader.Module):
                 not self.config["whitelist"]
                 and utils.get_chat_id(message) in self.config["chatlist"]
             )
-            or (message.private and not self.config["clear_pms"])
+            or (message.is_private and not self.config["clear_pms"])
         ):
             return
 
