@@ -1,4 +1,4 @@
-__version__ = (0, 1, 1)
+__version__ = (0, 1, 2)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -39,7 +39,7 @@ class ApodiktumMarkReadMod(loader.Module):
     strings = {
         "name": "Apo-MarkRead",
         "developer": "@anon97945",
-        "_cfg_additional_id": "Chats to mark as read.",
+        "_cfg_chat_list": "Chats to mark as read.",
         "_cfg_clear_mentions": "Whether to clear mentions or not.",
         "_cfg_clear_reactions": "Whether to clear reactions or not.",
         "_cfg_clear_pms": "Whether to clear pms or not.",
