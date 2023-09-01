@@ -1,4 +1,4 @@
-__version__ = (1, 2, 11)
+__version__ = (1, 2, 12)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -330,7 +330,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         sets = self._db.get(self._classname, "bnd_sets", {})
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
-        chat = await self._client.get_entity(message.chat)
+        chat = await message.get_chat()
         chat_id_str = str(chat.id)
 
         if args and args[0] == "clearall":
@@ -458,7 +458,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         sets = self._db.get(self._classname, "bf_sets", {})
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
-        chat = await self._client.get_entity(message.chat)
+        chat = message.get_chat()
         chat_id_str = str(chat.id)
 
         if args and args[0] == "clearall":
@@ -593,7 +593,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         bcu = self._db.get(self._classname, "bcu", [])
         sets = self._db.get(self._classname, "bcu_sets", {})
         args = utils.get_args_raw(message).lower().split()
-        chat = await self._client.get_entity(message.peer_id)
+        chat = await message.get_chat()
         chat_id_str = str(chat.id)
 
         if args and args[0] == "clearall":
@@ -723,7 +723,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         sets = self._db.get(self._classname, "bnc_sets", {})
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
-        chat = await self._client.get_entity(message.chat)
+        chat = await message.get_chat()
         chat_id_str = str(chat.id)
 
         if args and args[0] == "clearall":
@@ -850,7 +850,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         bdl = self._db.get(self._classname, "bdl", [])
         sets = self._db.get(self._classname, "bdl_sets", {})
         args = utils.get_args_raw(message).lower().split()
-        chat = await self._client.get_entity(message.peer_id)
+        chat = await message.get_chat()
         chat_id_str = str(chat.id)
 
         if args and args[0] == "clearall":
@@ -977,7 +977,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         bss = self._db.get(self._classname, "bss", [])
         sets = self._db.get(self._classname, "bss_sets", {})
         args = utils.get_args_raw(message).lower().split()
-        chat = await self._client.get_entity(message.peer_id)
+        chat = await message.get_chat()
         chat_id_str = str(chat.id)
 
         if args and args[0] == "clearall":
@@ -1104,7 +1104,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         bce = self._db.get(self._classname, "bce", [])
         sets = self._db.get(self._classname, "bce_sets", {})
         args = utils.get_args_raw(message).lower().split()
-        chat = await self._client.get_entity(message.peer_id)
+        chat = await message.get_chat()
         chat_id_str = str(chat.id)
 
         if args and args[0] == "clearall":
@@ -1231,7 +1231,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         bgs = self._db.get(self._classname, "bgs", [])
         sets = self._db.get(self._classname, "bgs_sets", {})
         args = utils.get_args_raw(message).lower().split()
-        chat = await self._client.get_entity(message.peer_id)
+        chat = await message.get_chat()
         chat_id_str = str(chat.id)
 
         if args and args[0] == "clearall":
@@ -1865,7 +1865,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             or chat_id_str in bnc
             or chat_id_str in bss
         ):
-            chat = await self._client.get_entity(chat_id)
+            chat = await message.get_chat()
             self.apo_lib.utils.log(
                 logging.DEBUG,
                 __name__,
@@ -1918,7 +1918,7 @@ class ApodiktumAdminToolsMod(loader.Module):
             not self.config["tag_whitelist"]
             and chat_id not in self.config["admin_tag_chats"]
         ):
-            chat = await self._client.get_entity(chat_id)
+            chat = await message.get_chat()
             user = await message.get_sender()
             await self.p__admin_handler(chat, user, message)
         with contextlib.suppress(Exception):
@@ -1939,7 +1939,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         gl_sets = self._db.get(self._classname, "gl_sets", {})
         bf = self._db.get(self._classname, "bf", [])
         if chat_id_str in gl:
-            chat = await self._client.get_entity(chat_id)
+            chat = message.get_chat()
             user = await message.get_sender()
             await self.p__gl(chat, user, message, gl, gl_sets)
         if (

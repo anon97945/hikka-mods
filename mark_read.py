@@ -1,4 +1,4 @@
-__version__ = (0, 1, 3)
+__version__ = (0, 1, 4)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -143,7 +143,7 @@ class ApodiktumMarkReadMod(loader.Module):
             or (message.is_private and not self.config["clear_pms"])
         ):
             return
-        if (await self._client.get_entity(message.chat_id)).forum:
+        if (await message.get_chat()).forum:
             await self._client(
                 ReadDiscussionRequest(
                     message.chat_id,

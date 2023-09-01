@@ -1,4 +1,4 @@
-__version__ = (0, 1, 7)
+__version__ = (0, 1, 8)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -256,7 +256,7 @@ class ApodiktumPMLogMod(loader.Module):
             return
         user = await message.get_sender()
         if user.id == self.tg_id:
-            user = await self._client.get_entity(utils.get_chat_id(message))
+            user = await message.get_chat()
         if user.bot and not self.config["log_bots"] or user.id == self.tg_id:
             return
         chatidindb = utils.get_chat_id(message) in (self.config["log_list"] or [])

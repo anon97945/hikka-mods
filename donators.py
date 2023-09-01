@@ -1,4 +1,4 @@
-__version__ = (0, 0, 29)
+__version__ = (0, 0, 30)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -248,7 +248,7 @@ class ApodiktumDonatorsMod(loader.Module):
                 self.apo_lib.utils.get_str("no_reply", self.all_strings, message),
             )
             return
-        user = await self._client.get_entity(reply.sender_id)
+        user = await reply.get_sender()
         if not user:
             await utils.answer(
                 message,

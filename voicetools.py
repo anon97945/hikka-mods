@@ -1,4 +1,4 @@
-__version__ = (1, 0, 33)
+__version__ = (1, 0, 34)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -1585,7 +1585,7 @@ class ApodiktumVoiceToolsMod(loader.Module):
         vcanon_chats = self._db.get(self._classname, "vcanon_watcher", [])
         speed_chats = self._db.get(self._classname, "speed_watcher", [])
         gain_chats = self._db.get(self._classname, "gain_watcher", [])
-        chat = await self._client.get_entity(utils.get_chat_id(message))
+        chat = await message.get_chat()
         chattype = await getchattype(message)
         if (
             chatid_str not in nr_chats

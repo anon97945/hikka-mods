@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.59
+### 📃 module updates:
+- general | replaced get_entity with get_chat and get_sender
+
 ## 🆕 Version 2.0.58
 ### 📃 module updates:
 - pmlog | mark log as read (opt-out)

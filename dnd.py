@@ -1,4 +1,4 @@
-__version__ = (0, 3, 15)
+__version__ = (0, 3, 16)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -584,7 +584,7 @@ class ApodiktumDNDMod(loader.Module):
                 user = await reply.get_sender() if reply else None
 
         if not user:
-            chat = await self._client.get_entity(utils.get_chat_id(message))
+            chat = await message.get_chat()
             if not isinstance(chat, User):
                 await utils.answer(
                     message,
@@ -621,7 +621,7 @@ class ApodiktumDNDMod(loader.Module):
                 user = await reply.get_sender() if reply else None
 
         if not user:
-            chat = await self._client.get_entity(utils.get_chat_id(message))
+            chat = await message.get_chat()
             if not isinstance(chat, User):
                 await utils.answer(
                     message,
@@ -649,8 +649,7 @@ class ApodiktumDNDMod(loader.Module):
                 self.apo_lib.utils.get_str("no_pchat", self.all_strings, message),
             )
             return
-        chat_id = utils.get_chat_id(message)
-        user = await self._client.get_entity(chat_id)
+        user = await message.get_chat()
         await message.client(ReportSpamRequest(peer=user.id))
         await utils.answer(
             message,
