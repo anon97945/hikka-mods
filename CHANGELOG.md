@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.57
+### 📃 module updates:
+- mark_read | updated for forums
+
 ## 🆕 Version 2.0.56
 ### 📃 module updates:
 - mark_read | wrong cfg string

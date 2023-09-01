@@ -1,4 +1,4 @@
-__version__ = (0, 1, 2)
+__version__ = (0, 1, 3)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -24,6 +24,9 @@ __version__ = (0, 1, 2)
 import logging
 
 from telethon.tl.types import Message
+from telethon.tl.functions.messages import (
+    ReadDiscussionRequest,
+)
 
 from .. import loader, utils
 
@@ -140,9 +143,22 @@ class ApodiktumMarkReadMod(loader.Module):
             or (message.is_private and not self.config["clear_pms"])
         ):
             return
-
-        await self._client.send_read_acknowledge(
-            message.chat_id,
-            clear_mentions=self.config["clear_mentions"],
-            clear_reactions=self.config["clear_reactions"],
-        )
+        if (await self._client.get_entity(message.chat_id)).forum:
+            await self._client(
+                ReadDiscussionRequest(
+                    message.chat_id,
+                    getattr(getattr(message, "reply_to", None), "reply_to_top_id", None)
+                    or getattr(
+                        getattr(message, "reply_to", None), "reply_to_msg_id", None
+                    ),
+                    2**31 - 1,
+                )
+            )
+        else:
+            await self._client.send_read_acknowledge(
+                message.chat_id,
+                message,
+                clear_mentions=self.config["clear_mentions"],
+                clear_reactions=self.config["clear_reactions"],
+            )
+        return
