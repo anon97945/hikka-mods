@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.58
+### 📃 module updates:
+- pmlog | mark log as read (opt-out)
+
 ## 🆕 Version 2.0.57
 ### 📃 module updates:
 - mark_read | updated for forums

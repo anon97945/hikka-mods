@@ -1,4 +1,4 @@
-__version__ = (0, 1, 6)
+__version__ = (0, 1, 7)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -28,6 +28,9 @@ from io import BytesIO
 from telethon.errors import MessageIdInvalidError
 from telethon.tl.types import Message, User
 
+from telethon.tl.functions.messages import (
+    ReadDiscussionRequest,
+)
 from telethon.tl.functions.channels import (
     GetForumTopicsRequest,
     CreateForumTopicRequest,
@@ -58,6 +61,8 @@ class ApodiktumPMLogMod(loader.Module):
         "_cfg_whitelist": (
             "Whether the list is a for excluded(True) or included(False) chats."
         ),
+        "_cfg_reatime_usernames": "Whether to update the topic names in realtime or not.",
+        "_cfg_mark_read": "Whether to mark the messsages in the log as read or not.",
         "_cfg_cst_auto_migrate": "Wheather to auto migrate defined changes on startup.",
     }
 
@@ -137,6 +142,12 @@ class ApodiktumPMLogMod(loader.Module):
                 "whitelist",
                 True,
                 doc=lambda: self.strings("_cfg_whitelist"),
+                validator=loader.validators.Boolean(),
+            ),
+            loader.ConfigValue(
+                "mark_read",
+                True,
+                doc=lambda: self.strings("_cfg_mark_read"),
                 validator=loader.validators.Boolean(),
             ),
             loader.ConfigValue(
@@ -258,9 +269,26 @@ class ApodiktumPMLogMod(loader.Module):
             return
         try:
             if await self._topic_handler(user, message):
-                await message.forward_to(
+                msg = await message.forward_to(
                     self.c.id, top_msg_id=self._topic_cache[user.id].id
                 )
+                if self.config["mark_read"]:
+                    await self._client(
+                        ReadDiscussionRequest(
+                            self.c.id,
+                            getattr(
+                                getattr(msg, "reply_to", None),
+                                "reply_to_top_id",
+                                None,
+                            )
+                            or getattr(
+                                getattr(msg, "reply_to", None),
+                                "reply_to_msg_id",
+                                None,
+                            ),
+                            2**31 - 1,
+                        )
+                    )
         except MessageIdInvalidError:
             if not message.file or not self.config["log_self_destr"]:
                 return
@@ -271,10 +299,26 @@ class ApodiktumPMLogMod(loader.Module):
                 message.file.name or f"{message.file.media.id}{message.file.ext}"
             )
             file.seek(0)
-            await self._client.send_file(
+            msg = await self._client.send_file(
                 self.c.id,
                 file,
                 force_document=True,
                 caption=caption,
                 reply_to=self._topic_cache[user.id].id,
+            )
+            await self._client(
+                ReadDiscussionRequest(
+                    self.c.id,
+                    getattr(
+                        getattr(msg, "reply_to", None),
+                        "reply_to_top_id",
+                        None,
+                    )
+                    or getattr(
+                        getattr(msg, "reply_to", None),
+                        "reply_to_msg_id",
+                        None,
+                    ),
+                    2**31 - 1,
+                )
             )
