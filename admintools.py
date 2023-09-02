@@ -1,4 +1,4 @@
-__version__ = (1, 2, 12)
+__version__ = (1, 2, 13)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -458,7 +458,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         sets = self._db.get(self._classname, "bf_sets", {})
         args = utils.get_args_raw(message).lower()
         args = str(args).split()
-        chat = message.get_chat()
+        chat = await message.get_chat()
         chat_id_str = str(chat.id)
 
         if args and args[0] == "clearall":
@@ -1939,7 +1939,7 @@ class ApodiktumAdminToolsMod(loader.Module):
         gl_sets = self._db.get(self._classname, "gl_sets", {})
         bf = self._db.get(self._classname, "bf", [])
         if chat_id_str in gl:
-            chat = message.get_chat()
+            chat = await message.get_chat()
             user = await message.get_sender()
             await self.p__gl(chat, user, message, gl, gl_sets)
         if (

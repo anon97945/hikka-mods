@@ -1,5 +1,9 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.60
+### 📃 module updates:
+- admintools | fixed missing await
+
 ## 🆕 Version 2.0.59
 ### 📃 module updates:
 - general | replaced get_entity with get_chat and get_sender
