@@ -1,5 +1,10 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.61
+### 📃 module updates:
+- linked_chat | added new module
+- quotes | added new module
+
 ## 🆕 Version 2.0.60
 ### 📃 module updates:
 - admintools | fixed missing await

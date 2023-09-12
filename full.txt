@@ -10,11 +10,13 @@ gtranslate
 heroku
 langreplier
 lcr
+linked_chat
 mark_read
 msg_merger
 pmlog
 purge
 pypng
+quotes
 save_message
 show_viewer
 tts
