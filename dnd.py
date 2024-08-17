@@ -1,10 +1,10 @@
-__version__ = (0, 3, 16)
+__version__ = (0, 3, 17)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
-#           © Copyright 2023
+#           © Copyright 2024
 #
 #        developed by @anon97945
 #
@@ -22,8 +22,8 @@ __version__ = (0, 3, 16)
 #          https://t.me/hikariatama
 
 # meta developer: @apodiktum_modules
-# meta banner: https://t.me/file_dumbster/11
-# meta pic: https://t.me/file_dumbster/13
+# meta banner: https://t.me/apodiktum_dumpster/11
+# meta pic: https://t.me/apodiktum_dumpster/13
 
 # scope: hikka_only
 # scope: hikka_min 1.3.3

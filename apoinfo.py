@@ -1,10 +1,10 @@
-__version__ = (0, 1, 23)
+__version__ = (0, 1, 24)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
-#           © Copyright 2023
+#           © Copyright 2024
 #
 #        developed by @anon97945
 #
@@ -15,8 +15,8 @@ __version__ = (0, 1, 23)
 # 🌐 https://www.gnu.org/licenses/gpl-3.0.html
 
 # meta developer: @apodiktum_modules
-# meta banner: https://t.me/file_dumbster/11
-# meta pic: https://t.me/file_dumbster/13
+# meta banner: https://t.me/apodiktum_dumpster/11
+# meta pic: https://t.me/apodiktum_dumpster/13
 
 # scope: inline
 # scope: hikka_only
@@ -141,7 +141,7 @@ class ApodiktumInfoMod(loader.Module):
         self.config = loader.ModuleConfig(
             loader.ConfigValue(
                 "custom_banner",
-                "https://t.me/file_dumbster/6",
+                "https://t.me/apodiktum_dumpster/6",
                 lambda: self.strings("_cfg_cst_bnr"),
                 validator=loader.validators.Link(),
             ),

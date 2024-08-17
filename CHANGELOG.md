@@ -1,5 +1,12 @@
 # 📝 Apodiktum Modules Changelog:
 
+## 🆕 Version 2.0.62
+### ℹ️ General:
+- updated addons copyright and media link
+
+### 📃 module updates:
+- save_message | fixed for channels
+
 ## 🆕 Version 2.0.61
 ### 📃 module updates:
 - linked_chat | added new module
