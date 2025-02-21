@@ -1,10 +1,10 @@
-__version__ = (0, 0, 6)
+__version__ = (0, 0, 8)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
 # █▀█ █ ▀█ █▄█ █ ▀█ ▀▀█   █ ▀▀█ ▀▀█ ▄█
 #
-#           © Copyright 2024
+#           © Copyright 2025
 #
 #        developed by @anon97945
 #
@@ -49,7 +49,7 @@ class ApodiktumLinkedChatMod(loader.Module):
         "_cfg_activate_bool": "Activate the Module.",
         "_cfg_linked_chats": "Link a chat to another chat.\nFormat: <chat_id1>|<chat_id2>\nUser must be in Chat2 or will be punished in Chat1.",
         "_cfg_delete_timer": "Delete the message after x seconds.",
-        "_cfg_mute_timer": "Mute the user for x minutes.",
+        "_cfg_mute_timer": "Mute the user for x minutes. 0 = no mute.",
         "_cfg_doc_raise_error": "Raise an error instead of a debug msg.",
         "triggered": (
             "{}, the comments are limited to discussiongroup members, "
@@ -64,7 +64,7 @@ class ApodiktumLinkedChatMod(loader.Module):
         "_cfg_activate_bool": "Aktiviere das Modul.",
         "_cfg_linked_chats": "Verlinke einen Chat mit einem anderen Chat.\nFormat: <chat_id1>|<chat_id2>\nUser muss in Chat2 sein oder wird in Chat1 bestraft.",
         "_cfg_delete_timer": "Lösche die Nachricht nach x Sekunden.",
-        "_cfg_mute_timer": "Stummschalten des Users für x Minuten.",
+        "_cfg_mute_timer": "Stummschalten des Users für x Minuten. 0 = kein Stummschalten.",
         "_cfg_doc_raise_error": "Werfe einen Fehler anstatt einer Debug-Nachricht.",
         "triggered": (
             "{}, die Kommentarfunktion wurde auf die Chatmitglieder begrenzt, "
@@ -167,32 +167,40 @@ class ApodiktumLinkedChatMod(loader.Module):
         for links in forced_links:
             chat1, chat2 = map(int, links.split("|"))
             if user_id not in [chat_id, self.inline.bot_id] and chat_id == chat1:
-                chat = await self._client.get_entity(chat_id)
-                chat1 = await self._client.get_entity(chat1)
-                chat2 = await self._client.get_entity(chat2)
-                user = await message.get_sender()
-                if (
-                    (
-                        (not chat.admin_rights and not chat.creator)
-                        or not chat.admin_rights.delete_messages
+                try:
+                    chat = await self._client.get_entity(chat_id)
+                    chat1 = await self._client.get_entity(chat1)
+                    chat2 = await self._client.get_entity(chat2)
+                    user = await message.get_sender()
+                    if (
+                        (
+                            (not chat.admin_rights and not chat.creator)
+                            or not chat.admin_rights.delete_messages
+                        )
+                        or (
+                            isinstance(user, User)
+                            and (perms := await self.apo_lib.utils.is_member(chat2, user))
+                            and perms.is_admin
+                        )
+                        or (
+                            isinstance(user, Channel)
+                            and not (perms := None)
+                            and await self.apo_lib.utils.is_linkedchannel(chat2, user)
+                            or await self.apo_lib.utils.is_linkedchannel(chat1, user)
+                        )
+                    ):
+                        return
+                    if (isinstance(user, User) and not perms) or isinstance(user, Channel):
+                        await self.punish_handler(chat1, chat2, user, message)
+                except Exception as e:
+                    self.apo_lib.utils.log(
+                        logging.ERROR,
+                        self._libclassname,
+                        f"Exception occurred while processing links: {e}",
+                        debug_msg=True,
                     )
-                    or (
-                        isinstance(user, User)
-                        and (perms := await self.apo_lib.utils.is_member(chat2, user))
-                        and perms.is_admin
-                    )
-                    or (
-                        isinstance(user, Channel)
-                        and not (perms := None)
-                        and await self.apo_lib.utils.is_linkedchannel(chat2, user)
-                        or await self.apo_lib.utils.is_linkedchannel(chat1, user)
-                    )
-                ):
-                    return
-                if (isinstance(user, User) and not perms) or isinstance(user, Channel):
-                    await self.punish_handler(chat1, chat2, user, message)
-            with contextlib.suppress(Exception):
-                return
+                    with contextlib.suppress(Exception):
+                        continue
         return
 
     async def punish_handler(
@@ -203,8 +211,8 @@ class ApodiktumLinkedChatMod(loader.Module):
         message: Message,
     ):  # sourcery skip: low-code-quality
         await self.apo_lib.utils.delete_message(message, True)
-        if chat1.admin_rights.ban_users:
-            await self.apo_lib.utils.mute(chat1.id, user.id, self.config["mute_timer"])
+        if chat1.admin_rights.ban_users and self.config["mute_timer"] > 0:
+                await self.apo_lib.utils.mute(chat1.id, user.id, self.config["mute_timer"])
         usertag = await self.apo_lib.utils.get_tag(user, True)
         link = await self.apo_lib.utils.get_invite_link(
             chat2
