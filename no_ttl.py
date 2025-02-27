@@ -1,4 +1,4 @@
-__version__ = (0, 0, 1)
+__version__ = (0, 0, 2)
 
 
 # ▄▀█ █▄ █ █▀█ █▄ █ █▀█ ▀▀█ █▀█ █ █ █▀
@@ -129,8 +129,8 @@ class NoTTLMod(loader.Module):
 
         await self.client(SetHistoryTTLRequest(chat_id, 0))
 
-        msg = await self.client.send_message(chat_id, reply if reply else args)
-
+        msg = await self.client.send_message(chat_id, reply if reply else args, reply_to=utils.get_topic(message))
+        await message.delete()
         await self.client(SetHistoryTTLRequest(chat_id, old_ttl))
 
         for offset in [-1, 1]:
