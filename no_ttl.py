@@ -23,7 +23,7 @@ __version__ = (0, 0, 2)
 
 import logging
 
-from telethon.tl.types import Message
+from telethon.tl.types import Message, UpdateNewChannelMessage, MessageService
 from telethon.tl.functions.messages import SetHistoryTTLRequest
 from telethon.tl.functions.channels import GetFullChannelRequest
 
@@ -127,13 +127,21 @@ class NoTTLMod(loader.Module):
         chat_id = utils.get_chat_id(message)
         old_ttl = (await self.client(GetFullChannelRequest(chat_id))).full_chat.ttl_period
 
-        await self.client(SetHistoryTTLRequest(chat_id, 0))
+        ttl_msg_id = await self._set_ttl(chat_id, 0)
 
-        msg = await self.client.send_message(chat_id, reply if reply else args, reply_to=utils.get_topic(message))
-        await message.delete()
-        await self.client(SetHistoryTTLRequest(chat_id, old_ttl))
+        await self.client.send_message(chat_id, reply if reply else args, reply_to=utils.get_topic(message))
 
-        for offset in [-1, 1]:
-            msg_action = await self.client.get_messages(chat_id, ids=msg.id + offset)
-            if msg_action != None and "MessageActionSetMessagesTTL" in str(msg_action.action):
-                await self.client.delete_messages(chat_id, [msg.id + offset])
+        restore_ttl_msg_id = await self._set_ttl(chat_id, old_ttl)
+
+        await self._client.delete_messages(chat_id, [ttl_msg_id, restore_ttl_msg_id, message.id])
+
+    async def _set_ttl(self, chat_id: int, ttl: int) -> int:
+        """
+        Set the TTL for the chat and return the message ID of the TTL update.
+        """
+        ttl_req = await self.client(SetHistoryTTLRequest(chat_id, ttl))
+        ttl_msg = next(
+            (update for update in ttl_req.updates if isinstance(update, UpdateNewChannelMessage) and isinstance(update.message, MessageService)),
+            None
+        )
+        return ttl_msg.message.id if ttl_msg else None
